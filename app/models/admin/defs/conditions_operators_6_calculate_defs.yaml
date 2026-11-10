@@ -1,0 +1,31 @@
+# Pattern 6: Calculations across attributes of the current record
+# @runnable: true
+# @instance: activity_log
+# @return: 2
+
+# `calculate` derives a number from several attributes of the current record.
+# Available functions: sum, min, max, count_not_null, mean.
+#
+# Placed directly under a record source, the calculated value becomes the result
+# returned by the condition. Here two of the three attributes are populated, so
+# the result is 2.
+all:
+  this:
+    calculate:
+      count_not_null:
+        attributes:
+          - id
+          - master_id
+          - notes
+
+# Placed under a field name, the calculated value is compared against that field,
+# so the condition succeeds only when the two are equal:
+#
+#   all:
+#     this:
+#       total_score:
+#         calculate:
+#           sum:
+#             attributes:
+#               - part_one_score
+#               - part_two_score

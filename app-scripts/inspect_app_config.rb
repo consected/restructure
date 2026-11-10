@@ -46,6 +46,12 @@ require 'yaml'
 require 'optparse'
 require 'shellwords'
 
+# Ensure the config inspection script always loads all active app types, even if the
+# parent shell has no explicit FPHS_LOAD_APP_TYPES setting.
+ENV['FPHS_LOAD_APP_TYPES'] = '-1'
+
+require_relative '../config/environment'
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -365,285 +371,384 @@ def report_access_controls(app_type, search_terms)
 end
 
 # ---------------------------------------------------------------------------
+# Validation helper for app-side config schema checks
+# ---------------------------------------------------------------------------
+
+def record_model_class(record)
+  klass_name = record.is_a?(Hash) ? (record['_class_name'] || record[:_class_name]) : nil
+  case klass_name.to_s
+  when 'DynamicModel' then DynamicModel
+  when 'ActivityLog' then ActivityLog
+  when 'ExternalIdentifier' then ExternalIdentifier
+  else
+    nil
+  end
+end
+
+def object_blank?(value)
+  case value
+  when nil
+    true
+  when String
+    value.strip.empty?
+  when Hash, Array
+    value.empty?
+  else
+    value.respond_to?(:empty?) ? value.empty? : false
+  end
+end
+
+def format_validation_notice(_record, notice)
+  type = notice.is_a?(Hash) ? notice[:type].to_s : notice.to_s
+  message = notice.is_a?(Hash) ? notice[:message].to_s : notice.to_s
+  "ERROR: #{type}: #{message}"
+end
+
+def validate_option_config_record(record)
+  return [] if object_blank?(record)
+
+  klass = record_model_class(record)
+  return [] unless klass
+
+  config_obj = klass.new
+  record_hash = record.to_h.deep_stringify_keys
+  record_hash.delete('_class_name')
+
+  allowed_attrs = %w[
+    name table_name schema_name category field_list options extra_log_types disabled
+  ].freeze
+
+  safe_attrs = record_hash.each_with_object({}) do |(key, value), attrs|
+    next if key.to_s.empty?
+    next unless allowed_attrs.include?(key)
+
+    attrs[key] = value
+  end
+
+  config_obj.assign_attributes(safe_attrs)
+  notices = OptionConfigs::ExtraOptions.all_option_configs_notices(config_obj)
+  return [] if notices.nil? || notices.empty?
+
+  notices.map do |notice|
+    next notice if object_blank?(notice)
+
+    normalized = notice.to_h.deep_symbolize_keys
+    normalized[:type] = normalized[:type].to_s.to_sym if normalized[:type].respond_to?(:to_s)
+    normalized
+  end
+rescue StandardError => e
+  [{
+    type: :parse_error,
+    message: e.message,
+    config_object: record,
+    extra_details: e.backtrace&.first(10)
+  }]
+end
+
+# ---------------------------------------------------------------------------
 # CLI option parsing
 # ---------------------------------------------------------------------------
 
-options = {
-  config: 'db/app_configs/play-ipa_config - production.yaml',
-  diff: false,
-  db_cols: false,
-  full: false,
-  sections: nil,
-  class_filter: nil,
-  errors_file: nil,
-  compare_git: nil,
-  compare_path: nil,
-  only_changed: false,
-  page_layouts: false,
-  access_controls: false
-}
+if $PROGRAM_NAME == __FILE__
+  options = {
+    config: 'db/app_configs/play-ipa_config - production.yaml',
+    diff: false,
+    db_cols: false,
+    full: false,
+    sections: nil,
+    class_filter: nil,
+    errors_file: nil,
+    compare_git: nil,
+    compare_path: nil,
+    only_changed: false,
+    page_layouts: false,
+    access_controls: false,
+    validate_option_configs: false
+  }
 
-parser = OptionParser.new do |opts|
-  opts.banner = 'Usage: ruby app-scripts/inspect_app_config.rb [options] [search_term ...]'
+  parser = OptionParser.new do |opts|
+    opts.banner = 'Usage: ruby app-scripts/inspect_app_config.rb [options] [search_term ...]'
 
-  opts.on('--config PATH', 'Path to the app-type YAML config file') { |v| options[:config] = v }
-  opts.on('--diff', 'Show fields in config options not in _db_columns / field_list') { options[:diff] = true }
-  opts.on('--db-columns', 'Show _db_columns for matching models') { options[:db_cols] = true }
-  opts.on('--options', 'Show the full parsed options hash') { options[:full] = true }
-  opts.on('--sections KEYS', 'Comma-separated list of option sections to display') { |v| options[:sections] = v.split(',').map(&:strip) }
-  opts.on('--class TYPE', 'Filter by _class_name') { |v| options[:class_filter] = v }
-  opts.on('--errors FILE', 'Read model names from a config-errors log file') { |v| options[:errors_file] = v }
-  opts.on('--compare-git REF', 'Compare config against a git ref (e.g. HEAD~1)') { |v| options[:compare_git] = v }
-  opts.on('--compare PATH', 'Compare config against another YAML file') { |v| options[:compare_path] = v }
-  opts.on('--only-changed', 'With --compare-git/--compare, only show models that have changes') { options[:only_changed] = true }
-  opts.on('--page-layouts', 'List page layout panels (Admin::PageLayout)') { options[:page_layouts] = true }
-  opts.on('--access-controls', 'List user access controls (Admin::UserAccessControl)') { options[:access_controls] = true }
-  opts.on('--help', 'Show help') do
-    puts opts
-    exit
-  end
-end
-
-search_terms = parser.parse!(ARGV)
-
-# ---------------------------------------------------------------------------
-# Load config
-# ---------------------------------------------------------------------------
-
-config_path = File.expand_path(options[:config], Dir.pwd)
-unless File.exist?(config_path)
-  warn "Config file not found: #{config_path}"
-  exit 1
-end
-
-puts "Loading config: #{config_path}"
-outer = YAML.safe_load_file(config_path, permitted_classes: [Symbol], aliases: true)
-unless outer.is_a?(Hash)
-  warn 'Unexpected top-level YAML structure (expected Hash)'
-  exit 1
-end
-
-app_type = outer['app_type'] || outer
-preamble = build_library_preamble(app_type)
-
-# ---------------------------------------------------------------------------
-# Page layout / access control modes short-circuit the model reporting below.
-# ---------------------------------------------------------------------------
-
-if options[:page_layouts]
-  report_page_layouts(app_type, search_terms)
-  exit 0
-end
-
-if options[:access_controls]
-  report_access_controls(app_type, search_terms)
-  exit 0
-end
-
-# ---------------------------------------------------------------------------
-# Load comparison config (for --compare-git / --compare)
-# ---------------------------------------------------------------------------
-
-compare_app_type = nil
-compare_preamble = ''
-
-if options[:compare_git]
-  git_ref = options[:compare_git]
-  # Resolve config_path relative to the git repo root
-  repo_root = `git -C #{File.dirname(config_path).shellescape} rev-parse --show-toplevel 2>/dev/null`.strip
-  rel_path  = config_path.sub("#{repo_root}/", '')
-  raw = `git -C #{repo_root.shellescape} show #{git_ref.shellescape}:#{rel_path.shellescape} 2>/dev/null`
-  if raw.empty?
-    warn "Could not load config from git ref '#{git_ref}' at path '#{rel_path}'"
-    exit 1
-  end
-  puts "Comparing against git ref: #{git_ref}"
-  old_outer = YAML.safe_load(raw, permitted_classes: [Symbol], aliases: true)
-  compare_app_type = old_outer.is_a?(Hash) ? (old_outer['app_type'] || old_outer) : nil
-  compare_preamble = build_library_preamble(compare_app_type) if compare_app_type
-elsif options[:compare_path]
-  cmp_path = File.expand_path(options[:compare_path], Dir.pwd)
-  unless File.exist?(cmp_path)
-    warn "Compare file not found: #{cmp_path}"
-    exit 1
-  end
-  puts "Comparing against: #{cmp_path}"
-  old_outer = YAML.safe_load_file(cmp_path, permitted_classes: [Symbol], aliases: true)
-  compare_app_type = old_outer.is_a?(Hash) ? (old_outer['app_type'] || old_outer) : nil
-  compare_preamble = build_library_preamble(compare_app_type) if compare_app_type
-end
-
-# ---------------------------------------------------------------------------
-# Extract model names from an error log (if --errors given)
-# ---------------------------------------------------------------------------
-
-if options[:errors_file]
-  errors_path = File.expand_path(options[:errors_file], Dir.pwd)
-  unless File.exist?(errors_path)
-    warn "Errors file not found: #{errors_path}"
-    exit 1
-  end
-
-  lines = File.readlines(errors_path)
-  # Lines look like:  - [dynamic_model__play_ipa_foo__default (DynamicModel)] ...
-  # or                  - [ipa_sample__default (ExternalIdentifier)] ...
-  extracted = lines.flat_map do |line|
-    line.scan(/\[([^\]]+)\]/).flatten
-        .map { |tag| tag.split(/\s+/).first } # strip "(ClassName)"
-        .map { |rn| rn.sub(/__default$/, '') } # strip trailing __default
-        .map { |rn| rn.sub(/\Adynamic_model__/, '') } # strip prefix
-  end.compact.uniq
-
-  # Convert resource names back to table_names (pluralise last segment)
-  search_terms.concat(extracted.map { |rn| rn.split('__').last })
-  search_terms.uniq!
-end
-
-# ---------------------------------------------------------------------------
-# Collect all model records from the config
-# ---------------------------------------------------------------------------
-
-MODEL_KEYS = %w[
-  dynamic_models activity_logs external_identifiers
-  associated_dynamic_models associated_activity_logs associated_external_identifiers
-  valid_dynamic_models valid_activity_logs valid_external_identifiers
-  valid_associated_dynamic_models valid_associated_activity_logs valid_associated_external_identifiers
-].freeze
-
-all_records     = MODEL_KEYS.flat_map { |key| Array(app_type[key]) }
-compare_records = compare_app_type ? MODEL_KEYS.flat_map { |key| Array(compare_app_type[key]) } : []
-
-if all_records.empty?
-  warn "No model records found in config (looked for keys: #{MODEL_KEYS.join(', ')})"
-  exit 1
-end
-
-# Filter by _class_name if requested
-all_records.select! { |r| r['_class_name'].to_s.include?(options[:class_filter]) } if options[:class_filter]
-
-# Filter by search terms (table_name or name)
-if search_terms.any?
-  pattern = Regexp.new(search_terms.map { |t| Regexp.escape(t) }.join('|'), Regexp::IGNORECASE)
-  all_records.select! do |r|
-    pattern.match?(r['table_name'].to_s) || pattern.match?(r['name'].to_s)
-  end
-end
-
-if all_records.empty?
-  puts 'No matching models found.'
-  exit 0
-end
-
-puts "Found #{all_records.size} matching model(s)\n\n"
-
-# Print class coverage so missing model classes are immediately visible.
-class_counts = all_records.each_with_object(Hash.new(0)) do |record, counts|
-  counts[record['_class_name'].to_s] += 1
-end
-
-puts 'Model class counts:'
-class_counts.sort.each do |class_name, count|
-  puts "  - #{class_name}: #{count}"
-end
-puts
-
-# ---------------------------------------------------------------------------
-# Report each model
-# ---------------------------------------------------------------------------
-
-all_records.each do |rec|
-  table   = rec['table_name'] || rec['name']
-  cls     = rec['_class_name']
-  label   = rec['name']
-
-  raw_opts = record_options_text(rec)
-  parsed   = parse_options(raw_opts, preamble)
-
-  # When --only-changed is active, pre-check before printing anything
-  if compare_app_type && options[:only_changed]
-    old_rec_pre = compare_records.find { |r| (r['table_name'] || r['name']) == table }
-    next unless config_changed?(rec, parsed || {}, old_rec_pre, compare_preamble, preamble)
-  end
-
-  puts '=' * 72
-  puts "#{table}  [#{cls}]  \"#{label}\""
-  puts '=' * 72
-
-  if parsed.nil?
-    puts '  (could not parse options)'
-    puts
-    next
-  end
-
-  # _db_columns
-  db_cols = parsed['_db_columns']&.keys&.to_set(&:to_s) || Set.new
-
-  if options[:db_cols] || options[:diff]
-    if db_cols.any?
-      puts "\n  _db_columns (#{db_cols.size}):"
-      db_cols.sort.each { |c| puts "    - #{c}" }
-    else
-      puts "\n  _db_columns: (none declared in options)"
+    opts.on('--config PATH', 'Path to the app-type YAML config file') { |v| options[:config] = v }
+    opts.on('--diff', 'Show fields in config options not in _db_columns / field_list') { options[:diff] = true }
+    opts.on('--db-columns', 'Show _db_columns for matching models') { options[:db_cols] = true }
+    opts.on('--options', 'Show the full parsed options hash') { options[:full] = true }
+    opts.on('--sections KEYS', 'Comma-separated list of option sections to display') { |v| options[:sections] = v.split(',').map(&:strip) }
+    opts.on('--class TYPE', 'Filter by _class_name') { |v| options[:class_filter] = v }
+    opts.on('--errors FILE', 'Read model names from a config-errors log file') { |v| options[:errors_file] = v }
+    opts.on('--compare-git REF', 'Compare config against a git ref (e.g. HEAD~1)') { |v| options[:compare_git] = v }
+    opts.on('--compare PATH', 'Compare config against another YAML file') { |v| options[:compare_path] = v }
+    opts.on('--only-changed', 'With --compare-git/--compare, only show models that have changes') { options[:only_changed] = true }
+    opts.on('--page-layouts', 'List page layout panels (Admin::PageLayout)') { options[:page_layouts] = true }
+    opts.on('--access-controls', 'List user access controls (Admin::UserAccessControl)') { options[:access_controls] = true }
+    opts.on('--validate-option-configs', 'Validate matching model option text against the live ExtraOptions schema') { options[:validate_option_configs] = true }
+    opts.on('--help', 'Show help') do
+      puts opts
+      exit
     end
   end
 
-  # field_list (declared fields on the model record itself)
-  field_list_str = rec['field_list'].to_s.strip
-  field_list     = field_list_str.split(/\s+/).map(&:strip).reject(&:empty?).to_set
+  search_terms = parser.parse!(ARGV)
 
-  if options[:diff]
-    puts "\n  field_list (#{field_list.size} fields from record):"
-    field_list.sort.each { |f| puts "    - #{f}" }
+  # ---------------------------------------------------------------------------
+  # Load config
+  # ---------------------------------------------------------------------------
+
+  config_path = File.expand_path(options[:config], Dir.pwd)
+  unless File.exist?(config_path)
+    warn "Config file not found: #{config_path}"
+    exit 1
   end
 
-  # Compute valid_fields = field_list ∪ db_cols
-  valid_fields = field_list | db_cols
+  puts "Loading config: #{config_path}"
+  outer = YAML.safe_load_file(config_path, permitted_classes: [Symbol], aliases: true)
+  unless outer.is_a?(Hash)
+    warn 'Unexpected top-level YAML structure (expected Hash)'
+    exit 1
+  end
 
-  # Sections to show
-  def_h = default_section(parsed)
+  app_type = outer['app_type'] || outer
+  preamble = build_library_preamble(app_type)
 
-  show_sections = options[:sections] || OPTION_SECTIONS
-  show_sections.each do |section|
-    next unless def_h.is_a?(Hash) && def_h.key?(section)
-    next unless options[:sections] || options[:diff] || options[:full]
+  # ---------------------------------------------------------------------------
+  # Page layout / access control modes short-circuit the model reporting below.
+  # ---------------------------------------------------------------------------
 
-    puts "\n  #{section}:"
-    keys = top_level_field_keys(def_h[section])
-    keys.sort.each do |k|
-      flag = !valid_fields.include?(k) && k !~ /\Aall_fields\z|\Aplaceholder_|\A_/ ? '  ⚠  NOT in valid_fields' : ''
-      puts "    #{k}#{flag}"
+  if options[:page_layouts]
+    report_page_layouts(app_type, search_terms)
+    exit 0
+  end
+
+  if options[:access_controls]
+    report_access_controls(app_type, search_terms)
+    exit 0
+  end
+
+  # ---------------------------------------------------------------------------
+  # Load comparison config (for --compare-git / --compare)
+  # ---------------------------------------------------------------------------
+
+  compare_app_type = nil
+  compare_preamble = ''
+
+  if options[:compare_git]
+    git_ref = options[:compare_git]
+    # Resolve config_path relative to the git repo root
+    repo_root = `git -C #{File.dirname(config_path).shellescape} rev-parse --show-toplevel 2>/dev/null`.strip
+    rel_path  = config_path.sub("#{repo_root}/", '')
+    raw = `git -C #{repo_root.shellescape} show #{git_ref.shellescape}:#{rel_path.shellescape} 2>/dev/null`
+    if raw.empty?
+      warn "Could not load config from git ref '#{git_ref}' at path '#{rel_path}'"
+      exit 1
+    end
+    puts "Comparing against git ref: #{git_ref}"
+    old_outer = YAML.safe_load(raw, permitted_classes: [Symbol], aliases: true)
+    compare_app_type = old_outer.is_a?(Hash) ? (old_outer['app_type'] || old_outer) : nil
+    compare_preamble = build_library_preamble(compare_app_type) if compare_app_type
+  elsif options[:compare_path]
+    cmp_path = File.expand_path(options[:compare_path], Dir.pwd)
+    unless File.exist?(cmp_path)
+      warn "Compare file not found: #{cmp_path}"
+      exit 1
+    end
+    puts "Comparing against: #{cmp_path}"
+    old_outer = YAML.safe_load_file(cmp_path, permitted_classes: [Symbol], aliases: true)
+    compare_app_type = old_outer.is_a?(Hash) ? (old_outer['app_type'] || old_outer) : nil
+    compare_preamble = build_library_preamble(compare_app_type) if compare_app_type
+  end
+
+  # ---------------------------------------------------------------------------
+  # Extract model names from an error log (if --errors given)
+  # ---------------------------------------------------------------------------
+
+  if options[:errors_file]
+    errors_path = File.expand_path(options[:errors_file], Dir.pwd)
+    unless File.exist?(errors_path)
+      warn "Errors file not found: #{errors_path}"
+      exit 1
+    end
+
+    lines = File.readlines(errors_path)
+    # Lines look like:  - [dynamic_model__play_ipa_foo__default (DynamicModel)] ...
+    # or                  - [ipa_sample__default (ExternalIdentifier)] ...
+    extracted = lines.flat_map do |line|
+      line.scan(/\[([^\]]+)\]/).flatten
+          .map { |tag| tag.split(/\s+/).first } # strip "(ClassName)"
+          .map { |rn| rn.sub(/__default$/, '') } # strip trailing __default
+          .map { |rn| rn.sub(/\Adynamic_model__/, '') } # strip prefix
+    end.compact.uniq
+
+    # Convert resource names back to table_names (pluralise last segment)
+    search_terms.concat(extracted.map { |rn| rn.split('__').last })
+    search_terms.uniq!
+  end
+
+  # ---------------------------------------------------------------------------
+  # Collect all model records from the config
+  # ---------------------------------------------------------------------------
+
+  MODEL_KEYS = %w[
+    dynamic_models activity_logs external_identifiers
+    associated_dynamic_models associated_activity_logs associated_external_identifiers
+    valid_dynamic_models valid_activity_logs valid_external_identifiers
+    valid_associated_dynamic_models valid_associated_activity_logs valid_associated_external_identifiers
+  ].freeze
+
+  all_records     = MODEL_KEYS.flat_map { |key| Array(app_type[key]) }
+  compare_records = compare_app_type ? MODEL_KEYS.flat_map { |key| Array(compare_app_type[key]) } : []
+
+  if all_records.empty?
+    warn "No model records found in config (looked for keys: #{MODEL_KEYS.join(', ')})"
+    exit 1
+  end
+
+  # Filter by _class_name if requested
+  all_records.select! { |r| r['_class_name'].to_s.include?(options[:class_filter]) } if options[:class_filter]
+
+  # Filter by search terms (table_name or name)
+  if search_terms.any?
+    pattern = Regexp.new(search_terms.map { |t| Regexp.escape(t) }.join('|'), Regexp::IGNORECASE)
+    all_records.select! do |r|
+      pattern.match?(r['table_name'].to_s) || pattern.match?(r['name'].to_s)
     end
   end
 
-  # Diff report
-  if options[:diff]
-    refs = referenced_fields(def_h)
-    missing = refs.reject do |f|
-      valid_fields.include?(f) ||
-        f.start_with?('_') ||
-        f == 'all_fields' ||
-        f.start_with?('placeholder_')
-    end.sort
+  if all_records.empty?
+    puts 'No matching models found.'
+    exit 0
+  end
 
-    puts "\n  Fields referenced in options but NOT in field_list or _db_columns:"
-    if missing.empty?
-      puts '    (none)'
-    else
-      missing.each { |f| puts "    *** #{f}" }
+  if options[:validate_option_configs]
+    puts "Validating option schemas for #{all_records.size} matching model(s)\n\n"
+    all_records.each do |rec|
+      table = rec['table_name'] || rec['name']
+      cls = rec['_class_name']
+      label = rec['name']
+      notices = validate_option_config_record(rec)
+      puts "#{table}  [#{cls}]  \"#{label}\""
+      if notices.nil? || notices.empty?
+        puts '  OK'
+      else
+        notices.each do |notice|
+          puts "  - #{format_validation_notice(rec, notice)}"
+        end
+      end
+      puts
     end
+    exit 0
   end
 
-  # Full options dump
-  if options[:full]
-    puts "\n  Full parsed options:"
-    puts YAML.dump(parsed)
+  puts "Found #{all_records.size} matching model(s)\n\n"
+
+  # Print class coverage so missing model classes are immediately visible.
+  class_counts = all_records.each_with_object(Hash.new(0)) do |record, counts|
+    counts[record['_class_name'].to_s] += 1
   end
 
-  # Compare against old config
-  if compare_app_type
-    old_rec = compare_records.find { |r| (r['table_name'] || r['name']) == table }
-    print_config_diff(rec, parsed, old_rec, compare_preamble, preamble)
+  puts 'Model class counts:'
+  class_counts.sort.each do |class_name, count|
+    puts "  - #{class_name}: #{count}"
   end
-
   puts
+
+  # ---------------------------------------------------------------------------
+  # Report each model
+  # ---------------------------------------------------------------------------
+
+  all_records.each do |rec|
+    table   = rec['table_name'] || rec['name']
+    cls     = rec['_class_name']
+    label   = rec['name']
+
+    raw_opts = record_options_text(rec)
+    parsed   = parse_options(raw_opts, preamble)
+
+    # When --only-changed is active, pre-check before printing anything
+    if compare_app_type && options[:only_changed]
+      old_rec_pre = compare_records.find { |r| (r['table_name'] || r['name']) == table }
+      next unless config_changed?(rec, parsed || {}, old_rec_pre, compare_preamble, preamble)
+    end
+
+    puts '=' * 72
+    puts "#{table}  [#{cls}]  \"#{label}\""
+    puts '=' * 72
+
+    if parsed.nil?
+      puts '  (could not parse options)'
+      puts
+      next
+    end
+
+    # _db_columns
+    db_cols = parsed['_db_columns']&.keys&.to_set(&:to_s) || Set.new
+
+    if options[:db_cols] || options[:diff]
+      if db_cols.any?
+        puts "\n  _db_columns (#{db_cols.size}):"
+        db_cols.sort.each { |c| puts "    - #{c}" }
+      else
+        puts "\n  _db_columns: (none declared in options)"
+      end
+    end
+
+    # field_list (declared fields on the model record itself)
+    field_list_str = rec['field_list'].to_s.strip
+    field_list     = field_list_str.split(/\s+/).map(&:strip).reject(&:empty?).to_set
+
+    if options[:diff]
+      puts "\n  field_list (#{field_list.size} fields from record):"
+      field_list.sort.each { |f| puts "    - #{f}" }
+    end
+
+    # Compute valid_fields = field_list ∪ db_cols
+    valid_fields = field_list | db_cols
+
+    # Sections to show
+    def_h = default_section(parsed)
+
+    show_sections = options[:sections] || OPTION_SECTIONS
+    show_sections.each do |section|
+      next unless def_h.is_a?(Hash) && def_h.key?(section)
+      next unless options[:sections] || options[:diff] || options[:full]
+
+      puts "\n  #{section}:"
+      keys = top_level_field_keys(def_h[section])
+      keys.sort.each do |k|
+        flag = !valid_fields.include?(k) && k !~ /\Aall_fields\z|\Aplaceholder_|\A_/ ? '  ⚠  NOT in valid_fields' : ''
+        puts "    #{k}#{flag}"
+      end
+    end
+
+    # Diff report
+    if options[:diff]
+      refs = referenced_fields(def_h)
+      missing = refs.reject do |f|
+        valid_fields.include?(f) ||
+          f.start_with?('_') ||
+          f == 'all_fields' ||
+          f.start_with?('placeholder_')
+      end.sort
+
+      puts "\n  Fields referenced in options but NOT in field_list or _db_columns:"
+      if missing.empty?
+        puts '    (none)'
+      else
+        missing.each { |f| puts "    *** #{f}" }
+      end
+    end
+
+    # Full options dump
+    if options[:full]
+      puts "\n  Full parsed options:"
+      puts YAML.dump(parsed)
+    end
+
+    # Compare against old config
+    if compare_app_type
+      old_rec = compare_records.find { |r| (r['table_name'] || r['name']) == table }
+      print_config_diff(rec, parsed, old_rec, compare_preamble, preamble)
+    end
+
+    puts
+  end
 end

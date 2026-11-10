@@ -184,6 +184,56 @@ module FilestoreUiActions
     expect(page).to have_css('#primary-modal', visible: true, wait: 10)
   end
 
+  def expect_move_modal_path_as_literal_text(path)
+    within '#primary-modal' do
+      aggregate_failures do
+        expect(find('.container-browser-move-from').text).to eq(path)
+        expect(page).to have_no_css('.container-browser-move-from img', visible: :all)
+        expect(page.evaluate_script('window.__xss')).to be_nil
+      end
+    end
+  end
+
+  # Select an existing destination folder in the move modal
+  # @param folder_name [String] displayed name of the destination folder
+  def select_move_destination_folder(folder_name)
+    folder_row = find('#primary-modal .browse-move-to-folders .container-folder', text: folder_name, wait: 10)
+    checkbox = folder_row.find('input.container-folder-selector', visible: :all)
+    page.execute_script('arguments[0].click();', checkbox)
+    finish_page_loading
+  end
+
+  # data-folder-path of each "add folder" control in the move modal
+  # @return [Array<String>]
+  def move_modal_add_folder_paths
+    find('#primary-modal .browse-move-to-folders').all('input.container-folder-add', visible: :all).map do |input|
+      input['data-folder-path']
+    end
+  end
+
+  # Clear a window flag that an injected payload would set
+  # @param flag [String] window property name
+  def reset_xss_flag(flag)
+    page.execute_script("window.#{flag} = false;")
+  end
+
+  # Check an injected payload has not run, after reset_xss_flag
+  # @param flag [String] window property name
+  def expect_xss_flag_unset(flag)
+    expect(page.evaluate_script("window.#{flag}")).to be(false)
+  end
+
+  # Check the destination selected in the move modal is shown literally and injected no element
+  # @param folder_name [String] the hostile destination folder name
+  # @param probe [String] data-xss-probe value of the injected element
+  def expect_move_modal_destination_as_literal(folder_name, probe)
+    aggregate_failures do
+      expect(page).to have_field('new_path', with: folder_name)
+      expect(page).to have_no_css("#primary-modal .browse-move-to-folders img[data-xss-probe=\"#{probe}\"]",
+                                  visible: :all)
+    end
+  end
+
   # Enter a folder name and submit the move files action
   # @param folder_name [String] the destination folder name (can be new or existing)
   def move_files_to_folder(folder_name)

@@ -8,6 +8,7 @@
     <li role="presentation" class=""><a href="#def-files-block" aria-controls="def-files-block" role="tab" data-toggle="tab">Files</a></li>
     <li role="presentation" class=""><a href="#def-users-block" aria-controls="def-users-block" role="tab" data-toggle="tab">Users</a></li>
     <li role="presentation" class=""><a href="#def-instruments-block" aria-controls="def-instruments-block" role="tab" data-toggle="tab">Instruments</a></li>
+    <li role="presentation" class=""><a href="#def-data-entry-trigger-block" aria-controls="def-data-entry-trigger-block" role="tab" data-toggle="tab">Data Entry Trigger</a></li>
   </ul>
   <!-- Tab panes -->
   <div class="tab-content">
@@ -29,6 +30,9 @@
     </div>
     <div role="tabpanel" class="tab-pane" id="def-instruments-block">
       <%= render partial: 'redcap/project_admins/instruments_block', locals: {object_instance: object_instance} %>
+    </div>
+    <div role="tabpanel" class="tab-pane" id="def-data-entry-trigger-block">
+      <%= render partial: 'redcap/project_admins/data_entry_trigger_block', locals: {object_instance: object_instance} %>
     </div>
   </div>
 </div>

@@ -1,0 +1,16 @@
+# Pattern 3: Using the value an attribute had before it was changed
+# @runnable: true
+# @instance: activity_log_changed
+# @expect: true
+
+# Prefixing an attribute name with previous_value_of_ returns the value the
+# attribute held before it was changed in the current transaction. If the
+# attribute has not been changed, the result is nil.
+#
+# In this example the current record's select_who has just been changed to
+# 'reviewer'; its previous value was 'user', so this matches other activity log
+# records in the master that still have select_who set to 'user'.
+all:
+  activity_log__player_contact_phones:
+    select_who:
+      this: previous_value_of_select_who

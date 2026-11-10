@@ -401,6 +401,10 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
       expect(ces).not_to be_nil
       expect(ces.first[:type]).to eq(:parse_error)
       expect(ces.first[:message]).to include('alias')
+      # The failed dynamic model should be identifiable and linkable, not blank (issue follow-up to #1456)
+      expect(ces.first[:resource_name]).to eq(dm.resource_name)
+      expect(ces.first[:config_object]).to eq(dm)
+      expect(ces.first[:config_resource_name]).to eq(DynamicModel.resource_name)
 
       # Now fix it by re-adding the anchor
       fixed_yaml = <<~YAML

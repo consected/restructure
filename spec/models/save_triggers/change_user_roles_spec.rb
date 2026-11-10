@@ -6,9 +6,12 @@ RSpec.describe SaveTriggers::ChangeUserRoles, type: :model do
   include ModelSupport
   include ActivityLogSupport
 
-  before :example do
+  before :all do
     SetupHelper.setup_al_player_contact_phones
     SetupHelper.setup_al_gen_tests AlNameGenTestCur, 'elt_save_test', 'player_contact'
+  end
+
+  before :example do
     create_user
     @master = create_master
     @player_contact = @master.player_contacts.create! data: '(617)123-1234 b', rec_type: :phone, rank: 10

@@ -25,6 +25,29 @@ RSpec.describe 'Settings::AppSettingsVars', type: :model do
     end
   end
 
+  describe 'recent environment-backed settings' do
+    it 'includes public operational settings in AppSettingsVars' do
+      expect(Settings::AppSettingsVars).to include(
+        'HandlebarsLockWaitSeconds',
+        'HandlebarsKeepGenerations',
+        'HandlebarsGenerationSafetyWindowSeconds',
+        'HandlebarsLockFileMaxAgeSeconds',
+        'PrewarmTemplatesEnabled',
+        'PrewarmSignInWindowDays',
+        'PrewarmMaxVariants',
+        'PrewarmThrottleSeconds',
+        'TemplateBrowserCacheSeconds',
+        'PullExternalDataAllowedHosts',
+        'PullExternalDataAllowPrivateHosts'
+      )
+    end
+
+    it 'defines and exposes the setting for allowing dynamic migration column drops' do
+      expect(Settings::AllowDropColumns).to eq(ENV['ALLOW_DROP_COLUMNS'] == 'true')
+      expect(Settings::AppSettingsVars).to include('AllowDropColumns')
+    end
+  end
+
   describe 'NfsStoreJobDefaultAppTypeId (removed)' do
     it 'is NOT included in AppSettingsVars' do
       expect(Settings::AppSettingsVars).not_to include('NfsStoreJobDefaultAppTypeId')

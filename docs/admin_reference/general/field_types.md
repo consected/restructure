@@ -180,8 +180,9 @@ These attributes apply to `select_*`, `tag_select_*`, `multi_*` and radio button
   With an array, each label is automatically downcased to produce the stored value.
 - `general_selection` — use a GeneralSelection definition with an alternative name,
   or one belonging to a different model prefix. Overrides the default lookup by model + field name.
-- `include_blank` — `true` or `false`. Forces a selectable blank/empty option in dropdowns
-  and radio button groups. Some field types (e.g. `blank_yes_no`) always include a blank.
+- `include_blank` — `true` or `false` to control whether a blank/empty option is shown,
+  or a string to use as the blank option's label. This applies to dropdowns and radio
+  button groups. Some field types (e.g. `blank_yes_no`) always include a blank.
 - `prompt` — placeholder text displayed in select fields when no value is selected.
 
 ### Record-Based Select Options (`select_record_*`)

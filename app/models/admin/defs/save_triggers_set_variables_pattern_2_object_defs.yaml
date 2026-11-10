@@ -1,0 +1,6 @@
+# Pattern 2: Set a Hash value using the object: wrapper
+set_variables:
+  name: hash_var
+  value:
+    object:
+      id: '{{study_id}}'

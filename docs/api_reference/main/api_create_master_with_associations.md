@@ -11,13 +11,22 @@ no master record or associated records are persisted.
 
 ## Authentication
 
-All API requests require token authentication via query parameters:
+All API requests require token authentication via HTTP headers. The app type is
+passed as a query parameter:
 
 | Parameter    | Description                        |
 |--------------|------------------------------------|
-| `user_email` | Email address of the API user      |
-| `user_token` | Authentication token for the user  |
 | `use_app_type` | App type ID for the user context |
+
+| Header | Description |
+|--------|-------------|
+| `X-User-Email` | Email address of the API user |
+| `X-User-Token` | Authentication token for the user |
+
+As a fallback, you can alternatively pass the email and token as query parameters.
+This risks leaking sensitive information in URLs and server logs.
+
+`?user_email={{user_email}}&user_token={{user_token}}`
 
 ## Request
 
@@ -78,10 +87,10 @@ Unpermitted attributes are silently ignored.
 ```bash
 curl -XPOST -s \
   -H "Content-Type: application/json" \
+  -H "X-User-Email: api-user@example.com" \
+  -H "X-User-Token: SECRET_TOKEN" \
   "https://server.example.com/masters/create.json?\
-use_app_type=1&\
-user_email=api-user@example.com&\
-user_token=SECRET_TOKEN" \
+use_app_type=1" \
   -d '{
     "master": {
       "embedded_item": {
@@ -127,6 +136,14 @@ Returned when any record fails validation. The entire transaction is rolled back
   "message": "Error creating Master Record: Validation failed: Rank can't be blank"
 }
 ```
+
+### Authentication Error Response (HTTP 401)
+
+Returned when `user_email`/`user_token` are supplied but invalid. If no credentials are supplied
+at all, this `POST` endpoint instead returns `403 Forbidden` (CSRF protection), since there is no
+token to justify bypassing the CSRF check. See
+[Authentication failures](README.md#authentication-failures) for the generic error body and the
+`X-ReStructure-Error` header sent when credentials were supplied but rejected.
 
 ## Access Control
 

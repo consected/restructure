@@ -1,3 +1,9 @@
+# Canonical schema
+# _default: <Hash(key: Any)>
+# _default_additions: <Hash(key: Any)>
+# All keys are optional. Keys are the same top-level option-type keys as any other
+# dynamic definition option type.
+#
 # Keys to be applied to all dynamic definitions. The actual
 # definitions will take precedence by replacing the full key definition.
 _default:
@@ -12,3 +18,11 @@ _default:
 _default_additions:
   key2: overrides `key2` from the `_default:`
   key3: applied to all dynamic definitions
+
+# Notes:
+# - Applied first, via a shallow merge - each option type's own value fully replaces the
+#   same key here on conflict (`opt_default.merge(value)`), then _merge_default,
+#   _merge_override and _override are applied on top, in that order.
+# - Has the lowest precedence of the four _default. / _merge_. / _override directives.
+# - Any key matching the `_default` prefix (e.g. `_default_additions`, or a
+#   library-namespaced `_default__xxx`) is combined into the same base hash before merging.

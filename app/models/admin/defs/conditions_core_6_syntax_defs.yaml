@@ -1,0 +1,28 @@
+# Pattern 6: Overall condition syntax
+# @runnable: false
+#
+# selection_type:                 all | any | not_all | not_any (an optional suffix
+#                                 may be added to repeat the same type)
+#   record_source:                a table / resource name, or one of the special
+#                                 record sources (this, referring_record, ...)
+#     field_name: value           equality against a literal, null, or a list (IN)
+#     field_name:                 an operator comparison
+#       condition: '>='
+#       value: 10
+#     field_name:                 a value taken from another record
+#       this: other_field
+#     field_name: return_value    return this field's value instead of a boolean
+#   selection_type:               nested conditions
+#     record_source: {}
+
+'all | any | not_all | not_any':
+  'table_name | this | referring_record | top_referring_record | reference | embedded_item | parent | user | this_references | parent_references | parent_or_this_references':
+    field_name: 'literal value | null | [list of values]'
+    field_name_with_operator:
+      condition: '>='
+      value: 10
+    field_name_from_another_record:
+      this: other_field_name
+    field_name_to_return: return_value
+  'all | any | not_all | not_any':
+    nested_table_name: {}

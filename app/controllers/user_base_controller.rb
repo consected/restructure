@@ -10,9 +10,10 @@
 class UserBaseController < ApplicationController
   #
   # Provide a forgery protection strategy that recognizes if a request is attempting to use
-  # an API user_token, and if so disables CSRF. The user_token has to be correct for the request
-  # to actually pass. If a X-CSRF-Token header is provided and is correct, this will override the
-  # user_token and the request will be treated as a browser request. If it is not correct, the user_token must be
+  # an API user_token (as a query/body param or as an X-User-Token header), and if so disables
+  # CSRF. The user_token has to be correct for the request to actually pass. If a X-CSRF-Token
+  # header is provided and is correct, this will override the user_token and the request will be
+  # treated as a browser request. If it is not correct, the user_token must be
   # If neither user_token or X-CSRF-Token header are provided then the request will fail.
   #
   # It is expected that this strategy will be extended when JWT or another API request style is implemented.
@@ -30,7 +31,7 @@ class UserBaseController < ApplicationController
     end
 
     def api_user?
-      controller.params[:user_token].present?
+      ApiTokenHeaderAuth.user_token_from_request(request).present?
     end
 
     def jwt_user?

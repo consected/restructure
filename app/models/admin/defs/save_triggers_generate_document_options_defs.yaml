@@ -1,38 +1,46 @@
 # Save Trigger: Generate Document options
-        generate_document:
-          # --- Content Generation (c.f. notify trigger) ---
-          content_template_name: template_name  # Named content template (Admin::MessageTemplate)
-          content_template_text: inline template text with {{curly}} substitutions  # OR inline template text
-          layout_template: layout_name  # Optional layout template to wrap content (replaces {{main_content}})
-          extra_substitutions:  # Optional extra data for {{extra_substitutions.*}} tag substitutions
-            key1: value1
-            key2: '{{field_name}}'  # Supports {{curly}} substitutions resolved from the triggering item
+# Canonical schema
+# generate_document: <Hash(entry_label: GenerateDocumentEntry) | Array(Hash(entry_label: GenerateDocumentEntry))>
+#
+# Key type
+# entry_label: <any label - purely for identification>
+#
+# Value type
+# GenerateDocumentEntry: <Hash(
+#   content_template_name: String,
+#   content_template_text: String,
+#   layout_template: String,
+#   extra_substitutions: Hash,
+#   container: ContainerValue (required),
+#   filename: String (required),
+#   content_type: String,
+#   path: String,
+#   skip_existing: Boolean,
+#   replace: Boolean,
+#   store_as_user: String | Integer | Hash,
+#   store_in_app_type: String | Integer | Hash,
+#   if: Condition,
+#   on_complete: TriggerTaskList,
+#   on_failure: TriggerTaskList
+# )>
+# Keys are optional unless marked (required). Exactly one of content_template_name or
+# content_template_text must be set - having neither raises an error.
+#
+# ContainerValue type (container) - exactly one lookup form should be used
+# ContainerValue: <Hash(from_this: String) | Hash(name: String) | Hash(id: Integer | String)>
+#
+# Pattern 1: Named content template, container via model reference (save_triggers_generate_document_pattern_1_named_template_defs.yaml)
+# Pattern 2: Inline content_template_text with layout and extra_substitutions (save_triggers_generate_document_pattern_2_inline_text_defs.yaml)
+# Pattern 3: Resolve the container by name or id (save_triggers_generate_document_pattern_3_container_lookup_defs.yaml)
+# See save_trigger_generate_document.md for the worked examples.
 
-          # --- File Storage ---
-          container:  # Hash defining how to locate the target NFS container
-            # Option A: resolve from item's model references (e.g. container created by create_filestore_container)
-            from_this: model_reference
-            # Option B: lookup by name in master
-            name: container-name  # Supports {{curly}} substitutions
-            # Option C: lookup by database id
-            id: 123  # Supports {{curly}} substitutions
-
-          filename: generated-report-{{id}}.html  # Filename with {{curly}} substitution support
-          content_type: text/html  # MIME type of the generated file
-          path: reports  # Optional subdirectory path within the container
-
-          # --- Duplicate File Handling ---
-          skip_existing: true  # Optional: skip if a file with the same name and path already exists
-          replace: true  # Optional: replace existing file if content has changed
-
-          # --- User/Access Context ---
-          # Accepts a literal user id (integer) or email (string), a {{curly}} substitution,
-          # or a conditional Hash reference (e.g. {this: {field: return_value}}).
-          store_as_user: user@example.com  # User to perform the file store operation
-          # Accepts a literal app type id (integer) or name (string), a {{curly}} substitution,
-          # or a conditional Hash reference (e.g. {this: {field: return_value}}).
-          store_in_app_type: app_type_name  # App type context for access control
-
-          # --- Standard Trigger Options ---
-          if: #if_extras  # Optional conditional to control when trigger fires
 #!defs(save_triggers_lifecycle_hooks_defs.yaml)
+
+# Notes:
+# - container's three lookup forms (from_this/name/id) are mutually exclusive - use exactly one.
+# - skip_existing and replace both apply to a duplicate filename+path match; skip_existing is
+#   checked first, so setting both leaves skip_existing in control.
+# - A generate_document result is typically referenced by a later notify trigger's
+#   attachments: to email the generated file.
+# - store_as_user/store_in_app_type accept a literal id/name, a {{curly}} substitution, or a
+#   conditional Hash reference (e.g. {this: {field: return_value}}).

@@ -21,6 +21,30 @@ module OptionConfigs
                  role_name: :string_or_hash,
                  for_user: :string_or_integer_or_hash
                }
+
+      class << self
+        def validate_config(config)
+          return config.flat_map { |entry| validate_config(entry) } if config.is_a?(Array)
+          return [] unless config.is_a?(Hash)
+
+          warnings = super
+          hash = config.transform_keys(&:to_sym)
+          %i[add_role_names remove_role_names].each do |key|
+            entries = hash[key]
+            next unless entries
+
+            entries = [entries] unless entries.is_a?(Array)
+            entries.each do |entry|
+              next unless entry.is_a?(Hash)
+
+              entry = entry.transform_keys(&:to_sym)
+              warnings.concat(validate_app_type_ref(entry[:app_type], 'app_type'))
+              warnings.concat(validate_user_ref(entry[:for_user], 'for_user'))
+            end
+          end
+          warnings
+        end
+      end
     end
   end
 end

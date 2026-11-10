@@ -1,4 +1,5 @@
 <h4><%= object_instance.name %></h4>
+<%= render partial: 'redcap/project_admins/config_errors', locals: { object_instance: } %>
 <% if object_instance.persisted? %>
   <p><%= link_to 'refresh', edit_redcap_project_admin_path(object_instance), 
   data: {
@@ -223,6 +224,10 @@ if req&.result
               method: :post, 
               remote: true, 
               class: 'btn btn-warning btn-sm' %></p>
+          <p><%= link_to 'dump project definition to filestore', request_archive_definition_redcap_project_admin_path(id: object_instance.id),
+            method: :post,
+            remote: true,
+            class: 'btn btn-warning btn-sm' %></p>
       <% end %>
     </div>
     <div class="admin-info-col">

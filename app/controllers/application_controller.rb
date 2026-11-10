@@ -34,7 +34,14 @@ class ApplicationController < ActionController::Base
   end
 
   def authenticate_user_or_admin!
-    redirect_to new_user_session_path if !current_user && !current_admin
+    # Evaluate both helpers (not `!current_user && !current_admin`, which short-circuits and
+    # skips current_admin whenever current_user is present) so Devise's Timeoutable hook always
+    # refreshes last_request_at for the admin scope too. Admins are typically also signed in as
+    # a matching user, so without this the admin session's inactivity timer was never refreshed
+    # by requests going through this shared gate, causing it to time out during active use - fixes #1345
+    signed_in_user = current_user
+    signed_in_admin = current_admin
+    redirect_to new_user_session_path unless signed_in_user || signed_in_admin
     true
   end
 

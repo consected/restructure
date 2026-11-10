@@ -1,3 +1,12 @@
 # filestore container options
+# Canonical schema
+# filestore: <Hash(container: Hash)>
+# All keys are optional.
+#
   filestore:
     container: {}
+
+# Notes:
+# - Only attaches a filestore container reference to this definition. The full filestore
+#   pipeline (nfs_store config and save_trigger to populate it) is documented separately -
+#   see the Filestore Options section linked above.

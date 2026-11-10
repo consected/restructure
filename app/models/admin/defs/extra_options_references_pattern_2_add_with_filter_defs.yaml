@@ -1,16 +1,16 @@
 # Pattern 2: add_with and filter_by
-  references:
-    activity_log__example_step:
-      label: Add Example Step
-      from: this
-      add: one_to_this
-      add_with:
-        extra_log_type: review
-        item_name:
-          embedded_item:
-            field_name: value
-      filter_by:
-        field_name: literal value or {{substitution}}
-        field_name2:
-          this:
-            field_name: return_value
+references:
+  activity_log__example_step:
+    label: Add Example Step
+    from: this
+    add: one_to_this
+    add_with:
+      extra_log_type: review
+      item_name:
+        embedded_item:
+          field_name: value
+    filter_by:
+      field_name: literal value or {{substitution}}
+      field_name2:
+        this:
+          field_name: return_value

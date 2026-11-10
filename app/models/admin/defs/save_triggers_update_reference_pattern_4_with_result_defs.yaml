@@ -1,0 +1,13 @@
+# Pattern 4: Map attributes from a related item using with_result
+update_reference:
+  player_contact:
+    first:
+      player_contacts:
+        update: return_result
+    with_result:
+      from:
+        embedded_item:
+          return: return_result
+      attributes:
+        receipt_date: event_date
+        receipt_time: event_time

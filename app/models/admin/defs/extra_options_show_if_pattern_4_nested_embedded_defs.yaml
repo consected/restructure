@@ -1,11 +1,11 @@
 # Pattern 4: Nested embedded conditions
-  show_if:
-    field_name:
-      any:
-        this_form_field: current value
-        embedded_item:
-          all:
-            embedded_status: active
-            embedded_score:
-              condition: '>='
-              value: 10
+show_if:
+  field_name:
+    any:
+      this_form_field: current value
+      embedded_item:
+        all:
+          embedded_status: active
+          embedded_score:
+            condition: '>='
+            value: 10

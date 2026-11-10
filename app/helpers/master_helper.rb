@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module MasterHelper
   def master_viewables
     return @master_viewables if @master_viewables
@@ -10,6 +12,12 @@ module MasterHelper
   # get only the viewables marked true
   def true_master_viewables
     @true_master_viewables ||= master_viewables.select { |_k, v| v }.map(&:first)
+  end
+
+  def master_result_id_list
+    app_config_items(:show_ids_in_master_result, ['master_id']).select do |id|
+      %w[none master_id].include?(id.to_s) || Master.alternative_id?(id, access_by: current_user)
+    end
   end
 
   def hide_player_tabs?

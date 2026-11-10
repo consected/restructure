@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# Regression coverage for issue #1501: NFS archive mounting supports .tar.xz files.
+
+require 'open3'
 require 'rails_helper'
 
 RSpec.describe NfsStore::Archive::Mounter, type: :model do
@@ -182,6 +185,75 @@ RSpec.describe NfsStore::Archive::Mounter, type: :model do
 
       expect(mounter.mount).to be_truthy
       expect(mounter.archive_file_count).to eq 10
+    end
+  end
+
+  describe '.tar.xz file handling' do
+    before :each do
+      seed_database && ActivityLog.define_models
+
+      @other_users = []
+      @other_users << create_user.first
+      @other_users << create_user.first
+      @other_users << create_user.first
+
+      setup_nfs_store
+      @activity_log = @container.parent_item
+
+      @tar_xz_directory = Dir.mktmpdir
+      archive_path = File.join(@tar_xz_directory, 'dicoms.tar.xz')
+      fixture_directory = File.dirname(dicom_file_path('000000.dcm'))
+      expect(Kernel.system('tar', '-cJf', archive_path, '-C', fixture_directory, '000000.dcm')).to be_truthy
+      @tar_xz_file = upload_file('dicoms.tar.xz', File.binread(archive_path))
+    end
+
+    after :each do
+      FileUtils.rm_rf(@tar_xz_directory)
+    end
+
+    it 'uploads a file that is .tar.xz format and extracts it' do
+      sf = @tar_xz_file.stored_file
+      mounter = NfsStore::Archive::Mounter.new
+      mounter.stored_file = sf
+
+      expect(mounter.temp_mounted_path).to end_with '/.tmp-dicoms.tar.xz.__mounted-archive__'
+      expect(NfsStore::Archive::Mounter.has_archive_extension?(sf)).to be true
+      mp = mounter.mounted_path
+      FileUtils.mv(mp, "#{mp}-#{SecureRandom.hex(25)}") if Pathname.new(mp).exist?
+      expect(mounter.mount).to be_truthy
+      expect(mounter.archive_file_count).to eq 1
+
+      archived_file = @container.archived_files.find_by(file_name: '000000.dcm')
+      expect(archived_file).not_to be_nil
+      expect(File.binread(archived_file.retrieval_path)).to eq(File.binread(dicom_file_path('000000.dcm')))
+    end
+
+    it 'reports an xz extraction failure for a corrupt archive' do
+      corrupt_archive_path = File.join(@tar_xz_directory, 'corrupt.tar.xz')
+      File.binwrite(corrupt_archive_path, 'not an xz archive')
+      tmpzipdir = Dir.mktmpdir
+
+      _stdout, stderr, status = Open3.capture3('app-scripts/extract_archive.sh', corrupt_archive_path, tmpzipdir)
+
+      expect(status).not_to be_success
+      expect(stderr).to include('Failed tar -xvaf')
+    ensure
+      FileUtils.rm_rf(tmpzipdir)
+    end
+
+    it 'rejects extra files left in the extraction directory' do
+      tmpzipdir = Dir.mktmpdir
+      script = 'app-scripts/extract_archive.sh'
+      archive_path = File.join(@tar_xz_directory, 'dicoms.tar.xz')
+
+      expect(Kernel.system(script, archive_path, tmpzipdir)).to be_truthy
+      File.write(File.join(tmpzipdir, 'unexpected.txt'), 'unexpected')
+
+      _stdout, _stderr, status = Open3.capture3(script, archive_path, tmpzipdir)
+
+      expect(status.exitstatus).to eq 2
+    ensure
+      FileUtils.rm_rf(tmpzipdir)
     end
   end
 end

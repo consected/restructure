@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require 'securerandom'
 
 # Regression tests for issue #1304.
 #
@@ -22,6 +23,10 @@ require 'rails_helper'
 # SQL with `PG::SyntaxError: zero-length delimited identifier` whenever
 # `master` was loaded (e.g. via `UserHandler#current_user=`, as triggered by
 # `handle_record_batch_trigger` / `trigger_batch_now`).
+#
+# Also covers `master_primary_key_name`, which names the column on the *masters*
+# table that `foreign_key_name` values are matched against for a direct master
+# association - not the dynamic model's own `primary_key_name` (see issue #1399).
 RSpec.describe 'Dynamic model view_sql with blank primary_key_name', type: :model do
   include ModelSupport
   include MasterDataSupport
@@ -33,13 +38,16 @@ RSpec.describe 'Dynamic model view_sql with blank primary_key_name', type: :mode
   before :all do
     change_setting('AllowDynamicMigrations', true)
     create_admin
+    @table_name = 'test_blank_pk_views_vspks'
+    ActiveRecord::Base.connection.execute("DROP VIEW IF EXISTS #{@table_name} CASCADE")
+
     @create_error = nil
 
     begin
       @dm = DynamicModel.create!(
         current_admin: @admin,
         name: 'test blank pk view',
-        table_name: 'test_blank_pk_views',
+        table_name: @table_name,
         category: :test,
         schema_name: 'dynamic_test',
         foreign_key_name: 'master_id',
@@ -79,6 +87,46 @@ RSpec.describe 'Dynamic model view_sql with blank primary_key_name', type: :mode
 
   it 'creates a view_sql dynamic model without raising, even though primary_key_name is blank' do
     expect(@create_error).to be_nil
+    expect(@dm.primary_key_name).to be_blank
+    expect(@dm.implementation_class.master_primary_key_name).to eq(:id)
+  end
+
+  it 'uses the masters id rather than the dynamic model primary key' do
+    dm = DynamicModel.new(
+      table_name: 'test_master_records',
+      foreign_key_name: 'master_id',
+      primary_key_name: 'record_key'
+    )
+
+    expect(dm.master_primary_key_name).to eq(:id)
+  end
+
+  it 'does not provide a master primary key without a dynamic model foreign key' do
+    dm = DynamicModel.new(primary_key_name: 'record_key')
+
+    expect(dm.master_primary_key_name).to be_nil
+  end
+
+  it 'matches a crosswalk foreign key against the same column on the masters table' do
+    dm = DynamicModel.new(
+      table_name: 'test_msid_records',
+      foreign_key_name: 'msid',
+      primary_key_name: 'id'
+    )
+
+    expect(dm.master_crosswalk_association?).to be true
+    expect(dm.master_primary_key_name).to eq(:msid)
+  end
+
+  it 'leaves an external identifier foreign key to the through association, despite the crosswalk name' do
+    dm = DynamicModel.new(
+      table_name: 'test_external_id_records',
+      foreign_key_name: 'msid',
+      options: "_configurations:\n  foreign_key_through_external_id: external_ids\n"
+    )
+
+    expect(dm.master_crosswalk_association?).to be false
+    expect(dm.virtual_master_id?).to be true
   end
 
   it 'loads the master association and runs trigger_batch_now without raising PG::SyntaxError' do

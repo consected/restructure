@@ -147,5 +147,30 @@ RSpec.describe SaveTriggers::UpdateThis, type: :model do
       expect(pc2).not_to be nil
       expect(al_pc.embedded_item).to eq pc2
     end
+
+    it 'writes the embedded_item exactly once via an on_update-triggered update_this (issue #1384)' do
+      # Locks in the behavior of the update_this dedup refactor: embedded_item: is removed
+      # from vals before merging into the real #update! call, so it's applied only once, via
+      # #update_embedded_item's #update! - not also via the lenient (non-bang) #update called
+      # as a side effect of the #embedded_item= setter receiving a Hash through assign_attributes.
+      al_pc = ActivityLog::PlayerContactElt.new(select_call_direction: 'from staff',
+                                                extra_log_type: 'mr_ref_pc',
+                                                select_who: 'abc',
+                                                master: @master)
+      al_pc.save!
+      ei = al_pc.create_embedded_item({ rank: 10, data: random_phone_number, rec_type: :phone })
+      expect(ei).to be_a PlayerContact
+
+      al_pc.clear_embedded_item_memo
+      ei = al_pc.embedded_item
+
+      expect(ei).not_to receive(:update)
+      expect(ei).to receive(:update!).once.and_call_original
+
+      al_pc.update!(select_who: 'def')
+
+      pc2 = PlayerContact.find_by(rec_type: :phone, rank: 5, data: @working_data)
+      expect(pc2).to eq ei
+    end
   end
 end

@@ -53,6 +53,10 @@ A separate developer's reference, including API samples, is available in the [De
 
 - [Message Templates](../message_templates/0_introduction.md)
 
+### Integrations
+
+- [REDCap: Project Transfer](../project_admins/0_introduction.md)
+
 ### General Concepts
 
 - [Substitutions](../general/substitutions.md) provide insertion of data into calculated conditions, captions, message templates and dialogs

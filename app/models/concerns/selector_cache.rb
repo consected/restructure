@@ -5,8 +5,7 @@ module SelectorCache
 
   included do
     after_initialize :init_vars_selector_cache
-    before_save :invalidate_cache
-    before_create :invalidate_cache
+    before_save :invalidate_selector_cache
 
     scope :enabled, -> { all.where('disabled is null OR disabled = FALSE') }
   end
@@ -26,6 +25,22 @@ module SelectorCache
 
     def gen_cache_key
       to_s
+    end
+
+    def selector_cache_version_token
+      Rails.cache.fetch(selector_cache_version_key) { SecureRandom.hex }
+    end
+
+    def rotate_selector_cache_version!
+      Rails.cache.write(selector_cache_version_key, SecureRandom.hex)
+    end
+
+    def selector_cache_version_key
+      "#{gen_cache_key}_selector_cache_version"
+    end
+
+    def versioned_selector_cache_key(key)
+      "#{key}-#{selector_cache_version_token}"
     end
 
     def array_cache_key
@@ -58,7 +73,7 @@ module SelectorCache
     end
 
     def selector_array(conditions = nil, attribute = :name)
-      ckey = "#{array_cache_key}#{conditions}:#{attribute}"
+      ckey = versioned_selector_cache_key("#{array_cache_key}#{conditions}:#{attribute}")
       Rails.cache.fetch(ckey) do
         res = enabled
         res = res.where(conditions) if conditions.present?
@@ -67,7 +82,7 @@ module SelectorCache
     end
 
     def selector_array_pair(conditions = nil)
-      ckey = "#{array_pair_cache_key}#{conditions}"
+      ckey = versioned_selector_cache_key("#{array_pair_cache_key}#{conditions}")
 
       Rails.cache.fetch(ckey) do
         enabled.where(conditions).pluck(:name, :id)
@@ -75,7 +90,7 @@ module SelectorCache
     end
 
     def selector_name_value_pair(conditions = nil)
-      ckey = "#{nv_pair_cache_key}#{conditions}"
+      ckey = versioned_selector_cache_key("#{nv_pair_cache_key}#{conditions}")
 
       Rails.cache.fetch(ckey) do
         enabled.where(conditions).collect { |c| [c.name, downcase_if_string(c.value)] }
@@ -83,7 +98,7 @@ module SelectorCache
     end
 
     def selector_name_value_pair_no_downcase(conditions = nil)
-      ckey = "#{nv_pair_cache_key}-nd-#{conditions}"
+      ckey = versioned_selector_cache_key("#{nv_pair_cache_key}-nd-#{conditions}")
 
       Rails.cache.fetch(ckey) do
         enabled.where(conditions).pluck(:name, :value)
@@ -91,7 +106,7 @@ module SelectorCache
     end
 
     def selector_attributes(attrs_or_methods, conditions = nil)
-      ckey = "#{attributes_cache_key}#{attrs_or_methods}#{conditions}"
+      ckey = versioned_selector_cache_key("#{attributes_cache_key}#{attrs_or_methods}#{conditions}")
 
       # Ensure we get an array of arrays, since pluck works differently when requesting a single attribute
       attrs_or_methods << :id if attrs_or_methods.length == 1
@@ -112,7 +127,7 @@ module SelectorCache
     # @param [Hash | nil] conditions
     # @return [Array{Hash}]
     def selector_collection(conditions = nil)
-      ckey = "#{collection_cache_key}#{conditions}"
+      ckey = versioned_selector_cache_key("#{collection_cache_key}#{conditions}")
 
       Rails.cache.fetch(ckey) do
         enabled.where(conditions).map { |i| i.attributes.with_indifferent_access }
@@ -120,7 +135,7 @@ module SelectorCache
     end
 
     def all_name_value_enable_flagged(conditions = nil)
-      ckey = "#{nv_all_cache_key}#{conditions}"
+      ckey = versioned_selector_cache_key("#{nv_all_cache_key}#{conditions}")
 
       Rails.cache.fetch(ckey) do
         if conditions && conditions[:disabled] == false
@@ -152,7 +167,7 @@ module SelectorCache
     end
 
     def name_user_id_value(conditions = nil)
-      ckey = "#{nv_user_id_cache_key}-nd-#{conditions}"
+      ckey = versioned_selector_cache_key("#{nv_user_id_cache_key}-nd-#{conditions}")
 
       Rails.cache.fetch(ckey) do
         enabled.where(conditions).pluck(:name, :user_id, :value)
@@ -178,10 +193,13 @@ module SelectorCache
     end
   end
 
-  def invalidate_cache
+  def invalidate_selector_cache
     logger.info "Selector added or updated (#{self.class.name}). Invalidating cache."
-    # Unfortunately we have no way to clear pattern matched keys with memcached so we just clear the whole cache
-    Rails.cache.clear
+    self.class.rotate_selector_cache_version!
+  end
+
+  def clear_rails_cache_on_save?
+    false
   end
 
   protected

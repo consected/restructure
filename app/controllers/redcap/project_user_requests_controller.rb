@@ -83,7 +83,71 @@ class Redcap::ProjectUserRequestsController < UserBaseController
     end
   end
 
+  #
+  # REDCap Data Entry Trigger endpoint. Configured directly in a REDCap project's
+  # "Data Entry Trigger" setting (Project Setup > Additional customizations), this is
+  # called by REDCap whenever a record or survey response is created or modified, to
+  # request this application pull the latest records for the matching project.
+  #
+  # Requires the standard user_email/user_token API credentials (see UserBaseController)
+  # for a user granted access to both the ref-data app type and the redcap_pull_request
+  # resource, plus a project-specific internal_project_token to prevent misuse if the
+  # URL leaks. The app type used to check access is always ref-data, regardless of the
+  # calling user's own current app type, and this is not persisted back to the user record.
+  #
+  # Also handles GET requests, used by REDCap's "Test" button: these are validated in
+  # the same way but never trigger a pull. REDCap's "Test" button calls the configured
+  # URL verbatim (project_id/redcap_url are only ever sent in REDCap's own POST payload),
+  # so the matching project is looked up by internal_project_token alone whenever
+  # project_id/redcap_url are not supplied.
+  def data_entry_trigger
+    ref_data_app_type = Admin::AppType.active.find_by(name: Settings::FilestoreAdminAppType)
+    return render_data_entry_trigger_result(404, 'Not found') unless ref_data_app_type&.active_on_server?
+
+    current_user.app_type_id = ref_data_app_type.id
+
+    unless current_user.can?(:app_type) && current_user.can?(:redcap_pull_request)
+      return render_data_entry_trigger_result(403, 'Not authorized')
+    end
+
+    project_admin = find_data_entry_trigger_project_admin
+    return render_data_entry_trigger_result(400, 'No matching project found') unless project_admin
+
+    unless project_admin.matches_internal_project_token?(params[:internal_project_token])
+      return render_data_entry_trigger_result(401, 'Invalid internal_project_token')
+    end
+
+    return render_data_entry_trigger_result(200, 'OK') if request.get?
+
+    if project_admin.dynamic_model_table.blank? || !project_admin.dynamic_model_ready?
+      return render_data_entry_trigger_result(400, 'Project is not ready to accept records')
+    end
+
+    project_admin.current_user = current_user
+    project_admin.dynamic_storage.request_records(request_source: :api)
+
+    render_data_entry_trigger_result(200, "Records requested at #{DateTime.now}")
+  end
+
   private
+
+  #
+  # Look up the project for a data_entry_trigger request. REDCap's real POST payload
+  # always includes project_id/redcap_url, so prefer that match when present; otherwise
+  # (e.g. a GET request from REDCap's "Test" button, which calls the configured URL
+  # verbatim with no extra params) fall back to matching by internal_project_token alone.
+  # @return [Redcap::ProjectAdmin, nil]
+  def find_data_entry_trigger_project_admin
+    if params[:project_id].present? && params[:redcap_url].present?
+      Redcap::ProjectAdmin.find_active_by_redcap_project(params[:project_id], params[:redcap_url])
+    else
+      Redcap::ProjectAdmin.find_active_by_internal_project_token(params[:internal_project_token])
+    end
+  end
+
+  def render_data_entry_trigger_result(status, message)
+    render json: { message: message }, status: status
+  end
 
   def set_defaults
     @show_again_on_save = true
@@ -156,37 +220,7 @@ class Redcap::ProjectUserRequestsController < UserBaseController
       # Find a matching project admin by project_id, first with an exact server_url match, then
       # falling back to matching on protocol + host only to tolerate path differences
       # (e.g. caller sends https://redcap.partners.org/redcap/ but project stores .../redcap/api/)
-      by_project_id = Redcap::ProjectAdmin
-                      .active
-                      .where("captured_project_info ->> 'project_id' = ?", project_id.to_s)
-                      .reorder('')
-                      .order(updated_at: :desc)
-
-      @redcap__project_admin = by_project_id.where(server_url: server_url).first
-
-      if @redcap__project_admin.nil? && server_url.present?
-        begin
-          uri = URI.parse(server_url)
-
-          if uri.scheme.present? && uri.host.present?
-            request_scheme = uri.scheme.downcase
-            request_host = uri.host.downcase
-
-            @redcap__project_admin = by_project_id.find do |project_admin|
-              stored_uri = URI.parse(project_admin.server_url.to_s)
-              stored_uri.scheme.present? &&
-                stored_uri.host.present? &&
-                stored_uri.scheme.downcase == request_scheme &&
-                stored_uri.host.downcase == request_host
-            rescue URI::InvalidURIError
-              Rails.logger.warn "Invalid stored server_url for project_admin #{project_admin.id}: #{project_admin.server_url}"
-              false
-            end
-          end
-        rescue URI::InvalidURIError
-          Rails.logger.warn "Invalid server_url param in set_instance_from_id: #{server_url}"
-        end
-      end
+      @redcap__project_admin = Redcap::ProjectAdmin.find_active_by_redcap_project(project_id, server_url)
     elsif pid == 'project_name'
       # Try the project by name instead
       @redcap__project_admin = Redcap::ProjectAdmin.active.find_by_name(project_name)

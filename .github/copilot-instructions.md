@@ -13,18 +13,28 @@
 8. **Create new files and edit directly in the editor**; avoid using command line file operations to generate source code
 9. **Never update CHANGELOG.md directly** - the release process will handle this based on commit messages and pull request titles
 10. **You have permission to use interactive debugging tools** (e.g., `interactive_debug_session`, `debugger`) to pause execution and inspect state, either in Rspec tests or if we are collaborating on a development server.
+11. **Workspaces are isolated environments for each feature branch** - the database, file system, test environment and other resources are separate, ensuring changes in one branch do not affect others. This is controlled by the environment variable `TEST_ENV_SET`, which is normally set when opening a new terminal. There is no need to check the database for other workspace connections.
 
 
 ### Critical Rules for Running Terminal Commands
+
+**Before running any commands in the terminal**
+- Source the workspace with the trusted script:`source app-scripts/source-workspace-env.sh`
+- Always instruct a subagent to do this as well, unless you've told it to read the copilot-instructions file.
+
 1. **Never set environment variables inline** - use app-scripts instead or `export` them in the terminal before running commands
 2. **Always wait for commands to complete before proceeding** - for long-running commands (such as rspec tests), don't poll - call the `get_terminal_output` once so you can be notified automatically when the command exits
 3. **Never redirect scripts stdout or stderr to /dev/null or /tmp**
 4. If creating long text files (e.g., PR body, issue body), **write them directly to a temporary or session file** rather than using command line tools that may escape characters or truncate output
 
+
+`app-scripts/headless_rspec.sh` and `app-scripts/not_headless_rspec.sh` automatically run `app-scripts/check_rspec_processes.sh` and refuse to start (exit 1) if another RSpec process is using this workspace; do not call the check separately for them. Before any direct `bundle exec rspec` call, run `app-scripts/check_rspec_processes.sh` and do not start the new run if it exits with status 1; inspect the reported workspace, PID, and test-environment values first.
+
 ### Git and GitHub Usage
 
-- Use `git` and `gh` CLI tools for version control and repository management.
+- Use `git` and `gh` CLI tools for version control and repository management unless MCP tools are enabled.
 - Before starting work, add a tag `start-<feature-name>-<issue-number>` then create a features/bug branch `<feature-name>-<issue-number>`.
+- Add a label `WIP` to the GitHub issue, to indicate to others that this is being worked on.
 - Commit messages should be short (1 line) and clear, typically starting with one of the past tense verbs (Added, Fixed, Changed, Removed, Refactored, Updated) and ending with a suffix like ` - fixes #123` or ` - resolves #123` to reference related issues.
 
 ### Creating a Pull Request
@@ -41,6 +51,8 @@ NOTE: Only a human user will merge branches after code review; AI agents should 
 - When fixing implementation bugs, **always write new Rspec or Jasmine tests** to demonstrate the bug, before fixing it.
 - Check for reusable support methods in `spec/support/` before writing new test code.
 - After writing tests, always add comments to the top of the spec files explaining the purpose of the tests.
+
+NOTE: The test database can be cleaned or mutated if required, without additional authorization.
 
 ### Ruby on Rails Conventions
 
@@ -69,7 +81,7 @@ For general Rspec standards refer to: [Rspec project coding standards](instructi
 For Rspec System Specs Refer to: [Rspec System Specs project coding standards](instructions/rspec-system-spec.instructions.md)
 
 ### Command Line Usage
-- Create a directory `./tmp/agent-tmp` in the workspace root
+- Create a directory `./tmp/agent-tmp` in the workspace root or the sandbox environment if applicable
 - Use `./tmp/agent-tmp` for all temporary files and logs
 - DO NOT set environment variables or prefix commands with `VAR=VALUE`; use the appropriate app-scripts instead or `export VAR=value` in the terminal before running commands
 - DO NOT run commands in the background using `&` or `nohup` unless absolutely necessary, and if so, ensure output is redirected to a file in `./tmp/agent-tmp` or '/tmp' for later analysis

@@ -1,0 +1,14 @@
+# Pattern 2: Unconditional results
+# @runnable: true
+# @instance: activity_log
+# @expect: true
+
+# always: true short-circuits evaluation and returns true.
+# Any other conditions in the same configuration are ignored.
+always: true
+
+# never: true short-circuits evaluation and returns false:
+#
+#   never: true
+#
+# always: takes precedence if both are present.

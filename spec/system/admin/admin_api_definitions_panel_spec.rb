@@ -25,7 +25,7 @@ describe 'admin API definitions panel', js: true, driver: $browser_driver do
     create_user
     @master ||= Master.first
     setup_fields_dm
-    setup_test_no_master_dm_rec_dynamic_model
+    @no_master_dm = setup_test_no_master_dm_rec_dynamic_model
     ENV['FPHS_ADMIN_SETUP'] = 'yes'
     make_an_admin
   end
@@ -138,7 +138,7 @@ describe 'admin API definitions panel', js: true, driver: $browser_driver do
     end
 
     it 'omits /masters/ prefix for non-master-nested definition' do
-      dm = DynamicModel.active.find { |d| d.table_or_view_ready? && d.foreign_key_name.blank? }
+      dm = @no_master_dm
       skip 'No non-master-nested dynamic model found' unless dm
 
       admin_sign_in_with_2fa

@@ -5,21 +5,22 @@ module Redcap
   # Job to capture a project archive XML file in the background
   class CaptureProjectArchiveJob < RedcapJob
     #
-    # Download the full XML project archive, and store it to the file_store container.
+    # Download the XML project archive, optionally without project data, and store it to the file_store container.
     # The stored file record is returned if successful.
     # @param [Redcap::ProjectAdmin] project_admin
+    # @param [Boolean] definition_only - whether to omit project data
     # @return [NfsStore::Manage::StoredFile]
-    def perform(project_admin)
+    def perform(project_admin, definition_only: false)
       setup_with project_admin
 
       container = project_admin.file_store
       raise FphsException, 'Project archive not downloaded - no file store set up' unless container
 
-      temp_file = project_admin.api_client.project_archive
-      path = "#{project_admin.dynamic_model_table}/project"
+      temp_file = project_admin.api_client.project_archive(definition_only:)
+      path = "#{project_admin.dynamic_model_table}/#{definition_only ? 'project-definition' : 'project'}"
 
       dt = DateTime.now.strftime('%Y-%m-%d-%H-%M-%S')
-      filename = "archive-#{dt}.xml"
+      filename = "#{definition_only ? 'definition' : 'archive'}-#{dt}.xml"
 
       NfsStore::Import.import_file(container.id,
                                    filename,

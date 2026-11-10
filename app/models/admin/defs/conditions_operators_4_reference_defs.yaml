@@ -1,0 +1,42 @@
+# Pattern 4: Full operator reference
+# @runnable: false
+#
+# Operators supported by conditions on database tables:
+#
+#   IS NULL, IS NOT NULL     unary - do not supply a `value`
+#   =, <, >, <>, <=, >=      scalar comparison. <> also matches NULL values
+#   LIKE, ILIKE              SQL pattern match, case sensitive / insensitive
+#   ~, ~*                    POSIX regular expression, case sensitive / insensitive
+#   in?                      alias for '= ANY'
+#   include?                 alias for '= ANY REV'
+#   = ANY                    this scalar field matches any entry of the array value
+#   = ANY REV                the scalar value matches any entry of this array field
+#   <> ANY                   this scalar field matches no entry of the array value
+#   <> ANY REV               the scalar value matches no entry of this array field
+#   = ARRAY_LENGTH           this integer field equals the length of the array value
+#   <> ARRAY_LENGTH          this integer field differs from the length of the array value
+#   = LENGTH                 this integer value equals the length of the string field
+#   <> LENGTH                this integer value differs from the length of the string field
+#   &&                       this array field overlaps the array value
+#   @>                       this array field contains all entries of the array value
+#   <@                       every entry of this array field is in the array value
+#
+# Conditions evaluated in memory against a special record source (this,
+# referring_record, user, ...) support a smaller set:
+#
+#   IS NULL, IS NOT NULL
+#   ==, =, <, >, <>, !=, <=, >=, ~, ~*, in?, include?
+#   = ANY, = ANY REV, <> ANY, <> ANY REV, = ARRAY_LENGTH, <> ARRAY_LENGTH,
+#   = LENGTH, <> LENGTH, &&
+#
+# LIKE and ILIKE are not available in memory, and @> and <@ raise an error there.
+#
+# `not: true` negates the comparison. On database table conditions it is only
+# honoured for the array operators; in-memory conditions honour it for all
+# operators.
+
+model_table_name:
+  field_name:
+    condition: '>='
+    value: 10
+    not: false

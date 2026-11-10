@@ -1,0 +1,12 @@
+# Pattern 3: big_select with a '>>>' separator for a two-part heading/description display
+field_options:
+  item_id:
+    edit_as:
+      field_type: select_record_from_table_items
+      value_attr: id
+      label_attr:
+        - name
+        - ' >>> '
+        - description
+      big_select:
+        hide_key: true

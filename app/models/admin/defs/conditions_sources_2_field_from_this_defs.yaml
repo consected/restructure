@@ -1,0 +1,13 @@
+# Pattern 2: Comparing a table field against a value from the current record
+# @runnable: true
+# @instance: activity_log
+# @expect: true
+
+# Instead of a literal, a field's expected value may be pulled from another
+# record. `this` takes the value from the record being evaluated.
+all:
+  activity_log__player_contact_phones:
+    master_id:
+      this: master_id
+    select_who:
+      this: select_who

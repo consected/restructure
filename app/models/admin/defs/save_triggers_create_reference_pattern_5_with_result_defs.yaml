@@ -1,0 +1,12 @@
+# Pattern 5: Map attributes from a related item into the newly created record (with_result)
+create_reference:
+  player_contact:
+    in: this
+    with_result:
+      from:
+        embedded_item:
+          return: return_result
+      attributes:
+        receipt_date: event_date
+        receipt_time: event_time
+        received_by: received_by

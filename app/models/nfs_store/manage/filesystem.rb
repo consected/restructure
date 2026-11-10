@@ -38,6 +38,63 @@ module NfsStore
         FileUtils.mkdir_p @temp_directory
       end
 
+      # Shared defence-in-depth guard for both reads (NfsStore::HandlesContainerFile
+      # #raise_if_symlink!) and writes (e.g. #move_file_to_final_location, #test_dir) -
+      # a symlinked intermediate directory would otherwise be silently followed by
+      # File.exist?/FileUtils.mkdir_p/`mv`, redirecting where a moved/uploaded file's real
+      # bytes land, exactly as a symlinked leaf would redirect what a read serves.
+      #
+      # Walks every path component below the nfs_store root individually with
+      # `File.lstat` (never `File.exist?`/`realpath`, which follow symlinks
+      # transparently), stopping without raising at the first component that does not
+      # exist yet - callers use this both to guard an existing file (nothing further to
+      # check once we run out of path) and to guard a not-yet-created write destination
+      # (a symlink planted anywhere between the root and the eventual leaf is always an
+      # *existing* component, so it is always hit before any non-existent tail).
+      #
+      # Starts from the *literal* nfs_store root, not a resolved/cached realpath - lstat
+      # only refuses to follow the final component of the path it's given, so a root
+      # that is itself a symlink (e.g. an ops-managed mount cutover, or `/var` ->
+      # `/private/var` on macOS dev machines) is still transparently resolved as an
+      # ancestor of every lstat call below it, with no separate caching layer needed
+      # (and no risk of that cache going stale if the root's target is repointed while
+      # the app is running).
+      # @param full_path [String] absolute path to inspect
+      # @return [File::Stat, nil] lstat of the last existing component, or nil if none of
+      #   the path exists yet
+      # @raise [FsException::SymlinkBlocked] if any existing component is a symlink
+      def self.raise_if_symlink_in_path!(full_path)
+        root = nfs_store_directory.chomp('/')
+        unless full_path == root || full_path.start_with?("#{root}/")
+          raise FsException::Action, "Path is not under the nfs_store root: #{full_path}"
+        end
+
+        remainder = full_path.delete_prefix(root).delete_prefix('/')
+        current = root
+        last_stat = nil
+
+        remainder.split('/').each do |part|
+          current = File.join(current, part)
+          last_stat = File.lstat(current)
+          if last_stat.symlink?
+            raise FsException::SymlinkBlocked,
+                  "Path traverses a symbolic link and can not be used: #{full_path}"
+          end
+        end
+
+        last_stat
+      rescue Errno::ENOENT, Errno::EACCES, Errno::ENOTDIR
+        # A permission/traversal error here means we can't even stat the path - the real
+        # operation the caller is about to attempt (touch/mkdir/mv/read) will hit the same
+        # OS-level restriction on its own and fail naturally; returning nil here grants no
+        # extra access, it just avoids pre-empting callers (e.g. test_dir's "try each role
+        # until one works" loops) that already handle Errno::EACCES themselves.
+        nil
+      rescue SystemCallError => e
+        raise FsException::Action,
+              "File location could not be verified and can not be used: #{full_path} (#{e.class})"
+      end
+
       # Path to the 'containers' directory for the specified app type within the
       # mount point for the specified role name
       # @param app_type_id [Integer] ID for the app type
@@ -189,7 +246,8 @@ module NfsStore
         return if cleaned.blank? || cleaned == '.'
 
         # Pathname#cleanpath leaves leading '..' intact (e.g. 'a/../../b' → '../b').
-        raise FsException::Action, "Path traversal not allowed: #{path_str.inspect}" if cleaned.split('/', 2).first == '..'
+        raise FsException::Action, "Path traversal not allowed: #{path_str.inspect}" if cleaned.split('/',
+                                                                                                      2).first == '..'
 
         cleaned
       end
@@ -222,6 +280,14 @@ module NfsStore
         # Lone "." and ".." are directory navigation entries, not filenames.
         raise FsException::Action, "File name is reserved: #{name_str.inspect}" if ['.', '..'].include?(name_str)
 
+        # Reserved for internal flag/indicator files this app writes itself (e.g.
+        # `.__processing__`, `.__mounted-archive__`) - a user-supplied name matching this
+        # convention must never be allowed to shadow or collide with one, independent of
+        # (and in addition to) the symlink guard in Filesystem#raise_if_symlink_in_path!.
+        if ContainerFile.file_is_indicator?(name_str)
+          raise FsException::Action, "File name is reserved for internal use: #{name_str.inspect}"
+        end
+
         name_str
       end
 
@@ -239,6 +305,7 @@ module NfsStore
         case action
         when :write
           fs_test_path = nfs_store_path(role_name, container, extra_path, '.test_file')
+          raise_if_symlink_in_path!(fs_test_path)
           FileUtils.rm_f fs_test_path
           # Avoid a strange NFS timing issue where touch hits a stale file handle
           # Give rm time to complete cleanly
@@ -251,6 +318,7 @@ module NfsStore
           FileUtils.rm fs_test_path
         when :mkdir
           fs_test_path = nfs_store_path(role_name, container, extra_path, strip_final_slash: true)
+          raise_if_symlink_in_path!(fs_test_path)
           if File.exist?(fs_test_path)
             return true if ok_if_exists
 
@@ -319,6 +387,7 @@ module NfsStore
       # @return [True] true represents success, exception on failure
       def self.move_file_to_final_location(role_name, from_path, container, path, file_name)
         fs_path = nfs_store_path(role_name, container, path, file_name)
+        raise_if_symlink_in_path!(fs_path)
 
         if fs_path == from_path && file_name.blank?
           raise FsException::Action, 'Path to move to matches the current path'

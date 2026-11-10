@@ -15,6 +15,14 @@
 #     the admin's current app type
 #   - Filtering by current_app_access: 'false' returns only users without access
 #     to the admin's current app type
+# - id filter for Issue #1386
+#   - filters hash includes :id key
+#   - filters_on includes :id
+#   - Filtering by id returns only that specific user
+# - disabled filter All option: Issue #1387
+#   - First page load defaults disabled filter to 'enabled'
+#   - Selecting "All" with other filters active returns both enabled and disabled users
+# - API-only user creation while 2FA is disabled: Issue #1410
 
 require 'rails_helper'
 
@@ -138,6 +146,27 @@ RSpec.describe Admin::ManageUsersController, type: :controller do
         expect(response).to render_template '_index'
         expect(assigns(:user).email).to eq va[:email]
         expect(assigns(:user).new_password).to be_a String
+      end
+
+      context 'when 2FA is disabled' do
+        before do
+          change_setting('TwoFactorAuthDisabledForUser', true)
+        end
+
+        after do
+          change_setting('TwoFactorAuthDisabledForUser', false)
+        end
+
+        it 'creates an API-only user without creating OTP state' do
+          attributes = valid_attributes.merge(api_access_only: true)
+
+          expect do
+            post :create, params: { user: attributes }
+          end.to change(object_class, :count).by(1)
+
+          expect(assigns(:user).otp_secret).to be_nil
+          expect(assigns(:user).otp_required_for_login).to be_falsey
+        end
       end
     end
 
@@ -388,6 +417,83 @@ RSpec.describe Admin::ManageUsersController, type: :controller do
         expect(assigns(:users)).not_to include(@user_with_access)
         expect(assigns(:users)).to include(@user_without_access)
       end
+    end
+  end
+
+  describe 'id filter - Issue #1386' do
+    before_each_login_admin
+
+    before :each do
+      @user_for_id_filter = User.create!(
+        email: "id_filter_#{SecureRandom.hex(4)}@test.com",
+        current_admin: @admin
+      )
+    end
+
+    describe '#filters' do
+      it 'includes :id key' do
+        get :index
+        f = controller.send(:filters)
+        expect(f).to have_key(:id)
+      end
+    end
+
+    describe '#filters_on' do
+      it 'includes :id' do
+        expect(controller.send(:filters_on)).to include(:id)
+      end
+    end
+
+    describe 'GET #index with id filter' do
+      it 'returns only the user matching the given id' do
+        get :index, params: { filter: { id: @user_for_id_filter.id.to_s } }
+        expect(response).to have_http_status(200)
+        expect(assigns(:users)).to include(@user_for_id_filter)
+        expect(assigns(:users).length).to eq(1)
+      end
+    end
+  end
+
+  describe 'disabled filter All option - Issue #1387' do
+    before_each_login_admin
+
+    before :each do
+      @test_app_type = Admin::AppType.active.first
+      raise 'No active app type found for disabled filter tests' unless @test_app_type
+
+      @enabled_user = User.create!(
+        email: "dis_enabled_#{SecureRandom.hex(4)}@test.com",
+        current_admin: @admin
+      )
+      Admin::UserAccessControl.create!(
+        user: @enabled_user,
+        app_type: @test_app_type,
+        access: :read,
+        resource_type: :general,
+        resource_name: :app_type,
+        current_admin: @admin
+      )
+
+      @disabled_user = User.create!(
+        email: "dis_disabled_#{SecureRandom.hex(4)}@test.com",
+        current_admin: @admin
+      )
+      @disabled_user.current_admin = @admin
+      @disabled_user.disabled = true
+      @disabled_user.save!
+    end
+
+    it 'defaults disabled to enabled on first page load' do
+      get :index
+      expect(response).to have_http_status(200)
+      expect(assigns(:users)).to include(@enabled_user)
+      expect(assigns(:users)).not_to include(@disabled_user)
+    end
+
+    it 'shows disabled users when disabled filter is All and filtering by email' do
+      get :index, params: { filter: { email: @disabled_user.email } }
+      expect(response).to have_http_status(200)
+      expect(assigns(:users)).to include(@disabled_user)
     end
   end
 end

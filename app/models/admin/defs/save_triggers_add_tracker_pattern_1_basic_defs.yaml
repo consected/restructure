@@ -1,0 +1,7 @@
+# Pattern 1: Basic tracker using the entry label as the protocol name
+add_tracker:
+  Q1:
+    with:
+      sub_process_name: REDCap
+      protocol_event_name: bounced email
+      notes: 'Note text with {{master_id}} substitution'

@@ -1,5 +1,10 @@
 # Standard options to simplify configurations
-
+# Canonical schema
+# standard_options: <Hash(anchor_name: ConfigFragment)>
+# ConfigFragment: <Hash | Array> - a reusable partial configuration value, referenced
+# elsewhere via YAML anchor/alias syntax (`<<: *anchor_name` or `key: *anchor_name`).
+# All keys are optional; anchor names are conventional, not schema-enforced.
+#
 _definitions___extra_options_standard_option_definitions___:
 
   # Usage:
@@ -72,3 +77,11 @@ _definitions___extra_options_standard_option_definitions___:
     disabled: 
       - null
       - false
+
+# Notes:
+# - The outer `_definitions___..._` key uses a deliberately unusual name to avoid
+#   collision when injected via `@library` includes into a real configuration's own
+#   `_definitions:` block, which is scanned and deleted by prefix.
+# - Anchors are a YAML/authoring convenience only - they carry no runtime validation of
+#   their own; the aliased value is validated wherever it is actually used (e.g. `never:
+#   true` under `creatable_if:`).

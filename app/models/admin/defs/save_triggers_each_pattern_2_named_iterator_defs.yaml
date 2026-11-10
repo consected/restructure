@@ -1,0 +1,18 @@
+# Pattern 2: Name nested iterator contexts so both loop values remain available.
+# Nested loops using the default iterator name would overwrite one another.
+save_trigger:
+  on_update:
+    - each:
+        iterator_name: outer_loop
+        value: [outer_a, outer_b]
+        do:
+          - each:
+              iterator_name: inner_loop
+              value: [inner_a, inner_b]
+              do:
+                - log:
+                    message: >-
+                      {{save_trigger_results.outer_loop_index}}/
+                      {{save_trigger_results.outer_loop_value}} =>
+                      {{save_trigger_results.inner_loop_index}}/
+                      {{save_trigger_results.inner_loop_value}}

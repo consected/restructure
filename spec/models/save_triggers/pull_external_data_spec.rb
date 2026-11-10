@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 # Tests for SaveTriggers::PullExternalData save trigger.
@@ -7,8 +9,14 @@ require 'rails_helper'
 #   body-sending (put, patch, lock, mkcol, propfind, proppatch, unlock),
 #   no-body (head, delete, options, trace, copy, move)
 # - Response code handling, error whitelisting, local_data storage
+# - Non-200 response bodies for unhandled and whitelisted statuses (issue #1418)
+# - Response headers stored under lowercase and underscored keys (issue #1430)
 # - send_data config alias for post_data
 # - Submitted request data (data, url, method) saved to save_trigger_results (issue #950)
+# - Response code, submitted request, and result content available to on_failure hooks on a
+#   rejected (non-2xx, non-whitelisted) response, not just on success (found via dev-server
+#   testing after #1421/#1434 only partially fixed on_failure observability)
+# - Response body, code, and headers are retrievable for successful, failed, and success_if requests
 RSpec.describe SaveTriggers::PullExternalData, type: :model do
   include ModelSupport
   include ActivityLogSupport
@@ -24,6 +32,12 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
   before :example do
     # SetupHelper.get_webmock_responses
     # WebMock.allow_net_connect!
+
+    # The SSRF guard (Utilities::UrlSafety) resolves hostnames via Resolv.getaddresses
+    # directly, bypassing WebMock entirely (WebMock only intercepts Net::HTTP). Without
+    # this default stub, every example below would perform a real DNS lookup for hosts
+    # like rspec-test.example.com before WebMock ever sees the request.
+    allow(Resolv).to receive(:getaddresses).and_return(['93.184.216.34'])
 
     content = <<~END_CONTENT
       <?xml version="1.0" ?>
@@ -219,13 +233,17 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
       .to_return(status: 200, body: '', headers: {})
   end
 
-  before :example do
+  before :all do
     SetupHelper.setup_al_player_contact_phones
-    res = SetupHelper.setup_al_gen_tests 'Test Pull External', 'test_pull_external', 'player_contact'
+    @aldef = SetupHelper.setup_al_gen_tests 'Test Pull External', 'test_pull_external', 'player_contact'
     create_user
     @master = create_master
     @player_contact = @master.player_contacts.create! data: '(617)123-1234 b', rec_type: :phone, rank: 10
-    @al = create_al_for_resource_name(res.resource_name, master: @master)
+    create_al_for_resource_name(@aldef.resource_name, master: @master)
+  end
+
+  before :each do
+    @al = create_al_for_resource_name(@aldef.resource_name, master: @master, skip_setup: true)
     expect(@al.master_id).to eq @master.id
     setup_access @al.resource_name, resource_type: :activity_log_type, access: :create, user: @user
   end
@@ -449,9 +467,52 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
 
     @trigger = SaveTriggers::PullExternalData.new(config, @al)
 
-    expect do
-      @trigger.perform
-    end.to raise_error(FphsException, "get external data: failed request with code '404' from url https://eutils.ncbi.nlm.nih.gov/404page")
+    expect { @trigger.perform }.to raise_error(
+      FphsException,
+      a_string_including("get external data: failed request with code '404' from url https://eutils.ncbi.nlm.nih.gov/404page")
+    )
+  end
+
+  it 'includes the remote response body in an unhandled error message (issue #1418)' do
+    config = {
+      this1: {
+        data_field: 'notes',
+        from: {
+          url: 'https://eutils.ncbi.nlm.nih.gov/404page',
+          format: 'json'
+        }
+      }
+    }
+
+    @trigger = SaveTriggers::PullExternalData.new(config, @al)
+
+    expect { @trigger.perform }.to raise_error(
+      FphsException,
+      a_string_including('"header":{"type":"esummary"')
+    )
+  end
+
+  it 'bounds the remote response body included in an unhandled error (issue #1418)' do
+    oversized_url = 'https://eutils.ncbi.nlm.nih.gov/oversized-error'
+    oversized_body = 'x' * 10_001
+    stub_request(:get, oversized_url).to_return(status: 422, body: oversized_body)
+
+    config = {
+      this1: {
+        from: {
+          url: oversized_url,
+          format: 'text'
+        }
+      }
+    }
+
+    @trigger = SaveTriggers::PullExternalData.new(config, @al)
+
+    expect { @trigger.perform }.to raise_error(FphsException) do |error|
+      body = error.message.split('response body: ', 2).last
+      expect(body).to start_with('x')
+      expect(body.length).to be <= 10_000
+    end
   end
 
   it 'fails to pull from a bad url but the failure can be whitelisted, and the result is saved to a field' do
@@ -474,6 +535,50 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
     end.not_to raise_error
 
     expect(@al.select_result).to eq '404'
+  end
+
+  it 'parses a whitelisted non-200 response for data_field and local_data (issue #1418)' do
+    config = {
+      this1: {
+        data_field: 'result_json',
+        local_data: 'error_response',
+        from: {
+          url: 'https://eutils.ncbi.nlm.nih.gov/404page',
+          format: 'json',
+          allow_response_codes: [404]
+        }
+      }
+    }
+
+    @trigger = SaveTriggers::PullExternalData.new(config, @al)
+    @trigger.perform
+
+    expect(@al.result_json.dig('header', 'type')).to eq 'esummary'
+    expect(@al.save_trigger_results['error_response'].dig('header', 'type')).to eq 'esummary'
+  end
+
+  it 'falls back to the raw body for an unparseable whitelisted response (issue #1418)' do
+    error_url = 'https://eutils.ncbi.nlm.nih.gov/html-error'
+    error_body = '<html><body>Forbidden</body></html>'
+    stub_request(:get, error_url).to_return(status: 403, body: error_body)
+
+    config = {
+      this1: {
+        data_field: 'notes',
+        local_data: 'error_response',
+        from: {
+          url: error_url,
+          format: 'json',
+          allow_response_codes: [403]
+        }
+      }
+    }
+
+    @trigger = SaveTriggers::PullExternalData.new(config, @al)
+    expect { @trigger.perform }.not_to raise_error
+
+    expect(@al.notes).to eq error_body
+    expect(@al.save_trigger_results['error_response']).to eq error_body
   end
 
   it 'fails if the content is blank' do
@@ -614,6 +719,759 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
       expect(@al.save_trigger_results['put_response']['result']).to eq 'success'
       expect(@al.save_trigger_results['put_response_http_response_code']).to eq 200
     end
+  end
+
+  context 'with response headers saved to save_trigger_results (issue #1430)' do
+    it 'stores response header names and underscored keys for conditions and substitutions' do
+      headers_url = 'https://rspec-test.example.com/api/headers'
+      consumer_url = 'https://rspec-test.example.com/api/header-consumer?request_id=abc-123'
+
+      stub_request(:get, headers_url)
+        .to_return(
+          status: 200,
+          body: '{"result":"headers"}',
+          headers: {
+            'X-Request-ID' => 'abc-123',
+            'X-ReStructure-Error' => 'invalid-authenticity-token'
+          }
+        )
+      stub_request(:get, consumer_url)
+        .to_return(status: 200, body: '{"result":"consumed"}', headers: {})
+
+      config = {
+        this1: {
+          local_data: 'header_response',
+          from: {
+            url: headers_url,
+            format: 'json'
+          }
+        },
+        this2: {
+          data_field: 'notes',
+          data_field_format: 'json',
+          if: {
+            all: {
+              this: {
+                save_trigger_results: {
+                  element: 'header_response_http_response_headers.x_request_id',
+                  value: 'abc-123'
+                }
+              }
+            }
+          },
+          from: {
+            url: 'https://rspec-test.example.com/api/header-consumer?request_id={{save_trigger_results.header_response_http_response_headers.x_request_id}}',
+            format: 'json'
+          }
+        }
+      }
+
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+      @trigger.perform
+
+      headers = @al.save_trigger_results['header_response_http_response_headers']
+      expect(headers['x-request-id']).to eq 'abc-123'
+      expect(headers[:x_request_id]).to eq 'abc-123'
+      expect(headers['x-restructure-error']).to eq 'invalid-authenticity-token'
+      expect(headers[:x_restructure_error]).to eq 'invalid-authenticity-token'
+      expect(@al.notes).to eq '{"result":"consumed"}'
+    end
+
+    it 'stores response headers before raising for a rejected response' do
+      error_url = 'https://rspec-test.example.com/api/rejected'
+
+      stub_request(:get, error_url)
+        .to_return(
+          status: 422,
+          body: '{"error":"invalid authenticity token"}',
+          headers: { 'X-ReStructure-Error' => 'invalid-authenticity-token' }
+        )
+
+      config = {
+        this1: {
+          local_data: 'rejected_response',
+          from: {
+            url: error_url,
+            format: 'json'
+          }
+        }
+      }
+
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+
+      expect { @trigger.perform }.to raise_error(FphsException, /code '422'/)
+
+      headers = @al.save_trigger_results['rejected_response_http_response_headers']
+      expect(headers['x-restructure-error']).to eq 'invalid-authenticity-token'
+      expect(headers[:x_restructure_error]).to eq 'invalid-authenticity-token'
+    end
+
+    it 'makes rejected response headers available to on_failure triggers' do
+      error_url = 'https://rspec-test.example.com/api/rejected-with-hook'
+
+      stub_request(:get, error_url)
+        .to_return(
+          status: 422,
+          body: '{"error":"invalid authenticity token"}',
+          headers: { 'X-ReStructure-Error' => 'invalid-authenticity-token' }
+        )
+
+      config = {
+        this1: {
+          local_data: 'rejected_response',
+          from: {
+            url: error_url,
+            format: 'json'
+          },
+          on_failure: [
+            {
+              set_save_trigger_results: {
+                element: 'failure_header',
+                value: '{{save_trigger_results.rejected_response_http_response_headers.x_restructure_error}}'
+              }
+            }
+          ]
+        }
+      }
+
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+      @trigger.perform
+
+      expect(@al.save_trigger_results['failure_header']).to eq 'invalid-authenticity-token'
+    end
+  end
+
+  # Regression coverage: PR #1434 stored response headers before raising, but left
+  # _http_response_code/_submitted_request/result content gated behind the success-only
+  # store_local_data_results call, so on_failure hooks referencing them saw nothing (issue found
+  # via dev-server deployment testing after #1421/#1434).
+  context 'with response code, submitted_request, and result content available on failure' do
+    it 'stores the response code and submitted request before raising for a rejected response' do
+      error_url = 'https://rspec-test.example.com/api/rejected-metadata'
+
+      stub_request(:post, error_url)
+        .to_return(status: 400, body: '{"error":"bad request"}')
+
+      config = {
+        this1: {
+          local_data: 'rejected_response',
+          method: 'post',
+          to: {
+            url: error_url,
+            format: 'json'
+          },
+          send_data: { key: 'value' }
+        }
+      }
+
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+
+      expect { @trigger.perform }.to raise_error(FphsException, /code '400'/)
+
+      expect(@al.save_trigger_results['rejected_response_http_response_code']).to eq 400
+
+      submitted = @al.save_trigger_results['rejected_response_submitted_request']
+      expect(submitted).to be_present
+      expect(submitted['method']).to eq 'post'
+      expect(submitted['url']).to eq error_url
+      expect(submitted['data']).to eq({ 'key' => 'value' })
+    end
+
+    it 'stores the parsed failure body under local_data for a rejected response' do
+      error_url = 'https://rspec-test.example.com/api/rejected-body'
+
+      stub_request(:get, error_url)
+        .to_return(status: 422, body: '{"error":"invalid authenticity token"}')
+
+      config = {
+        this1: {
+          local_data: 'rejected_response',
+          from: {
+            url: error_url,
+            format: 'json'
+          }
+        }
+      }
+
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+
+      expect { @trigger.perform }.to raise_error(FphsException, /code '422'/)
+
+      expect(@al.save_trigger_results['rejected_response']).to eq({ 'error' => 'invalid authenticity token' })
+    end
+
+    it 'makes the response code and submitted request available to on_failure triggers' do
+      error_url = 'https://rspec-test.example.com/api/rejected-metadata-hook'
+
+      stub_request(:get, error_url).to_return(status: 400, body: '{"error":"bad request"}')
+
+      config = {
+        this1: {
+          local_data: 'rejected_response',
+          from: {
+            url: error_url,
+            format: 'json'
+          },
+          on_failure: [
+            {
+              set_save_trigger_results: {
+                element: 'failure_code',
+                value: '{{save_trigger_results.rejected_response_http_response_code}}'
+              }
+            },
+            {
+              set_save_trigger_results: {
+                element: 'failure_url',
+                value: '{{save_trigger_results.rejected_response_submitted_request.url}}'
+              }
+            }
+          ]
+        }
+      }
+
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+      @trigger.perform
+
+      expect(@al.save_trigger_results['failure_code']).to eq '400'
+      expect(@al.save_trigger_results['failure_url']).to eq error_url
+    end
+  end
+
+  context 'with response body, code, and headers available for each response outcome' do
+    it 'stores the response body, code, and headers for a successful response' do
+      response_url = 'https://rspec-test.example.com/api/successful-metadata'
+
+      stub_request(:get, response_url)
+        .to_return(
+          status: 200,
+          body: '{"result":"success"}',
+          headers: { 'X-Response-ID' => 'success-123' }
+        )
+
+      config = {
+        this1: {
+          local_data: 'successful_response',
+          from: {
+            url: response_url,
+            format: 'json'
+          }
+        }
+      }
+
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+      @trigger.perform
+
+      expect(@al.save_trigger_results['successful_response']).to eq({ 'result' => 'success' })
+      expect(@al.save_trigger_results['successful_response_http_response_code']).to eq 200
+      expect(@al.save_trigger_results['successful_response_http_response_headers']['x-response-id']).to eq 'success-123'
+    end
+
+    it 'makes the response body, code, and headers available to failure hooks' do
+      response_url = 'https://rspec-test.example.com/api/failed-metadata'
+
+      stub_request(:get, response_url)
+        .to_return(
+          status: 422,
+          body: '{"error":"rejected"}',
+          headers: { 'X-Response-ID' => 'failure-422' }
+        )
+
+      config = {
+        this1: {
+          local_data: 'failed_response',
+          from: {
+            url: response_url,
+            format: 'json'
+          },
+          on_failure: [
+            {
+              set_save_trigger_results: {
+                element: 'failure_body',
+                value: '{{save_trigger_results.failed_response.error}}'
+              }
+            },
+            {
+              set_save_trigger_results: {
+                element: 'failure_code',
+                value: '{{save_trigger_results.failed_response_http_response_code}}'
+              }
+            },
+            {
+              set_save_trigger_results: {
+                element: 'failure_header',
+                value: '{{save_trigger_results.failed_response_http_response_headers.x_response_id}}'
+              }
+            }
+          ]
+        }
+      }
+
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+      expect { @trigger.perform }.not_to raise_error
+
+      expect(@al.save_trigger_results['failure_body']).to eq 'rejected'
+      expect(@al.save_trigger_results['failure_code']).to eq '422'
+      expect(@al.save_trigger_results['failure_header']).to eq 'failure-422'
+    end
+
+    it 'stores the response body, code, and headers before evaluating success_if' do
+      response_url = 'https://rspec-test.example.com/api/success-if-metadata'
+
+      stub_request(:get, response_url)
+        .to_return(
+          status: 200,
+          body: '{"result":"accepted"}',
+          headers: { 'X-Response-ID' => 'success-if-200' }
+        )
+
+      config = {
+        this1: {
+          local_data: 'success_if_response',
+          from: {
+            url: response_url,
+            format: 'json'
+          },
+          success_if: {
+            all: [
+              {
+                this: {
+                  save_trigger_results: {
+                    element: 'success_if_response.result',
+                    value: 'accepted'
+                  }
+                }
+              },
+              {
+                this: {
+                  save_trigger_results: {
+                    element: 'success_if_response_http_response_code',
+                    value: 200
+                  }
+                }
+              },
+              {
+                this: {
+                  save_trigger_results: {
+                    element: 'success_if_response_http_response_headers.x_response_id',
+                    value: 'success-if-200'
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+      @trigger.perform
+
+      expect(@al.save_trigger_results['success_if_response']).to eq({ 'result' => 'accepted' })
+      expect(@al.save_trigger_results['success_if_response_http_response_code']).to eq 200
+      expect(@al.save_trigger_results['success_if_response_http_response_headers']['x-response-id']).to eq 'success-if-200'
+      expect(@al.save_trigger_results['success_if_response_success_if_res']).to be true
+    end
+
+    it 'runs failure hooks and skips the update when success_if is false' do
+      response_url = 'https://rspec-test.example.com/api/failed-success-if'
+
+      stub_request(:get, response_url)
+        .to_return(
+          status: 200,
+          body: '{"result":"rejected"}',
+          headers: { 'X-Response-ID' => 'failed-success-if-200' }
+        )
+
+      config = {
+        this1: {
+          local_data: 'failed_success_if_response',
+          data_field: 'notes',
+          from: {
+            url: response_url,
+            format: 'json'
+          },
+          success_if: {
+            all: {
+              this: {
+                save_trigger_results: {
+                  element: 'failed_success_if_response.result',
+                  value: 'accepted'
+                }
+              }
+            }
+          },
+          on_failure: [
+            {
+              set_save_trigger_results: {
+                element: 'failed_success_if_code',
+                value: '{{save_trigger_results.failed_success_if_response_http_response_code}}'
+              }
+            }
+          ]
+        }
+      }
+
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+      expect { @trigger.perform }.not_to raise_error
+
+      expect(@al.save_trigger_results['failed_success_if_response_success_if_res']).to be false
+      expect(@al.save_trigger_results['failed_success_if_code']).to eq '200'
+      expect(@al.notes).to be_nil
+    end
+  end
+
+  it 'stores an unformatted failed response body as raw content' do
+    response_url = 'https://rspec-test.example.com/api/unformatted-failure'
+    response_body = 'gateway rejected the request'
+
+    stub_request(:get, response_url).to_return(status: 422, body: response_body)
+
+    config = {
+      this1: {
+        local_data: 'unformatted_response',
+        from: { url: response_url }
+      }
+    }
+
+    @trigger = SaveTriggers::PullExternalData.new(config, @al)
+
+    expect { @trigger.perform }.to raise_error(FphsException, /code '422'/)
+    expect(@al.save_trigger_results['unformatted_response']).to eq response_body
+  end
+
+  context 'with malformed successful responses' do
+    it 'stores malformed JSON as raw content before running failure hooks' do
+      response_url = 'https://rspec-test.example.com/api/malformed-json'
+      response_body = '{"error":'
+
+      stub_request(:get, response_url)
+        .to_return(status: 200, body: response_body, headers: { 'X-Response-ID' => 'malformed-json-200' })
+
+      @al.notes = 'unchanged'
+      config = {
+        this1: {
+          local_data: 'malformed_json_response',
+          data_field: 'notes',
+          from: {
+            url: response_url,
+            format: 'json'
+          },
+          on_failure: [
+            {
+              set_save_trigger_results: {
+                element: 'failure_hook_ran',
+                value: 'true'
+              }
+            },
+            {
+              set_save_trigger_results: {
+                element: 'failure_body',
+                value: '{{save_trigger_results.malformed_json_response}}'
+              }
+            },
+            {
+              set_save_trigger_results: {
+                element: 'failure_code',
+                value: '{{save_trigger_results.malformed_json_response_http_response_code}}'
+              }
+            },
+            {
+              set_save_trigger_results: {
+                element: 'failure_header',
+                value: '{{save_trigger_results.malformed_json_response_http_response_headers.x_response_id}}'
+              }
+            }
+          ]
+        }
+      }
+
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+      expect { @trigger.perform }.not_to raise_error
+
+      expect(@al.save_trigger_results['malformed_json_response']).to eq response_body
+      expect(@al.save_trigger_results['malformed_json_response_http_response_code']).to eq 200
+      expect(@al.save_trigger_results['malformed_json_response_http_response_headers']['x-response-id']).to eq 'malformed-json-200'
+      expect(@al.save_trigger_results['failure_hook_ran']).to eq 'true'
+      expect(@al.save_trigger_results['failure_body']).to eq response_body
+      expect(@al.save_trigger_results['failure_code']).to eq '200'
+      expect(@al.save_trigger_results['failure_header']).to eq 'malformed-json-200'
+      expect(@al.notes).to eq 'unchanged'
+    end
+
+    it 'propagates the original JSON parser error without failure hooks' do
+      response_url = 'https://rspec-test.example.com/api/malformed-json-without-hook'
+      response_body = '{"error":'
+
+      stub_request(:get, response_url).to_return(status: 200, body: response_body)
+
+      @al.notes = 'unchanged'
+      config = {
+        this1: {
+          local_data: 'malformed_json_response',
+          data_field: 'notes',
+          from: {
+            url: response_url,
+            format: 'json'
+          }
+        }
+      }
+
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+      expect { @trigger.perform }.to raise_error(JSON::ParserError)
+
+      expect(@al.save_trigger_results['malformed_json_response']).to eq response_body
+      expect(@al.notes).to eq 'unchanged'
+    end
+
+    it 'stores malformed XML as raw content before running failure hooks' do
+      response_url = 'https://rspec-test.example.com/api/malformed-xml'
+      response_body = '<response><message>broken'
+
+      stub_request(:get, response_url)
+        .to_return(status: 200, body: response_body, headers: { 'X-Response-ID' => 'malformed-xml-200' })
+
+      @al.notes = 'unchanged'
+      config = {
+        this1: {
+          local_data: 'malformed_xml_response',
+          data_field: 'notes',
+          from: {
+            url: response_url,
+            format: 'xml'
+          },
+          on_failure: [
+            {
+              set_save_trigger_results: {
+                element: 'failure_hook_ran',
+                value: 'true'
+              }
+            },
+            {
+              set_save_trigger_results: {
+                element: 'failure_body',
+                value: '{{save_trigger_results.malformed_xml_response}}'
+              }
+            }
+          ]
+        }
+      }
+
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+      expect { @trigger.perform }.not_to raise_error
+
+      expect(@al.save_trigger_results['malformed_xml_response']).to eq response_body
+      expect(@al.save_trigger_results['malformed_xml_response_http_response_code']).to eq 200
+      expect(@al.save_trigger_results['malformed_xml_response_http_response_headers']['x-response-id']).to eq 'malformed-xml-200'
+      expect(@al.save_trigger_results['failure_hook_ran']).to eq 'true'
+      expect(@al.save_trigger_results['failure_body']).to eq response_body
+      expect(@al.notes).to eq 'unchanged'
+    end
+
+    it 'propagates the original XML parser error without failure hooks' do
+      response_url = 'https://rspec-test.example.com/api/malformed-xml-without-hook'
+      response_body = '<response><message>broken'
+
+      stub_request(:get, response_url).to_return(status: 200, body: response_body)
+
+      @al.notes = 'unchanged'
+      config = {
+        this1: {
+          local_data: 'malformed_xml_response',
+          data_field: 'notes',
+          from: {
+            url: response_url,
+            format: 'xml'
+          }
+        }
+      }
+
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+      expect { @trigger.perform }.to raise_error(REXML::ParseException)
+
+      expect(@al.save_trigger_results['malformed_xml_response']).to eq response_body
+      expect(@al.notes).to eq 'unchanged'
+    end
+
+    it 'stores disallowed-type XML as raw content before running failure hooks' do
+      response_url = 'https://rspec-test.example.com/api/disallowed-xml'
+      response_body = '<response type="yaml">unsafe</response>'
+
+      stub_request(:get, response_url)
+        .to_return(status: 200, body: response_body, headers: { 'X-Response-ID' => 'disallowed-xml-200' })
+
+      @al.notes = 'unchanged'
+      config = {
+        this1: {
+          local_data: 'disallowed_xml_response',
+          data_field: 'notes',
+          from: {
+            url: response_url,
+            format: 'xml'
+          },
+          on_failure: [
+            {
+              set_save_trigger_results: {
+                element: 'failure_hook_ran',
+                value: 'true'
+              }
+            },
+            {
+              set_save_trigger_results: {
+                element: 'failure_body',
+                value: '{{save_trigger_results.disallowed_xml_response}}'
+              }
+            },
+            {
+              set_save_trigger_results: {
+                element: 'failure_code',
+                value: '{{save_trigger_results.disallowed_xml_response_http_response_code}}'
+              }
+            },
+            {
+              set_save_trigger_results: {
+                element: 'failure_header',
+                value: '{{save_trigger_results.disallowed_xml_response_http_response_headers.x_response_id}}'
+              }
+            }
+          ]
+        }
+      }
+
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+      expect { @trigger.perform }.not_to raise_error
+
+      expect(@al.save_trigger_results['disallowed_xml_response']).to eq response_body
+      expect(@al.save_trigger_results['disallowed_xml_response_http_response_code']).to eq 200
+      expect(@al.save_trigger_results['disallowed_xml_response_http_response_headers']['x-response-id']).to eq 'disallowed-xml-200'
+      expect(@al.save_trigger_results['failure_hook_ran']).to eq 'true'
+      expect(@al.save_trigger_results['failure_body']).to eq response_body
+      expect(@al.save_trigger_results['failure_code']).to eq '200'
+      expect(@al.save_trigger_results['failure_header']).to eq 'disallowed-xml-200'
+      expect(@al.notes).to eq 'unchanged'
+    end
+
+    it 'propagates the original disallowed-type XML error without failure hooks' do
+      response_url = 'https://rspec-test.example.com/api/disallowed-xml-without-hook'
+      response_body = '<response type="yaml">unsafe</response>'
+
+      stub_request(:get, response_url).to_return(status: 200, body: response_body)
+
+      @al.notes = 'unchanged'
+      config = {
+        this1: {
+          local_data: 'disallowed_xml_response',
+          data_field: 'notes',
+          from: {
+            url: response_url,
+            format: 'xml'
+          }
+        }
+      }
+
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+      expect { @trigger.perform }.to raise_error(ActiveSupport::XMLConverter::DisallowedType)
+
+      expect(@al.save_trigger_results['disallowed_xml_response']).to eq response_body
+      expect(@al.notes).to eq 'unchanged'
+    end
+  end
+
+  context 'with disallowed empty successful responses' do
+    it 'stores an empty body before running failure hooks' do
+      response_url = 'https://rspec-test.example.com/api/empty-response'
+
+      stub_request(:get, response_url)
+        .to_return(status: 200, body: '', headers: { 'X-Response-ID' => 'empty-200' })
+
+      @al.notes = 'unchanged'
+      config = {
+        this1: {
+          local_data: 'empty_response',
+          data_field: 'notes',
+          from: {
+            url: response_url,
+            format: 'json'
+          },
+          on_failure: [
+            {
+              set_save_trigger_results: {
+                element: 'failure_hook_ran',
+                value: 'true'
+              }
+            },
+            {
+              set_save_trigger_results: {
+                element: 'failure_code',
+                value: '{{save_trigger_results.empty_response_http_response_code}}'
+              }
+            },
+            {
+              set_save_trigger_results: {
+                element: 'failure_header',
+                value: '{{save_trigger_results.empty_response_http_response_headers.x_response_id}}'
+              }
+            }
+          ]
+        }
+      }
+
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+      expect { @trigger.perform }.not_to raise_error
+
+      expect(@al.save_trigger_results['empty_response']).to eq ''
+      expect(@al.save_trigger_results['empty_response_http_response_code']).to eq 200
+      expect(@al.save_trigger_results['empty_response_http_response_headers']['x-response-id']).to eq 'empty-200'
+      expect(@al.save_trigger_results['failure_hook_ran']).to eq 'true'
+      expect(@al.save_trigger_results['failure_code']).to eq '200'
+      expect(@al.save_trigger_results['failure_header']).to eq 'empty-200'
+      expect(@al.notes).to eq 'unchanged'
+    end
+
+    it 'propagates the empty-content failure without failure hooks' do
+      response_url = 'https://rspec-test.example.com/api/empty-response-without-hook'
+
+      stub_request(:get, response_url).to_return(status: 200, body: '')
+
+      @al.notes = 'unchanged'
+      config = {
+        this1: {
+          local_data: 'empty_response',
+          data_field: 'notes',
+          from: {
+            url: response_url,
+            format: 'json'
+          }
+        }
+      }
+
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+      expect { @trigger.perform }.to raise_error(FphsException, /empty content received/)
+
+      expect(@al.save_trigger_results['empty_response']).to eq ''
+      expect(@al.notes).to eq 'unchanged'
+    end
+  end
+
+  it 'accepts a successful 2xx response without allow_response_codes' do
+    response_url = 'https://rspec-test.example.com/api/created'
+
+    stub_request(:get, response_url)
+      .to_return(status: 201, body: '{"result":"created"}')
+
+    config = {
+      this1: {
+        local_data: 'created_response',
+        from: {
+          url: response_url,
+          format: 'json'
+        }
+      }
+    }
+
+    @trigger = SaveTriggers::PullExternalData.new(config, @al)
+    expect { @trigger.perform }.not_to raise_error
+
+    expect(@al.save_trigger_results['created_response']).to eq({ 'result' => 'created' })
+    expect(@al.save_trigger_results['created_response_http_response_code']).to eq 201
   end
 
   context 'with unsupported HTTP method' do
@@ -895,6 +1753,29 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
       @trigger.perform
 
       expect(@al.save_trigger_results).not_to have_key('_submitted_request')
+      expect(@al.save_trigger_results).not_to have_key('_http_response_headers')
+    end
+  end
+
+  # Issue #1384 - pull_external_data updates `this` via a genuine #update!, which is
+  # reentrant (and silently corrupts on_create/on_update/on_disable dispatch) when run
+  # from a before_save trigger, since the record isn't (fully) saved yet at that point.
+  describe 'invoked from a before_save trigger (issue #1384)' do
+    it 'raises instead of silently corrupting the outer save' do
+      config = {
+        this1: {
+          data_field: 'notes',
+          from: {
+            url: 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=14760269&retmode=xml',
+            format: 'xml'
+          }
+        }
+      }
+
+      @al.in_before_save_trigger = true
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+
+      expect { @trigger.perform }.to raise_error(FphsException, /before_save/)
     end
   end
 end

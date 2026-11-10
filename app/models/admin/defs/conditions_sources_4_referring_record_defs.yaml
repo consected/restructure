@@ -1,0 +1,23 @@
+# Pattern 4: The record referring to this one
+# @runnable: true
+# @instance: referred_activity_log
+# @expect: true
+
+# referring_record is the record that referenced this one - either the record
+# that provided the context for the current request, or the single model
+# reference pointing at this record.
+all:
+  referring_record:
+    select_who: user
+
+# top_referring_record walks all the way up a chain of references to the
+# outermost referring record.
+all_2:
+  top_referring_record:
+    extra_log_type: primary
+
+# Comparing a table field against an attribute of the referring record
+all_3:
+  activity_log__player_contact_phones:
+    id:
+      referring_record: id

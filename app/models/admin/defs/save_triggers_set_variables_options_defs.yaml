@@ -1,24 +1,26 @@
 # Save Trigger: Set Variables options
-        set_variables:
-          - set_1:
-            if: #if_extras
-            name: variable_name  # name of the variable to set in trigger_variables; supports dot-notation (e.g. 'hash_var.key1')
-            value: literal_or_substitution  # value to set - literal, substitution string like '{{field}}', or object hash
-          # NOTE: sets the specified variable in trigger_variables for use in subsequent triggers
-          # and substitutions via {{variables.varname}} tags. The direct form
-          # ({ name: ..., value: ... } without a label) is also accepted.
-          # e.g. |-
-          #   save_trigger:
-          #     on_create:
-          #       - set_variables:
-          #           name: simple_var
-          #           value: 123
-          #       - set_variables:
-          #           name: hash_var
-          #           value:
-          #             object:
-          #               id: '{{study_id}}'
-          #       - set_variables:
-          #           name: hash_var.key1
-          #           value: hello
+# Canonical schema
+# set_variables: <SetVariableEntry | Array(SetVariableEntry)>
+#
+# Value type
+# SetVariableEntry: <Hash(
+#   if: Condition,
+#   name: String (required),
+#   value: Scalar | Hash(object: Hash) | Condition,
+#   on_complete: TriggerTaskList,
+#   on_failure: TriggerTaskList
+# )>
+# Keys are optional unless marked (required).
+#
+# Pattern 1: Set a simple literal or substituted value (save_triggers_set_variables_pattern_1_simple_defs.yaml)
+# Pattern 2: Set a Hash value using object: (save_triggers_set_variables_pattern_2_object_defs.yaml)
+# Pattern 3: Set a nested key using dot-notation (save_triggers_set_variables_pattern_3_dot_notation_defs.yaml)
+# See save_trigger_set_variables.md for the worked examples.
+
 #!defs(save_triggers_lifecycle_hooks_defs.yaml)
+
+# Notes:
+# - This is the per-trigger-task form of set_variables, distinct from the option-type-level
+#   `set_variables:` extra option (see set_variables.md) - both share the same {{variables.*}}
+#   substitution namespace and dot-notation nesting.
+# - The direct form ({ name: ..., value: ... } without a label) is also accepted.

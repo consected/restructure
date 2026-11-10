@@ -11,46 +11,21 @@ This trigger supports two write modes:
 
 ## Configuration
 
-### Same-table mode
-
 ```yaml
-save_trigger:
-  on_save:
-    full_text_search:
-      - index_this:
-          target_column: search_index
-          source_fields:
-            - title
-            - description
-          ts_config: english
+!defs(save_triggers_full_text_search_options_defs.yaml)
 ```
 
-### Separate-table mode
+### Pattern 1: Same-table mode
 
 ```yaml
-save_trigger:
-  on_save:
-    full_text_search:
-      - index_target:
-          target_table: dynamic_test.record_search_indexes
-          target_column: search_vector
-          target_foreign_key_column: source_record_id
-          source_fields:
-            - title
-            - description
-            - notes
-          extra_content: '{{external_identifiers.reference_text}}'
-          ts_config: english
+!defs(save_triggers_full_text_search_pattern_1_same_table_defs.yaml)
 ```
 
-## Options
+### Pattern 2: Separate-table mode
 
-- `source_fields`: required array of field names used to build text content
-- `target_column`: required tsvector field to update
-- `target_table`: optional; if omitted, writes to current record table
-- `target_foreign_key_column`: required when `target_table` is set
-- `extra_content`: optional additional text appended to indexed content
-- `ts_config`: optional PostgreSQL text search configuration (defaults to `english`)
+```yaml
+!defs(save_triggers_full_text_search_pattern_2_separate_table_defs.yaml)
+```
 
 ## Requirements
 

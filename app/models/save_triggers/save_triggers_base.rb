@@ -190,13 +190,18 @@ class SaveTriggers::SaveTriggersBase
 
     execute_lifecycle_triggers(on_complete) if on_complete.present?
     result
-  rescue StandardError
-    begin
-      execute_lifecycle_triggers(on_failure) if on_failure.present?
-    rescue StandardError => inner_e
-      Rails.logger.error "[SaveTrigger] on_failure trigger itself raised an error: #{inner_e.message}"
+  rescue StandardError => e
+    if on_failure.present?
+      prev_exception = Thread.current[:active_save_trigger_exception]
+      Thread.current[:active_save_trigger_exception] = e
+      begin
+        execute_lifecycle_triggers(on_failure)
+      ensure
+        Thread.current[:active_save_trigger_exception] = prev_exception
+      end
+    else
+      raise
     end
-    raise
   end
 
   #
@@ -213,15 +218,23 @@ class SaveTriggers::SaveTriggersBase
   # Perform the trigger with lifecycle hooks.
   # Calls #perform, then fires on_complete triggers on success,
   # or on_failure triggers if an exception is raised.
-  # The original exception is re-raised after on_failure triggers execute.
   # @return [Object] the result of #perform
   def perform_with_lifecycle
     result = perform
     fire_on_complete_triggers
     result
-  rescue StandardError
-    fire_on_failure_triggers
-    raise
+  rescue StandardError => e
+    if @on_failure_triggers.present?
+      prev_exception = Thread.current[:active_save_trigger_exception]
+      Thread.current[:active_save_trigger_exception] = e
+      begin
+        fire_on_failure_triggers
+      ensure
+        Thread.current[:active_save_trigger_exception] = prev_exception
+      end
+    else
+      raise
+    end
   end
 
   def self.config_def(if_extras: nil); end
@@ -287,15 +300,11 @@ class SaveTriggers::SaveTriggersBase
 
   #
   # Fire on_failure triggers using calc_triggers dispatch.
-  # Errors within on_failure triggers are logged but do not prevent
-  # the original exception from being re-raised.
   # @return [void]
   def fire_on_failure_triggers
     return unless @on_failure_triggers.present?
 
     execute_lifecycle_triggers(@on_failure_triggers)
-  rescue StandardError => e
-    Rails.logger.error "[SaveTrigger] on_failure trigger itself raised an error: #{e.message}"
   end
 
   #

@@ -11,7 +11,8 @@ class Admin::MigrationGenerator
   attr_accessor :db_migration_schema, :table_name, :all_implementation_fields,
                 :table_comments, :no_master_association, :prev_table_name, :belongs_to_model,
                 :allow_migrations, :db_configs, :resource_type, :view_sql, :all_referenced_tables,
-                :class_name, :dynamic_def, :app_type_name, :view_sql_changed, :no_user_id
+                :class_name, :dynamic_def, :app_type_name, :view_sql_changed, :no_user_id,
+                :view_skip_updates
 
   def initialize(db_migration_schema, table_name: nil, class_name: nil,
                  all_implementation_fields: nil, table_comments: nil,
@@ -19,6 +20,7 @@ class Admin::MigrationGenerator
                  resource_type: nil,
                  view_sql: nil,
                  view_sql_changed: nil,
+                 view_skip_updates: nil,
                  allow_migrations: nil,
                  all_referenced_tables: nil,
                  dynamic_def: nil,
@@ -36,6 +38,7 @@ class Admin::MigrationGenerator
     self.db_configs = db_configs
     self.view_sql = view_sql
     self.view_sql_changed = view_sql_changed
+    self.view_skip_updates = view_skip_updates
     self.all_referenced_tables = all_referenced_tables
     self.dynamic_def = dynamic_def
 
@@ -362,6 +365,11 @@ class Admin::MigrationGenerator
   # @param [String] export_type - a suffix to add to the migration name,
   #                               such as 'app-export'
   def add_schema(export_type = nil)
+    if db_migration_schema.blank?
+      Rails.logger.warn 'Skipping schema migration generation because the schema name is blank.'
+      return
+    end
+
     mig_text = schema_generator_script(db_migration_schema, 'create')
     write_db_migration mig_text, "#{db_migration_schema}_schema", export_type:
   end
@@ -630,6 +638,7 @@ class Admin::MigrationGenerator
         VIEWSQL
 
         self.view_sql_changed = #{!!view_sql_changed}
+        self.view_skip_updates = #{!!view_skip_updates}
       VSTEXT
     end
 
@@ -737,9 +746,8 @@ class Admin::MigrationGenerator
           self.class.migration_context(db_migration_dirname).migrate
         end
       rescue Exception => e
-        FileUtils.mkdir_p db_migration_failed_dirname
-        FileUtils.mv @do_migration, db_migration_failed_dirname
-        msg = "Failed migration for path '#{db_migration_dirname}' - moved '#{@do_migration}' to '#{db_migration_failed_dirname}' - database #{Admin::MigrationGenerator.current_database}"
+        migration_file_status = move_failed_migration_file
+        msg = "Failed migration for path '#{db_migration_dirname}' - #{migration_file_status} - database #{Admin::MigrationGenerator.current_database}"
         Rails.logger.warn msg
         unless Rails.env.production?
           warn msg
@@ -756,9 +764,8 @@ class Admin::MigrationGenerator
 
     true
   rescue Exception => e
-    FileUtils.mkdir_p db_migration_failed_dirname
-    FileUtils.mv @do_migration, db_migration_failed_dirname
-    msg = "Failed migration for path '#{db_migration_dirname}' - moved '#{@do_migration}' to '#{db_migration_failed_dirname}' - database #{Admin::MigrationGenerator.current_database}"
+    migration_file_status = move_failed_migration_file
+    msg = "Failed migration for path '#{db_migration_dirname}' - #{migration_file_status} - database #{Admin::MigrationGenerator.current_database}"
     Rails.logger.warn msg
     unless Rails.env.production?
       warn msg
@@ -868,9 +875,26 @@ class Admin::MigrationGenerator
 
   private
 
+  def move_failed_migration_file
+    if @do_migration.present? && File.exist?(@do_migration)
+      FileUtils.mkdir_p db_migration_failed_dirname
+      FileUtils.mv @do_migration, db_migration_failed_dirname
+      "moved '#{@do_migration}' to '#{db_migration_failed_dirname}'"
+    else
+      "migration file '#{@do_migration}' was not present to move"
+    end
+  rescue SystemCallError => e
+    "failed to move '#{@do_migration}' to '#{db_migration_failed_dirname}': #{e.message}"
+  end
+
   #
   # Content for a migration to create a schema
   def schema_generator_script(schema_name, mode = 'create', owner: DefaultSchemaOwner)
+    if schema_name.blank?
+      Rails.logger.warn 'Skipping schema migration generation because the schema name is blank.'
+      return
+    end
+
     cname = "#{mode}_#{schema_name}_schema_#{migration_version}".camelize
 
     raise FphsException, "No schema owner provided for schema #{schema_name}" unless owner.present?

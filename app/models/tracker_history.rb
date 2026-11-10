@@ -21,6 +21,8 @@ class TrackerHistory < UserBase
   has_one :tracker, inverse_of: :tracker_histories, foreign_key: 'tracker_id'
   belongs_to :item, polymorphic: true, optional: true
 
+  add_model_to_list
+
   # Avoids a lot of unnecessary database lookups
   def self.uses_item_flags?(_user)
     false

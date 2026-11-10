@@ -13,13 +13,8 @@ RSpec.describe 'ExtraOptionConfigs::SaveTrigger', type: :model do
   include DynamicModelSupport
   include ExtraOptionConfigsSupport
 
-  before(:each) do
-    create_admin
-    create_user
-    setup_access :trackers
-    setup_access :tracker_histories
-    @dm = generate_test_dynamic_model
-    setup_access :dynamic_model__test_created_by_recs, user: @user
+  before(:all) do
+    set_up_extra_options_configs
   end
 
   let(:klass) { OptionConfigs::ExtraOptionConfigs::SaveTrigger }
@@ -127,6 +122,87 @@ RSpec.describe 'ExtraOptionConfigs::SaveTrigger', type: :model do
     end
   end
 
+  # Issue #1384 - pull_external_data, redcap_request and notify all perform a genuine
+  # update of `this` (the record being saved), and create_reference with in: this/
+  # referring_record needs this record's id - none of these work correctly from
+  # before_save, since the record isn't persisted (or fully saved) yet at that point.
+  describe 'before_save unsupported trigger warnings (issue #1384)' do
+    it 'warns when pull_external_data is used within before_save' do
+      instance = klass.new(before_save: { pull_external_data: { url: 'http://example.com' } })
+      warning = instance.config_warnings.find { |w| w[:type] == :before_save }
+      expect(warning).to be_present
+      expect(warning[:message]).to match(/pull_external_data/)
+    end
+
+    it 'warns when redcap_request is used within before_save' do
+      instance = klass.new(before_save: { redcap_request: { study: 'Q1', method: 'project' } })
+      warning = instance.config_warnings.find { |w| w[:type] == :before_save }
+      expect(warning).to be_present
+      expect(warning[:message]).to match(/redcap_request/)
+    end
+
+    it 'warns when notify is used within before_save' do
+      instance = klass.new(before_save: { notify: { role: 'admin' } })
+      warning = instance.config_warnings.find { |w| w[:type] == :before_save }
+      expect(warning).to be_present
+      expect(warning[:message]).to match(/notify/)
+    end
+
+    it 'warns when create_reference with in: this is used within before_save' do
+      instance = klass.new(before_save: { create_reference: { player_contacts: { in: 'this' } } })
+      warning = instance.config_warnings.find { |w| w[:type] == :before_save }
+      expect(warning).to be_present
+      expect(warning[:message]).to match(/create_reference/)
+    end
+
+    it 'warns when create_reference with in: referring_record is used within before_save' do
+      instance = klass.new(before_save: { create_reference: { player_contacts: { in: 'referring_record' } } })
+      warning = instance.config_warnings.find { |w| w[:type] == :before_save }
+      expect(warning).to be_present
+    end
+
+    it 'does not warn when create_reference with in: master is used within before_save' do
+      instance = klass.new(before_save: { create_reference: { player_contacts: { in: 'master' } } })
+      expect(instance.config_warnings).to be_empty
+    end
+
+    it 'still warns for a trigger nested inside a transaction within before_save' do
+      instance = klass.new(before_save: { transaction: { notify: { role: 'admin' } } })
+      warning = instance.config_warnings.find { |w| w[:type] == :before_save }
+      expect(warning).to be_present
+      expect(warning[:message]).to match(/notify/)
+    end
+
+    it 'does not warn when the same triggers are used within on_create' do
+      instance = klass.new(on_create: { pull_external_data: { url: 'http://example.com' } })
+      expect(instance.config_warnings).to be_empty
+    end
+  end
+
+  # Issue #1406 follow-up: background queues a job carrying the item's id, but
+  # before_save runs before the record has been persisted (no id yet on create).
+  describe 'background rejected within before_save' do
+    it 'reports an error (not just a warning) when background is used within before_save' do
+      instance = klass.new(before_save: { background: [{ log: { message: 'hi' } }] })
+      error = instance.config_errors.find { |e| e[:type] == :before_save }
+      expect(error).to be_present
+      expect(error[:message]).to match(/background/)
+    end
+
+    it 'does not warn when background is used within on_create' do
+      instance = klass.new(on_create: { background: [{ log: { message: 'hi' } }] })
+      expect(instance.config_errors).to be_empty
+      expect(instance.config_warnings).to be_empty
+    end
+
+    it 'still allows a transaction nested within before_save to be scanned normally' do
+      instance = klass.new(before_save: { transaction: { notify: { role: 'admin' } } })
+      warning = instance.config_warnings.find { |w| w[:type] == :before_save }
+      expect(warning).to be_present
+      expect(warning[:message]).to match(/notify/)
+    end
+  end
+
   describe 'ExtraOptions integration' do
     it 'defaults save_trigger to a SaveTrigger with blank TriggerTasks' do
       eo = config_for(<<~YAML)
@@ -210,6 +286,57 @@ RSpec.describe 'ExtraOptionConfigs::SaveTrigger', type: :model do
 
       expect(eo.save_trigger).to be_a OptionConfigs::ExtraOptionConfigs::SaveTrigger
       expect(eo.save_trigger[:on_create]).to be_a Array
+    end
+
+    # Regression test: on_save is never itself executed as a trigger hook - it is
+    # only a source cascaded into on_create/on_update (#cascade_on_save) - so a
+    # config issue authored under on_save was being reported 3 times (once per
+    # hook, including the never-executed on_save copy) instead of the 2 hooks
+    # (on_create, on_update) it actually affects at runtime.
+    it 'does not report an on_save-cascaded task issue a third time for the never-executed on_save copy' do
+      config_for(<<~YAML)
+        default:
+          fields:
+            - name
+          save_trigger:
+            on_save:
+            - create_reference:
+              - ipa_sample:
+                  in: master
+                  force_not_editable_save: true
+                  with:
+                    select_project: biodata
+      YAML
+
+      notices = OptionConfigs::ExtraOptions.all_option_configs_notices(@dm)
+      matches = notices.select { |n| n[:message].to_s.include?("unrecognized key 'force_not_editable_save'") }
+      expect(matches.map { |n| n[:parent_attribute] }).to contain_exactly(:on_create, :on_update)
+    end
+
+    # Regression test: two independently authored problems under on_create and
+    # on_update must never be collapsed into one, even if their messages happen
+    # to be identical text - only the on_save phantom copy should be dropped.
+    it 'still reports separately authored on_create and on_update issues as distinct notices' do
+      config_for(<<~YAML)
+        default:
+          fields:
+            - name
+          save_trigger:
+            on_create:
+              create_reference:
+                - ipa_sample:
+                    in: master
+                    bogus_key_a: true
+            on_update:
+              create_reference:
+                - ipa_sample:
+                    in: master
+                    bogus_key_a: true
+      YAML
+
+      notices = OptionConfigs::ExtraOptions.all_option_configs_notices(@dm)
+      matches = notices.select { |n| n[:message].to_s.include?("unrecognized key 'bogus_key_a'") }
+      expect(matches.map { |n| n[:parent_attribute] }).to contain_exactly(:on_create, :on_update)
     end
 
     it 'normalizes nested create_reference trigger lists to plain hashes and arrays' do

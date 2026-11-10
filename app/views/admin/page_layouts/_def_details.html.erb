@@ -7,4 +7,6 @@
       <label>view URL</label> <%= link_to page_layout_path(object_instance.panel_name), page_layout_path(object_instance.panel_name), target: '_blank'  %>
     </p>
   <% end %>
+
+  <%= render partial: 'admin/dynamic_models/config_errors', locals: { object_instance: } %>
 </div>

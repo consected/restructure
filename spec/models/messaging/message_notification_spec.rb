@@ -77,11 +77,13 @@ RSpec.describe Messaging::MessageNotification, type: :model do
 
       expect do
         Messaging::MessageNotification.create! app_type: @user.app_type, user: @user, recipient_user_ids: [@rec_user], layout_template_name: layout.name,
-                                               item_type: @activity_log.class.name, item_id: @activity_log.id, master:, message_type: :email
+                                               item_type: @activity_log.class.name, item_id: @activity_log.id, master:, message_type: :email,
+                                               subject: 'Test Subject'
       end.to raise_error ActiveRecord::RecordInvalid # for no content template
 
       mn = Messaging::MessageNotification.create! app_type: @user.app_type, user: @user, recipient_user_ids: [@rec_user], layout_template_name: layout.name,
-                                                  content_template_name: content.name, item_type: @activity_log.class.name, item_id: @activity_log.id, master:, message_type: :email
+                                                  content_template_name: content.name, item_type: @activity_log.class.name, item_id: @activity_log.id, master:, message_type: :email,
+                                                  subject: 'Test Subject'
 
       mn.generate
 
@@ -101,11 +103,13 @@ RSpec.describe Messaging::MessageNotification, type: :model do
 
       expect do
         Messaging::MessageNotification.create! app_type: @user.app_type, user: @user, recipient_user_ids: [@rec_user], layout_template_name: layout.name,
-                                               item_type: @activity_log.class.name, item_id: @activity_log.id, master:, message_type: :email
+                                               item_type: @activity_log.class.name, item_id: @activity_log.id, master:, message_type: :email,
+                                               subject: 'Test Subject'
       end.to raise_error ActiveRecord::RecordInvalid # for no content template
 
       mn = Messaging::MessageNotification.create! app_type: @user.app_type, user: @user, recipient_user_ids: [@rec_user], layout_template_name: layout.name,
-                                                  content_template_text: t, item_type: @activity_log.class.name, item_id: @activity_log.id, master:, message_type: :email
+                                                  content_template_text: t, item_type: @activity_log.class.name, item_id: @activity_log.id, master:, message_type: :email,
+                                                  subject: 'Test Subject'
 
       mn.generate
 
@@ -125,7 +129,8 @@ RSpec.describe Messaging::MessageNotification, type: :model do
       layout = @layout
 
       mn = Messaging::MessageNotification.create! app_type: @user.app_type, user: @user, recipient_user_ids: [@rec_user], layout_template_name: layout.name,
-                                                  content_template_text: t, item_type: @activity_log.class.name, item_id: @activity_log.id, master:, message_type: :email
+                                                  content_template_text: t, item_type: @activity_log.class.name, item_id: @activity_log.id, master:, message_type: :email,
+                                                  subject: 'Test Subject'
 
       mn.handle_notification_now logger: Delayed::Worker.logger,
                                  for_item: @activity_log,
@@ -159,7 +164,8 @@ RSpec.describe Messaging::MessageNotification, type: :model do
       layout = @layout
 
       mn = Messaging::MessageNotification.create! app_type: @user.app_type, user: @user, recipient_user_ids: [@rec_user], layout_template_name: layout.name,
-                                                  content_template_text: t, item_type: dm.class.name, item_id: dm.id, master: nil, message_type: :email
+                                                  content_template_text: t, item_type: dm.class.name, item_id: dm.id, master: nil, message_type: :email,
+                                                  subject: 'Test Subject'
 
       mn.handle_notification_now logger: Delayed::Worker.logger,
                                  for_item: dm,
@@ -193,6 +199,7 @@ RSpec.describe Messaging::MessageNotification, type: :model do
       # NOTE: do not specify app_type when using data rather than setting an item
       mn = Messaging::MessageNotification.create! user: @user, recipient_user_ids: [@rec_user], layout_template_name: layout.name,
                                                   content_template_text: t, message_type: :email,
+                                                  subject: 'Test Subject',
                                                   data: {
                                                     master_id: 1234,
                                                     select_who: 'henry anderson'
@@ -226,12 +233,14 @@ RSpec.describe Messaging::MessageNotification, type: :model do
 
       mn = Messaging::MessageNotification.create! app_type: @user.app_type, user: @user, recipient_user_ids: [@rec_user], layout_template_name: layout.name,
                                                   content_template_text: t, item_type: @activity_log.class.name, item_id: @activity_log.id, master:, message_type: :email,
+                                                  subject: 'Test Subject',
                                                   from_user_email: { address: 'test@testemail.test', display_name: 'Test Email' }
 
       expect(mn.from_user_email).to eq 'Test Email <test@testemail.test>'
 
       mn = Messaging::MessageNotification.create! app_type: @user.app_type, user: @user, recipient_user_ids: [@rec_user], layout_template_name: layout.name,
                                                   content_template_text: t, item_type: @activity_log.class.name, item_id: @activity_log.id, master:, message_type: :email,
+                                                  subject: 'Test Subject',
                                                   from_user_email: 'test@testemail2.test'
 
       expect(mn.from_user_email).to eq 'test@testemail2.test'
@@ -245,6 +254,7 @@ RSpec.describe Messaging::MessageNotification, type: :model do
 
       mn = Messaging::MessageNotification.create! app_type: @user.app_type, user: @user, recipient_user_ids: [@rec_user], layout_template_name: layout.name,
                                                   content_template_text: t, item_type: @activity_log.class.name, item_id: @activity_log.id, master:, message_type: :email,
+                                                  subject: 'Test Subject',
                                                   from_user_email: { address: 'test@testemail.test', display_name: 'Test Email' },
                                                   extra_substitutions: { data1: 'es-data-one', data2: 'es-data-two' }
       mn.generate
@@ -309,7 +319,8 @@ RSpec.describe Messaging::MessageNotification, type: :model do
       expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some new content in a text template.</p><p>Related to another master_id #{master.id}. This is a data: #{data}.</p></div></body></html>"
 
       mn = Messaging::MessageNotification.create! app_type: @user.app_type, user: @user, recipient_data: rd, layout_template_name: layout.name,
-                                                  content_template_text: t, item_type: @activity_log.class.name, item_id: @activity_log.id, master:, message_type: :email
+                                                  content_template_text: t, item_type: @activity_log.class.name, item_id: @activity_log.id, master:, message_type: :email,
+                                                  subject: 'Test Subject'
 
       mn.handle_notification_now logger: Delayed::Worker.logger,
                                  for_item: @activity_log,
@@ -399,6 +410,7 @@ RSpec.describe Messaging::MessageNotification, type: :model do
                                                   item_id: @activity_log.id,
                                                   master:,
                                                   message_type: :email,
+                                                  subject: 'Test Subject',
                                                   data: { payload: '<img src="x" onerror="alert(1)">' }
 
       expect do
@@ -420,6 +432,113 @@ RSpec.describe Messaging::MessageNotification, type: :model do
 
       expect { mn.generate }.not_to raise_error
       expect(mn.generated_text).to include '<script>alert(1)</script>'
+    end
+  end
+
+  describe 'validations (issue #1370)' do
+    before :example do
+      setup_messaging_test
+    end
+
+    it 'validates message_type presence and inclusion' do
+      mn = Messaging::MessageNotification.new(
+        app_type: @user.app_type, user: @user, recipient_user_ids: [@rec_user.id],
+        layout_template_name: @layout.name, content_template_name: @content.name,
+        item_type: @activity_log.class.name, item_id: @activity_log.id, master: @activity_log.master,
+        subject: 'Subject', message_type: nil
+      )
+      expect(mn).not_to be_valid
+      expect(mn.errors[:message_type]).to be_present
+
+      mn.message_type = 'invalid_type'
+      expect(mn).not_to be_valid
+      expect(mn.errors[:message_type]).to be_present
+
+      mn.message_type = 'email'
+      expect(mn).to be_valid
+
+      mn.message_type = 'sms'
+      mn.layout_template_name = @layout_sms.name
+      mn.content_template_name = nil
+      mn.content_template_text = 'SMS body'
+      expect(mn).to be_valid
+    end
+
+    it 'requires subject for email messages but not for sms' do
+      mn = Messaging::MessageNotification.new(
+        app_type: @user.app_type, user: @user, recipient_user_ids: [@rec_user.id],
+        layout_template_name: @layout.name, content_template_name: @content.name,
+        item_type: @activity_log.class.name, item_id: @activity_log.id, master: @activity_log.master,
+        message_type: :email, subject: nil
+      )
+      expect(mn).not_to be_valid
+      expect(mn.errors[:subject]).to be_present
+
+      mn.subject = 'Now has subject'
+      expect(mn).to be_valid
+
+      mn_sms = Messaging::MessageNotification.new(
+        app_type: @user.app_type, user: @user, recipient_user_ids: [@rec_user.id],
+        layout_template_name: @layout_sms.name, content_template_text: 'SMS text',
+        item_type: @activity_log.class.name, item_id: @activity_log.id, master: @activity_log.master,
+        message_type: :sms, subject: nil
+      )
+      expect(mn_sms).to be_valid
+    end
+
+    it 'validates importance inclusion when present and normalizes case' do
+      mn = Messaging::MessageNotification.new(
+        app_type: @user.app_type, user: @user, recipient_user_ids: [@rec_user.id],
+        layout_template_name: @layout.name, content_template_name: @content.name,
+        item_type: @activity_log.class.name, item_id: @activity_log.id, master: @activity_log.master,
+        message_type: :email, subject: 'Subject'
+      )
+      expect(mn).to be_valid
+
+      mn.importance = 'promotional'
+      expect(mn.importance).to eq('Promotional')
+      expect(mn).to be_valid
+
+      mn.importance = 'transactional'
+      expect(mn.importance).to eq('Transactional')
+      expect(mn).to be_valid
+
+      mn.importance = 'critical'
+      expect(mn).not_to be_valid
+      expect(mn.errors[:importance]).to be_present
+    end
+
+    it 'validates layout_template exists and matches message_type' do
+      mn = Messaging::MessageNotification.new(
+        app_type: @user.app_type, user: @user, recipient_user_ids: [@rec_user.id],
+        layout_template_name: 'nonexistent_layout', content_template_name: @content.name,
+        item_type: @activity_log.class.name, item_id: @activity_log.id, master: @activity_log.master,
+        message_type: :email, subject: 'Subject'
+      )
+      expect(mn).not_to be_valid
+      expect(mn.errors[:layout_template_name]).to be_present
+
+      # SMS layout template used for email message
+      mn.layout_template_name = @layout_sms.name
+      expect(mn).not_to be_valid
+      expect(mn.errors[:layout_template_name]).to be_present
+
+      mn.layout_template_name = @layout.name
+      expect(mn).to be_valid
+    end
+
+    it 'validates content_template exists and matches message_type when specified' do
+      mn = Messaging::MessageNotification.new(
+        app_type: @user.app_type, user: @user, recipient_user_ids: [@rec_user.id],
+        layout_template_name: @layout.name, content_template_name: 'nonexistent_content',
+        item_type: @activity_log.class.name, item_id: @activity_log.id, master: @activity_log.master,
+        message_type: :email, subject: 'Subject'
+      )
+      expect(mn).not_to be_valid
+      expect(mn.errors[:content_template_name]).to be_present
+
+      mn.content_template_name = @content.name
+      expect(mn).to be_valid
     end
   end
 
@@ -449,7 +568,8 @@ RSpec.describe Messaging::MessageNotification, type: :model do
       item_type: @activity_log.class.name,
       item_id: @activity_log.id,
       master: @activity_log.master,
-      message_type: :email
+      message_type: :email,
+      subject: 'Test Subject'
     }
     attrs[:extra_substitutions] = { calendar_invite: calendar_invite_data } if with_calendar_invite
     Messaging::MessageNotification.create!(attrs)

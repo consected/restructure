@@ -1,0 +1,21 @@
+# Pattern 6: Records referenced by this record
+# @runnable: true
+# @instance: referencing_activity_log
+# @expect: true
+
+# this_references restricts a table condition to only those records that the
+# current record actually references, rather than every record belonging to the
+# master. Here only addresses referenced by this activity log are considered.
+all:
+  addresses:
+    city: portland
+    id:
+      this_references: id
+
+# Naming a record type takes the attribute from references of that type only,
+# and the value is used to match the enclosing table's field.
+all_2:
+  addresses:
+    rank:
+      this_references:
+        address: rank

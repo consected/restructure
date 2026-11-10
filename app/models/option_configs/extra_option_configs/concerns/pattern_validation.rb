@@ -51,7 +51,9 @@ module OptionConfigs
       #   key_type :string_or_array, %i[uniqueness_fields]
       #   key_type :hash, %i[batch_trigger], allowed_keys: %i[frequency run_at limit]
       #
-      # Supported type symbols: +:boolean+, +:string+, +:string_or_array+, +:integer+, +:hash+
+      # Supported type symbols: +:boolean+, +:nullable_boolean+, +:string+, +:boolean_or_string+,
+      # +:string_or_array+, +:string_hash_or_array+, +:boolean_numeric_string_hash_or_array+,
+      # +:integer+, +:hash+
       #
       # == Automatic Validation
       #
@@ -77,23 +79,31 @@ module OptionConfigs
         # Type-checking lambdas for key_type and value_pattern key_types.
         KEY_TYPE_CHECKERS = {
           boolean: ->(v) { [true, false].include?(v) },
+          nullable_boolean: ->(v) { v.nil? || [true, false].include?(v) },
+          boolean_or_string: ->(v) { [true, false].include?(v) || v.is_a?(String) || v.is_a?(Symbol) },
           # Tri-state used by reference entries: accepts true/false or the
           # special string literal 'outside_master'.
           boolean_or_outside_master: ->(v) { [true, false, 'outside_master', :outside_master].include?(v) },
           string: ->(v) { v.is_a?(String) || v.is_a?(Symbol) },
           # Accepts a literal string (including substitution strings like
           # '{{field_name}}') or a Hash form such as { this: { field: return_value } }
-          # used by field_default-style lookups (e.g. active_value).
+          # used by field_default-style lookups.
           string_or_hash: ->(v) { v.is_a?(String) || v.is_a?(Symbol) || v.is_a?(Hash) },
           string_or_array: lambda { |v|
             v.is_a?(String) || v.is_a?(Symbol) ||
               (v.is_a?(Array) && v.all? { |i| i.is_a?(String) || i.is_a?(Symbol) })
           },
-          # Accepts a string, a Hash (return_value lookup), or an Array of strings.
-          # Used by field value options (preset_value, blank_preset_value, value, blank_value).
+          # Base checker for field value options that do not accept scalar booleans
+          # or numerics.
           string_hash_or_array: lambda { |v|
             v.is_a?(String) || v.is_a?(Symbol) || v.is_a?(Hash) ||
               (v.is_a?(Array) && v.all? { |i| i.is_a?(String) || i.is_a?(Symbol) })
+          },
+          # Extends string_hash_or_array for field value options that also accept
+          # scalar booleans and numerics.
+          boolean_numeric_string_hash_or_array: lambda { |v|
+            [true, false].include?(v) || v.is_a?(Numeric) ||
+              KEY_TYPE_CHECKERS[:string_hash_or_array].call(v)
           },
           integer: ->(v) { v.is_a?(Integer) },
           hash: ->(v) { v.is_a?(Hash) }
@@ -102,11 +112,14 @@ module OptionConfigs
         # Human-readable descriptions for each type symbol.
         KEY_TYPE_DESCRIPTIONS = {
           boolean: 'true or false',
+          nullable_boolean: 'true, false or nil',
+          boolean_or_string: 'true, false or a string',
           boolean_or_outside_master: "true, false or 'outside_master'",
           string: 'a string',
           string_or_hash: 'a string (literal or {{substitution}}) or a Hash (e.g. { this: { field: return_value } })',
           string_or_array: 'a string or array of strings',
           string_hash_or_array: 'a string, a Hash (e.g. { this: { field: return_value } }), or an array of strings',
+          boolean_numeric_string_hash_or_array: 'true, false, numeric, string, Hash, or array of strings',
           integer: 'an integer',
           hash: 'a Hash'
         }.freeze
@@ -289,7 +302,7 @@ module OptionConfigs
 
             extra_keys_desc = self.class._extra_keys.map { |k| k.is_a?(Regexp) ? k.inspect : k }.join(', ')
             add_validation_notice(field_name,
-                                  "#{field_name} is not a valid field name" \
+                                  'is not a valid field name' \
                                   "#{" or extra key (#{extra_keys_desc})" if extra_keys_desc.present?}",
                                   level: :warn)
           end
@@ -307,8 +320,7 @@ module OptionConfigs
             matched = match_value_pattern(value)
             unless matched
               types = self.class._value_patterns.values.map { |p| describe_match(p[:match]) }.join(' or ')
-              add_validation_notice(field_name,
-                                    "#{field_name} must be #{types}, got #{value.class}")
+              add_validation_notice(field_name, "must be #{types}, got #{value.class}")
               next
             end
 
@@ -337,10 +349,7 @@ module OptionConfigs
             checker = KEY_TYPE_CHECKERS[rule[:type]]
             unless checker&.call(value)
               desc = KEY_TYPE_DESCRIPTIONS[rule[:type]] || rule[:type].to_s
-              add_validation_notice(
-                key,
-                "#{key} must be #{desc}, current value: #{value.inspect} (#{value.class})"
-              )
+              add_validation_notice(key, "must be #{desc}, current value: #{value.inspect} (#{value.class})")
               next
             end
 
@@ -393,11 +402,10 @@ module OptionConfigs
 
           if pattern[:allowed_keys]
             invalid = value.keys.map(&:to_sym) - pattern[:allowed_keys]
-            if invalid.present?
-              add_validation_notice(field_name,
-                                    "#{field_name} contains unrecognized keys #{invalid}",
-                                    level: :warn)
-            end
+            # run_validations bridges ActiveModel errors into config_warnings and already
+            # prepends the field name (see base_configuration.rb#run_validations), so the
+            # message here must not repeat it or the field name is duplicated.
+            add_validation_notice(field_name, "contains unrecognized keys #{invalid}", level: :warn) if invalid.present?
           end
 
           validate_pattern_key_types(field_name, value, pattern[:key_types]) if pattern[:key_types]
@@ -407,8 +415,7 @@ module OptionConfigs
           missing = pattern[:required_keys] - value.keys.map(&:to_sym)
           return if missing.empty?
 
-          add_validation_notice(field_name,
-                                "#{field_name} is missing required keys #{missing}")
+          add_validation_notice(field_name, "is missing required keys #{missing}")
         end
 
         # Check value types within a hash against key_types declarations.
@@ -421,9 +428,11 @@ module OptionConfigs
 
             desc = KEY_TYPE_DESCRIPTIONS[type] || type.to_s
             invalid_value = value[kt_key]
+            # run_validations already prepends field_name once (see base_configuration.rb),
+            # so it must not be repeated here or it is duplicated.
             add_validation_notice(
               field_name,
-              "#{field_name} #{kt_key} must be #{desc}, current value: #{invalid_value.inspect} (#{invalid_value.class})"
+              "#{kt_key} must be #{desc}, current value: #{invalid_value.inspect} (#{invalid_value.class})"
             )
           end
         end

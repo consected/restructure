@@ -25,6 +25,8 @@
 require 'rails_helper'
 
 RSpec.describe HelpHelper, type: :helper do
+  include ModelSupport
+
   describe '#main_section' do
     # `section` is a HelpController helper_method delegated to the controller,
     # so it is not defined on ActionView::Base. We define it on the singleton class.
@@ -136,6 +138,88 @@ RSpec.describe HelpHelper, type: :helper do
     before do
       allow(helper).to receive(:current_admin).and_return(nil)
       allow(helper).to receive(:current_user).and_return(nil)
+    end
+
+    context 'with message template overrides' do
+      def create_help_message_template(template:, name: 'general/substitutions', category: 'admin_reference',
+                                       message_type: :dialog, template_type: :content, disabled: false)
+        @admin ||= create_admin.first
+        Admin::MessageTemplate.create!(name:, category:, message_type:, template_type:, template:, disabled:,
+                                       current_admin: @admin)
+      end
+
+      it 'falls back to the markdown file when no matching template exists' do
+        expect(helper.formatted_doc('admin_reference', 'general', 'substitutions')).to include('{{#is')
+      end
+
+      it 'uses an active matching dialog content template without reading the markdown file' do
+        create_help_message_template(template: 'Help template override marker')
+        doc_path = Rails.root.join('docs', 'admin_reference', 'general', 'substitutions.md')
+
+        expect(File).not_to receive(:read).with(doc_path)
+        expect(helper.formatted_doc('admin_reference', 'general', 'substitutions'))
+          .to include('Help template override marker')
+      end
+
+      it 'ignores inactive matching templates' do
+        create_help_message_template(template: 'Inactive override marker', disabled: true)
+
+        rendered = helper.formatted_doc('admin_reference', 'general', 'substitutions')
+
+        expect(rendered).to include('{{#is')
+        expect(rendered).not_to include('Inactive override marker')
+      end
+
+      it 'ignores content templates with a non-dialog message type' do
+        create_help_message_template(template: 'Email override marker', message_type: :email)
+
+        rendered = helper.formatted_doc('admin_reference', 'general', 'substitutions')
+
+        expect(rendered).to include('{{#is')
+        expect(rendered).not_to include('Email override marker')
+      end
+
+      it 'ignores dialog layout templates' do
+        create_help_message_template(template: 'Layout override marker', template_type: :layout)
+
+        rendered = helper.formatted_doc('admin_reference', 'general', 'substitutions')
+
+        expect(rendered).to include('{{#is')
+        expect(rendered).not_to include('Layout override marker')
+      end
+
+      it 'ignores templates in a different category' do
+        create_help_message_template(template: 'Other category marker', category: 'guest_reference')
+
+        rendered = helper.formatted_doc('admin_reference', 'general', 'substitutions')
+
+        expect(rendered).to include('{{#is')
+        expect(rendered).not_to include('Other category marker')
+      end
+
+      it 'falls back to the markdown file when the matching template is blank' do
+        create_help_message_template(template: " \n")
+
+        rendered = helper.formatted_doc('admin_reference', 'general', 'substitutions')
+
+        expect(rendered).to include('{{#is')
+        expect(rendered).not_to be_blank
+      end
+
+      it 'strips a trailing .md from the subsection used for the template name' do
+        create_help_message_template(template: 'Normalized subsection override marker')
+
+        expect(helper.formatted_doc('admin_reference', 'general', 'substitutions.md'))
+          .to include('Normalized subsection override marker')
+      end
+
+      it 'rejects invalid libraries before looking up a message template' do
+        expect(Admin::MessageTemplate).not_to receive(:generate_content)
+
+        expect do
+          helper.formatted_doc('invalid_library', 'general', 'substitutions')
+        end.to raise_error(FphsException, /invalid help library/)
+      end
     end
 
     context 'when rendering the substitutions.md documentation page' do

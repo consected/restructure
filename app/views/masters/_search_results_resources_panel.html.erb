@@ -32,12 +32,20 @@
   # Panel-level default perspective slug (overridden per-user via AppConfiguration)
   panel_default_perspective = panel.view_options&.default_perspective
   # User / role / app-type specific default perspectives hash keyed by resource name.
-  # Values may contain {{#is}} / {{#if}} substitution blocks evaluated against the current user.
+  # Values may contain {{#is}} / {{#if}} substitution blocks evaluated against the current
+  # user's role. Only `role_name` is exposed to the substitution (issue #1362) - NOT
+  # `current_user` itself - so a literal (non-structural) tag such as {{first_name}} or
+  # {{email}} can never resolve to real per-user data here; it silently resolves blank
+  # (ignore_missing: true) instead. This keeps the rendered output identical for every
+  # user sharing a role, which is required for master_main_inner to be safely
+  # content-addressed.
+  current_user_role_name = current_user&.role_names&.first&.to_s || ''
   user_default_perspectives = Admin::AppConfiguration.hash_for(:default_activity_log_perspective, current_user)
                                                      .transform_values do |v|
     next v unless v.is_a?(String) && v.include?('{{')
 
-    Formatter::Substitution.substitute(v, data: current_user, tag_subs: nil, ignore_missing: true)&.strip
+    Formatter::Substitution.substitute(v, data: { role_name: current_user_role_name }, tag_subs: nil,
+                                           ignore_missing: true)&.strip
   end
 
   renderable = resources.each_with_object([]) do |resource, memo|

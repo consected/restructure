@@ -153,6 +153,19 @@ module OptionConfigs
       end
     end
 
+    def record_unresolved_model_reference(config_class, model_name)
+      model_names = unresolved_model_references[config_class] ||= []
+      model_names << model_name unless model_names.include?(model_name)
+    end
+
+    def unresolved_model_references?
+      unresolved_model_references.present?
+    end
+
+    def clear_unresolved_model_references(config_class)
+      unresolved_model_references.delete(config_class)
+    end
+
     #
     # Get the model reference configuration hash, based on the to_record.
     # For flexibility, this may be keyed with a singular or plural key that is one of:
@@ -178,6 +191,7 @@ module OptionConfigs
     # This is the public post-initialization API for cases where +references+ is
     # assigned directly (e.g. after runtime config changes or in tests).
     def clean_references_def
+      clear_unresolved_model_references(ExtraOptionConfigs::References)
       return unless references
 
       new_ref = ExtraOptionConfigs::References.prepare_config(references, self)
@@ -210,6 +224,10 @@ module OptionConfigs
           field_configs[k].merge!({ vc => v })
         end
       end
+    end
+
+    def unresolved_model_references
+      @unresolved_model_references ||= {}
     end
 
     # For dynamic model definitions, fields that are selection-like by naming
@@ -510,7 +528,7 @@ module OptionConfigs
           Rails.logger.warn e
           Rails.logger.warn errtext
           if Rails.env.test? || Rails.env.development?
-            $stderr.puts e
+            $stderr.puts "#{config_obj&.resource_name} - #{e}"
             $stderr.puts errtext
           end
           Rails.logger.warn 'Failed configuration YAML at:'
@@ -828,17 +846,9 @@ module OptionConfigs
       end
 
       types_to_check.uniq.each do |type|
-        defsw = [
-          'app',
-          'models',
-          'admin',
-          'defs',
-          "#{type}_standard_option_defs.yaml"
-        ]
-        path = Rails.root.join(*defsw)
-        next unless File.exist?(path)
+        content = standard_option_defs_yaml(type)
+        next unless content
 
-        content = File.read(path)
         # Match YAML anchor definitions: &anchor_name
         content.scan(/&([a-zA-Z0-9_]+)/).each do |match|
           anchors << match[0]
@@ -909,19 +919,26 @@ module OptionConfigs
 
       force_type ||= new_force_type
 
-      defsw = [
-        'app',
-        'models',
-        'admin',
-        'defs',
-        "#{force_type}_standard_option_defs.yaml"
-      ]
+      defs_yaml = standard_option_defs_yaml(force_type)
+      return content_to_update unless defs_yaml
 
-      path = Rails.root.join(*defsw)
-      return content_to_update unless File.exist?(path)
-
-      defs_yaml = File.read(path)
       "# @#{force_type}_standard_definitions_start\n#{defs_yaml}\n# @#{force_type}_standard_definitions_end\n#{content_to_update}\n"
+    end
+
+    #
+    # Read (and memoize) the contents of a standard_option_defs.yaml file for the given type.
+    # These files are static application code, not admin-editable data, so their content cannot
+    # change without a deploy/restart - memoizing avoids re-reading the same file from disk on
+    # every single option_configs parse (previously once per dynamic definition, e.g. on the
+    # admin index page - see issue #1354).
+    # @param [String] force_type
+    # @return [String, nil] file contents, or nil if the file doesn't exist
+    def self.standard_option_defs_yaml(force_type)
+      @standard_option_defs_yaml ||= {}
+      return @standard_option_defs_yaml[force_type] if @standard_option_defs_yaml.key?(force_type)
+
+      path = Rails.root.join('app', 'models', 'admin', 'defs', "#{force_type}_standard_option_defs.yaml")
+      @standard_option_defs_yaml[force_type] = File.exist?(path) ? File.read(path) : nil
     end
 
     #

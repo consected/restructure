@@ -56,6 +56,7 @@ require './db/table_generators/dynamic_models_table'
 #    skipping cached results:
 #      - skips validate and store when results are from cache
 #      - records error in job request when exception occurs
+#      - invalidates cached records when validation or storage fails
 #
 #    deleted records handling with date range:
 #      - skips deleted records validation when using date range filter
@@ -661,6 +662,63 @@ RSpec.describe 'Redcap::DataRecords cache and date range', type: :model do
 
         # This job request should NOT be picked up by last_successful_store_records_at
         expect(rc.last_successful_store_records_at).to be_nil
+      end
+
+      it 'invalidates cached records when validation or storage fails' do
+        dm = create_dynamic_model_for_sample_response
+
+        rc = Redcap::ProjectAdmin.active.first
+        rc.current_admin = @admin
+
+        stub_request_records @project[:server_url], @project[:api_key]
+
+        first_pull = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+        allow(first_pull).to receive(:store).and_raise(StandardError, 'Test error during store')
+
+        expect { first_pull.retrieve_validate_store }.to raise_error(StandardError, 'Test error during store')
+
+        second_pull = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+        expect(second_pull).to receive(:validate).and_call_original
+        expect(second_pull).to receive(:store).and_call_original
+
+        second_pull.retrieve_validate_store
+
+        expect(second_pull.retrieved_from_cache).to be false
+        expect(second_pull.storage_stage).to eq 'store complete'
+      end
+
+      it 'preserves the original error when cache invalidation fails' do
+        dm = create_dynamic_model_for_sample_response
+
+        rc = Redcap::ProjectAdmin.active.first
+        rc.current_admin = @admin
+
+        dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+        allow(dr).to receive(:retrieve).and_raise(StandardError, 'original pull failure')
+        allow(rc).to receive(:api_client).and_raise(FphsException, 'API client unavailable')
+
+        expect { dr.retrieve_validate_store }.to raise_error(StandardError, 'original pull failure')
+
+        job_request = Redcap::ClientRequest.where(
+          redcap_project_admin: rc,
+          action: 'store records'
+        ).order(created_at: :desc).first
+
+        expect(job_request.result['errors'].first['error']).to eq 'original pull failure'
+      end
+
+      it 'updates project status while storing records' do
+        dm = create_dynamic_model_for_sample_response
+
+        rc = Redcap::ProjectAdmin.active.first
+        rc.current_admin = @admin
+
+        stub_request_records @project[:server_url], @project[:api_key]
+
+        dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+        dr.retrieve_validate_store
+
+        expect(rc.reload.status).to eq Redcap::ProjectAdmin::Statuses[:storing_records]
       end
     end
 

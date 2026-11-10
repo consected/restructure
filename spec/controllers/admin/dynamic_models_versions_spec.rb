@@ -105,4 +105,57 @@ RSpec.describe Admin::DynamicModelsController, type: :controller do
       expect(diffs).to be_empty
     end
   end
+
+  # Issue #1343 - the admin versions panel must limit the number of history rows
+  # fetched/displayed and expose the true total count, so admins aren't hit with
+  # a proxy timeout when a definition has a very large version history.
+  describe 'GET #versions with a large history (issue #1343)' do
+    include DynamicModelSupport
+
+    before do
+      @user0, = create_user
+      create_admin
+      create_user
+      @dm = generate_test_dynamic_model
+      sign_in @admin
+    end
+
+    def insert_history_rows(count)
+      count.times do |i|
+        Admin::MigrationGenerator.connection.execute <<~SQL
+          insert into dynamic_model_history (dynamic_model_id, name, table_name, created_at, updated_at)
+          values (
+            #{@dm.id},
+            '#{@dm.name}',
+            '#{@dm.table_name}',
+            now() - interval '#{count - i} minutes',
+            now() - interval '#{count - i} minutes'
+          )
+        SQL
+      end
+    end
+
+    it 'limits the versions displayed and exposes the total count' do
+      stub_const('Dynamic::VersionHandler::MAX_DISPLAYED_VERSIONS', 3)
+      insert_history_rows(5)
+
+      get :versions, params: { id: @dm.id }
+
+      expect(response).to have_http_status(:ok)
+      expect(assigns(:version_limit)).to eq(3)
+      expect(assigns(:all_versions).length).to eq(3)
+      expect(assigns(:total_version_count)).to be >= 5
+    end
+
+    it 'fetches a larger cumulative limit when a page param is given, and points "load more" at the next page' do
+      stub_const('Dynamic::VersionHandler::MAX_DISPLAYED_VERSIONS', 3)
+      insert_history_rows(10)
+
+      get :versions, params: { id: @dm.id, page: 2 }
+
+      expect(assigns(:version_limit)).to eq(6)
+      expect(assigns(:all_versions).length).to eq(6)
+      expect(assigns(:next_versions_page_path)).to include('page=3')
+    end
+  end
 end

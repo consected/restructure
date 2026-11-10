@@ -112,6 +112,87 @@ module OptionConfigs
           key_type :hash_or_array, :on_complete, :on_failure
         end
 
+        # DSL: keys whose values are conditions, evaluated with ConditionalActions in condition mode.
+        # Keys are added to those inherited from the parent trigger type.
+        # @param keys [Array<Symbol>] keys to declare; none returns the effective keys
+        # @return [Array<Symbol>]
+        def condition_keys(*keys)
+          declared_keys(:@_condition_keys, :condition_keys, keys)
+        end
+
+        # DSL: keys whose values are single value expressions, evaluated with FieldDefaults.calculate_default
+        # (hash values are evaluated with ConditionalActions in value mode).
+        # @param keys [Array<Symbol>] keys to declare; none returns the effective keys
+        # @return [Array<Symbol>]
+        def value_keys(*keys)
+          declared_keys(:@_value_keys, :value_keys, keys)
+        end
+
+        # DSL: keys whose values are Hashes of field name to value expression, such as with:
+        # Each value within the Hash is evaluated at runtime as a value expression, through
+        # FieldDefaults.calculate_default or the value mode of ConditionalActions. The declaration only tells the
+        # ConditionCollector what to lint: it does not change runtime behaviour or trigger validation.
+        # @param keys [Array<Symbol>] keys to declare; none returns the effective keys
+        # @return [Array<Symbol>]
+        def value_map_keys(*keys)
+          declared_keys(:@_value_map_keys, :value_map_keys, keys)
+        end
+
+        # DSL: keys whose values are nested lists of trigger tasks, such as each: do: or case: then:
+        # @param keys [Array<Symbol>] keys to declare; none returns the effective keys
+        # @return [Array<Symbol>]
+        def task_keys(*keys)
+          declared_keys(:@_task_keys, :task_keys, keys)
+        end
+
+        # DSL: mark a trigger type whose configuration is itself a list of trigger tasks (transaction, background)
+        # @return [void]
+        def task_list_config!
+          @_task_list_config = true
+        end
+
+        # @return [true | false] true if the configuration is itself a list of trigger tasks
+        def task_list_config?
+          return @_task_list_config if defined?(@_task_list_config)
+
+          superclass.respond_to?(:task_list_config?) && superclass.task_list_config?
+        end
+
+        # DSL: mark a :named_entry trigger type as NOT supporting a direct (unwrapped) config
+        # form, even though its top-level keys happen to overlap with #allowed_keys (which
+        # would otherwise auto-detect direct form - see #validate_named_entries). Declare this
+        # when the trigger's runtime implementation always expects `label: { actual_keys... }`
+        # and would otherwise silently misinterpret an unwrapped config (see issue #1444).
+        # @return [void]
+        def no_direct_form
+          @_no_direct_form = true
+        end
+
+        # DSL: mark this trigger type as unconditionally unsafe within save_trigger.before_save
+        # when targeting the record currently being saved - it performs a genuine update of
+        # that record from within its own before_save callback chain, corrupting the outer
+        # save's dirty-tracking and silently breaking on_create/on_update/on_disable trigger
+        # dispatch (see issue #1384). Subclasses with config-dependent semantics (e.g.
+        # create_reference, which is only unsafe for certain `in:` values) should instead
+        # override #before_save_warning directly.
+        # @return [void]
+        def not_valid_in_before_save
+          @_not_valid_in_before_save = true
+        end
+
+        # Returns a warning message if the given config is unsafe to use within
+        # save_trigger.before_save, or nil if it's safe. Default checks the
+        # unconditional #not_valid_in_before_save flag; override for config-dependent cases.
+        # @param _config [Hash, Array] the trigger's configuration
+        # @return [String, nil]
+        def before_save_warning(_config)
+          return unless @_not_valid_in_before_save
+
+          'performs an update of the record being saved from within its own before_save ' \
+            'callback chain, which corrupts on_create/on_update/on_disable trigger dispatch - ' \
+            'use on_create/on_update/on_disable instead'
+        end
+
         # Accessor for key type rules hash.
         # @return [Hash{Symbol => Symbol}]
         def key_type_rules
@@ -148,7 +229,43 @@ module OptionConfigs
           end
         end
 
+        # Validate only the structural and type constraints. Nested trigger tasks
+        # do not have the context needed for descriptor-level semantic checks.
+        def validate_structural_config(config)
+          return [] if @_pattern == :delegate
+
+          return config.flat_map { |entry| validate_structural_config(entry) } if config.is_a?(Array)
+
+          return [] unless config.is_a?(Hash)
+
+          case @_pattern
+          when :direct_config
+            validate_direct(config)
+          when :named_entry
+            validate_named_entries(config)
+          else
+            []
+          end
+        end
+
+        # Validation hook for trigger tasks. Most trigger types can use their
+        # complete validation; types with context-dependent semantics may narrow it.
+        def validate_for_trigger_tasks(config)
+          validate_config(config)
+        end
+
         private
+
+        # Combine keys declared on this class with those inherited from the parent trigger type
+        # @param ivar [Symbol] instance variable holding the keys declared on this class
+        # @param reader [Symbol] DSL reader method name, used to read the parent's keys
+        # @param keys [Array<Symbol>] keys to add
+        # @return [Array<Symbol>]
+        def declared_keys(ivar, reader, keys)
+          instance_variable_set(ivar, (instance_variable_get(ivar) || []) | keys.flatten.map(&:to_sym)) if keys.any?
+          inherited = superclass.respond_to?(reader) ? superclass.public_send(reader) : []
+          (inherited | (instance_variable_get(ivar) || [])).freeze
+        end
 
         # Ensure all trigger type descriptor classes are loaded.
         # This guarantees registry lookups work regardless of spec/file load order.
@@ -188,10 +305,23 @@ module OptionConfigs
         # Auto-detects direct form when any outer key (excluding lifecycle hook
         # keys which are valid at both levels) is present in @_allowed_keys.
         # This handles trigger types whose runtime implementation accepts both a
-        # direct hash and a named-entry hash.
+        # direct hash and a named-entry hash - unless #no_direct_form was declared,
+        # in which case this shape is always a misconfiguration (see issue #1444):
+        # the runtime's `model_def.each { |label, config| ... }`/`each_value` loop
+        # would instead treat one of these keys as if it were the label, silently
+        # discarding the real config rather than raising or applying it.
         def validate_named_entries(config)
           non_lifecycle_keys = config.keys.map(&:to_sym) - NAMED_ENTRY_OUTER_KEYS
-          return validate_direct(config) if @_allowed_keys && non_lifecycle_keys.any? { |k| @_allowed_keys.include?(k) }
+          looks_like_direct_form = @_allowed_keys && non_lifecycle_keys.any? { |k| @_allowed_keys.include?(k) }
+
+          if looks_like_direct_form
+            return validate_direct(config) unless @_no_direct_form
+
+            return ["is missing its named-entry label - found key(s) #{non_lifecycle_keys.join(', ')} " \
+                    'directly under the trigger instead of nested inside an arbitrary label, e.g. ' \
+                    "`my_label: { #{non_lifecycle_keys.first}: ... }` - as configured this is silently " \
+                    'ignored at runtime rather than applied']
+          end
 
           warnings = []
           config.each do |k, inner|
@@ -243,6 +373,74 @@ module OptionConfigs
           warnings
         end
 
+        # Returns true if a config value is a dynamic substitution ({{...}}) or
+        # conditional Hash that cannot be statically validated.
+        def skip_dynamic_value?(value)
+          value.is_a?(Hash) || ((value.is_a?(String) || value.is_a?(Symbol)) && value.to_s.include?('{{'))
+        end
+
+        # Validate an app_type reference value. Returns warning strings.
+        # @param value [Object] the raw config value
+        # @param key_label [String] label for warning messages (e.g. "app_type", "store_in_app_type")
+        # @return [Array<String>]
+        def validate_app_type_ref(value, key_label)
+          return [] if value.nil?
+          return [] if skip_dynamic_value?(value)
+
+          app_type = find_app_type_for_validation(value)
+          if app_type.nil?
+            ["#{key_label} '#{value}' does not reference a known app type"]
+          elsif app_type.disabled
+            ["#{key_label} '#{value}' references a disabled app type"]
+          else
+            []
+          end
+        rescue ActiveRecord::StatementInvalid
+          []
+        end
+
+        # Validate a user reference value (by ID or email). Returns warning strings.
+        # @param value [Object] the raw config value
+        # @param key_label [String] label for warning messages (e.g. "user", "for_user")
+        # @return [Array<String>]
+        def validate_user_ref(value, key_label)
+          return [] if value.nil?
+          return [] if skip_dynamic_value?(value)
+
+          user = find_user_for_validation(value)
+          if user.nil?
+            ["#{key_label} '#{value}' does not reference a known user"]
+          elsif user.disabled
+            ["#{key_label} '#{value}' references a disabled user"]
+          elsif user.account_expired?
+            ["#{key_label} '#{value}' references an expired user"]
+          else
+            []
+          end
+        rescue ActiveRecord::StatementInvalid
+          []
+        end
+
+        def find_app_type_for_validation(value)
+          if integer_reference?(value)
+            Admin::AppType.find_by(id: value.to_i)
+          else
+            Admin::AppType.find_by(name: value.to_s)
+          end
+        end
+
+        def find_user_for_validation(value)
+          if integer_reference?(value)
+            User.find_by(id: value.to_i)
+          else
+            User.find_by(email: value.to_s)
+          end
+        end
+
+        def integer_reference?(value)
+          value.is_a?(Integer) || value.to_i.to_s == value.to_s
+        end
+
         # Validate the inner keys of a nested Hash value (or each Hash within an
         # Array value, e.g. change_user_roles' add_role_names) against the
         # allowed_keys:/key_types: rules declared via +key_type+.
@@ -282,6 +480,10 @@ module OptionConfigs
           warnings
         end
       end
+
+      # Every trigger type's +if:+ is a condition, and lifecycle hooks hold nested trigger tasks
+      condition_keys :if
+      task_keys :on_complete, :on_failure
     end
   end
 end

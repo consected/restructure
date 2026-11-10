@@ -12,6 +12,12 @@ describe 'admin config library versions', js: true, driver: $browser_driver do
     make_an_admin
   end
 
+  def format_version_timestamp_for(config_library, which)
+    rows = config_library.all_versions_query(limit: 2)
+    row = which == :current ? rows.first : rows.second
+    Object.new.extend(CommonTemplatesHelper).format_version_timestamp(row['updated_at'] || row['created_at'])
+  end
+
   it 'creates a config library, makes multiple changes, and displays version diffs' do
     # Create and update a config library programmatically to generate version history
     cl = Admin::ConfigLibrary.create!(
@@ -54,6 +60,14 @@ describe 'admin config library versions', js: true, driver: $browser_driver do
     # Verify we have multiple version diff sections
     version_sections = all('.version-diff-section')
     expect(version_sections.length).to be >= 3
+
+    # Each heading should show real timestamps, not "Unknown" (issue: history
+    # rows return real Time objects, and Time.parse(a_time) always raised,
+    # silently rescued to the literal string "Unknown")
+    version_sections.each do |section|
+      expect(section).to have_css('h4 small', text: /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/)
+      expect(section).not_to have_content('Unknown')
+    end
   end
 
   it 'shows split diff format for changed fields' do
@@ -123,6 +137,60 @@ describe 'admin config library versions', js: true, driver: $browser_driver do
     end
   end
 
+  it 'shows the heading timestamp order matching the table column order (Previous -> Current), and excludes updated_at/created_at as a diffed row' do
+    cl = Admin::ConfigLibrary.create!(
+      current_admin: @admin,
+      name: 'test_heading_order_library',
+      category: 'test',
+      format: 'yaml',
+      options: "field_1:\n  label: Original Label"
+    )
+
+    cl.current_admin = @admin
+    cl.update!(options: "field_1:\n  label: Updated Label")
+
+    admin_sign_in_with_2fa
+
+    visit '/admin/config_libraries'
+    expect(page).to have_css("#admin-item-#{cl.id}", wait: 10)
+
+    within "#admin-item-#{cl.id}" do
+      find('a.edit-entity.glyphicon-pencil').click
+    end
+
+    expect(page).to have_css('.nav-tabs', wait: 15)
+    sleep 1
+
+    within '.nav-tabs' do
+      click_link 'Versions'
+    end
+    expect(page).to have_css('#def-versions-embedded', visible: true, wait: 10)
+    expect(page).to have_css('.version-diff-section', wait: 10)
+
+    within '#embedded-config-library-def-versions-embedded .version-diff-section' do
+      # The table's "Previous Version" header column comes before "Current
+      # Version" - the heading's two timestamps must be in the same order.
+      # (thead also contains the id/created_at/updated_at identifier rows, so
+      # scope to just the first header row for the column labels.)
+      header_cells = all('thead tr').first.all('th').map(&:text)
+      expect(header_cells).to eq(['Attribute', 'Previous Version', 'Current Version'])
+
+      heading_text = find('h4').text
+      timestamps = heading_text.scan(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/)
+      expect(timestamps.length).to eq(2)
+
+      previous_updated_at = format_version_timestamp_for(cl, :previous)
+      current_updated_at = format_version_timestamp_for(cl, :current)
+      expect(timestamps).to eq([previous_updated_at, current_updated_at])
+
+      # updated_at/created_at are shown in the header row above, not repeated
+      # as a diffed row in the changes table body.
+      body_row_labels = all('tbody tr td strong').map(&:text)
+      expect(body_row_labels).not_to include('Updated At')
+      expect(body_row_labels).not_to include('Created At')
+    end
+  end
+
   it 'handles config libraries with no version history' do
     # Create a config library programmatically with no updates (only 1 version)
     cl = Admin::ConfigLibrary.create!(
@@ -168,6 +236,113 @@ describe 'admin config library versions', js: true, driver: $browser_driver do
       # A newly created config library with no updates should have no diff sections
       # (no previous version to compare against)
       expect(version_sections.length).to eq(0)
+    end
+  end
+
+  it 'shows the total version count and a truncation note when history exceeds the display limit' do
+    stub_const('Dynamic::VersionHandler::MAX_DISPLAYED_VERSIONS', 3)
+
+    cl = Admin::ConfigLibrary.create!(
+      current_admin: @admin,
+      name: 'test_version_count_library',
+      category: 'test',
+      format: 'yaml',
+      options: "field_1:\n  label: First Field"
+    )
+
+    # Insert extra history rows directly so the total exceeds the display limit
+    # without needing many slow real updates.
+    5.times do |i|
+      Admin::MigrationGenerator.connection.execute <<~SQL
+        insert into config_library_history (config_library_id, name, category, format, created_at, updated_at)
+        values (
+          #{cl.id},
+          'test_version_count_library',
+          'test',
+          'yaml',
+          now() - interval '#{5 - i} minutes',
+          now() - interval '#{5 - i} minutes'
+        )
+      SQL
+    end
+
+    admin_sign_in_with_2fa
+
+    visit '/admin/config_libraries'
+    expect(page).to have_css("#admin-item-#{cl.id}", wait: 10)
+
+    within "#admin-item-#{cl.id}" do
+      find('a.edit-entity.glyphicon-pencil').click
+    end
+
+    expect(page).to have_css('.nav-tabs', wait: 15)
+    sleep 1
+
+    within '.nav-tabs' do
+      click_link 'Versions'
+    end
+    expect(page).to have_css('#def-versions-embedded', visible: true, wait: 10)
+
+    within '#embedded-config-library-def-versions-embedded' do
+      expect(page).to have_css('.admin-version__count', text: '6 versions', wait: 10)
+      expect(page).to have_content('most recent 3 versions shown')
+    end
+  end
+
+  it 'loads more versions when the "load more" link is clicked' do
+    stub_const('Dynamic::VersionHandler::MAX_DISPLAYED_VERSIONS', 3)
+
+    cl = Admin::ConfigLibrary.create!(
+      current_admin: @admin,
+      name: 'test_load_more_library',
+      category: 'test',
+      format: 'yaml',
+      options: "field_1:\n  label: First Field"
+    )
+
+    5.times do |i|
+      Admin::MigrationGenerator.connection.execute <<~SQL
+        insert into config_library_history (config_library_id, name, category, format, options, created_at, updated_at)
+        values (
+          #{cl.id},
+          'test_load_more_library',
+          'test',
+          'yaml',
+          'field_1:#{"\n  label: Version #{i}"}',
+          now() - interval '#{5 - i} minutes',
+          now() - interval '#{5 - i} minutes'
+        )
+      SQL
+    end
+
+    admin_sign_in_with_2fa
+
+    visit '/admin/config_libraries'
+    expect(page).to have_css("#admin-item-#{cl.id}", wait: 10)
+
+    within "#admin-item-#{cl.id}" do
+      find('a.edit-entity.glyphicon-pencil').click
+    end
+
+    expect(page).to have_css('.nav-tabs', wait: 15)
+    sleep 1
+
+    within '.nav-tabs' do
+      click_link 'Versions'
+    end
+    expect(page).to have_css('#def-versions-embedded', visible: true, wait: 10)
+
+    within '#embedded-config-library-def-versions-embedded' do
+      expect(page).to have_css('.admin-version__count', text: '6 versions', wait: 10)
+      expect(page).to have_content('most recent 3 versions shown')
+      initial_section_count = all('.version-diff-section').length
+
+      click_link 'Load 3 more versions'
+
+      expect(page).to have_css('.admin-version__count', text: '6 versions', wait: 10)
+      expect(page).not_to have_content('most recent')
+      expect(all('.version-diff-section').length).to be > initial_section_count
+      expect(page).not_to have_link('Load')
     end
   end
 end

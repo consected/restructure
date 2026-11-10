@@ -12,13 +12,8 @@ RSpec.describe 'ExtraOptionConfigs::DialogBefore', type: :model do
   include DynamicModelSupport
   include ExtraOptionConfigsSupport
 
-  before(:each) do
-    create_admin
-    create_user
-    setup_access :trackers
-    setup_access :tracker_histories
-    @dm = generate_test_dynamic_model
-    setup_access :dynamic_model__test_created_by_recs, user: @user
+  before(:all) do
+    set_up_extra_options_configs
   end
 
   let(:klass) { OptionConfigs::ExtraOptionConfigs::DialogBefore }
@@ -87,6 +82,16 @@ RSpec.describe 'ExtraOptionConfigs::DialogBefore', type: :model do
         error_messages = instance.config_errors.map { |e| e[:message] }
         expect(error_messages.any? { |m| m.include?('test_field keep_label must be true or false') }).to be(true)
       end
+    end
+
+    # Regression test for issue #1456: the missing-required-keys error must not
+    # duplicate the field name (previously e.g. "test_field test_field is missing
+    # required keys [...]").
+    it 'does not duplicate the field name in the missing required keys error message (issue #1456)' do
+      instance = klass.new(test_field: { keep_label: true })
+      error_messages = instance.config_errors.map { |e| e[:message] }
+      error = error_messages.find { |m| m.include?('missing required keys') }
+      expect(error).to eq 'test_field is missing required keys [:name]'
     end
   end
 

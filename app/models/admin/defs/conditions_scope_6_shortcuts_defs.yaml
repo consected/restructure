@@ -1,0 +1,22 @@
+# Pattern 6: Shortcuts for activity completion
+# @runnable: true
+# @instance: activity_log
+# @expect: true
+
+# has_created_activity is shorthand for testing that an extra log type has
+# already been recorded in the current activity log. It expands to:
+#
+#   all_completed_activity:
+#     definition_resources:
+#       extra_log_type: <value>
+has_created_activity: primary
+
+# has_not_created_activity is the inverse, expanding to:
+#
+#   not_any_completed_activity:
+#     definition_resources:
+#       extra_log_type: <value>
+has_not_created_activity: cancelled
+
+# Both accept a single extra log type or a list of them, and may be used at the
+# top level or nested inside a selection type.

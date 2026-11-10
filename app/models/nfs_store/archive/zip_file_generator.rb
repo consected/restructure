@@ -24,7 +24,7 @@ module NfsStore
         multi_containers = retrieved_items.map{|r| r[:container_id]}.uniq.length > 1
 
         #Add files to the zip file as usual
-        Zip::File.open(temp_file.path, Zip::File::CREATE) do |zip|
+        Zip::File.open(temp_file.path, create: true) do |zip|
           retrieved_items.each do |f|
             parts = []
             if f[:parent_name].present?

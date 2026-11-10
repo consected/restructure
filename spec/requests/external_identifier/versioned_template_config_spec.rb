@@ -169,7 +169,7 @@ RSpec.describe 'ExternalIdentifier versioned template config', type: :request do
       # Reset memoization so the freshly bumped definition is re-fetched.
       ExternalIdentifier.reset_active_model_configurations!
       ExternalIdentifier.all_versions_memo = {}
-      HandlebarsPrecompiler.cleanup_public_dir
+      HandlebarsPrecompiler.cleanup_compiled_output
 
       get template_page_path(1)
 

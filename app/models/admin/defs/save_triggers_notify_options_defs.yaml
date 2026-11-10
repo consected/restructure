@@ -1,144 +1,200 @@
 # Save Trigger: Notify options
-        # An array of definitions allowing multiple notifications to be specified
-        # for a single trigger.  
+# Canonical schema
+# notify: <NotifyEntry | Array(NotifyEntry)>
+#
+# Value type
+# NotifyEntry: <Hash(
+#   type: <email | sms> (required),
+#   role: RecipientExpr,
+#   users: RecipientExpr,
+#   emails: RecipientExpr,
+#   phones: RecipientExpr,
+#   phone_records: RecipientExpr,
+#   list_type: String (required with phone_records),
+#   default_country_code: String,
+#   from_user_email: FromUserEmailValue,
+#   ignore_no_recipients: Boolean,
+#   layout_template: String (required),
+#   content_template: String,
+#   content_template_text: String | Hash,
+#   subject: String,
+#   calendar_invite: CalendarInviteValue,
+#   attachments: Array(AttachmentValue),
+#   extra_substitutions: Hash,
+#   importance: <transactional | promotional>,
+#   when: WhenValue,
+#   on_complete: TriggerTaskList,
+#   on_failure: TriggerTaskList,
+#   if: Condition,
+#   app_type: String | Integer | Hash,
+#   user: String | Integer | Hash
+# )>
+# Keys are optional unless marked (required). Exactly one of content_template or
+# content_template_text must also be set (both are individually optional, but one is required).
+#
+# Recipients: exactly one of role/users, phones, phone_records or emails should be set to
+# resolve who receives the notification. At runtime they are checked in this precedence
+# order - only the first one present is used: role/users, then phones, then phone_records,
+# then emails.
+#
+# RecipientExpr type (role, users, emails, phones, phone_records)
+# RecipientExpr: <Scalar | Array(Scalar) | Hash (conditions return_value / return_value_list lookup)>
+#
+# FromUserEmailValue type (from_user_email) - email only
+# FromUserEmailValue: <String | Hash(address: String, display_name: String)>
+#
+# CalendarInviteValue type (calendar_invite) - email only
+# CalendarInviteValue: <Hash(
+#   method: <REQUEST | CANCEL>,
+#   summary: String (required),
+#   description: String,
+#   location: String,
+#   dtstart: String (required),
+#   dtend: String,
+#   duration: String,
+#   organizer: String (required),
+#   uid: String,
+#   sequence: Integer
+# )>
+# Keys are optional unless marked (required). Either dtend or duration must be provided.
+#
+# AttachmentValue type (attachments) - email only
+# AttachmentValue: <Hash(container_id: String (required), path: String, file_name: String (required))>
+#
+# WhenValue type (when)
+# WhenValue: <Hash(wait_until: String | Hash(date: String, time: String, zone: String), wait: String)>
+# All keys are optional.
+#
+# Pattern 1: Email notification to a role (save_triggers_notify_pattern_1_email_defs.yaml)
+# Pattern 2: SMS notification to phone numbers (save_triggers_notify_pattern_2_sms_defs.yaml)
+# Pattern 3: Recipients via phone_records association (save_triggers_notify_pattern_3_phone_records_defs.yaml)
+# Pattern 4: Calendar invite, email only (save_triggers_notify_pattern_4_calendar_invite_defs.yaml)
+# Pattern 5: File attachments, email only (save_triggers_notify_pattern_5_attachments_defs.yaml)
+# See save_trigger_notify.md for the worked examples.
+#
+# Common keys - apply regardless of which pattern above is used
         notify:
-          - type: 'email|sms'
-            role: |
-              (optional) role name(s) to notify. Supports:
-              - literal string: 'admin'
-              - conditional reference: {this: {user_id: return_value}}
-              - simple template: '{{field_name}}' substitutes field value as string
-              - raw template: '{{{field_name}}}' substitutes field value preserving type
-            
-            users: |
-              (optional) list of user IDs to notify. Supports:
-              - literal value: 123
-              - array of literals: [123, 456]
-              - conditional reference with single value: {this: {user_id: return_value}}
-              - conditional reference with list: {activity_log__player_contact_phones: {master_id: <id>, user_id: return_value_list}}
-              - simple template: '{{user_id}}' substitutes field value as string
-              - raw template: '{{{user_id}}}' substitutes field value preserving type (e.g., Integer)
-              
-              Note: return_value_list retrieves an array of values from matching records
-            
-            emails: |
-              (optional) list of email addresses - not necessarily users. Supports:
-              - literal string: 'admin@example.com'
-              - array of literals or templates: ['admin@example.com', '{{some_field}}']
-              - conditional reference with single value: {this: {email: return_value}}
-              - conditional reference with list: {player_contacts: {rec_type: email, data: return_value_list}}
-              - simple template: '{{player_contact_emails.data}}' substitutes associated record field(s)
-              
-              Note: return_value_list retrieves an array of values from matching records.
-              Template substitutions for associations return arrays (e.g., ['email1@test.com', 'email2@test.com'])
-            
-            phones: |
-              (optional) list of phone numbers to notify. Supports:
-              - literal string: '+16175550118'
-              - array of literals or templates: ['+16175550118', '{{some_field}}']
-              - conditional reference with single value: {this: {phone: return_value}}
-              - conditional reference with list: {player_contacts: {rec_type: phone, data: return_value_list}}
-              - simple template: '{{data}}' substitutes field value as string
-              
-              Note: return_value_list retrieves an array of phone numbers from matching records.
-              Phone numbers are automatically cleaned and formatted with the specified default_country_code
-            phone_records: |
-              (optional) conditional reference to retrieve phone record IDs. Uses return_value_list
-              to get an array of record IDs from an associated model. Requires list_type to specify
-              the model class to use for retrieving the actual phone records.
-              
-              Example configuration:
-                dynamic_model__zeus_bulk_message_recipients:
-                  zeus_bulk_message_id:
-                    parent_references:
-                      dynamic_model__zeus_bulk_messages: 'id'
-                  disabled: false
-                  id: 'return_value_list'
-            
-            list_type: |
-              (required with phone_records) association name to use to retrieve phone records.
-              Specifies the model class that phone_records IDs belong to.
-              
-              For example: dynamic_model__zeus_bulk_message_recipients
+          role: |
+            (optional) role name(s) to notify. Supports:
+            - literal string: 'admin'
+            - conditional reference: {this: {user_id: return_value}}
+            - simple template: '{{field_name}}' substitutes field value as string
+            - raw template: '{{{field_name}}}' substitutes field value preserving type
 
-            default_country_code: '(optional) country code for SMS numbers, if they are not otherwise specified'
-            from_user_email:
-              address: 'email address the message should appear to be from'
-              display_name: 'display name for email address'
-            
-            "from_user_email(alternative)": 'string email address'
-            ignore_no_recipients: nil (default) | true - don't raise an error if no recipients are specified or found in the role
+          users: |
+            (optional) list of user IDs to notify. Supports:
+            - literal value: 123
+            - array of literals: [123, 456]
+            - conditional reference with single value: {this: {user_id: return_value}}
+            - conditional reference with list: {activity_log__player_contact_phones: {master_id: <id>, user_id: return_value_list}}
+            - simple template: '{{user_id}}' substitutes field value as string
+            - raw template: '{{{user_id}}}' substitutes field value preserving type (e.g., Integer)
 
-            layout_template: 'name of layout template'
-            content_template: 'name of content template'
-            content_template_text: |
-              alternative content template text (instead of content_template). Supports:
-              - literal string: 'Your message here'
-              - conditional reference: {this: {importance_level: return_value}}
-              - simple template: '{{field_name}}' substitutes field value into the text
-              
-              Note: Any template substitutions will be made when the content_template_text value
-              is first used. This result may include further curly templates, which
-              will be processed when the message is sent. In this way, stored records may be used to
-              represent templates, which are then rendered with current data at send time.
-            
-            subject: 'subject text'
-            calendar_invite:
-              method: '(optional, default: REQUEST) REQUEST|CANCEL - RFC 5545 method (case insensitive)'
-              summary: 'event title - supports {{curly}} substitutions'
-              description: '(optional) event description (plain text) - supports {{curly}} substitutions'
-              location: '(optional) event location - supports {{curly}} substitutions'
-              dtstart: 'start datetime (ISO format or parseable string) - supports {{curly}} substitutions'
-              dtend: '(optional if duration provided) end datetime (ISO format or parseable string) - supports {{curly}} substitutions'
-              duration: '(optional) event duration string (e.g. "90 minutes", "1 hour", "2 days") - used to calculate dtend from dtstart when dtend is not provided'
-              organizer: 'organizer email address - supports {{curly}} substitutions'
-              uid: '(optional, default: auto-generated UUID) unique event identifier - supports {{curly}} substitutions'
-              sequence: '(optional, default: 0) event revision sequence number'
+            Note: return_value_list retrieves an array of values from matching records
 
-            attachments:
-              - container_id: |
-                  NfsStore container ID containing the file to attach.
-                  Supports {{curly}} substitutions resolved at trigger time.
-                path: |
-                  (optional) path within the container (empty string for root).
-                  Supports {{curly}} substitutions resolved at trigger time.
-                file_name: |
-                  filename of the NfsStore stored file to attach.
-                  Supports {{curly}} substitutions resolved at trigger time.
+          emails: |
+            (optional) list of email addresses - not necessarily users. Supports:
+            - literal string: 'admin@example.com'
+            - array of literals or templates: ['admin@example.com', '{{some_field}}']
+            - conditional reference with single value: {this: {email: return_value}}
+            - conditional reference with list: {player_contacts: {rec_type: email, data: return_value_list}}
+            - simple template: '{{player_contact_emails.data}}' substitutes associated record field(s)
 
-            extra_substitutions:
-              data1: 'fixed data item to be substituted into the message in `\{\{extra_substitutions.data1\}\}`'
-            
-            importance: |
-              transactional (default) | promotional. Supports:
-              - literal string: 'Promotional'
-              - conditional reference: {this: {importance_level: return_value}}
-              - simple template: '{{select_result}}' substitutes field value as string
-              
-              Used for email categorization and compliance with anti-spam regulations
-            
-            when:
-              wait_until: |
-                (optional) one of
-                - ISO date
-                - {date:..., time..., zone:...}  
-                  where zone is one specified in MAPPINGS @ 
-                  https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html
+            Note: return_value_list retrieves an array of values from matching records.
+            Template substitutions for associations return arrays (e.g., ['email1@test.com', 'email2@test.com'])
 
-              wait: |
-                Time to wait from now before sending, in the form:
-                <n> seconds|minutes|hours|days|weeks|months|years
-            
-            on_complete: |
-              triggers to run when send has completed, for example update_reference:...
+          phones: |
+            (optional) list of phone numbers to notify - see Pattern 2 above. Supports:
+            - literal string: '+16175550118'
+            - array of literals or templates: ['+16175550118', '{{some_field}}']
+            - conditional reference with single value: {this: {phone: return_value}}
+            - conditional reference with list: {player_contacts: {rec_type: phone, data: return_value_list}}
+            - simple template: '{{data}}' substitutes field value as string
 
-            if: if_extras
+            Note: return_value_list retrieves an array of phone numbers from matching records.
+            Phone numbers are automatically cleaned and formatted with the specified default_country_code
 
-            app_type: |
-              optionally specify an app type to force the use of a batch user when performing actions.
-              Accepts an app type id (integer), an app type name (string), a {{curly}} substitution,
-              or a conditional Hash reference (e.g. {this: {field: return_value}}).
-            user: |
-              optionally specify a user to force use of the specified user when performing actions.
-              Accepts a user id (integer), a user email (string), a {{curly}} substitution, or a
-              conditional Hash reference (e.g. {this: {field: return_value}}).
+          phone_records: |
+            (optional) conditional reference to retrieve phone record IDs - see Pattern 3 above.
+            Uses return_value_list to get an array of record IDs from an associated model.
+            Requires list_type to specify the model class to use for retrieving the actual
+            phone records.
+
+          list_type: |
+            (required with phone_records) association name to use to retrieve phone records.
+            Specifies the model class that phone_records IDs belong to.
+
+          default_country_code: '(optional) country code for SMS numbers, if they are not otherwise specified'
+
+          from_user_email:
+            address: 'email address the message should appear to be from'
+            display_name: 'display name for email address'
+
+          "from_user_email(alternative)": 'string email address'
+          ignore_no_recipients: nil (default) | true - don't raise an error if no recipients are specified or found in the role
+
+          layout_template: 'name of layout template'  # required - see Notes
+          content_template: 'name of content template'  # one of content_template / content_template_text is required
+          content_template_text: |
+            alternative content template text (instead of content_template). Supports:
+            - literal string: 'Your message here'
+            - conditional reference: {this: {importance_level: return_value}}
+            - simple template: '{{field_name}}' substitutes field value into the text
+
+            Note: Any template substitutions will be made when the content_template_text value
+            is first used. This result may include further curly templates, which
+            will be processed when the message is sent. In this way, stored records may be used to
+            represent templates, which are then rendered with current data at send time.
+
+          subject: 'subject text - email only, see Pattern 1 above'
+
+          extra_substitutions:
+            data1: 'fixed data item to be substituted into the message in `\{\{extra_substitutions.data1\}\}`'
+
+          importance: |
+            transactional (default) | promotional. Supports:
+            - literal string: 'Promotional'
+            - conditional reference: {this: {importance_level: return_value}}
+            - simple template: '{{select_result}}' substitutes field value as string
+
+            Used for email categorization and compliance with anti-spam regulations
+
+          when:
+            wait_until: |
+              (optional) one of
+              - ISO date
+              - {date:..., time..., zone:...}  
+                where zone is one specified in MAPPINGS @ 
+                https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html
+
+            wait: |
+              Time to wait from now before sending, in the form:
+              <n> seconds|minutes|hours|days|weeks|months|years
+
+          if: if_extras
+
+          app_type: |
+            optionally specify an app type to force the use of a batch user when performing actions.
+            Accepts an app type id (integer), an app type name (string), a {{curly}} substitution,
+            or a conditional Hash reference (e.g. {this: {field: return_value}}).
+          user: |
+            optionally specify a user to force use of the specified user when performing actions.
+            Accepts a user id (integer), a user email (string), a {{curly}} substitution, or a
+            conditional Hash reference (e.g. {this: {field: return_value}}).
+
+#!defs(save_triggers_lifecycle_hooks_defs.yaml)
+
+# Notes:
+# - layout_template is always required (Messaging::MessageNotification validates its
+#   presence unconditionally) - every pattern above sets it.
+# - Exactly one of content_template or content_template_text must be set; having neither
+#   fails validation.
+# - type determines the delivery channel (email or sms). role/users resolve to User records
+#   and are notified via whichever channel type specifies, using their associated contact info.
+# - Recipients are resolved by whichever of role/users, phones, phone_records or emails is
+#   present first (see the precedence order above) - combining more than one form in the same
+#   entry is redundant, since only the first match is used.
+# - calendar_invite and attachments (Patterns 4 and 5) are additive extras layered onto an
+#   email notification - they have no effect when type: sms.
+# - notify: may be given as a single Hash (one notification) or an Array of Hashes to send
+#   multiple distinct notifications from the same trigger.

@@ -12,13 +12,8 @@ RSpec.describe 'ExtraOptionConfigs::ViewOptions', type: :model do
   include DynamicModelSupport
   include ExtraOptionConfigsSupport
 
-  before(:each) do
-    create_admin
-    create_user
-    setup_access :trackers
-    setup_access :tracker_histories
-    @dm = generate_test_dynamic_model
-    setup_access :dynamic_model__test_created_by_recs, user: @user
+  before(:all) do
+    set_up_extra_options_configs
   end
 
   let(:klass) { OptionConfigs::ExtraOptionConfigs::ViewOptions }
@@ -70,7 +65,7 @@ RSpec.describe 'ExtraOptionConfigs::ViewOptions', type: :model do
 
       expect(error_messages.any? do |msg|
         msg.include?('hide_unless_creatable must be true or false') &&
-          msg.include?("current value: \"yes\" (String)")
+          msg.include?('current value: "yes" (String)')
       end).to be(true)
     end
   end

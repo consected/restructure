@@ -81,12 +81,16 @@ module UserAccessHandler
   end
 
   #
-  # The full list of active role names for the current app_type
+  # The full list of active role names for the current app_type, alphabetically ordered so
+  # #role_names.first (used e.g. by Formatter::Substitution's {{role_name}} tag) is
+  # deterministic rather than depending on incidental DB row order - otherwise, for a
+  # multi-role user, {{role_name}}-driven content baked into a shared content-addressed
+  # Handlebars artifact (issue #1362) could flap between runs.
   # @return [Array{String}]
   def role_names
     clear_role_names! if @latest_user_role != Admin::UserRole.latest_update
 
-    @role_names ||= user_roles.active.pluck(:role_name)
+    @role_names ||= user_roles.active.order(:role_name).pluck(:role_name)
   end
 
   #

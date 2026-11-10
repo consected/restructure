@@ -48,12 +48,15 @@ class ActivityLog::ActivityLogsController < UserBaseController
     end
     if @item
       caption ||= @item.data
-      item_list ||= @implementation_class.view_attribute_list -
+      # view_attribute_list returns Symbols; normalise to Strings to match fields_to_sync
+      item_list ||= @implementation_class.view_attribute_list.map(&:to_s) -
                     @implementation_class.fields_to_sync.map(&:to_s) -
                     ['tracker_history_id']
     else
       caption ||= 'log item'
-      item_list ||= @implementation_class.view_blank_log_attribute_list - ['tracker_history_id']
+      item_list ||= @implementation_class.view_blank_log_attribute_list.map(&:to_s) -
+                    @implementation_class.fields_to_sync.map(&:to_s) -
+                    ['tracker_history_id']
     end
 
     cb = {}
@@ -301,7 +304,13 @@ class ActivityLog::ActivityLogsController < UserBaseController
       raw_default = defaults[resource_name.to_sym].presence || defaults[resource_name].presence
       if raw_default.present?
         resolved = if raw_default.is_a?(String) && raw_default.include?('{{')
-                     Formatter::Substitution.substitute(raw_default, data: current_user, tag_subs: nil,
+                     # Only role_name is exposed to the substitution (issue #1362) - mirrors
+                     # the fix in masters/_search_results_resources_panel.html.erb, so a
+                     # literal (non-structural) tag such as {{first_name}} can never resolve
+                     # to real per-user data here; it silently resolves blank instead.
+                     current_user_role_name = current_user&.role_names&.first.to_s
+                     substitution_data = { role_name: current_user_role_name }
+                     Formatter::Substitution.substitute(raw_default, data: substitution_data, tag_subs: nil,
                                                                      ignore_missing: true)&.strip
                    else
                      raw_default

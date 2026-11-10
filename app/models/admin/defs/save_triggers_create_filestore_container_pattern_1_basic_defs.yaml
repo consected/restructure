@@ -1,0 +1,4 @@
+# Pattern 1: Directory name from a literal/substituted string
+create_filestore_container:
+  name: '{{last_name}}-{{first_name}}'
+  create_with_role: filestore user

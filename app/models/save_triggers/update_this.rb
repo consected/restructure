@@ -52,19 +52,35 @@ class SaveTriggers::UpdateThis < SaveTriggers::SaveTriggersBase
           handle_with_result with_result, vals
           handle_with_attributes update_with, vals
 
-          # Retain the flags so that the #update! doesn't change
-          # what we need to report through the API
           res = @item
+          in_before_save_trigger = @item.respond_to?(:in_before_save_trigger) && @item.in_before_save_trigger
+
+          # Retain the flags so that a genuine (non-reentrant) #update! below doesn't
+          # change what we need to report through the API
           created = res._created
           updated = res._updated
           disabled = res._disabled
+
           @item.transaction do
             res.ignore_configurable_valid_if = true if force_not_valid
             res.force_save! if force_not_editable_save
-            new_vals = vals.merge(current_user: @item.current_user || @item.user, skip_save_trigger: true)
-            res.update! new_vals
+            ei_vals = vals.delete(:embedded_item)
 
-            ei_vals = vals[:embedded_item]
+            if in_before_save_trigger
+              # `res` is the very record currently in the middle of being saved (we're
+              # running as one of its own before_save triggers). Calling #update!/#save!
+              # here would be a reentrant save on a not-yet-fully-saved record, corrupting
+              # the outer save's own dirty-tracking (saved_change_to_id?/
+              # saved_change_to_updated_at?/saved_change_to_disabled?) and causing its
+              # on_create/on_update/on_disable trigger dispatch to silently pick the wrong
+              # action (see issue #1384). Instead, just apply the attribute changes
+              # directly so they're persisted as part of the outer save.
+              res.assign_attributes vals
+            else
+              new_vals = vals.merge(current_user: @item.current_user || @item.user, skip_save_trigger: true)
+              res.update! new_vals
+            end
+
             res.update_embedded_item(ei_vals, force_not_editable_save:, force_not_valid:) if ei_vals
           end
           res._created = created

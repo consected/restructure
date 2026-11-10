@@ -1,0 +1,9 @@
+# Pattern 4: Reference an existing record instead of creating a new one (to_existing_record)
+create_reference:
+  player_contact:
+    in: this
+    to_existing_record:
+      record_id:
+        player_contacts:
+          rank: 5
+          id: return_value

@@ -7,6 +7,8 @@ module OptionConfigs
     class Case < Base
       trigger_name :case
       pattern :delegate
+      condition_keys :when
+      task_keys :then, :else
     end
   end
 end

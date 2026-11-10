@@ -1,0 +1,12 @@
+# Pattern 4: Referring to the current definition's own records
+# @runnable: true
+# @instance: activity_log
+# @expect: true
+
+# `definition_resources` resolves to the association for the definition the
+# current record belongs to - the activity log for an activity log entry, or the
+# dynamic model / external identifier otherwise. It avoids naming the resource
+# explicitly, so a definition can be copied between configurations unchanged.
+all:
+  definition_resources:
+    extra_log_type: primary

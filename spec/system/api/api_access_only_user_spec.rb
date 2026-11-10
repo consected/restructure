@@ -11,6 +11,7 @@
 # - API-only user can make POST requests with token auth
 # - Regular user without 2FA setup gets a non-200 response (existing security preserved)
 # - API-only user cannot reach the authenticated application via browser login
+# - API-only user bypasses interactive 2FA setup without fabricated OTP state
 #
 # These tests use curl to exercise the real HTTP API, mirroring the pattern
 # established in api_token_spec.rb.
@@ -58,9 +59,10 @@ describe 'API access only user - Issue #1025', js: true, driver: $browser_driver
     @api_user.update!(app_type:)
     let_user_create :player_contacts, alt_user: @api_user
 
-    # Verify preconditions: API user has 2FA auto-confirmed
+    # Verify preconditions: API user bypasses interactive 2FA setup
     @api_user.reload
-    expect(@api_user.otp_required_for_login).to be true
+    expect(@api_user.otp_secret).to be_nil
+    expect(@api_user.otp_required_for_login).to be_falsey
     expect(@api_user.two_factor_setup_required?).to be false
 
     # Create a regular user that has NOT completed 2FA setup (to test the redirect still happens)

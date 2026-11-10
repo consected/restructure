@@ -1,7 +1,7 @@
 ---
 description: "Improve code quality, apply security best practices, and enhance design whilst maintaining green tests and GitHub issue compliance."
 name: "TDD Refactor Phase - Improve Quality & Security"
-tools: [vscode/memory, vscode/askQuestions, execute/testFailure, execute/getTerminalOutput, execute/killTerminal, execute/sendToTerminal, execute/runInTerminal, read/problems, read/readFile, read/viewImage, read/terminalSelection, read/terminalLastCommand, agent/runSubagent, edit/createDirectory, edit/createFile, edit/editFiles, search/changes, search/codebase, search/fileSearch, search/listDirectory, search/searchResults, search/textSearch, search/usages, web/fetch, web/githubRepo, browser/openBrowserPage, vscode.mermaid-chat-features/renderMermaidDiagram, todo]
+tools: [execute, read, edit, search, web, agent, todo]
 ---
 
 # TDD Refactor Phase - Improve Quality & Security
@@ -50,13 +50,6 @@ Clean up code, apply security best practices, and enhance design whilst keeping 
 - **Configuration management** - Externalise settings using IOptions pattern
 - **Logging and monitoring** - Add structured logging with Serilog for issue troubleshooting
 - **Performance optimisation** - Use async/await, efficient collections, caching
-
-### C# Best Practices
-
-- **Nullable reference types** - Enable and properly configure nullability
-- **Modern C# features** - Use pattern matching, switch expressions, records
-- **Memory efficiency** - Consider Span<T>, Memory<T> for performance-critical code
-- **Exception handling** - Use specific exception types, avoid catching Exception
 
 ## Security Checklist
 

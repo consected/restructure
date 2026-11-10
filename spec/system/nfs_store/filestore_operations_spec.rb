@@ -12,6 +12,10 @@
 #   - Moving files between folders
 #   - Downloading single and multiple files
 #   - Sending a file to trash
+#   - Downloading a stored file whose on-disk location has been replaced with a symlink
+#     receives a friendly placeholder response instead of following it or showing a
+#     generic error (NfsStore::HandlesContainerFile#raise_if_symlink!,
+#     FsException::SymlinkBlocked, NfsStore::DownloadsController#render_symlink_blocked)
 #
 # Regression test for Issue #878:
 #   Error when renaming or sending files to trash due to
@@ -237,6 +241,41 @@ describe 'Filestore file operations', js: true, driver: $browser_driver, type: :
       expect(file_exists_in_browser?(new_filename)).to be true
       expect(file_exists_in_browser?(original_filename)).to be false
     end
+
+    it 'preserves escaped filename characters through rename and on disk (Issue #1492)' do
+      navigate_to_master(@master.id)
+      expand_phone_log_tab
+      wait_for_filestore_container
+
+      unique_part = SecureRandom.hex(4)
+      original_filename = "roundtrip-#{unique_part} &amp; <draft> \"quoted\".txt"
+      upload_file_to_filestore(create_temp_test_file(filename: original_filename))
+
+      stored_file = @container.stored_files.find_by!(file_name: original_filename)
+      stored_file.current_user = @user
+      original_retrieval_path = stored_file.retrieval_path
+      expect(File.exist?(original_retrieval_path)).to be(true)
+
+      select_file_in_browser(original_filename)
+      open_filestore_menu
+      click_rename_file_menu_item
+      expect(page).to have_field('new_name', with: original_filename)
+
+      renamed_filename = "renamed-#{unique_part} <final> &amp; \"quoted\".txt"
+      rename_file_to(renamed_filename)
+      refresh_filestore_list
+
+      expect(file_exists_in_browser?(renamed_filename)).to be(true)
+      expect(file_exists_in_browser?(original_filename)).to be(false)
+
+      stored_file.reload
+      stored_file.current_user = @user
+      renamed_retrieval_path = stored_file.retrieval_path
+      expect(stored_file.file_name).to eq(renamed_filename)
+      expect(File.basename(renamed_retrieval_path)).to eq(renamed_filename)
+      expect(File.exist?(renamed_retrieval_path)).to be(true)
+      expect(File.exist?(original_retrieval_path)).to be(false)
+    end
   end
 
   describe 'Send file to trash' do
@@ -382,6 +421,69 @@ describe 'Filestore file operations', js: true, driver: $browser_driver, type: :
       expand_folder(new_folder_name)
       expect(file_exists_in_browser?(filename)).to be true
     end
+
+    it 'renders a hostile folder name as literal text in the move modal (Issue #1492)' do
+      navigate_to_master(@master.id)
+      expand_phone_log_tab
+      wait_for_filestore_container
+
+      filename = "xss-move-test-#{SecureRandom.hex(4)}.txt"
+      test_file_path = create_temp_test_file(filename:)
+      upload_file_to_filestore(test_file_path)
+      select_file_in_browser(filename)
+      open_filestore_menu
+      click_move_files_menu_item
+
+      folder_name = "<img src=x onerror='window.__xss=1'>-#{SecureRandom.hex(3)}"
+      move_files_to_folder(folder_name)
+      refresh_filestore_list
+      expect(folder_exists_in_browser?(folder_name)).to be true
+
+      expand_folder(folder_name)
+      expect(file_exists_in_browser?(filename)).to be true
+      select_file_in_browser(filename)
+      open_filestore_menu
+      click_move_files_menu_item
+
+      expect_move_modal_path_as_literal_text(folder_name)
+    end
+
+    it 'keeps stored folder paths out of move-modal HTML attributes (Issue #1492)' do
+      navigate_to_master(@master.id)
+      expand_phone_log_tab
+      wait_for_filestore_container
+
+      filename = "xss-attribute-test-#{SecureRandom.hex(4)}.txt"
+      upload_file_to_filestore(create_temp_test_file(filename:))
+      select_file_in_browser(filename)
+      open_filestore_menu
+      click_move_files_menu_item
+
+      folder_name = 'x" data-xss-marker="y"><img src=x data-xss-probe=issue1492-attribute ' \
+                    'onerror=window.__issue1492_attribute_xss=1>'
+      flag = '__issue1492_attribute_xss'
+      reset_xss_flag(flag)
+      move_files_to_folder(folder_name)
+      expect_xss_flag_unset(flag)
+      refresh_filestore_list
+      expect(folder_exists_in_browser?(folder_name)).to be(true)
+
+      safe_filename = "safe-source-#{SecureRandom.hex(4)}.txt"
+      upload_file_to_filestore(create_temp_test_file(filename: safe_filename))
+      select_file_in_browser(safe_filename)
+      reset_xss_flag(flag)
+      open_filestore_menu
+      click_move_files_menu_item
+
+      destination_paths = move_modal_add_folder_paths
+      select_move_destination_folder(folder_name)
+
+      aggregate_failures('issue #1492 stored folder path handling') do
+        expect(destination_paths).to include("./#{folder_name}")
+        expect_move_modal_destination_as_literal(folder_name, 'issue1492-attribute')
+        expect_xss_flag_unset(flag)
+      end
+    end
   end
 
   describe 'File download' do
@@ -448,6 +550,94 @@ describe 'Filestore file operations', js: true, driver: $browser_driver, type: :
 
       # Verify no error occurred
       expect(has_error_alert?).to be(false), "Unexpected error: #{error_alert_text}"
+    end
+  end
+
+  describe 'Symlink protection' do
+    it 'returns a friendly placeholder instead of following a symlink planted at a stored file location' do
+      # Navigate to the master record
+      navigate_to_master(@master.id)
+
+      # Expand the phone log tab
+      expand_phone_log_tab
+
+      # Wait for the filestore container to be visible
+      wait_for_filestore_container
+
+      # Create and upload a real test file via the UI
+      filename = "symlink-blocked-#{SecureRandom.hex(4)}.txt"
+      test_file_path = create_temp_test_file(filename:)
+      upload_file_to_filestore(test_file_path)
+      expect(file_exists_in_browser?(filename)).to be true
+
+      stored_file = @container.stored_files.find_by!(file_name: filename)
+      retrieval_path = stored_file.retrieval_path
+
+      # Stand-in for a file outside the container entirely - e.g. another user's home
+      # directory, or any other file the app server process can read.
+      secret_path = Rails.root.join('tmp', "secret-#{SecureRandom.hex}.txt").to_s
+      File.write(secret_path, 'unauthorized secret content')
+
+      begin
+        # Replace the stored file's on-disk entry with a symlink, simulating tampering
+        # by some means other than the app's own upload code.
+        File.delete(retrieval_path)
+        File.symlink(secret_path, retrieval_path)
+
+        select_file_in_browser(filename)
+        click_download_button
+
+        # A blocked symlink is a deliberate safety response, not an application error -
+        # it must not show up as a scary generic error alert.
+        expect(has_error_alert?).to be(false), "Unexpected error: #{error_alert_text}"
+
+        # Verify the actual served response, via same-origin requests from within the
+        # authenticated browser session (so they go through real routing, auth and access
+        # control - not just a Ruby-level model check). This is the same URL the filestore
+        # UI itself constructs for a single-file download (see
+        # app/assets/javascripts/app/_fpa_ajax_processors_nfs_store.js).
+        download_url = "/nfs_store/downloads/#{@container.id}?activity_log_id=#{@activity_log.id}" \
+                       "&activity_log_type=#{@activity_log.class.to_s.ns_underscore}" \
+                       "&download_id=#{stored_file.id}&retrieval_type=stored_file"
+
+        # Plain browser navigation (an <a href> click, an ambiguous Accept header) gets an
+        # actual small text file, not an error page.
+        download_response = page.evaluate_script(<<~JS)
+          (function() {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', #{download_url.to_json}, false);
+            xhr.send(null);
+            return { status: xhr.status, body: xhr.responseText, type: xhr.getResponseHeader('Content-Type') };
+          })()
+        JS
+
+        expect(download_response['status']).to eq(200)
+        expect(download_response['body']).to eq('Symbolic link file not returned.')
+        expect(download_response['type']).to include('text/plain')
+
+        # An explicit JSON/AJAX request gets a structured, non-error body the UI can key
+        # off of instead of a generic failure toast. 409 (not 200), since this represents
+        # a blocked security event, not an unconditional success.
+        json_response = page.evaluate_script(<<~JS)
+          (function() {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', #{download_url.to_json}, false);
+            xhr.setRequestHeader('Accept', 'application/json');
+            xhr.send(null);
+            return { status: xhr.status, body: xhr.responseText };
+          })()
+        JS
+
+        expect(json_response['status']).to eq(409)
+        parsed = JSON.parse(json_response['body'])
+        expect(parsed).to eq(
+          'blocked' => true,
+          'reason' => 'symbolic_link',
+          'message' => 'Symbolic link file not returned.'
+        )
+      ensure
+        File.delete(secret_path) if File.exist?(secret_path)
+      end
     end
   end
 end

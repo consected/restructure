@@ -29,6 +29,7 @@ These options appear outside the `default:` key.
 - [labels](../general/labels.md) — field label overrides
 - [show_if](../general/show_if.md) — conditional field visibility
 - [view_options](../general/view_options.md) — layout, ordering, embedding, and UI class settings
+- [view_handlers](../general/view_handlers.md) — model handlers for rec types, ranks, contacts, addresses and subjects
 - [filestore](../general/filestore_container.md) — attach a filestore container
 - [save_action](../general/save_action.md) — post-save UI actions
 - [field_options](../general/field_options.md) — per-field configuration (values, validators, edit_as, big-select)
@@ -58,6 +59,12 @@ These options appear outside the `default:` key.
 ## Conditions Reference
 
 - [Conditions](../general/conditions.md) — full reference for condition syntax used in `*_if` options and trigger `if:` clauses
+- [Record sources](../general/conditions_record_sources.md) — `this`, `referring_record`, `user` and reference traversal
+- [Operators and values](../general/conditions_operators.md) — comparison operators, JSON elements, calculations and dynamic values
+- [Returning values](../general/conditions_returns.md) — `return_value`, `return_result`, `return_constant` and `lookup`
+- [Search scope](../general/conditions_scope.md) — `masters:`, `no_masters:`, `users`, item flags and activity shortcuts
+- [Record scoping](../general/scoping.md) — how the *Foreign key name* and `foreign_key_through_external_id` decide which records conditions and substitutions can reach
+- [Validation messages](../general/conditions_validation.md) — `invalid_error_message`, `validate:` and `hide_error`
 
 ## Standard Options (Reusable Anchors)
 

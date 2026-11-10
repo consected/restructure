@@ -10,6 +10,7 @@ module Dynamic
       after_save :handle_batch_schedule
       attr_accessor :configurations, :data_dictionary, :options_constants, :foreign_key_through_external_id,
                     :failed_option_configs
+      attr_reader :option_configs_parse_error
     end
 
     class_methods do
@@ -135,6 +136,18 @@ module Dynamic
         @active_model_configurations[ckey] = dma
       end
 
+      # Reuse the generated definition when its timestamp still matches.
+      def cached_definition_for(definition)
+        cached = definition_cache[definition.id]
+        same_definition_version?(cached, definition) ? cached : definition
+      end
+
+      def same_definition_version?(cached, definition)
+        return false unless cached&.updated_at && definition.updated_at
+
+        [cached.updated_at.to_i, cached.updated_at.usec] == [definition.updated_at.to_i, definition.updated_at.usec]
+      end
+
       # Get all the resource names for options configs in all active dynamic definitions
       # Used by user filestore filters
       # @param [Proc] an optional block may be passed to allow filtering based
@@ -145,7 +158,9 @@ module Dynamic
       def all_option_configs_resource_names(&)
         res = []
 
-        @all_option_configs_resource_names ||= active_model_configurations.map(&:option_configs)
+        @all_option_configs_resource_names ||= active_model_configurations.map do |definition|
+          cached_definition_for(definition).option_configs
+        end
 
         @all_option_configs_resource_names.each do |a|
           elts = if block_given?
@@ -170,7 +185,9 @@ module Dynamic
       def all_option_configs_grouped_resources(&)
         res = {}
 
-        @all_option_configs_resource_names ||= active_model_configurations.map(&:option_configs)
+        @all_option_configs_resource_names ||= active_model_configurations.map do |definition|
+          cached_definition_for(definition).option_configs
+        end
 
         @all_option_configs_resource_names.each do |a|
           elts = if block_given?
@@ -316,7 +333,7 @@ module Dynamic
         if user
           user = User.find_active_by_email_or_id(user)
           if app_type && user.app_type != app_type
-            user.app_type = app_type 
+            user.app_type = app_type
             user.save
           end
         elsif app_type
@@ -448,6 +465,7 @@ module Dynamic
       @failed_option_configs = nil
       @option_configs = nil if force
       @option_configs ||= self.class.options_provider.parse_config(self, force)
+      @option_configs_parse_error = nil
       if raise_bad_configs
         self.class.options_provider.raise_bad_configs @option_configs
       else
@@ -459,6 +477,8 @@ module Dynamic
       Rails.logger.error "Error retrieving option_configs for #{self.class.name}/#{id}: #{e}"
       Rails.logger.error e.short_string_backtrace
       @failed_option_configs = true
+      # Without option configs the parse itself raised; configuration validation errors leave them set
+      @option_configs_parse_error = e.message unless @option_configs
       raise if raise_bad_configs == true || raise_bad_configs == e.class || (
         raise_bad_configs.is_a?(Array) && raise_bad_configs&.include?(e.class)
       )
@@ -468,6 +488,20 @@ module Dynamic
 
     def failed_option_configs?
       @failed_option_configs
+    end
+
+    def option_configs_have_unresolved_references?
+      return false unless @option_configs
+
+      @option_configs.any?(&:unresolved_model_references?)
+    end
+
+    # Names of models that the parsed option configs could not resolve
+    # @return [Array<String>]
+    def unresolved_model_reference_names
+      return [] unless @option_configs
+
+      @option_configs.flat_map { |config| config.unresolved_model_references.values.flatten }.uniq
     end
 
     #

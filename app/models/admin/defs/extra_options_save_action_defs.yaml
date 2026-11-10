@@ -1,4 +1,29 @@
 # save_action options
+# Canonical schema
+# save_action: <Hash(
+#   label: String | Array(String),
+#   on_create: SaveActionEventValue,
+#   on_update: SaveActionEventValue,
+#   on_save: SaveActionEventValue
+# )>
+# All keys are optional.
+#
+# SaveActionEventValue type (on_create / on_update / on_save)
+# SaveActionEventValue: <Hash(
+#   create_next_creatable: Hash(if: Condition),
+#   show_panel: ActionEntry | Array(ActionEntry),
+#   hide_panel: ActionEntry | Array(ActionEntry),
+#   refresh_panel: ActionEntry | Array(ActionEntry),
+#   expand_reference: ActionEntry | Array(ActionEntry),
+#   go_to_master: Boolean,
+#   redirect_to_url: ActionEntry
+# )>
+# All keys are optional.
+#
+# ActionEntry type
+# ActionEntry: <Hash(value: String, if: Condition)>
+# All keys are optional. Condition uses the standard conditions syntax, see conditions.md.
+#
   save_action:
     label: button label 
     # May also use an array of labels for multiple alternative buttons, in combination with show_if control of the one shown
@@ -32,3 +57,9 @@
       notes: |
         on_save: provides a shorthand for on_create and on_update. on_create
         and on_update override on_save configurations.
+
+# Notes:
+# - on_save cascades into on_create and on_update as a base (merged in first); any key
+#   also present directly under on_create/on_update takes precedence over the on_save value.
+# - expand_reference/refresh_panel accept a single ActionEntry or an ordered Array of them;
+#   for expand_reference the first entry whose `if:` matches is used.

@@ -190,12 +190,17 @@ class Admin::ConfigLibrary < Admin::AdminBase
       # resolve to the correct library content via versioned definitions.
       # Skip the touch when versioning is disabled globally (DisableVDef)
       # or when the definition uses use_current_version (always uses latest).
-      unless m.uses_current_definition_version?
+      if m.uses_current_definition_version?
+        m.force_option_config_parse
+        m.class.definition_cache[m.id] = m
+      else
         m.current_admin ||= current_admin
         m.touch
+        m.force_option_config_parse
       end
-      m.force_option_config_parse
     end
+
+    ms.map(&:class).uniq.each(&:reset_active_model_configurations!)
   end
 
   def valid_options

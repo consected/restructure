@@ -21,6 +21,11 @@ module UserActionLogging
     self.class.name.singularize.ns_underscore.sub('_controller', '')
   end
 
+  # klass's no_master_association flag, or nil if klass doesn't implement it
+  def no_master_association_for(klass)
+    klass.no_master_association if klass.respond_to?(:no_master_association)
+  end
+
   def log_user_item_action
     if is_a?(ReportsController) && action_name == 'show'
       log_user_index_action force_item_type: :masters
@@ -29,14 +34,13 @@ module UserActionLogging
 
     return if no_action_log || self.class.name.in?(ExcludeClasses)
 
-    # Use rescue rather than checking respond to, since this had weird behaviors
     master = @master
+    # Default to true (no association) unless object_instance says otherwise below
+    nma = true
 
-    if defined?(object_instance) && object_instance
-      nma = object_instance.class.no_master_association
-      master ||= object_instance.master unless nma
-    else
-      nma = true
+    if defined?(object_instance) && (instance = object_instance)
+      nma = no_master_association_for(instance.class)
+      master ||= instance.master if !nma && instance.respond_to?(:master)
     end
 
     master_id = master.id if master
@@ -69,17 +73,22 @@ module UserActionLogging
   def log_user_index_action(force_item_type: nil)
     return if no_action_log || self.class.name.in?(ExcludeClasses) || @no_masters
 
-    # Use rescue rather than checking respond to, since this had weird behaviors
     master = @master
+    nma = nil
 
-    if defined?(object_instance) && object_instance
-      nma = object_instance.class.no_master_association
-      master ||= object_instance.master unless nma
+    if defined?(object_instance) && (instance = object_instance)
+      nma = no_master_association_for(instance.class)
+      master ||= instance.master if !nma && instance.respond_to?(:master)
     end
 
-    if defined?(objects_instance) && objects_instance
-      nma = objects_instance.model.no_master_association
-      master ||= objects_instance.first&.master unless nma
+    if defined?(objects_instance) && (instances = objects_instance)
+      nma = no_master_association_for(instances.model)
+
+      # only query for the first record when it might actually be needed
+      if !nma && !master
+        first = instances.first
+        master = first.master if first.respond_to?(:master)
+      end
     end
 
     master_id = master.id if master

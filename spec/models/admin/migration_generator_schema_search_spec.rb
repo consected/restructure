@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# Regression coverage for blank schema names in generated schema-migration files.
+# This guards against creating invalid CREATE SCHEMA migrations when no schema name
+# is available for an app or test environment.
 require 'rails_helper'
 
 RSpec.describe 'Admin::MigrationGenerator schema search path handling', type: :model do
@@ -145,6 +148,18 @@ RSpec.describe 'Admin::MigrationGenerator schema search path handling', type: :m
         # Should return 'test' since it's earlier in the search path than 'dynamic_test'
         expect(hash[@gap_table]).to eq('test')
       end
+    end
+  end
+
+  describe 'schema generation' do
+    it 'skips migration creation when the schema name is blank' do
+      migration_generator = Admin::MigrationGenerator.new('')
+      allow(Rails.logger).to receive(:warn)
+
+      expect(migration_generator).not_to receive(:write_db_migration)
+
+      expect { migration_generator.add_schema }.not_to raise_error
+      expect(Rails.logger).to have_received(:warn).with(/schema.*blank/i)
     end
   end
 

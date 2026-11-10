@@ -5,6 +5,7 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
 
   BODY_METHODS = %w[put patch lock mkcol propfind proppatch unlock].freeze
   NO_BODY_METHODS = %w[head delete options trace copy move].freeze
+  MAX_ERROR_BODY_LENGTH = 10_000
 
   # Re-exposed so existing callers and rescue blocks keep working after the
   # SSRF guard was extracted into Utilities::UrlSafety.
@@ -49,15 +50,7 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
           end
 
           vals[response_code_field] = response_code if response_code_field
-          if local_data_name
-            @item.save_trigger_results[local_data_name] = orig_data
-            @item.save_trigger_results["#{local_data_name}_http_response_code"] = response_code
-            @item.save_trigger_results["#{local_data_name}_submitted_request"] = {
-              'data' => @submitted_request_data,
-              'url' => url_from_config,
-              'method' => method_from_config
-            }
-          end
+          store_local_data_results(local_data_name, orig_data)
 
           # We calculate the conditional if inside each item, rather than relying
           # on the outer processing in ActivityLogOptions#calc_save_trigger_if
@@ -71,28 +64,18 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
           uri = url_from_config.split('?').first
           logmsg = "pull_external_data #{method_from_config} -> #{uri} = response code #{response_code} " \
                    "&& success_if_res #{success_if_res}"
-          if response_code == 200 && success_if_res != false
+          if response_code.between?(200, 299) && success_if_res != false
             Rails.logger.info logmsg
           else
             Rails.logger.warn logmsg
           end
 
+          raise FphsException, "pull_external_data success_if condition failed for #{uri}" if success_if_res == false
+
           next unless vals.present?
 
-          # Retain the flags so that the #update! doesn't change
-          # what we need to report through the API
-          res = @item
-          created = res._created
-          updated = res._updated
-          disabled = res._disabled
-          @item.transaction do
-            res.ignore_configurable_valid_if = true if config[:force_not_valid]
-            res.force_save! if config[:force_not_editable_save]
-            res.update! vals.merge(current_user: @item.current_user || @item.user, skip_save_trigger: true)
-          end
-          res._created = created
-          res._updated = updated
-          res._disabled = disabled
+          raise_if_in_before_save_trigger!
+          update_item(vals, config)
         end
       end
     end
@@ -162,32 +145,37 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
     format = sub_config[:format]
 
     self.response_code = response.code.to_i
-
-    unless response_code == 200
-      return if response_code&.in?(allow_response_codes)
-
-      raise FphsException,
-            "#{http_method} external data: failed request with code '#{response_code}' from url #{url}"
-    end
-
+    local_data_name = @this_config[:local_data]
+    store_response_headers(local_data_name, response_headers(response))
+    # Store response code and submitted request details now, before any raise below, so
+    # on_failure hooks have them regardless of whether the request ultimately succeeds.
+    store_response_metadata(local_data_name)
     content = response.body
+    successful_response = response_code.between?(200, 299)
+    allowed_non_success_response = !successful_response && response_code.in?(allow_response_codes)
+
+    unless successful_response || allowed_non_success_response
+      store_failure_content(local_data_name, content, format)
+      uri = url.split('?').first
+      raise FphsException,
+            "#{http_method} external data: failed request with code '#{response_code}' from url #{uri}; " \
+            "response body: #{content.to_s.truncate(MAX_ERROR_BODY_LENGTH)}"
+    end
 
     if content.blank?
-      return if allow_empty_result
+      return if allow_empty_result || allowed_non_success_response
 
-      raise FphsException, "#{http_method} external data: empty content received from #{url}"
+      store_local_data_results(local_data_name, content)
+      uri = url.split('?').first
+      raise FphsException, "#{http_method} external data: empty content received from #{uri}"
     end
 
-    case format
-    when 'xml'
-      data = Hash.from_xml(content)
-    when 'json'
-      data = JSON.parse(content)
-    when 'text'
-      data = content
+    begin
+      parse_response_content(content, format, fallback_to_raw: allowed_non_success_response)
+    rescue JSON::ParserError, REXML::ParseException, ActiveSupport::XMLConverter::DisallowedType
+      store_local_data_results(local_data_name, content)
+      raise
     end
-
-    data
   end
 
   def url_from_config
@@ -223,6 +211,18 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
 
   private
 
+  # Reentrant #update! on `this` from within a before_save trigger corrupts the outer
+  # save's dirty-tracking, silently breaking on_create/on_update/on_disable dispatch (issue #1384).
+  def raise_if_in_before_save_trigger!
+    return unless @item.respond_to?(:in_before_save_trigger) && @item.in_before_save_trigger
+
+    raise FphsException,
+          'pull_external_data can not update the record being saved from within a ' \
+          'before_save trigger - the outer save is still in progress, so this write would ' \
+          'be lost or corrupt on_create/on_update/on_disable trigger dispatch (issue #1384); ' \
+          'use on_create/on_update/on_disable instead'
+  end
+
   #
   # Serialize the send_data / post_data configuration value to a JSON string
   # or calculate it as a default field value
@@ -244,6 +244,76 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
   # @param [Net::HTTPGenericRequest] req
   def apply_headers(req)
     header_config&.each { |k, v| req[k] = v }
+  end
+
+  def parse_response_content(content, format, fallback_to_raw: false)
+    case format
+    when 'xml'
+      Hash.from_xml(content)
+    when 'json'
+      JSON.parse(content)
+    when 'text', nil
+      content
+    end
+  rescue JSON::ParserError, REXML::ParseException, ActiveSupport::XMLConverter::DisallowedType
+    raise unless fallback_to_raw
+
+    content
+  end
+
+  def response_headers(response)
+    response.each_header.with_object({}) do |(name, value), headers|
+      headers[name] = value
+      headers[name.id_underscore.to_sym] = value
+    end
+  end
+
+  def store_response_headers(local_data_name, headers)
+    return unless local_data_name && headers
+
+    @item.save_trigger_results["#{local_data_name}_http_response_headers"] = headers
+  end
+
+  def store_response_metadata(local_data_name)
+    return unless local_data_name
+
+    @item.save_trigger_results["#{local_data_name}_http_response_code"] = response_code
+    @item.save_trigger_results["#{local_data_name}_submitted_request"] = {
+      'data' => @submitted_request_data,
+      'url' => url_from_config,
+      'method' => method_from_config
+    }
+  end
+
+  # Best-effort attempt to store a failed response's body under the local_data key, so
+  # on_failure hooks can inspect the error content the same way a successful result would be.
+  def store_failure_content(local_data_name, content, format)
+    return unless local_data_name
+
+    @item.save_trigger_results[local_data_name] = parse_response_content(content, format, fallback_to_raw: true)
+  end
+
+  def store_local_data_results(local_data_name, data)
+    return unless local_data_name
+
+    @item.save_trigger_results[local_data_name] = data
+  end
+
+  def update_item(vals, config)
+    # Retain the flags so that the #update! doesn't change
+    # what we need to report through the API
+    res = @item
+    created = res._created
+    updated = res._updated
+    disabled = res._disabled
+    @item.transaction do
+      res.ignore_configurable_valid_if = true if config[:force_not_valid]
+      res.force_save! if config[:force_not_editable_save]
+      res.update! vals.merge(current_user: @item.current_user || @item.user, skip_save_trigger: true)
+    end
+    res._created = created
+    res._updated = updated
+    res._disabled = disabled
   end
 
   #

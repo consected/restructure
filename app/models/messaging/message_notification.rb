@@ -8,6 +8,7 @@ module Messaging
     StatusInProgress = 'in progress'
     StatusFailed = 'failed'
     ValidImportance = %w[Promotional Transactional].freeze
+    ValidMessageTypes = %w[email sms].freeze
 
     include WorksWithItem
 
@@ -22,9 +23,11 @@ module Messaging
     # No minimum on recipient_user_ids, since recipient_data may be used instead
     validates :recipient_user_ids, length: { maximum: MaxRecipients }, if: :app_type
     validates :layout_template_name, presence: true
+    validates :message_type, presence: true, inclusion: { in: ValidMessageTypes }
+    validates :subject, presence: true, if: :email?
+    validates :importance, inclusion: { in: ValidImportance }, allow_blank: true
 
-    # The type of message - either email or sms currently
-    validates :message_type, presence: true
+    validate :layout_template_valid?
     validate :content_template_specified?
     validate :item_type_valid?, if: :app_type
 
@@ -63,12 +66,10 @@ module Messaging
     end
 
     #
-    # Set the importance of the message, checking the value is valid
+    # Set the importance of the message, normalizing case if present
     # @param [String] value - one of ValidImportance (currently Promotional | Transactional)
     def importance=(value)
-      value = value.to_s.capitalize
-      raise FphsException, "Incorrect importance: #{value}" unless value.in?(ValidImportance)
-
+      value = value.to_s.capitalize if value.present?
       super
     end
 
@@ -414,13 +415,32 @@ module Messaging
     end
 
     #
-    # Validation to check if the content template text or name is set/
-    # Sets error if not set
+    # Validation to check if the layout template exists for the message type
+    # Sets error if not found
+    # @return [Boolean]
+    def layout_template_valid?
+      applicable = layout_template_name.present? && message_type.present? && message_type.to_s.in?(ValidMessageTypes)
+      return false unless applicable
+      return false if layout_template
+
+      errors.add :layout_template_name, "is not a valid layout template for #{message_type}: '#{layout_template_name}'"
+    end
+
+    #
+    # Validation to check if the content template text or name is set and valid
+    # Sets error if not set or template not found
     # @return [Boolean]
     def content_template_specified?
-      return if content_template_text || content_template_name
+      if content_template_name.present?
+        return false unless message_type.present? && message_type.to_s.in?(ValidMessageTypes)
 
-      errors.add :content_template_name, 'or content template text must be set'
+        unless content_template
+          errors.add :content_template_name,
+                     "is not a valid content template for #{message_type}: '#{content_template_name}'"
+        end
+      elsif content_template_text.blank?
+        errors.add :content_template_name, 'or content template text must be set'
+      end
     end
 
     #

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Tests for SaveTriggers::Case - Issue #944, Issue #984
+# Tests for SaveTriggers::Case - Issues #944, #984, and #1495
 # Implements a case/when/else save trigger block that evaluates conditions
 # and executes the triggers associated with the first matching condition,
 # or an else block if no conditions match.
@@ -254,6 +254,57 @@ RSpec.describe SaveTriggers::Case, type: :model do
       end
     end
 
+    context 'with an each trigger in a branch' do
+      it 'executes each through the nested trigger-list dispatcher' do
+        config = [
+          when_branch(:select_call_direction, 'to player', [
+                        {
+                          each: {
+                            value: %w[first second],
+                            do: [
+                              log_trigger('Case {{save_trigger_results.iterator_index}} => {{save_trigger_results.iterator_value}}')
+                            ]
+                          }
+                        }
+                      ])
+        ]
+
+        trigger = SaveTriggers::Case.new(config, @activity_log)
+
+        expect(Rails.logger).to receive(:info).with(/Case 0 => first/)
+        expect(Rails.logger).to receive(:info).with(/Case 1 => second/)
+        allow(Rails.logger).to receive(:info)
+
+        expect { trigger.perform }.not_to raise_error
+        expect(@activity_log.save_trigger_results['iterator_index']).to eq 1
+        expect(@activity_log.save_trigger_results['iterator_value']).to eq 'second'
+      end
+
+      it 'executes each in an else branch through the nested trigger-list dispatcher' do
+        config = [
+          when_branch(:select_call_direction, 'from player', [log_trigger('Should not run')]),
+          else_branch([
+                        {
+                          each: {
+                            value: %w[first second],
+                            do: [
+                              log_trigger('Else {{save_trigger_results.iterator_index}} => {{save_trigger_results.iterator_value}}')
+                            ]
+                          }
+                        }
+                      ])
+        ]
+
+        trigger = SaveTriggers::Case.new(config, @activity_log)
+
+        expect(Rails.logger).to receive(:info).with(/Else 0 => first/)
+        expect(Rails.logger).to receive(:info).with(/Else 1 => second/)
+        allow(Rails.logger).to receive(:info)
+
+        expect { trigger.perform }.not_to raise_error
+      end
+    end
+
     context 'storing results' do
       it 'stores results in save_trigger_results - Issue #944' do
         config = [
@@ -464,6 +515,11 @@ RSpec.describe SaveTriggers::Case, type: :model do
     it 'can be resolved via trigger_class - Issue #944' do
       klass = OptionConfigs::ExtraOptions.trigger_class(:case)
       expect(klass).to eq(SaveTriggers::Case)
+    end
+
+    it 'registers each as a composable trigger - Issue #1495' do
+      expect(OptionConfigs::ExtraOptionImplementers::SaveTriggers::ValidSaveTriggers).to include(:each)
+      expect(OptionConfigs::ExtraOptions.trigger_class(:each)).to eq(SaveTriggers::Each)
     end
   end
 end

@@ -37,10 +37,13 @@
   </div>
 
   <label>authentication</label>
-  <p>All API requests require token authentication via query parameters:</p>
-  <pre class="api-panel__auth-params">use_app_type={{app_type_id}}
-user_email={{user_email}}
-user_token={{user_token}}</pre>
+  <p>All API requests require token authentication via HTTP headers:</p>
+  <pre class="api-panel__auth-params">X-User-Email: {{user_email}}
+X-User-Token: {{user_token}}</pre>
+  <p>As a fallback, you can alternatively pass the email and token as query parameters.
+    This risks leaking sensitive information in URLs and server logs.</p>
+  <pre class="api-panel__auth-params">?user_email={{user_email}}
+&user_token={{user_token}}</pre>
 
   <label>curl examples</label>
 
@@ -52,10 +55,10 @@ user_token={{user_token}}</pre>
     </p>
     <% curl_create_alone = <<~CURL.chomp
       curl -XPOST -H "Content-Type: application/json" \\
+        -H "X-User-Email: {{user_email}}" \\
+        -H "X-User-Token: {{user_token}}" \\
         "https://server.example.com/masters/create.json?\\
-      use_app_type={{app_type_id}}&\\
-      user_email={{user_email}}&\\
-      user_token={{user_token}}" \\
+      use_app_type={{app_type_id}}" \\
         -d '{
         "master": {
           "embedded_item": {
@@ -86,10 +89,10 @@ user_token={{user_token}}</pre>
     </p>
     <% curl_create_with_assoc = <<~CURL.chomp
       curl -XPOST -H "Content-Type: application/json" \\
+        -H "X-User-Email: {{user_email}}" \\
+        -H "X-User-Token: {{user_token}}" \\
         "https://server.example.com/masters/create.json?\\
-      use_app_type={{app_type_id}}&\\
-      user_email={{user_email}}&\\
-      user_token={{user_token}}" \\
+      use_app_type={{app_type_id}}" \\
         -d '{
         "master": {
           "embedded_item": {
@@ -127,10 +130,10 @@ user_token={{user_token}}</pre>
     <p><strong>Read master record</strong></p>
     <% curl_read = <<~CURL.chomp
       curl -XGET \\
+        -H "X-User-Email: {{user_email}}" \\
+        -H "X-User-Token: {{user_token}}" \\
         "https://server.example.com/masters/{{master_id}}.json?\\
-      use_app_type={{app_type_id}}&\\
-      user_email={{user_email}}&\\
-      user_token={{user_token}}"
+      use_app_type={{app_type_id}}"
     CURL
     %>
     <pre class="api-panel__curl-block"><%= curl_read %></pre>

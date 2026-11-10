@@ -1,0 +1,7 @@
+# Pattern 2: SMS notification to phone numbers
+notify:
+  type: sms
+  phones: '{{data}}'
+  default_country_code: '+1'
+  layout_template: standard sms layout
+  content_template_text: 'Your appointment is on {{event_date}}'

@@ -9,6 +9,7 @@
     <li role="presentation"><a href="#flags" aria-controls="flags" role="tab" data-toggle="tab">Flags</a></li>
     <li role="presentation"><a href="#subject-accuracy" aria-controls="subject-accuracy" role="tab" data-toggle="tab">Subject Accuracy</a></li>
     <li role="presentation"><a href="#user-access-controls" aria-controls="user-access-controls" role="tab" data-toggle="tab">User Access Controls</a></li>
+    <li role="presentation"><a href="#def-versions" aria-controls="def-versions" role="tab" data-toggle="tab">Versions</a></li>
     <li role="presentation"><a href="#api-definitions" aria-controls="api-definitions" role="tab" data-toggle="tab">API</a></li>
   </ul>
   <!-- Tab panes -->
@@ -70,6 +71,10 @@
     <% else %>
       <p>Not authorized to administer user access controls</p>
     <% end %>
+    </div>
+
+    <div role="tabpanel" class="tab-pane on-open-click" id="def-versions">
+      <%= render partial: 'admin/reports/versions_panel', locals: { object_instance: @report } %>
     </div>
 
     <div role="tabpanel" class="tab-pane" id="api-definitions">

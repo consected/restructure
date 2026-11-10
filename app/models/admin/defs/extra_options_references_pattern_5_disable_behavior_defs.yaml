@@ -1,8 +1,8 @@
 # Pattern 5: Disable and reload behavior
-  references:
-    model_name:
-      prevent_disable: true | <condition Hash>
-      also_disable_record: false | true
-      allow_disable_if_not_editable: true | <condition Hash>
-      prevent_reload_on_save: true | false
-      action_position: top | bottom
+references:
+  model_name:
+    prevent_disable: true | <condition Hash>
+    also_disable_record: false | true
+    allow_disable_if_not_editable: true | <condition Hash>
+    prevent_reload_on_save: true | false
+    action_position: top | bottom

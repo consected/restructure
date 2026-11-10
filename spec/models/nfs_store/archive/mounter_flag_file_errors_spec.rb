@@ -15,11 +15,20 @@
 # - a hint about likely causes (filesystem mount issues or role/access problems)
 #
 # These tests use a stubbed stored_file to avoid requiring actual NFS filesystem setup.
+#
+# fake_archive_path must still live under the real configured nfs_store root -
+# Filesystem#raise_if_symlink_in_path! (called ahead of every flag file write since this
+# spec was written) fails closed for any path outside that root. A guaranteed-nonexistent
+# subdirectory keeps the guard's lstat walk hitting ENOENT (fail-open, no raise) on the
+# first component, leaving these FileUtils/File stubs as the only thing that raises.
 
 require 'rails_helper'
 
 RSpec.describe NfsStore::Archive::Mounter, 'flag file error handling - Issue911', type: :model do
-  let(:fake_archive_path) { '/nfs_store/gid600/containers/test_archive.zip' }
+  let(:fake_archive_path) do
+    File.join(NfsStore::Manage::Filesystem.nfs_store_directory, "nonexistent-#{SecureRandom.hex(4)}",
+              'test_archive.zip')
+  end
   let(:fake_file_name) { 'test_archive.zip' }
 
   let(:fake_current_user) do
@@ -368,6 +377,35 @@ RSpec.describe NfsStore::Archive::Mounter, 'flag file error handling - Issue911'
         expect do
           described_class.mount_all(relation)
         end.to raise_error(FsException::Action, /Errno::EACCES/)
+      end
+    end
+
+    context 'when a stored file has no accessible retrieval_path (no role grants access)' do
+      let(:inaccessible_stored_file) do
+        instance_double(
+          'NfsStore::Manage::StoredFile',
+          retrieval_path: nil,
+          file_name: 'inaccessible.zip',
+          id: 43,
+          container: fake_container,
+          current_user_role_names: %w[file_store_role]
+        )
+      end
+
+      before do
+        allow(described_class).to receive(:has_archive_extension?)
+          .with(inaccessible_stored_file).and_return(true)
+        allow(described_class).to receive(:has_archive_extension?)
+          .with(stored_file_for_mount_all).and_return(true)
+        allow(File).to receive(:ctime).with(fake_archive_path).and_return(Time.now)
+      end
+
+      it 'skips the inaccessible file without raising, and does not abort the rest of the batch' do
+        relation = double('ActiveRecord::Relation', all: [inaccessible_stored_file, stored_file_for_mount_all])
+
+        expect do
+          described_class.mount_all(relation)
+        end.not_to raise_error
       end
     end
   end

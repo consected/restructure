@@ -1,0 +1,6 @@
+# Pattern 3: Resolve the container by name or by id instead of from_this
+generate_document:
+  content_template_text: '<p>doc content</p>'
+  container:
+    name: container-name
+  filename: 'generated-report-{{id}}.html'

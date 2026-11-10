@@ -39,7 +39,7 @@ RSpec.describe SaveTriggers::GenerateDocument, type: :model do
     change_setting('AllowDynamicMigrations', false)
   end
 
-  before :each do
+  before :all do
     setup_nfs_store
     @master = @player_contact.master
     @master.current_user = @user
@@ -60,7 +60,9 @@ RSpec.describe SaveTriggers::GenerateDocument, type: :model do
       template: '<html><body>{{main_content}}</body></html>',
       current_admin: @admin
     )
+  end
 
+  before :example do
     # Create an activity log instance with a filestore container
     @al = @player_contact.activity_log__player_contact_phones.create!(
       select_call_direction: 'from player',

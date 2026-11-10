@@ -73,14 +73,27 @@ The name should be underscored or hyphenated, and represents the page *slug* for
 
 For example: `/info_pages/ipa_screening__intro_call_faq`
 
+### Help Page Overrides
+
+An active message template can override a page in the help libraries. Configure it with:
+
+- **Category:** one of `guest_reference`, `admin_reference`, `user_reference`, `app_reference`, `dev_reference`, or `api_reference`.
+- **Name:** the help page's section and subsection separated by `/`, such as `main/login_issues`. Do not include the `.md` extension.
+- **Message type:** `dialog`.
+- **Template type:** `content`.
+
+Help pages fall back to their `.md` file when no matching active template exists, or when the template is disabled or generates blank content. Templates support Markdown and message-template substitutions. Access control is unchanged: each page and its override are available under the same authorization rules as the corresponding help library.
+
 ### UI Templates
 
-The *plain* message type with template type *content* is used to configure UI specific messages to the end user. These UI template
+The following UI template
 blocks are typically dependent on the server environment, and allow for admin configuration of the messages presented to guide
 users in the app usage and meet the policies of a specific organization.
 
 Only if a UI template block with the appropriate name is defined will the block appear in the UI. Although not essential, it is
 recommended that the category option be set to **ui** to keep the definitions grouped.
+
+Use template type **content** and message type set to *is a* **plain** for plain text or **dialog** for a markdown editor.
 
 The current UI template names are
 used in the following forms / pages:
@@ -101,6 +114,9 @@ used in the following forms / pages:
 - `ui user credential text` - configurable text to appear in a user password change template document
 
 ### HTML Markup Snippets
+
+The *plain* message type with template type *content* is used to configure UI specific CSS and Javascript to be
+embedded into the app page.
 
 - `ui page css - {app type name}` - plain CSS to place in a *style* block in the *head* section
 - `ui page js - {app type name}` - plain Javascript to place in a *style* block in the *head* section

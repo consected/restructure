@@ -23,6 +23,10 @@ These options appear outside any `default:` or extra log type key.
 
 - [Extra Log Type](../general/extra_log_type.md) — defining named extra log type keys
 
+## Parent Field Synchronization
+
+- [Parent field synchronization](parent_field_synchronization.md) — automatic parent-field synchronization and the `_configurations.no_sync_fields` opt-out
+
 ## Common Options (within `default:` and each extra log type)
 
 - [label / button_label](../general/label.md) — display and add-button labels
@@ -72,6 +76,12 @@ These options are used in activity logs that manage NFS filestore containers. Ty
 ## Conditions Reference
 
 - [Conditions](../general/conditions.md) — full reference for condition syntax used in `*_if` options and trigger `if:` clauses
+- [Record sources](../general/conditions_record_sources.md) — `this`, `referring_record`, `user` and reference traversal
+- [Operators and values](../general/conditions_operators.md) — comparison operators, JSON elements, calculations and dynamic values
+- [Returning values](../general/conditions_returns.md) — `return_value`, `return_result`, `return_constant` and `lookup`
+- [Search scope](../general/conditions_scope.md) — `masters:`, `no_masters:`, `users`, item flags and activity shortcuts
+- [Record scoping](../general/scoping.md) — which records conditions and substitutions can reach, through the master record
+- [Validation messages](../general/conditions_validation.md) — `invalid_error_message`, `validate:` and `hide_error`
 
 ## Standard Options (Reusable Anchors)
 

@@ -1,7 +1,7 @@
 # Pattern 2: Embedded-reference presentation
-  view_options:
-    show_embedded_at_top: true | false
-    always_embed_reference: reference name | never
-    always_embed_creatable_reference: reference name | never
-    hide_unless_creatable: true | false
-    only_create_as_reference: true | false
+view_options:
+  show_embedded_at_top: true | false
+  always_embed_reference: reference name | never
+  always_embed_creatable_reference: reference name | never
+  hide_unless_creatable: true | false
+  only_create_as_reference: true | false

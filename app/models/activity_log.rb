@@ -61,6 +61,18 @@ class ActivityLog < ActiveRecord::Base
     :extra_log_types
   end
 
+  def additional_configuration_notices(levels:)
+    return [] unless levels.include?(:errors)
+    return [] unless configurations&.dig(:no_sync_fields).present?
+
+    implementation_class.no_sync_fields_configuration_notices
+  rescue StandardError => e
+    [Dynamic::ActivityLogSyncHandler.no_sync_fields_configuration_notice(
+      definition: self,
+      message: "could not be validated: #{e.message}"
+    )]
+  end
+
   def human_name
     name
   end
@@ -649,6 +661,7 @@ class ActivityLog < ActiveRecord::Base
         add_model_to_list res
       rescue StandardError => e
         failed = true
+        record_generation_failure(e)
         warn "Failure creating activity log model definition. #{e.inspect}\n#{e.short_string_backtrace}"
         logger.info <<~END_TEXT
           *************************************************************************************
@@ -663,6 +676,7 @@ class ActivityLog < ActiveRecord::Base
     else
       # Check that the implementation has been successful
       unless implementation_class_defined?(klass, fail_without_exception: true)
+        record_generation_failure('generated class failed the implementation class check (see log)')
         warn 'Failure checking activity log model definition.'
         logger.info <<~END_TEXT
           *************************************************************************************

@@ -48,6 +48,10 @@ module LimitedAccessControl
     # @return [ActiveRecord::Relation]
     def join_limit_to_assigned(uac, current_user)
       assoc_name = uac.resource_name.to_sym
+      if assoc_name.to_s.end_with?('_item_flags')
+        raise FphsException, "Item flags can not be used to control limited access (#{assoc_name})"
+      end
+
       assoc = (new.send(assoc_name) if new.respond_to?(assoc_name))
 
       case uac.access

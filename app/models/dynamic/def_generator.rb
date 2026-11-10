@@ -14,8 +14,10 @@ module Dynamic
       after_save :reset_active_model_configurations!, if: -> { @regenerate || disabled }
       after_save :handle_config_triggers
 
-      # This double reset is intentional
-      after_commit :reset_active_model_configurations!, if: -> { @regenerate || disabled }
+      # This double reset is intentional; options-only edits skip regeneration but still leave loaded records stale
+      after_commit :reset_active_model_configurations!, if: lambda {
+        @regenerate || disabled || saved_change_to_attribute?(self.class.option_configs_attr)
+      }
 
       after_commit :update_tracker_events, if: -> { @regenerate }
       after_commit :clean_schema, if: -> { @regenerate }
@@ -27,6 +29,11 @@ module Dynamic
     end
 
     class_methods do
+      # Messages for definitions whose implementation class failed to generate, keyed by definition id
+      def generation_failures
+        @generation_failures ||= {}
+      end
+
       #
       # Run through the configurations to implement them and make them available for use
       # Since ActivityLog types actually preload DynamicModel and ExternalIdentifier types
@@ -121,6 +128,7 @@ module Dynamic
             next unless d.options_text&.include?('# @library ')
 
             d.force_option_config_parse(raise_bad_configs: false)
+            definition_cache[d.id] = d
           end
           return
         end
@@ -177,6 +185,17 @@ module Dynamic
       end
 
       # End of class_methods
+    end
+
+    # Definitions parsed before a referenced class was generated later in the same pass drop that reference
+    def self.resolve_cached_forward_references!
+      [DynamicModel, ActivityLog, ExternalIdentifier].each do |definition_class|
+        definition_class.definition_cache.each_value do |definition|
+          next unless definition.option_configs_have_unresolved_references?
+
+          definition.force_option_config_parse(raise_bad_configs: false)
+        end
+      end
     end
 
     #
@@ -315,6 +334,11 @@ module Dynamic
       self.class.preload
       Rails.logger.info 'Reloading column definitions'
       implementation_class.reset_column_information
+
+      if respond_to?(:item_type_name) && ItemFlag.active_class_names.include?(item_type_name.ns_underscore)
+        ItemFlag.add_master_association(item_type_name.ns_underscore)
+      end
+
       Rails.logger.info 'Refreshing item types'
       Classification::GeneralSelection.item_types refresh: true
     end
@@ -384,10 +408,17 @@ module Dynamic
     # Add an item to this list
     def add_model_to_list(m)
       tn = implementation_model_name
+      self.class.generation_failures.delete(id)
       self.class.models[tn] = m
       logger.info "Added new model #{tn}"
       self.class.model_names << tn unless self.class.model_names.include? tn
       Resources::Models.add(m)
+    end
+
+    # Remember why this definition's class could not be generated, until it next generates successfully
+    # @param [Exception | String] error
+    def record_generation_failure(error)
+      self.class.generation_failures[id] = error.to_s
     end
 
     # Remove an item from the list of available dynamic classes
@@ -426,9 +457,8 @@ module Dynamic
       # This may fail if an underlying dependent class (parent class) has been redefined by
       # another dynamic implementation, such as external identifier.
       # A missing class is also expected here on first generation, since there is nothing to remove yet
-      return unless implementation_class_defined?(klass, fail_without_exception: true,
-                                                         fail_without_exception_newable_result: true,
-                                                         not_found_ok: true)
+      # Check the exact constant being removed; implementation_class_defined? instantiates the model.
+      return unless klass.const_defined?(model_class_name, false)
 
       remove_const_for(klass, model_class_name)
     rescue StandardError => e

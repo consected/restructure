@@ -1,0 +1,12 @@
+# Pattern 3: Suppressing a validation message
+# @runnable: false
+
+# hide_error: true stops a failing field condition from adding a message to the
+# form. Use it when the field is not visible to the user, or when a single
+# top-level message already explains the failure.
+all:
+  this:
+    invalid_error_message: 'Complete the earlier steps before submitting'
+    internal_state_field:
+      condition: 'IS NOT NULL'
+      hide_error: true

@@ -125,5 +125,5 @@ Run with: `bundle exec rspec spec/system/dynamic_model_show_if_spec.rb`
 ## Related Documentation
 
 - [Admin Reference: Substitutions](../../admin_reference/general/substitutions.md) - Using embedded_item in show_if
-- [Admin Reference: Conditions](../../../app/models/admin/defs/conditions_defs.yaml) - Complete condition syntax
+- [Admin Reference: Conditions](../../admin_reference/general/conditions.md) - Complete condition syntax
 - [Admin Reference: show_if Option](../../admin_reference/general/options/show_if.md) - show_if configuration options

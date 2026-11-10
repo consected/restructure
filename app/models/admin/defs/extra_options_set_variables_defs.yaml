@@ -1,9 +1,21 @@
 # set_variables options
-  # Define an ordered list of variables that are evaluated at runtime and accessible via
-  # {{variables.varname}} substitutions, or `element: variables.varname` in conditional calculations.
-  # Each entry has a `name`, a `value` (which may include {{substitutions}}), and an optional
-  # `if` condition (using standard conditional syntax).
-  # Later entries with the same name override earlier ones, allowing conditional defaulting.
+# Canonical schema
+# set_variables: <Array(SetVariableEntry)>
+#
+# Value type
+# SetVariableEntry: <Hash(
+#   name: String (required),
+#   value: ValueExpr (required),
+#   if: Condition
+# )>
+# Keys are optional unless marked (required).
+#
+# ValueExpr type (value)
+# ValueExpr: <String | {{substitution}} | Hash(object: Hash(key: String))>
+#
+# Condition type (if) - standard conditions syntax, see conditions.md
+# Condition: <Hash(selection_type: record_source: field_conditions)>
+#
   set_variables:
     - name: varname
       value: some default value
@@ -22,3 +34,13 @@
         all:
           this:
             field_name: expected_value
+
+# Notes:
+# - Entries are processed in order; later entries with the same name override earlier
+#   ones, allowing a default value to be set first and then conditionally overridden.
+# - Variables are accessible via {{variables.varname}} substitutions, or
+#   `element: variables.varname` in conditional calculations.
+# - The `object:` value form is accessible with dot notation, e.g. {{variables.hashvar.key1}}.
+# - Unlike `_constants` (global, static, no conditions), set_variables are scoped per
+#   option type and support {{substitution}} values plus an `if:` condition.
+# - Entries missing `name` or `value` are silently filtered out rather than raising.

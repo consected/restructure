@@ -68,7 +68,9 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
         next
       end
 
-      new_mn = create_message_notification
+      new_mn = create_message_notification_or_record_error
+      next unless new_mn
+
       res = queue_job
       @item.save_trigger_results['notify_messages'] << new_mn
       @item.save_trigger_results['notify_results'] << true
@@ -77,11 +79,26 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
       next unless @item.respond_to?(:background_job_ref) && res&.provider_job
 
       @item.set_background_job_ref res
+
+      raise_if_in_before_save_trigger!
+
       @item.save
     end
   end
 
   private
+
+  # Reentrant save of `this` from within a before_save trigger corrupts the outer
+  # save's dirty-tracking, silently breaking on_create/on_update/on_disable dispatch (issue #1384).
+  def raise_if_in_before_save_trigger!
+    return unless @item.respond_to?(:in_before_save_trigger) && @item.in_before_save_trigger
+
+    raise FphsException,
+          'notify can not persist background_job_ref on the record being saved from within a ' \
+          'before_save trigger - the outer save is still in progress, so this write would be ' \
+          'lost or corrupt on_create/on_update/on_disable trigger dispatch (issue #1384); use ' \
+          'on_create/on_update instead'
+  end
 
   def init_attribs(config)
     @config = config
@@ -166,9 +183,9 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
     @receiving_user_ids.uniq!
 
     # Clean up user list to remove users that are set to no-send emails (if an email is being sent)
-    # or are template users
+    # or are template users or have expired accounts
     rusers = User.active.where(id: @receiving_user_ids)
-    rusers = rusers.reject { |u| u.a_template_or_batch_user? || (email? && u.do_not_email) }
+    rusers = rusers.reject { |u| u.a_template_or_batch_user? || u.account_expired? || (email? && u.do_not_email) }
     @receiving_user_ids = rusers.map(&:id)
   end
 
@@ -380,6 +397,17 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
   # @return [<Type>] <description>
   def importance
     @importance ||= calc_field_or_return(@config[:importance]) if @config[:importance]
+  end
+
+  # Rescues MessageNotification validation failures so one bad notify entry doesn't abort the rest.
+  def create_message_notification_or_record_error
+    create_message_notification
+  rescue ActiveRecord::RecordInvalid => e
+    msg = "Failed to create message notification: #{e.message}"
+    Rails.logger.warn msg
+    @item.save_trigger_results['notify_results'] << false
+    @item.save_trigger_results['notify_errors'] << msg
+    nil
   end
 
   def create_message_notification

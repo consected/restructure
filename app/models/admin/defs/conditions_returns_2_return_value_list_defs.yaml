@@ -1,0 +1,11 @@
+# Pattern 2: Returning a list of values
+# @runnable: true
+# @instance: activity_log
+# @return_json: ["12345"]
+
+# return_value_list returns an array holding the field value from every matching
+# record, most recently created first.
+all:
+  addresses:
+    city: portland
+    zip: return_value_list

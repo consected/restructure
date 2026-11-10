@@ -3,6 +3,12 @@ _nfs_store.fs_browser = function ($outer) {
 
   var last_count = {};
 
+  var attr_equals = function (attr, value) {
+    return function () {
+      return value !== undefined && $(this).attr(attr) === value;
+    };
+  };
+
   var get_container_id = function ($this) {
     var d = $this.attr('data-container-id');
     if (d) {
@@ -105,8 +111,7 @@ _nfs_store.fs_browser = function ($outer) {
       for (var k in extra_params) {
         if (extra_params.hasOwnProperty(k)) {
           var v = extra_params[k];
-          v = v.replace(/"/, '&quot;')
-          form_ep.append('<input type="hidden" name="nfs_store_download[' + k + ']" value="' + v + '" />');
+          form_ep.append($('<input type="hidden">').attr({ name: 'nfs_store_download[' + k + ']', value: v }));
         }
       }
     }
@@ -218,7 +223,7 @@ _nfs_store.fs_browser = function ($outer) {
     var total_checked = all_checked.length;
     var total_checked_folders = all_checked_folders.length;
 
-    var first_file = all_checked.first().siblings('.browse-filename').html();
+    var first_file = all_checked.first().siblings('.browse-filename').text();
 
     var $folders = all_checked.first().parents('.container-folder-items');
     var $folder_top = $folders.not('[data-folder-items="."]').last();
@@ -256,7 +261,9 @@ _nfs_store.fs_browser = function ($outer) {
     var $checkboxes_in_folder = folder.find('> .container-entry input[type="checkbox"]');
     var all_checked = $checkboxes_in_folder.length == $checkboxes_in_folder.closest(':checked').length;
 
-    $browser.find('.container-folder input[type="checkbox"][data-folder-path="' + path + '"] ').prop('checked', all_checked);
+    $browser.find('.container-folder input[type="checkbox"]')
+      .filter(attr_equals('data-folder-path', path))
+      .prop('checked', all_checked);
 
     count_downloads($this);
   };
@@ -264,7 +271,9 @@ _nfs_store.fs_browser = function ($outer) {
   var folder_checked = function ($this) {
     var path = $this.attr('data-folder-path');
     var checked = $this.is(':checked');
-    $browser.find('.container-folder-items[data-folder-items="' + path + '"] li input[type="checkbox"]').prop('checked', checked);
+    $browser.find('.container-folder-items')
+      .filter(attr_equals('data-folder-items', path))
+      .find('li input[type="checkbox"]').prop('checked', checked);
     count_downloads($this);
   };
 
@@ -304,7 +313,7 @@ _nfs_store.fs_browser = function ($outer) {
       var new_path = new_path.replace(/^[^\/]+\.__mounted-archive__(\/|$)/, '');
     }
 
-    $modal.find('.container-browser-move-from').html(new_path);
+    $modal.find('.container-browser-move-from').text(new_path);
   };
 
   var container_id = get_container_id($outer);
@@ -364,6 +373,11 @@ _nfs_store.fs_browser = function ($outer) {
     }
 
     $bmtf.find('.container-entry').remove();
+    var new_folder_parent_path;
+    $modal.find('.container-new-folder-name').on('keyup', function () {
+      set_move_path($(this).val(), new_folder_parent_path);
+    });
+
     $bmtf.find('.container-folder-items').each(function () {
       var $this = $(this);
       var $folder_line = $this.prev();
@@ -372,19 +386,20 @@ _nfs_store.fs_browser = function ($outer) {
       $this.attr('aria-expanded', 'true');
       $this.addClass('in');
       var dfp = $this.attr('data-folder-items');
-      var $newf = $('<a class="container-add"><input type="checkbox" class="container-folder-add hidden" data-folder-path="' + dfp + '" /> <span class="glyphicon glyphicon-plus"></span> folder</a>').appendTo($folder_line);
+      var $newf = $('<a>').addClass('container-add')
+        .append($('<input type="checkbox">').addClass('container-folder-add hidden').attr('data-folder-path', dfp))
+        .append(' ')
+        .append($('<span>').addClass('glyphicon glyphicon-plus'))
+        .append(' folder')
+        .appendTo($folder_line);
       $newf.on('click', function (e) {
         e.preventDefault();
         $(this).find('input.container-folder-add').prop('checked', true).change();
 
         var $cnfn = $modal.find('.container-new-folder-name');
         $cnfn.slideDown();
+        new_folder_parent_path = dfp;
         set_move_path($cnfn.val(), dfp);
-
-        $cnfn.on('keyup', function () {
-          var v = $(this).val();
-          set_move_path(v, dfp);
-        });
 
         $folder_line.append($cnfn);
       });
@@ -413,7 +428,8 @@ _nfs_store.fs_browser = function ($outer) {
     $bmtf.on('change', 'input[type="checkbox"]', function () {
       var $this = $(this);
       var dfp = $this.attr('data-folder-path');
-      $checkboxes.not('[data-folder-path="' + dfp + '"]').prop('checked', false);
+      var $matching_checkboxes = $checkboxes.filter(attr_equals('data-folder-path', dfp));
+      $checkboxes.not($matching_checkboxes).prop('checked', false);
 
       var $cnfn = $modal.find('.container-new-folder-name');
       if (!$this.hasClass('container-folder-add'))

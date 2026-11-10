@@ -14,4 +14,5 @@ Administration is provided in [Activity Logs](/admin/activity_logs)
 ## Contents
 
 - [Detailed Options](detailed_options.md)
+- [Parent Field Synchronization](parent_field_synchronization.md)
 - [Form Field Types](../general/field_types.md)

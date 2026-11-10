@@ -193,7 +193,7 @@ describe 'page layout initial_show tab auto-expand', js: true, driver: $browser_
     # Clear precompiled Handlebars templates so each test gets a fresh compilation
     # reflecting the current layout and config state (avoids stale cache from prior tests)
     HandlebarsPrecompiler.cleanup_tmp_dir
-    HandlebarsPrecompiler.cleanup_public_dir
+    HandlebarsPrecompiler.cleanup_compiled_output
     Rails.cache.delete('server_cache_version')
     login
   end

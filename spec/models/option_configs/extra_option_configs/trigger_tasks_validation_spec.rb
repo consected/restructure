@@ -15,6 +15,7 @@ require 'rails_helper'
 # Related GitHub issue: #1058
 RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :model do
   let(:klass) { OptionConfigs::ExtraOptionConfigs::TriggerTasks }
+  let(:regular_app_type_name) { Admin::AppType.active.first.name }
 
   # ── Trigger action name validation ──────────────────────────────────
 
@@ -24,11 +25,11 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
                           create_filestore_container update_this add_tracker
                           change_user_roles pull_external_data set_item_flags
                           redcap_request run_batch_trigger log transaction
-                          background reload_this case set_save_trigger_results
+                          background reload_this case each set_save_trigger_results
                           set_variables generate_document full_text_search]
 
       # Build a minimal valid config with every trigger name
-      config = valid_triggers.each_with_object({}) { |name, h| h[name] = {} }
+      config = valid_triggers.to_h { |name| [name, {}] }
       instance = klass.new(config)
       expect(instance.config_warnings.select { |w| w[:message]&.match?(/trigger|action|unrecognized/) }).to be_empty
     end
@@ -64,7 +65,8 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
   describe 'universal keys' do
     it 'accepts :if as a valid key in a direct-config trigger type' do
       instance = klass.new(notify: { type: 'email', role: 'admin', if: { always: true } })
-      expect(instance.config_warnings).to be_empty
+      key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/unrecognized key|must be /) }
+      expect(key_warnings).to be_empty
     end
 
     it 'accepts :on_complete as a valid key in a direct-config trigger type with no spurious warnings' do
@@ -110,6 +112,46 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
       warnings = instance.config_warnings.select { |w| w[:message]&.match?(/phantom/) }
       expect(warnings).not_to be_empty
     end
+
+    it 'allows iterator_name and lifecycle hooks on each:' do
+      instance = klass.new(
+        each: {
+          iterator_name: 'loop_result',
+          value: %w[first second],
+          do: { log: { message: '{{save_trigger_results.loop_result_value}}' } },
+          on_complete: { log: { message: 'completed' } },
+          on_failure: { log: { message: 'failed' } }
+        }
+      )
+
+      expect(instance.config_warnings).to be_empty
+    end
+
+    it 'allows each in lifecycle and delegate trigger blocks' do
+      each_config = {
+        each: {
+          value: %w[first second],
+          do: { log: { message: '{{save_trigger_results.iterator_value}}' } }
+        }
+      }
+      config = {
+        log: {
+          message: 'main',
+          on_complete: each_config,
+          on_failure: each_config
+        },
+        case: [
+          { when: { always: true }, then: [each_config] },
+          { else: [each_config] }
+        ],
+        transaction: [each_config],
+        background: [each_config]
+      }
+
+      instance = klass.new(config)
+
+      expect(instance.config_warnings).to be_empty
+    end
   end
 
   # ── Array-valued trigger configs ────────────────────────────────────
@@ -123,7 +165,8 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
 
     it 'does not warn for a valid array-valued notify' do
       instance = klass.new(notify: [{ type: 'email', role: 'admin' }, { type: 'sms', phones: '{{phone}}' }])
-      expect(instance.config_warnings).to be_empty
+      key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/unrecognized key|must be /) }
+      expect(key_warnings).to be_empty
     end
 
     it 'validates keys in each element of an array-valued log' do
@@ -156,7 +199,7 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
 
       it 'accepts a Hash for_user within an add_role_names entry without warnings' do
         instance = klass.new(change_user_roles: { add_role_names: [
-                               { app_type: 'study info', role_name: 'viewer', for_user: { this: { created_by_user_id: 'return_value' } } }
+                               { app_type: regular_app_type_name, role_name: 'viewer', for_user: { this: { created_by_user_id: 'return_value' } } }
                              ] })
         expect(instance.config_warnings).to be_empty
       end
@@ -259,18 +302,23 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
   describe 'named-entry trigger key validation' do
     context 'notify (direct-config)' do
       it 'accepts valid keys without warnings' do
+        # Only structural (unrecognized-key / type-mismatch) warnings are checked here;
+        # this minimal fixture has no DB-backed template/role data for semantic checks.
         instance = klass.new(notify: { type: 'email', role: 'admin', subject: 'Test' })
-        expect(instance.config_warnings).to be_empty
+        key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/unrecognized key|must be /) }
+        expect(key_warnings).to be_empty
       end
 
       it 'accepts an integer app_type without warnings' do
         instance = klass.new(notify: { type: 'email', role: 'admin', app_type: 1 })
-        expect(instance.config_warnings).to be_empty
+        key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/app_type must be/) }
+        expect(key_warnings).to be_empty
       end
 
       it 'accepts a string app_type without warnings' do
         instance = klass.new(notify: { type: 'email', role: 'admin', app_type: 'study info' })
-        expect(instance.config_warnings).to be_empty
+        key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/app_type must be/) }
+        expect(key_warnings).to be_empty
       end
 
       it 'accepts a Hash app_type without warnings, since it is resolved via FieldDefaults' do
@@ -281,12 +329,14 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
 
       it 'accepts an integer user without warnings' do
         instance = klass.new(notify: { type: 'email', role: 'admin', user: 1 })
-        expect(instance.config_warnings).to be_empty
+        key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/user must be/) }
+        expect(key_warnings).to be_empty
       end
 
       it 'accepts a string (email) user without warnings' do
         instance = klass.new(notify: { type: 'email', role: 'admin', user: 'fphsetl@hms.harvard.edu' })
-        expect(instance.config_warnings).to be_empty
+        key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/user must be/) }
+        expect(key_warnings).to be_empty
       end
 
       it 'accepts a Hash user without warnings, since it is resolved via FieldDefaults' do
@@ -436,7 +486,7 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
 
       it 'accepts an integer store_as_user and store_in_app_type without warnings' do
         instance = klass.new(generate_document: { doc1: { content_template_name: 'template', filename: 'out.pdf',
-                                                          store_as_user: 1, store_in_app_type: 2 } })
+                                                          store_as_user: 1, store_in_app_type: 1 } })
         expect(instance.config_warnings).to be_empty
       end
 
@@ -456,9 +506,91 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
 
     context 'redcap_request' do
       it 'accepts valid keys inside the named entry without warnings' do
-        instance = klass.new(redcap_request: { rc1: { study: 'study1', project_name: 'proj', method: 'post' } })
+        instance = klass.new(redcap_request: {
+                               rc1: { study: '{{study}}', project_name: '{{project}}', method: 'post' }
+                             })
         key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/redcap_request/) }
         expect(key_warnings).to be_empty
+      end
+
+      it 'accepts literal study and project_name when they identify an active REDCap project' do
+        project_admins = instance_double(ActiveRecord::Relation)
+        allow(Redcap::ProjectAdmin).to receive(:active).and_return(project_admins)
+        allow(project_admins).to receive(:find_by).with(study: 'Q2', name: 'existing_project')
+                                                  .and_return(instance_double(Redcap::ProjectAdmin))
+
+        instance = klass.new(redcap_request: {
+                               rc1: { study: 'Q2', project_name: 'existing_project', method: 'post' }
+                             })
+
+        warnings = instance.config_warnings.select { |w| w[:message]&.match?(/redcap_request/) }
+        expect(warnings).to be_empty
+      end
+
+      it 'warns when literal study and project_name do not identify an active REDCap project' do
+        project_admins = instance_double(ActiveRecord::Relation)
+        allow(Redcap::ProjectAdmin).to receive(:active).and_return(project_admins)
+        allow(project_admins).to receive(:find_by).with(study: 'Q2', name: 'missing_project').and_return(nil)
+
+        instance = klass.new(redcap_request: {
+                               rc1: { study: 'Q2', project_name: 'missing_project', method: 'post' }
+                             })
+
+        warnings = instance.config_warnings.select { |w| w[:message]&.match?(/redcap_request/) }
+        expect(warnings.map { |warning| warning[:message] }).to include(
+          'tasks redcap_request study / project_name does not identify an active REDCap project'
+        )
+      end
+
+      it 'skips the REDCap project lookup when study or project_name is dynamic' do
+        project_admins = instance_double(ActiveRecord::Relation)
+        allow(Redcap::ProjectAdmin).to receive(:active).and_return(project_admins)
+        expect(project_admins).not_to receive(:find_by)
+
+        instance = klass.new(redcap_request: {
+                               rc1: {
+                                 study: '{{variables.redcap_study}}',
+                                 project_name: 'missing_project',
+                                 method: 'post'
+                               }
+                             })
+
+        warnings = instance.config_warnings.select { |w| w[:message]&.match?(/redcap_request/) }
+        expect(warnings).to be_empty
+      end
+
+      it 'also skips the REDCap project lookup when project_name is dynamic' do
+        project_admins = instance_double(ActiveRecord::Relation)
+        allow(Redcap::ProjectAdmin).to receive(:active).and_return(project_admins)
+        expect(project_admins).not_to receive(:find_by)
+
+        instance = klass.new(redcap_request: {
+                               rc1: {
+                                 study: 'Q2',
+                                 project_name: '{{variables.redcap_project_name}}',
+                                 method: 'post'
+                               }
+                             })
+
+        warnings = instance.config_warnings.select { |w| w[:message]&.match?(/redcap_request/) }
+        expect(warnings).to be_empty
+      end
+
+      it 'skips validation when a dynamic value is embedded anywhere in either field' do
+        project_admins = instance_double(ActiveRecord::Relation)
+        allow(Redcap::ProjectAdmin).to receive(:active).and_return(project_admins)
+        expect(project_admins).not_to receive(:find_by)
+
+        instance = klass.new(redcap_request: {
+                               rc1: {
+                                 study: 'prefix_{{variables.redcap_study}}',
+                                 project_name: 'project_{{variables.redcap_project_name}}_suffix',
+                                 method: 'post'
+                               }
+                             })
+
+        warnings = instance.config_warnings.select { |w| w[:message]&.match?(/redcap_request/) }
+        expect(warnings).to be_empty
       end
 
       it 'warns on unrecognized keys inside the named entry' do
@@ -619,7 +751,8 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
                                { when: { all: { this: { f: 1 } } }, then: [{ notify: { type: 'email', role: 'admin' } }] },
                                { else: [{ log: { message: 'no match' } }] }
                              ])
-        expect(instance.config_warnings).to be_empty
+        key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/unrecognized key|must be /) }
+        expect(key_warnings).to be_empty
       end
     end
   end
@@ -658,7 +791,8 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
                              { change_user_roles: { add_role_names: ['admin'] } },
                              { transaction: [{ log: { message: 'done' } }] }
                            ])
-      expect(instance.config_warnings).to be_empty
+      key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/unrecognized key|must be /) }
+      expect(key_warnings).to be_empty
     end
   end
 

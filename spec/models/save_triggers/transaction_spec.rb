@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Tests transaction trigger-list composition, including the each iterator.
 require 'rails_helper'
 
 RSpec.describe SaveTriggers::Transaction, type: :model do
@@ -155,6 +156,31 @@ RSpec.describe SaveTriggers::Transaction, type: :model do
         result = trigger.perform
 
         expect(result).to eq([])
+      end
+    end
+
+    context 'with an each trigger in the child list' do
+      it 'executes each through the nested trigger-list dispatcher' do
+        config = [
+          {
+            each: {
+              value: %w[first second],
+              do: [
+                { log: { message: 'Transaction {{save_trigger_results.iterator_index}} => {{save_trigger_results.iterator_value}}', severity: 'info' } }
+              ]
+            }
+          }
+        ]
+
+        trigger = SaveTriggers::Transaction.new(config, @activity_log)
+
+        expect(Rails.logger).to receive(:info).with(/Transaction 0 => first/)
+        expect(Rails.logger).to receive(:info).with(/Transaction 1 => second/)
+        allow(Rails.logger).to receive(:info)
+
+        expect { trigger.perform }.not_to raise_error
+        expect(@activity_log.save_trigger_results['iterator_index']).to eq 1
+        expect(@activity_log.save_trigger_results['iterator_value']).to eq 'second'
       end
     end
 

@@ -1,9 +1,22 @@
 # Save Trigger: Log options
-        log:
-          - log_1:
-            if: #if_extras
-            message: 'Processing record {{id}} for master {{master_id}}'  # Message to log, supports substitutions
-            severity: info  # 'debug', 'info' (default), 'warn', or 'error'
+# Canonical schema
+# log: <LogEntry | Array(LogEntry)>
+#
+# Value type
+# LogEntry: <Hash(
+#   if: Condition,
+#   message: String (required),
+#   severity: <debug | info | warn | error>,
+#   on_complete: TriggerTaskList,
+#   on_failure: TriggerTaskList
+# )>
+# Keys are optional unless marked (required). severity defaults to info.
+#
+# Pattern 1: Log a message with substitutions (save_triggers_log_pattern_1_basic_defs.yaml)
+# See save_trigger_log.md for the worked example.
+
 #!defs(save_triggers_lifecycle_hooks_defs.yaml)
-          # NOTE: this sets:
-          # - save_trigger_results.log (array of results with message, severity, and logged_at)
+
+# Notes:
+# - log may be a single Hash or an Array of Hashes to write multiple log entries.
+# - Each result is appended to save_trigger_results.log (message, severity, logged_at).

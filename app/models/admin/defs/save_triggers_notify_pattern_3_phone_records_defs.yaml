@@ -1,0 +1,13 @@
+# Pattern 3: Recipients via phone_records association
+notify:
+  type: sms
+  phone_records:
+    dynamic_model__zeus_bulk_message_recipients:
+      zeus_bulk_message_id:
+        parent_references:
+          dynamic_model__zeus_bulk_messages: 'id'
+      disabled: false
+      id: 'return_value_list'
+  list_type: dynamic_model__zeus_bulk_message_recipients
+  layout_template: standard sms layout
+  content_template_text: 'Your appointment is on {{event_date}}'

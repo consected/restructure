@@ -30,11 +30,15 @@ Rails.application.routes.draw do
       collection do
         get :schema_reference
       end
+      member do
+        get :versions
+      end
     end
     get :external_identifier_details, to: 'external_identifiers#details'
     resources :reports, except: %i[show destroy] do
       member do
         get :preview
+        get :versions
       end
     end
     get :report_search_attr_definer, to: 'reports#search_attr_definer'
@@ -71,7 +75,11 @@ Rails.application.routes.draw do
       end
     end
     resources :app_configurations, except: %i[show destroy]
-    resources :message_templates, except: %i[show destroy]
+    resources :message_templates, except: %i[show destroy] do
+      member do
+        get :versions
+      end
+    end
     resources :message_notifications, except: %i[show destroy] do
       member do
         get :attachment
@@ -148,6 +156,7 @@ Rails.application.routes.draw do
         post :request_latest_rc_configs
         post :request_records
         post :request_archive
+        post :request_archive_definition
         post :request_users
         post :request_data_collection_instruments
         post :request_logs
@@ -165,6 +174,10 @@ Rails.application.routes.draw do
         post :request_archive
         post :request_users
         get 'download_field_file/:field_name/:record_id', to: 'download_field_file'
+      end
+      collection do
+        get :data_entry_trigger
+        post :data_entry_trigger
       end
     end
   end
@@ -233,10 +246,12 @@ Rails.application.routes.draw do
   if Settings::AllowUsersToRegister
     devise_for :users,
                only: %i[sessions confirmations passwords registrations],
-               controllers: { registrations: 'users/registrations' }
+               controllers: { registrations: 'users/registrations' },
+               failure_app: ApiAwareFailureApp
   else
     devise_for :users,
-               only: %i[sessions]
+               only: %i[sessions],
+               failure_app: ApiAwareFailureApp
     as :user do
       get '/users/edit' => 'users/registrations#edit', as: :edit_user_registration
       put '/users' => 'users/registrations#update', as: :user_registration

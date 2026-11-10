@@ -7,6 +7,9 @@ module OptionConfigs
     class FullTextSearch < Base
       trigger_name :full_text_search
       pattern :named_entry
+      # SaveTriggers::FullTextSearch#perform always expects `label: { source_fields: ... } }` - an
+      # unwrapped config is misread via `each_value` (see issue #1444).
+      no_direct_form
       allowed_keys %i[source_fields target_column target_table target_foreign_key_column
                       extra_content ts_config if on_complete on_failure]
       standard_hook_key_types

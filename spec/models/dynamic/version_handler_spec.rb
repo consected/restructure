@@ -239,4 +239,42 @@ RSpec.describe 'Definition versioning', type: :model do
     c4 = al_v4.versioned_definition.option_configs[1]
     expect(c4.label).to eq 'Step 2 v4'
   end
+
+  # Issue #1343 - the admin versions panel must not load unbounded history for
+  # definitions with very large numbers of versions (which can time out behind
+  # a proxy). Rows are inserted directly via SQL (rather than repeated saves)
+  # so a large history can be simulated quickly.
+  describe 'admin panel version display limiting (issue #1343)' do
+    def insert_history_rows(count)
+      count.times do |i|
+        Admin::MigrationGenerator.connection.execute <<~SQL
+          insert into activity_log_history (activity_log_id, name, created_at, updated_at)
+          values (
+            #{@activity_log.id},
+            'test_version_#{i}',
+            now() - interval '#{count - i} minutes',
+            now() - interval '#{count - i} minutes'
+          )
+        SQL
+      end
+    end
+
+    it 'limits all_versions_query results to the most recent rows when a limit is given' do
+      insert_history_rows(120)
+
+      unlimited = @activity_log.all_versions_query
+      limited = @activity_log.all_versions_query(limit: 100)
+
+      expect(unlimited.length).to eq(@orig_num_versions + 120)
+      expect(limited.length).to eq(100)
+      expect(limited).to eq(unlimited.first(100))
+    end
+
+    it 'reports the full version count independent of any display limit' do
+      insert_history_rows(120)
+
+      expect(@activity_log.all_versions_count).to eq(@orig_num_versions + 120)
+      expect(@activity_log.all_versions_query(limit: 50).length).to eq(50)
+    end
+  end
 end

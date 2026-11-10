@@ -25,6 +25,29 @@ describe 'API authentication failure logging', type: :request do
     # Cleanup
   end
 
+  describe 'API token auth detection' do
+    it 'prefers query params and falls back to headers for API auth checks' do
+      request = ActionDispatch::Request.new(
+        Rack::MockRequest.env_for('/?user_email=user@example.com&user_token=abc123')
+      )
+
+      expect(ApiTokenHeaderAuth.user_email_from_request(request)).to eq('user@example.com')
+      expect(ApiTokenHeaderAuth.user_token_from_request(request)).to eq('abc123')
+      expect(ApiTokenHeaderAuth.api_token_authentication_present?(request)).to be(true)
+
+      request = ActionDispatch::Request.new(
+        Rack::MockRequest.env_for('/',
+          'HTTP_X_USER_EMAIL' => 'header@example.com',
+          'HTTP_X_USER_TOKEN' => 'header-token'
+        )
+      )
+
+      expect(ApiTokenHeaderAuth.user_email_from_request(request)).to eq('header@example.com')
+      expect(ApiTokenHeaderAuth.user_token_from_request(request)).to eq('header-token')
+      expect(ApiTokenHeaderAuth.api_token_authentication_present?(request)).to be(true)
+    end
+  end
+
   describe 'failed API authentication attempts' do
     it 'logs a warn message when API request has a bad user_token' do
       # Arrange: Stub Rails.logger to capture warn calls

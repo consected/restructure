@@ -7,21 +7,18 @@ require './db/table_generators/dynamic_models_table'
 # Verifies NamedConfiguration for per-field options (edit_as, value, pattern, etc.),
 # alt_options preprocessing, and integration through
 # ExtraOptions initialization (clean_field_options_def behavior).
-# Also verifies that preset_value, blank_preset_value, value, blank_value, and
-# default_value accept array values in addition to strings and hashes (issue #1313).
+# Also verifies that field value options accept array values in addition to strings
+# and hashes (issue #1313), and that all value forms accept boolean and numeric
+# literals (issue #1453). default_value remains string-only. no_downcase accepts
+# nil as an unset value (issue #1462).
 RSpec.describe 'ExtraOptionConfigs::FieldOptions', type: :model do
   include MasterSupport
   include ModelSupport
   include DynamicModelSupport
   include ExtraOptionConfigsSupport
 
-  before(:each) do
-    create_admin
-    create_user
-    setup_access :trackers
-    setup_access :tracker_histories
-    @dm = generate_test_dynamic_model
-    setup_access :dynamic_model__test_created_by_recs, user: @user
+  before(:all) do
+    set_up_extra_options_configs
   end
 
   let(:klass) { OptionConfigs::ExtraOptionConfigs::FieldOptions }
@@ -73,18 +70,70 @@ RSpec.describe 'ExtraOptionConfigs::FieldOptions', type: :model do
       expect(result[:field1][:value]).to eq 'x'
     end
 
-    it 'warns about unrecognized keys in field config' do
-      instance = klass.new(field1: { no_downcase: true, bogus_key: 'bad' })
+    # Regression tests for issue #1456: there are no truly unrecognized keys for
+    # field_options.field_name.<key> — any key/value pair is historically passed
+    # through to the HTML input (see CommonTemplatesHelper#field_options_for and
+    # edit_fields/_default.html.erb), so an arbitrary key must not raise a warning
+    # and must still be forwarded raw for rendering.
+    it 'does not warn about an arbitrary (non-declared) key in field config (issue #1456)' do
+      instance = klass.new(field1: { no_downcase: true, some_random_html_attr: 'bad' })
       expect(instance[:field1]).to be_a(klass::NamedConfiguration)
-      expect(instance.config_warnings).not_to be_empty
+      expect(instance.config_warnings).to be_empty
+      expect(instance.config_errors).to be_empty
+    end
+
+    it 'forwards an arbitrary (non-declared) key raw so it reaches the rendered field (issue #1456)' do
+      instance = klass.new(field1: { placeholder: 'Pick one', some_random_html_attr: 'foo' })
+      expect(instance[:field1].dup).to include(placeholder: 'Pick one', some_random_html_attr: 'foo')
+    end
+
+    it 'forwards an arbitrary key via to_hash and implicit Hash() conversion too (issue #1456)' do
+      instance = klass.new(field1: { some_random_html_attr: 'foo' })
+      nc = instance[:field1]
+      expect(nc.to_hash).to include(some_random_html_attr: 'foo')
+      expect(Hash(nc)).to include(some_random_html_attr: 'foo')
+    end
+
+    it 'accepts disabled as a valid field option key without warnings or errors (issue #1456)' do
+      instance = klass.new(status: { disabled: true, edit_as: { field_type: 'select_status' } })
+      expect(instance.config_warnings).to be_empty
+      expect(instance.config_errors).to be_empty
+      expect(instance[:status][:disabled]).to be true
+      expect(instance[:status].disabled).to be true
     end
 
     context 'field option hash key type validation' do
-      it 'rejects a non-boolean include_blank with a config error' do
-        instance = klass.new(field1: { include_blank: 'yes' })
+      it 'accepts true, false, or a string include_blank without a config error' do
+        [true, false, '(other)'].each do |include_blank|
+          instance = klass.new(field1: { include_blank: include_blank })
+          expect(instance.config_errors).to be_empty
+        end
+      end
+
+      it 'rejects a non-boolean, non-string include_blank with a config error' do
+        instance = klass.new(field1: { include_blank: 1 })
         expect(instance.config_errors).to be_present
         error_messages = instance.config_errors.map { |e| e[:message] }
-        expect(error_messages.any? { |m| m.include?('field1 include_blank must be true or false') }).to be(true)
+        expect(error_messages).to include(
+          a_string_including('field1 include_blank must be true, false or a string')
+        )
+      end
+
+      it 'accepts nil for no_downcase and preserves the unset value (issue #1462)' do
+        instance = klass.new(field1: { no_downcase: nil })
+
+        expect(instance.config_errors).to be_empty
+        expect(instance[:field1].no_downcase).to be_nil
+      end
+
+      it 'keeps unrelated boolean options strict when given nil' do
+        instance = klass.new(field1: { disabled: nil })
+
+        expect(instance.config_errors).to be_present
+        error_messages = instance.config_errors.map { |e| e[:message] }
+        expect(error_messages).to include(
+          a_string_including('field1 disabled must be true or false')
+        )
       end
 
       it 'rejects a non-hash edit_as with a config error' do
@@ -137,6 +186,54 @@ RSpec.describe 'ExtraOptionConfigs::FieldOptions', type: :model do
                                })
           error_messages = instance.config_errors.map { |e| e[:message] }
           expect(error_messages).to be_empty
+        end
+
+        it 'accepts false and numeric literals for all field value options (issue #1453)' do
+          {
+            value: [false, 42],
+            blank_value: [false, 42],
+            preset_value: [false, 42],
+            blank_preset_value: [false, 42]
+          }.each do |option, literals|
+            literals.each do |literal|
+              instance = klass.new(field1: { option => literal })
+              failure_message = "#{option}=#{literal.inspect} should be accepted"
+              expect(instance.config_errors).to be_empty, failure_message
+            end
+          end
+        end
+
+        it 'accepts boolean, numeric, and array literals for active_value (issue #1453)' do
+          [false, 0, 3.14, %w[option1 option2]].each do |literal|
+            instance = klass.new(field1: { active_value: literal })
+            failure_message = "active_value=#{literal.inspect} should be accepted"
+            expect(instance.config_errors).to be_empty, failure_message
+          end
+        end
+
+        it 'accepts a boolean preset_value without config errors (issue #1453)' do
+          instance = klass.new(field1: { preset_value: true })
+          expect(instance.config_errors).to be_empty
+        end
+
+        it 'accepts an integer preset_value without config errors (issue #1453)' do
+          instance = klass.new(field1: { preset_value: 42 })
+          expect(instance.config_errors).to be_empty
+        end
+
+        it 'accepts a float preset_value without config errors (issue #1453)' do
+          instance = klass.new(field1: { preset_value: 3.14 })
+          expect(instance.config_errors).to be_empty
+        end
+
+        it 'accepts a BigDecimal decimal preset_value without config errors (issue #1453)' do
+          instance = klass.new(field1: { preset_value: BigDecimal('12.50') })
+          expect(instance.config_errors).to be_empty
+        end
+
+        it 'accepts a boolean blank_preset_value without config errors (issue #1453)' do
+          instance = klass.new(field1: { blank_preset_value: false })
+          expect(instance.config_errors).to be_empty
         end
 
         it 'accepts an Array for preset_value without config errors' do
@@ -276,6 +373,20 @@ RSpec.describe 'ExtraOptionConfigs::FieldOptions', type: :model do
       expect(eo.field_options[:test1]).to eq(no_downcase: true)
     end
 
+    it 'accepts an unset no_downcase value through ExtraOptions YAML configuration (issue #1462)' do
+      eo = config_for(<<~YAML)
+        default:
+          fields:
+            - test1
+          field_options:
+            test1:
+              no_downcase:
+      YAML
+
+      expect(eo.config_errors).to be_empty
+      expect(eo.field_options[:test1].no_downcase).to be_nil
+    end
+
     it 'converts edit_as.alt_options from Array to Hash' do
       eo = config_for(<<~YAML)
         default:
@@ -328,6 +439,47 @@ RSpec.describe 'ExtraOptionConfigs::FieldOptions', type: :model do
 
       instance = @master.dynamic_model__test_created_by_recs.build
       expect(instance.text_array).to eq %w[blood\ spot\ card saliva\ tube test\ kit]
+    end
+
+    it 'applies a false preset_value at runtime via force_preset_values (issue #1453)' do
+      instance = @master.dynamic_model__test_created_by_recs.build
+      allow(instance).to receive(:option_type_config).and_return(
+        double(field_options: { test1: { preset_value: false } })
+      )
+
+      expect(instance).to receive(:test1=).with(false)
+      instance.force_preset_values
+    end
+
+    it 'applies a zero blank_preset_value at runtime via force_preset_values (issue #1453)' do
+      instance = @master.dynamic_model__test_created_by_recs.build
+      allow(instance).to receive(:option_type_config).and_return(
+        double(field_options: { test1: { blank_preset_value: 0 } })
+      )
+
+      expect(instance).to receive(:test1=).with(0)
+      instance.force_preset_values
+    end
+
+    it 'applies a false active_value at runtime via evaluate_active_values (issue #1453)' do
+      instance = @master.dynamic_model__test_created_by_recs.build
+      allow(instance).to receive(:option_type_config).and_return(
+        double(field_options: { test1: { active_value: false } })
+      )
+
+      expect(instance).to receive(:test1=).with(false)
+      instance.evaluate_active_values
+    end
+
+    it 'does not replace an existing false value with blank_preset_value' do
+      instance = @master.dynamic_model__test_created_by_recs.build
+      allow(instance).to receive(:attributes).and_return('test1' => false)
+      allow(instance).to receive(:option_type_config).and_return(
+        double(field_options: { test1: { blank_preset_value: true } })
+      )
+
+      expect(instance).not_to receive(:test1=)
+      instance.force_preset_values
     end
   end
 end

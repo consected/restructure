@@ -134,6 +134,9 @@ module NfsStore
       self.user_groups = retrieved_file.current_user_group_ids
       self.container = retrieved_file.container
       self.user = current_user
+      retrieval_path = retrieved_file.retrieval_path
+
+      raise FsException::NotFound, 'file not found with available group access' unless retrieval_path
 
       # The details we save is dependent on whether we are downloading a single file, or a set of multiple items
       if multiple_items
@@ -148,17 +151,15 @@ module NfsStore
           parent_name: retrieved_file.container.parent_sub_dir || "master-id-#{retrieved_file.container.master_id}",
           container_name: retrieved_file.container.directory_name,
           container_path: retrieved_file.container_path(no_filename: true),
-          retrieval_path: retrieved_file.retrieval_path,
+          retrieval_path: retrieval_path,
           file_metadata: retrieved_file.file_metadata,
           retrieved_file: retrieved_file
         }
       else
-        self.retrieval_path = retrieved_file.retrieval_path
+        self.retrieval_path = retrieval_path
         self.retrieval_type = retrieval_type
         self.file_metadata = retrieved_file.file_metadata
       end
-
-      FsException::NotFound.new 'file not found with available group access' unless retrieval_path
 
       retrieval_path
     end

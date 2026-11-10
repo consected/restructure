@@ -1,66 +1,45 @@
 # references options
+# Canonical schema
+# references: <Hash(model_name: ReferenceValue)>
 #
-# Pattern 1: Simple reference definition
-  references:
-    model_name:
-      label: button label
-      from: this | master | any | user_is_creator
-      add: many | one_to_master | one_to_this
-
-# Pattern 2: Reference with add_with and filter_by
-  references:
-    activity_log__example_step:
-      label: Add Example Step
-      from: this
-      add: one_to_this
-      add_with:
-        extra_log_type: review
-        item_name:
-          embedded_item:
-            field_name: value
-      filter_by:
-        field_name: literal value or {{substitution}}
-        field_name2:
-          this:
-            field_name: return_value
-
-# Pattern 3: Reference with ordering and activity selector
-  references:
-    activity_log__example_step:
-      from: this
-      add: many
-      order_by:
-        created_at: desc
-      type_config:
-        activity_selector:
-          extra_log_type_key1: Label for button
-          extra_log_type_key2: Another label
-
-# Pattern 4: Reference display behavior
-  references:
-    model_name:
-      result_label: alternative label shown in the result caption
-      view_as:
-        edit: hide | readonly | not_embedded | select_or_add
-        show: hide | readonly | see_presence | filestore | as_edit
-        new: outside_this | not_embedded | select_or_add
-      view_options:
-        always_open: true
-      showable_if:
-        always: true
-      creatable_if:
-        all:
-          this:
-            status: active
-
-# Pattern 5: Reference disable behavior
-  references:
-    model_name:
-      prevent_disable: true | <condition Hash>
-      also_disable_record: false | true
-      allow_disable_if_not_editable: true | <condition Hash>
-      prevent_reload_on_save: true | false
-      action_position: top | bottom
+# Value type
+# ReferenceValue: <Hash(
+#   label: String,
+#   result_label: String,
+#   from: <this | master | any | user_is_creator>,
+#   without_reference: Boolean | <outside_master>,
+#   add: <many | one_to_master | one_to_this>,
+#   add_with: Hash,
+#   filter_by: Hash,
+#   order_by: Hash,
+#   limit: Integer,
+#   type_config: Hash,
+#   view_as: ViewAsValue,
+#   view_options: Hash,
+#   showable_if: Condition,
+#   creatable_if: Condition,
+#   prevent_disable: Boolean | Condition,
+#   also_disable_record: Boolean,
+#   allow_disable_if_not_editable: Boolean | Condition,
+#   prevent_reload_on_save: Boolean,
+#   action_position: <top | bottom>
+# )>
+# All keys are optional.
+#
+# ViewAsValue type (view_as)
+# ViewAsValue: <Hash(
+#   edit: <hide | readonly | not_embedded | select_or_add>,
+#   show: <hide | readonly | see_presence | filestore | as_edit>,
+#   new: <outside_this | not_embedded | select_or_add>
+# )>
+# All keys are optional.
+#
+# Pattern 1: Simple reference definition (extra_options_references_pattern_1_simple_defs.yaml)
+# Pattern 2: Reference with add_with and filter_by (extra_options_references_pattern_2_add_with_filter_defs.yaml)
+# Pattern 3: Reference with ordering and activity selector (extra_options_references_pattern_3_order_type_config_defs.yaml)
+# Pattern 4: Reference display behavior (extra_options_references_pattern_4_display_defs.yaml)
+# Pattern 5: Reference disable behavior (extra_options_references_pattern_5_disable_behavior_defs.yaml)
+# See references.md for the worked examples.
 
 # Notes:
 # - Each reference entry must be a Hash.

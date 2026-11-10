@@ -1,37 +1,32 @@
 # Save Trigger: Update This options
-        update_this:
-          - this_1: 
-            if: if_extras
-            force_not_editable_save: 'true allows the update to succeed even if the referenced item is set as not_editable'
-            force_not_valid: 'true to allow valid_if checks to be ignored'
-
-            with_result: 
-            # Map attributes from a related item to the target item.
-            # A list of models to retrieve from and attributes to assign allow multiple sources to
-            # be used.
-            # NOTE: with: fields override any specified here
-            # from: may also just take a simple String such as `from: embedded_item` to
-            # as shorthand for the following full calculation
-              - from:
-                  embedded_item:
-                    return: return_result
-                attributes:
-                  receipt_date: event_date
-                  receipt_time: event_time
-                  received_by: received_by
-                  select_facility: 'Lab: {{select_lab}}'
-                  # Substitutions use data only from the "from:" item
-
-                  # Also set attributes in the embedded item
-                  embedded_item:
-                    rank: rank
-                    rec_type: rec_type
-                    data: '{{select_lab}}'
-              - from: 
-                  dynamic_model__some_recs:
-                    return: return_result
-                attributes:
-                  a_value: value_from_result
+# Canonical schema
+# update_this: <Hash(entry_label: UpdateThisEntry) | Array(Hash(entry_label: UpdateThisEntry))>
+#
+# Key type
+# entry_label: <any label - purely for identification>
+#
+# Value type
+# UpdateThisEntry: <Hash(
+#   if: Condition,
+#   force_not_editable_save: Boolean,
+#   force_not_valid: Boolean,
+#   with_result: WithResultValue,
+#   with: WithValue,
+#   on_complete: TriggerTaskList,
+#   on_failure: TriggerTaskList
+# )>
+# All keys are optional.
+#
+# Pattern 1: Update the current item's own attributes (save_triggers_update_this_pattern_1_basic_defs.yaml)
+# Pattern 2: Map attributes from a related item using with_result (save_triggers_update_this_pattern_2_with_result_defs.yaml)
+# See save_trigger_update_this.md for the worked examples.
 
 #!defs(save_triggers_with_attribute_values_defs.yaml)
 #!defs(save_triggers_lifecycle_hooks_defs.yaml)
+
+# Notes:
+# - update_this is commonly used with before_save (so computed values are set before the
+#   save completes) but works with any save_trigger event.
+# - with: fields take precedence over with_result: fields when both set the same attribute.
+# - force_not_editable_save: true allows the update to succeed even if the item is set as
+#   not_editable. force_not_valid: true allows the update to succeed even if valid_if checks fail.

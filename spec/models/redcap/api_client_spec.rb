@@ -2,6 +2,7 @@
 
 # Tests for Redcap::ApiClient covering project, metadata, record, user and file
 # retrieval from the REDCap API, including the #remove_project_user method
+# and project definition archive downloads without project data for issue #794.
 # added for issue #1259 (removing a user's access from a REDCap project) and
 # its audit trail (Redcap::ClientRequest#result[:api_action]), and the
 # #import_project_user method for adding or updating a user's privileges in a
@@ -103,6 +104,29 @@ RSpec.describe Redcap::ApiClient, type: :model do
     pc = rc.api_client
     res = pc.project_archive
     expect(res).to be_a Tempfile
+  end
+
+  it 'pulls the project definition without project data' do
+    rc = Redcap::ProjectAdmin.active.first
+    rc.current_admin = @admin
+    tempfile = Tempfile.new('project-definition')
+
+    allow(rc.api_client.redcap).to receive(:project_xml).and_return(tempfile)
+
+    rc.api_client.project_archive(definition_only: true)
+
+    expect(rc.api_client.redcap).to have_received(:project_xml).with(
+      request_options: {
+        returnMetadataOnly: 'true',
+        exportSurveyFields: 'true',
+        exportDataAccessGroups: 'true',
+        returnFormat: 'json'
+      }
+    )
+    expect(rc.redcap_client_requests.order(:id).last.result).to include('definition_only' => true)
+  ensure
+    tempfile&.close
+    tempfile&.unlink
   end
 
   it 'pulls the users for the project' do

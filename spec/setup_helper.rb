@@ -101,7 +101,7 @@ module SetupHelper
     put_now 'Clean Handlebars precompiled dirs'
     HandlebarsPrecompiler.setup_directories
     HandlebarsPrecompiler.cleanup_tmp_dir
-    HandlebarsPrecompiler.cleanup_public_dir
+    HandlebarsPrecompiler.cleanup_compiled_output
   end
 
   # Remove any leftover app migration files for specified schema(s) to avoid conflicts

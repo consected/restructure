@@ -1,0 +1,16 @@
+# Pattern 1: Reload the current item between two update_reference triggers
+save_trigger:
+  on_create:
+    - update_reference:
+        - pi:
+            first:
+              player_infos:
+                last_name: new name
+    - reload_this:
+        if:
+          always: true
+    - update_reference:
+        - pi:
+            first:
+              player_infos:
+                last_name: 'updated - {{last_name}}'

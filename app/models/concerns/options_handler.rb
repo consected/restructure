@@ -38,32 +38,22 @@ module OptionsHandler
   include ActiveModel::Validations
 
   class Configuration
+    attr_reader :config_errors
+
     def initialize(params)
-      return unless params
-
-      params = params.symbolize_keys
-
-      unrecognized = params.keys - self.class.configure_with_items
-      # Allow a nil entry, to enable cleanup of previously allowed items
-      unrecognized.delete_if { |u| params[u].nil? }
-      if unrecognized.present?
-        raise FphsException,
-              "Unrecognized configuration params in #{self.class.name}: #{unrecognized.join(', ')}"
-      end
-
-      init_with(params)
+      initialize_with(params)
     end
 
     def to_h
       res = {}
       self.class.configure_with_items.each { |k| res[k] = send(k) }
-      res
+      res.merge(unrecognized_configuration)
     end
 
     alias to_hash to_h
 
     def filtered_hash
-      to_h.filter { |_k, v| !v.nil? }
+      to_h.compact
     end
 
     def init_with(params)
@@ -74,6 +64,66 @@ module OptionsHandler
     def key?(key)
       to_h.key? key
     end
+
+    class << self
+      private
+
+      def from_persisted_config(params)
+        configuration = allocate
+        configuration.send(:initialize_from_persisted_config, params)
+        configuration
+      end
+    end
+
+    private
+
+    attr_reader :unrecognized_configuration
+
+    def initialize_with(params)
+      initialize_from_params(params, strict: true)
+    end
+
+    def initialize_from_persisted_config(params)
+      initialize_from_params(params&.symbolize_keys || {}, strict: false)
+    end
+
+    def initialize_from_params(params, strict:)
+      @config_errors = []
+      @unrecognized_configuration = {}
+      return unless params
+
+      params = params.symbolize_keys
+      @unrecognized_configuration = extract_unrecognized_configuration(params, preserve_nil: !strict)
+
+      if strict && @unrecognized_configuration.present?
+        raise FphsException,
+              "Unrecognized configuration params in #{self.class.name}: #{unrecognized_configuration.keys.join(', ')}"
+      elsif @unrecognized_configuration.present?
+        @config_errors << unrecognized_config_error
+      end
+
+      init_with(params)
+    end
+
+    def extract_unrecognized_configuration(params, preserve_nil:)
+      # Explicit configs retain historical cleanup behavior; persisted configs preserve
+      # nil values for rollback-safe round trips.
+      params.each_with_object({}) do |(key, value), result|
+        next if self.class.configure_with_items.include?(key)
+        next if value.nil? && !preserve_nil
+
+        result[key] = value
+      end
+    end
+
+    def unrecognized_config_error
+      offending_keys = unrecognized_configuration.keys
+      {
+        config_class: self.class.name,
+        message: "Unrecognized configuration params in #{self.class.name}: #{offending_keys.join(', ')}",
+        offending_keys:
+      }
+    end
   end
 
   class ConfigurationHash < Hash
@@ -81,6 +131,7 @@ module OptionsHandler
 
   included do
     attr_accessor :owner, :orig_config_text
+    attr_accessor :config_errors
     attr_writer :hash_configuration
 
     # If we are within an ActiveRecord model, after_initialize will setup the
@@ -310,6 +361,7 @@ module OptionsHandler
     end
 
     self.owner = owner || self
+    self.config_errors = []
     self.hash_configuration = use_hash_config
 
     parse_config_text unless hash_configuration
@@ -346,7 +398,7 @@ module OptionsHandler
   def setup_options
     self.orig_config_text ||= config_text
     parse_config_text
-    setup_from_hash_config
+    setup_from_hash_config(preserve_unrecognized: true)
   end
 
   def parse_config_text
@@ -374,25 +426,34 @@ module OptionsHandler
   # - configure_hash
   # Use #hash_configuration directly
   # @return [Hash]
-  def setup_from_hash_config
+  def setup_from_hash_config(preserve_unrecognized: false)
+    self.config_errors = []
     return {} unless hash_configuration.is_a? Hash
 
     self.hash_configuration = hash_configuration.symbolize_keys
 
-    setup_all_options_multi hash_configuration
+    setup_all_options_multi hash_configuration, preserve_unrecognized: preserve_unrecognized
     setup_all_options_simple hash_configuration
-    setup_all_options_hash hash_configuration
+    setup_all_options_hash hash_configuration, preserve_unrecognized: preserve_unrecognized
     setup_all_options_typed hash_configuration
 
     hash_configuration
   end
 
-  def setup_all_options_multi(hash_configuration)
+  def setup_all_options_multi(hash_configuration, preserve_unrecognized:)
     self.class.option_types[:multi].each do |option_type|
       ot_class = class_for(option_type)
       config_val = hash_configuration[option_type]
-      send("#{option_type}=", ot_class.new(config_val))
+      config = build_option_configuration(ot_class, config_val, preserve_unrecognized:)
+      send("#{option_type}=", config)
+      config_errors.concat(config.config_errors)
     end
+  end
+
+  def build_option_configuration(config_class, config_value, preserve_unrecognized:)
+    return config_class.send(:from_persisted_config, config_value) if preserve_unrecognized
+
+    config_class.new(config_value)
   end
 
   def setup_all_options_simple(hash_configuration)
@@ -410,20 +471,22 @@ module OptionsHandler
     end
   end
 
-  def setup_all_options_hash(hash_configuration)
+  def setup_all_options_hash(hash_configuration, preserve_unrecognized:)
     self.class.option_types[:hash].each do |option_type|
-      setup_options_hash(hash_configuration, option_type)
+      setup_options_hash(hash_configuration, option_type, preserve_unrecognized:)
     end
   end
 
-  def setup_options_hash(hash_configuration, option_type)
+  def setup_options_hash(hash_configuration, option_type, preserve_unrecognized: false)
     ot_hash_class = class_for(option_type)
     ot_class = class_for(option_type, type: :hash_item)
     config_val = hash_configuration[option_type]
 
     all_vals = ot_hash_class.new
     config_val&.each do |k, v|
-      all_vals[k] = ot_class.new(v)
+      config = build_option_configuration(ot_class, v, preserve_unrecognized:)
+      all_vals[k] = config
+      config_errors.concat(config.config_errors)
     end
 
     send("#{option_type}=", all_vals)
@@ -438,10 +501,7 @@ module OptionsHandler
 
     self.class.option_types[:multi].each do |ot|
       obj = send(ot)
-      obj.class.configure_with_items&.each do |i|
-        def_hash[ot.to_s] ||= {}
-        def_hash[ot.to_s][i] = obj.send(i)
-      end
+      def_hash[ot.to_s] = obj.to_h
     end
 
     self.class.option_types[:simple].each do |ot|
@@ -450,13 +510,9 @@ module OptionsHandler
 
     self.class.option_types[:hash].each do |ot|
       obj_hash = send(ot)
-      hash_class = class_for("#{ot}__#{ot}")
       d = def_hash[ot.to_s] = {}
       obj_hash&.each do |k, obj|
-        hash_class.configure_with_items.each do |i|
-          d[k.to_s] ||= {}
-          d[k.to_s][i] = obj.send(i)
-        end
+        d[k.to_s] = obj.to_h
       end
     end
 

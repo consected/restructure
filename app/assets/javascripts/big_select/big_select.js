@@ -1,5 +1,16 @@
 $.big_select = function ($field, $target, full_hash, before, after, options) {
 
+  var html_entities = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }
+
+  var escape_html = function (str) {
+    return String(str).replace(/[&<>"']/g, function (c) { return html_entities[c] })
+  }
+
+  // Labels are HTML by default, for configured content. With the escape_labels option they are text.
+  var label_html = function (str) {
+    return options.escape_labels ? escape_html(str) : str
+  }
+
   var setup_with = function (hash, $target, $field) {
     var $outer = $(`<div class="big-select"></div>`).appendTo($target);
     var group_num = 0
@@ -14,10 +25,10 @@ $.big_select = function ($field, $target, full_hash, before, after, options) {
 
       if (typeof val == 'object') {
         var $group_title_h = $(`
-        <div class="big-select-group-head" data-bsi-key="${k}" id="big-select-group-head--${field_parent_id}-${group_num}">
+        <div class="big-select-group-head" data-bsi-key="${escape_html(k)}" id="big-select-group-head--${field_parent_id}-${group_num}">
           <a role="button" data-toggle="collapse" data-parent="#${field_parent_id}" class="collapsed"
-             href="#big-select-panel--${field_parent_id}-${group_num}" aria-expanded="false" aria-controls="big-select-item--${k}">
-             <i class="caret"></i> ${k}
+             href="#big-select-panel--${field_parent_id}-${group_num}" aria-expanded="false" aria-controls="big-select-item--${escape_html(k)}">
+             <i class="caret"></i> ${label_html(k)}
           </a>
         </div>`
         )
@@ -90,16 +101,16 @@ $.big_select = function ($field, $target, full_hash, before, after, options) {
 
     if (!show_k) {
       var html = `
-      <div class="big-select-item ${selected_class}" data-bsi-key="${k}" id="big-select-item--${kid}">
-        <div class="bsi--head">${val}</div>
+      <div class="big-select-item ${selected_class}" data-bsi-key="${escape_html(k)}" id="big-select-item--${escape_html(kid)}">
+        <div class="bsi--head">${label_html(val)}</div>
       </div>
       `
     }
     else {
       var html = `
-      <div class="big-select-item ${selected_class}" data-bsi-key="${k}" id="big-select-item--${kid}">
-        <div class="bsi--head">${show_k}</div>
-        <div class="bsi--body">${val}</div>
+      <div class="big-select-item ${selected_class}" data-bsi-key="${escape_html(k)}" id="big-select-item--${escape_html(kid)}">
+        <div class="bsi--head">${label_html(show_k)}</div>
+        <div class="bsi--body">${label_html(val)}</div>
       </div>
       `
     }

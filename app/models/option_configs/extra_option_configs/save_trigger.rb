@@ -25,6 +25,7 @@ module OptionConfigs
 
       validate :validate_keys
       validate :validate_trigger_shapes
+      validate :validate_before_save_unsupported_triggers
 
       # Set up typed attributes with cascade logic.
       # @return [void]
@@ -41,6 +42,29 @@ module OptionConfigs
       def blank?
         self.class.option_types[:typed].all? { |key| send(key).blank? }
       end
+
+      # on_save is only ever used as a source cascaded into on_create/on_update
+      # (see #cascade_on_save) and is never itself executed as a trigger hook, so
+      # propagating its own notices would just repeat whatever on_create/on_update
+      # already report for the same cascaded content.
+      # @return [void]
+      def collect_typed_attribute_notices
+        typed_keys = self.class.option_types[:typed] || []
+        typed_keys.each do |key|
+          next if key == :on_save
+
+          child = send(key)
+          next unless child.is_a?(BaseConfiguration)
+
+          propagate_child_notices(child, key)
+        end
+      end
+
+      # Trigger names whose config is itself a nested trigger task list, rather than
+      # a task's own config - mirrors TriggerTasks#validate_nested_trigger_definitions.
+      # `background` is handled separately (see #check_before_save_trigger) since it is
+      # rejected outright within before_save, rather than merely recursed into.
+      DELEGATE_TRIGGERS = %i[transaction].freeze
 
       private
 
@@ -66,6 +90,60 @@ module OptionConfigs
           add_validation_notice(:save_trigger,
                                 "#{trigger_name} must be a Hash or Array of Hash task definitions")
         end
+      end
+
+      # Warn when before_save configures a trigger that performs a genuine update of
+      # the record currently being saved (see issue #1384) - such triggers only work
+      # correctly from on_create/on_update/on_disable, once the record is persisted.
+      # @return [void]
+      def validate_before_save_unsupported_triggers
+        return if before_save.blank?
+
+        scan_before_save_tasks(before_save.tasks)
+      end
+
+      # @param [Hash, Array, nil] tasks
+      # @return [void]
+      def scan_before_save_tasks(tasks)
+        case tasks
+        when Hash
+          tasks.each { |trigger_name, config| check_before_save_trigger(trigger_name.to_sym, config) }
+        when Array
+          tasks.each { |entry| scan_before_save_tasks(entry) if entry.is_a?(Hash) }
+        end
+      end
+
+      # @param [Symbol] trigger_name
+      # @param [Hash, Array] config
+      # @return [void]
+      def check_before_save_trigger(trigger_name, config)
+        case trigger_name
+        when :each
+          scan_before_save_tasks(config[:do]) if config.is_a?(Hash)
+          return
+        when :case
+          Array(config).each do |branch|
+            next unless branch.is_a?(Hash)
+
+            scan_before_save_tasks(branch[:then])
+            scan_before_save_tasks(branch[:else])
+          end
+          return
+        when :background
+          # Rejected outright (not just warned): before_save runs before the record is
+          # persisted, so there is no id yet to serialize for the deferred job to look up.
+          add_validation_notice(:before_save,
+                                'background is not supported within before_save - the record ' \
+                                'has no persisted id yet for the background job to load; use ' \
+                                'on_create/on_update/on_disable instead')
+          return
+        when *DELEGATE_TRIGGERS
+          scan_before_save_tasks(config)
+          return
+        end
+
+        warning = OptionConfigs::TriggerTypes::Base.for(trigger_name)&.before_save_warning(config)
+        add_validation_notice(:before_save, "#{trigger_name} #{warning}", level: :warn) if warning
       end
 
       # Cascade on_save into on_create and on_update (wrapping hashes into arrays).

@@ -7,6 +7,10 @@ module OptionConfigs
     class PullExternalData < Base
       trigger_name :pull_external_data
       pattern :named_entry
+      not_valid_in_before_save
+      # SaveTriggers::PullExternalData#perform always expects `label: { url: ... }` - an
+      # unwrapped config is misread via `each_value` (see issue #1444).
+      no_direct_form
       allowed_keys %i[
         if force_not_editable_save force_not_valid local_data data_field data_field_format
         response_code_field method from to post_data send_data form success_if on_complete on_failure
@@ -17,6 +21,7 @@ module OptionConfigs
       # from and to are always Hashes with sub-keys (url:, format:, etc.);
       # a String value would raise TypeError at runtime when sub_config[:url] is called.
       key_type :hash, :from, :to, :success_if, :form
+      condition_keys :success_if
       key_type :scalar_or_array_or_hash, :post_data, :send_data
     end
   end

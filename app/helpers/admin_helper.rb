@@ -43,25 +43,36 @@ module AdminHelper
   # @param [Hash, Array] values - the available filter options
   #   Hash: { value => label } pairs
   #   Array: simple list of values (used as both value and label)
+  # @param [Boolean] allow_not_set - whether to offer a "Not set" (IS NULL) option. Should be
+  #   false for filters that aren't real nullable database columns (e.g. a computed/virtual
+  #   filter like in_current_app_type), where "Not set" has no meaningful distinct value from "All".
   # @return [String] HTML safe string containing the select element
-  def filter_select(filter_on, values)
+  def filter_select(filter_on, values, allow_not_set: true)
     current_filter = (filter_params || {}).dup
-    current_val = current_filter[filter_on].to_s
+    key_present = current_filter.key?(filter_on)
+    # A present key with a nil value means "Not set" (IS NULL) was selected and applied.
+    # A missing key means "All" (no filter applied). Both stringify to '', so they must be
+    # distinguished via key presence rather than comparing stringified values alone -
+    # otherwise "Not set" and "All" are indistinguishable in the rendered dropdown.
+    not_set_selected = key_present && current_filter[filter_on].nil?
+    current_val = not_set_selected ? nil : current_filter[filter_on].to_s
 
     options = []
     options << content_tag(:option, 'All', value: '')
-    options << content_tag(:option, 'Not set', value: 'IS NULL', selected: current_val == 'IS NULL' ? 'selected' : nil)
+    if allow_not_set
+      options << content_tag(:option, 'Not set', value: 'IS NULL', selected: not_set_selected ? 'selected' : nil)
+    end
 
     if values.is_a?(Hash)
       values.each do |val, label|
-        selected = val.to_s == current_val ? 'selected' : nil
+        selected = !not_set_selected && val.to_s == current_val ? 'selected' : nil
         like_type = label.to_s.end_with?('__%')
         display_label = like_type ? label.to_s[0..-4] : label.to_s
         options << content_tag(:option, display_label, value: val, selected:)
       end
     elsif values.is_a?(Array)
       values.each do |val|
-        selected = val.to_s == current_val ? 'selected' : nil
+        selected = !not_set_selected && val.to_s == current_val ? 'selected' : nil
         options << content_tag(:option, val.to_s.humanize, value: val, selected:)
       end
     end

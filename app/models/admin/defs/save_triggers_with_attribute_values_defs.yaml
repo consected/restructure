@@ -1,7 +1,23 @@
 # Save Trigger: `with:` attribute value types
 # These value types apply to `with:` in create_reference, update_reference, update_this,
 # and preset_fields triggers. Each field value can be set using one of the following formats:
-
+#
+# Canonical schema
+# with: <Hash(field_name: AttributeValueExpr)>
+#
+# AttributeValueExpr type
+# AttributeValueExpr: <
+#   String literal |
+#   now() |
+#   {{curly_tag}} substitution |
+#   {{{curly_tag}}} raw substitution (preserves type, e.g. for JSON/Hash fields) |
+#   ReturnValueLookup |
+#   Hash(object: Hash) (literal Hash/JSONB passthrough)
+# >
+#
+# ReturnValueLookup type
+# ReturnValueLookup: <Hash(this | reference_<reference_name>: Hash(field_name: 'return_value'))>
+#
             with: 
               field_name: 'now()'
               field_name_2: 'literal value'
@@ -27,3 +43,9 @@
                 field_name_2: 
                   reference_name:
                     field_name: return_value
+
+# Notes:
+# - A plain Hash value (without an `object:` wrapper) is interpreted as a ReturnValueLookup
+#   conditional query, not a literal value - use `object:` to store a literal Hash/JSONB value.
+# - embedded_item is a pseudo-key: values under it are assigned to the item's embedded_item
+#   instead of the item itself.

@@ -1,0 +1,26 @@
+# Pattern 4: Repeating a selection type, and lists of condition blocks
+# @runnable: true
+# @instance: activity_log
+# @expect: true
+
+# A selection type key may be given a suffix so it can be used more than once
+# in the same configuration. Everything after the selection type name is ignored,
+# so all_2, all_current_record and all-whatever are all treated as `all`.
+all_current_record:
+  this:
+    extra_log_type: primary
+
+all_2:
+  addresses:
+    city: portland
+
+# A selection type may also be given a list of condition blocks. Each block is
+# evaluated in turn using the semantics of that selection type.
+#
+# Evaluation stops at the first block whose running result is unsuccessful, so
+# for `any` the first block listed must match for later blocks to be considered.
+any_matching_address:
+  - addresses:
+      zip: '12345'
+  - addresses:
+      zip: 'no such zip'

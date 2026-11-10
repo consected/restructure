@@ -1,0 +1,10 @@
+# Pattern 5: File attachments (email only)
+notify:
+  type: email
+  role: admin
+  subject: 'Document ready: {{name}}'
+  layout_template: standard email layout
+  content_template: document_ready_notification
+  attachments:
+    - container_id: '{{filestore_container_id}}'
+      file_name: '{{generated_file_name}}'

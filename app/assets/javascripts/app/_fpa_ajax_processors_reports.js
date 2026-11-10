@@ -114,17 +114,22 @@ _fpa.postprocessors_reports = {
       // Update the search form results count bar manually
       var c = block.find('.result-count').html();
       var table_count = block.find('.count-only td[data-col-type="result_count"]').not('.report-el-was-from-new');
-      var h;
       if (table_count.length === 1) {
         c = table_count.html();
       }
       c = parseInt(c);
       data.count = { count: c, show_count: c };
 
-      if (_fpa.templates['search-count-template']) {
-        var h = _fpa.templates['search-count-template'](data);
-        $('[data-report-count]').html(h);
-      }
+      // The admin layout loads this template asynchronously, so it may not be registered yet
+      var show_count = function (attempts_left) {
+        if (_fpa.templates['search-count-template']) {
+          $('[data-report-count]').html(_fpa.templates['search-count-template'](data));
+        }
+        else if (attempts_left > 0) {
+          window.setTimeout(function () { show_count(attempts_left - 1); }, 100);
+        }
+      };
+      show_count(50);
     }
 
 

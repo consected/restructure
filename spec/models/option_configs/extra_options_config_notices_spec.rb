@@ -16,13 +16,8 @@ RSpec.describe 'ExtraOptions config notice enrichment', type: :model do
   include DynamicModelSupport
   include ExtraOptionConfigsSupport
 
-  before(:each) do
-    create_admin
-    create_user
-    setup_access :trackers
-    setup_access :tracker_histories
-    @dm = generate_test_dynamic_model
-    setup_access :dynamic_model__test_created_by_recs, user: @user
+  before(:all) do
+    set_up_extra_options_configs
   end
 
   describe 'caption_before with unrecognized attributes' do
@@ -168,6 +163,28 @@ RSpec.describe 'ExtraOptions config notice enrichment', type: :model do
         expect { notice[:config_def].to_yaml }.not_to raise_error
       end
     end
+
+    it 'enriches top-level _configurations notices with definition context' do
+      @dm.update!(options: <<~YAML, current_admin: @admin)
+        _configurations:
+          view_skip_updates: true
+        default:
+          label: Test
+      YAML
+
+      notices = OptionConfigs::ExtraOptions.all_option_configs_errors(@dm)
+      notice = notices.find { |entry| entry[:type].to_s.include?('view_skip_updates') }
+
+      expect(notice).not_to be_nil
+      expect(notice[:name]).to eq @dm.name
+      expect(notice[:resource_name]).to be_present
+      expect(notice[:config_class]).to be_present
+      expect(notice[:config_resource_name]).to be_present
+      expect(notice[:config_object]).to eq @dm
+      expect(notice[:config_def]).to eq(
+        '_configurations' => { 'view_skip_updates' => true }
+      )
+    end
   end
 
   describe 'valid configuration produces no notices' do
@@ -184,6 +201,36 @@ RSpec.describe 'ExtraOptions config notice enrichment', type: :model do
       oc = config_for(yaml)
       expect(oc.config_errors).to be_empty
       expect(oc.config_warnings).to be_empty
+    end
+  end
+
+  describe 'notify save trigger with configuration notices (issue #1370)' do
+    let(:yaml) do
+      <<~YAML
+        default:
+          fields:
+            - test1
+          save_trigger:
+            on_create:
+              notify:
+                type: email
+                role: admin
+                layout_template: nonexistent_layout
+                content_template: nonexistent_content
+      YAML
+    end
+
+    it 'produces warnings for invalid notify options and allows saving' do
+      @dm.update!(options: yaml, current_admin: @admin)
+      expect(@dm).to be_persisted
+
+      notices = OptionConfigs::ExtraOptions.all_option_configs_notices(@dm)
+      expect(notices).not_to be_empty
+
+      messages = notices.map { |n| n[:message] }
+      expect(messages.any? { |m| m.include?('subject is required when type is email') }).to be true
+      expect(messages.any? { |m| m.include?("layout_template 'nonexistent_layout' not found") }).to be true
+      expect(messages.any? { |m| m.include?("content_template 'nonexistent_content' not found") }).to be true
     end
   end
 end

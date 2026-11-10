@@ -1,3 +1,9 @@
+plugins:
+  - rubocop-rails
+
+AllCops:
+  MigratedSchemaVersion: '20261110000000'
+
 AllCops:
   NewCops: enable
   Include:

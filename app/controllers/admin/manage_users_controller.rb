@@ -78,6 +78,7 @@ class Admin::ManageUsersController < AdminController
 
   def filters
     {
+      id: User.order(:id).pluck(:id),
       app_type_id: Admin::AppType.all_by_name,
       current_app_access: { 'true' => 'yes', 'false' => 'no' },
       email: filter_values_for(:email),
@@ -87,7 +88,7 @@ class Admin::ManageUsersController < AdminController
   end
 
   def filters_on
-    %i[app_type_id current_app_access email first_name last_name]
+    %i[id app_type_id current_app_access email first_name last_name]
   end
 
   # Override regular defaults, which force the current user's app_type_id

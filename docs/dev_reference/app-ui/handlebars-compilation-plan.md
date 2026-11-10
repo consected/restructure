@@ -80,7 +80,7 @@ module HandlebarsPrecompiler
       FileUtils.rm_rf(Dir.glob(TMP_DIR.join('*')))
     end
 
-    def cleanup_public_dir
+    def cleanup_compiled_output
       # Delete ALL precompiled files on startup
       FileUtils.rm_rf(Dir.glob(PUBLIC_DIR.join('*.js')))
       FileUtils.rm_rf(Dir.glob(PUBLIC_DIR.join('*.map')))
@@ -99,7 +99,7 @@ end
 Rails.application.config.after_initialize do
   HandlebarsPrecompiler.setup_directories
   HandlebarsPrecompiler.cleanup_tmp_dir
-  HandlebarsPrecompiler.cleanup_public_dir
+  HandlebarsPrecompiler.cleanup_compiled_output
 
   unless HandlebarsPrecompiler.cli_available?
     msg = "Handlebars CLI not found. Install with: npm install --global handlebars"

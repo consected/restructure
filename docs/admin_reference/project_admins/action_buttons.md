@@ -8,7 +8,7 @@ Simply refreshes the information in the admin panel to match the current state o
 
 ## retrieve records
 
-Schedule an immediate transfer of records from the REDCap project. After a little time, click the [refresh](#refresh) button then select the **Requests** tab to check that the retrieval has completed.
+Schedule an immediate transfer of records from the REDCap project. After a little time, click the [refresh](#refresh) button then select the **Requests** tab to check that the retrieval has completed. For details on each stage and status displayed as a pull progresses, see [Pull Process and Statuses](pull_process_and_statuses.md).
 
 ### Incremental retrieval mode
 

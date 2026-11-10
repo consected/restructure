@@ -1,0 +1,4 @@
+# Pattern 3: Set a nested key within an existing Hash variable using dot-notation
+set_variables:
+  name: hash_var.key1
+  value: hello

@@ -254,8 +254,10 @@ RSpec.describe AdminApiDefinitionsHelper, type: :helper do
       expect(curl).to include('curl -XGET')
       expect(curl).to include('{{base_url}}')
       expect(curl).to include('{{app_type_id}}')
-      expect(curl).to include('{{user_email}}')
-      expect(curl).to include('{{api_token}}')
+      expect(curl).to include('-H "X-User-Email: {{user_email}}"')
+      expect(curl).to include('-H "X-User-Token: {{api_token}}"')
+      expect(curl).not_to include('user_email={{user_email}}')
+      expect(curl).not_to include('user_token={{api_token}}')
     end
 
     it 'includes body in POST examples' do
@@ -308,6 +310,10 @@ RSpec.describe AdminApiDefinitionsHelper, type: :helper do
       yaml = helper.api_save_trigger_example(dm)
       expect(yaml).to include('force_not_editable_save: true')
       expect(yaml).to include("'Content-Type': 'application/json'")
+      expect(yaml).to include("'X-User-Email': '{{constants.api_user_email}}'")
+      expect(yaml).to include("'X-User-Token': '{{constants.api_shared_secret}}'")
+      expect(yaml).not_to include('&user_email={{constants.api_user_email}}')
+      expect(yaml).not_to include('&user_token={{constants.api_shared_secret}}')
     end
 
     it 'explicitly sets method: post on the create_record action' do
@@ -594,8 +600,10 @@ RSpec.describe AdminApiDefinitionsHelper, type: :helper do
       expect(result).to include('/reports/test__api_test_report.json')
       expect(result).to include('{{base_url}}')
       expect(result).to include('{{app_type_id}}')
-      expect(result).to include('{{user_email}}')
-      expect(result).to include('{{api_token}}')
+      expect(result).to include('-H "X-User-Email: {{user_email}}"')
+      expect(result).to include('-H "X-User-Token: {{api_token}}"')
+      expect(result).not_to include('user_email={{user_email}}')
+      expect(result).not_to include('user_token={{api_token}}')
     end
 
     it 'uses the provided format extension in the path' do
@@ -640,6 +648,14 @@ RSpec.describe AdminApiDefinitionsHelper, type: :helper do
     it 'includes the search attributes in the trigger URL' do
       yaml = helper.api_report_save_trigger_example(report_double, sa: 'last_name=smith')
       expect(yaml).to include('last_name=smith')
+    end
+
+    it 'uses headers for report save trigger authentication' do
+      yaml = helper.api_report_save_trigger_example(report_double, sa: 'q=1')
+      expect(yaml).to include("'X-User-Email': '{{constants.api_user_email}}'")
+      expect(yaml).to include("'X-User-Token': '{{constants.api_shared_secret}}'")
+      expect(yaml).not_to include('&user_email={{constants.api_user_email}}')
+      expect(yaml).not_to include('&user_token={{constants.api_shared_secret}}')
     end
   end
 

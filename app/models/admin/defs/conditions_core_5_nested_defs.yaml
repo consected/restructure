@@ -1,0 +1,21 @@
+# Pattern 5: Nested conditions
+# @runnable: true
+# @instance: activity_log
+# @expect: true
+
+# Selection types may be nested to build the equivalent of
+# AND( OR(...), NOT(...) ) expressions. A nested block is evaluated against the
+# records matched by the level above it.
+all:
+  all_current_record:
+    this:
+      extra_log_type: primary
+
+  any_address:
+    addresses:
+      city: portland
+      zip: 'no such zip'
+
+  not_any_cancelled:
+    activity_log__player_contact_phones:
+      extra_log_type: cancelled

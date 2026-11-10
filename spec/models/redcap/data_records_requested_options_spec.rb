@@ -26,9 +26,10 @@ require './db/table_generators/dynamic_models_table'
 #   1. request_records persists requested_options on the 'setup job: store records'
 #      ClientRequest row, with the exact options passed by the caller.
 #   2. request_records persists all-false requested_options when no options passed.
-#   3. retrieve_validate_store persists requested_options (ignore_cache, retrieve_all,
+#   3. request_records sets the project status after the records job is queued.
+#   4. retrieve_validate_store persists requested_options (ignore_cache, retrieve_all,
 #      verify_file_fields) and skipped_files_count on the 'store records' ClientRequest row.
-#   4. capture_files pushes an entry to skipped_files when import_file returns nil,
+#   5. capture_files pushes an entry to skipped_files when import_file returns nil,
 #      and the resulting skipped_files_count is reflected in the persisted ClientRequest row.
 
 RSpec.describe 'Redcap::DataRecords requested options & skipped files', type: :model do
@@ -120,6 +121,43 @@ RSpec.describe 'Redcap::DataRecords requested options & skipped files', type: :m
         'retrieve_all' => false,
         'verify_file_fields' => false
       )
+    end
+
+    it 'sets the project status after the records job is queued' do
+      rc, class_name = project_admin_with_dm
+      stub_for_request_records
+
+      dr = Redcap::DataRecords.new(rc, class_name)
+      dr.request_records
+
+      expect(rc.reload.status).to eq Redcap::ProjectAdmin::Statuses[:records_request_job_set_up]
+    end
+
+    it 'does not overwrite a final status when the inline job completes immediately' do
+      rc, class_name = project_admin_with_dm
+      allow(Redcap::ProjectAdmin).to receive(:existing_jobs).and_return([])
+      allow(Rails.application.config.active_job).to receive(:queue_adapter).and_return(:inline)
+      allow(Redcap::CaptureRecordsJob).to receive(:perform_later) do
+        rc.update_status(:manual_run_successful)
+        double('job', job_id: 'test-job-id')
+      end
+
+      dr = Redcap::DataRecords.new(rc, class_name)
+      dr.request_records
+
+      expect(rc.reload.status).to eq Redcap::ProjectAdmin::Statuses[:manual_run_successful]
+    end
+
+    it 'marks the request as failed when an asynchronous job cannot be enqueued' do
+      rc, class_name = project_admin_with_dm
+      allow(Redcap::ProjectAdmin).to receive(:existing_jobs).and_return([])
+      allow(Rails.application.config.active_job).to receive(:queue_adapter).and_return(:test)
+      allow(Redcap::CaptureRecordsJob).to receive(:perform_later).and_return(false)
+
+      dr = Redcap::DataRecords.new(rc, class_name)
+
+      expect { dr.request_records }.to raise_error(FphsException, 'Could not enqueue records request job')
+      expect(rc.reload.status).to eq Redcap::ProjectAdmin::Statuses[:request_failed]
     end
   end
 

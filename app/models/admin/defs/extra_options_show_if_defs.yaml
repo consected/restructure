@@ -1,57 +1,25 @@
 # show_if options
+# Canonical schema
+# show_if: <Hash(show_if_target_key: ShowIfValue)>
 #
-# Pattern 1: Simple field-to-field condition
-  show_if:
-    field_name:
-      depends_on_field_name: conditional value
-      current_mode: show | edit
-
-# Pattern 2: Combined conditions for one field
-# Use all, any, not_all or not_any when the field depends on more than one rule.
-  show_if:
-    field_name:
-      all:
-        depends_on_field_name: conditional value
-        current_mode: show | edit
-      any:
-        alternative_field: another conditional value
-      not_all:
-        hidden_when_field: hidden value
-
-# Pattern 3: Conditions that refer to an embedded item
-# embedded_item is available when the current option type defines an embed:
-# configuration or otherwise exposes embedded-item substitutions.
-  show_if:
-    field_depends_on_embedded_item:
-      depends_on_field_name: conditional value
-      embedded_item:
-        field_name: conditional value
-        field_name_2: conditional value
-
-# Pattern 4: Nested conditional groups with embedded_item
-  show_if:
-    field_name:
-      any:
-        this_form_field: current value
-        embedded_item:
-          all:
-            embedded_status: active
-            embedded_score:
-              condition: '>='
-              value: 10
-
-# Pattern 5: Apply the same condition to multiple fields using a regex key
-# Example regex keys: /^.+_complete/, field_[0-9], /^status_.*$/
-  show_if:
-    /field_name_regex/:
-      depends_on_field_name: conditional value
-      current_mode: show | edit
-
-# Pattern 6: Control submit buttons instead of data fields
-  show_if:
-    submit_buttons_<button_id>:
-      current_mode: edit
-      depends_on_field_name: conditional value
+# Key type
+# show_if_target_key: <valid_field_name | /regex/ | submit_buttons_<button_id> | _anchor_name>
+#
+# Value type - a standard Condition (see conditions.md), which may also carry current_mode
+# ShowIfValue: <Hash(current_mode: <show | edit>) | Condition>
+# Condition: <Hash(selection_type: record_source: field_conditions)>
+# All keys are optional.
+#
+# Pattern 1: Simple field-to-field condition (extra_options_show_if_pattern_1_simple_defs.yaml)
+# Pattern 2: Combined conditions for one field - use all, any, not_all or not_any when the
+#   field depends on more than one rule (extra_options_show_if_pattern_2_combined_defs.yaml)
+# Pattern 3: Conditions that refer to an embedded item - embedded_item is available when the
+#   current option type defines an embed: configuration (extra_options_show_if_pattern_3_embedded_item_defs.yaml)
+# Pattern 4: Nested conditional groups with embedded_item (extra_options_show_if_pattern_4_nested_embedded_defs.yaml)
+# Pattern 5: Apply the same condition to multiple fields using a regex key, e.g.
+#   /^.+_complete/, field_[0-9], /^status_.*$/ (extra_options_show_if_pattern_5_regex_defs.yaml)
+# Pattern 6: Control submit buttons instead of data fields (extra_options_show_if_pattern_6_submit_button_defs.yaml)
+# See show_if.md for the worked examples.
 
 # Notes:
 # - Each top-level show_if entry must be a Hash of conditions.

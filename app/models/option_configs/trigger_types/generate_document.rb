@@ -22,6 +22,32 @@ module OptionConfigs
       key_type :string_or_integer_or_hash, :store_as_user, :store_in_app_type
       key_type :hash, :extra_substitutions, :container
       key_type :boolean, :skip_existing, :replace
+
+      class << self
+        def validate_config(config)
+          return config.flat_map { |entry| validate_config(entry) } if config.is_a?(Array)
+          return [] unless config.is_a?(Hash)
+
+          warnings = super
+          semantic_configs(config).each do |inner|
+            next unless inner.is_a?(Hash)
+
+            inner = inner.transform_keys(&:to_sym)
+            warnings.concat(validate_app_type_ref(inner[:store_in_app_type], 'store_in_app_type'))
+            warnings.concat(validate_user_ref(inner[:store_as_user], 'store_as_user'))
+          end
+          warnings
+        end
+
+        private
+
+        def semantic_configs(config)
+          non_lifecycle_keys = config.keys.map(&:to_sym) - %i[if on_complete on_failure]
+          return [config] if non_lifecycle_keys.any? { |key| allowed_keys.include?(key) }
+
+          config.values
+        end
+      end
     end
   end
 end

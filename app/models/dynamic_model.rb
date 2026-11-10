@@ -8,10 +8,13 @@ class DynamicModel < ActiveRecord::Base
   include AdminHandler
 
   StandardFields = %w[id created_at updated_at contactid user_id master_id].freeze
+  ViewHandlersRequiringMasterId = %w[rec_type contact subject].freeze
 
   default_scope -> { order disabled: :asc, category: :asc, position: :asc, updated_at: :desc }
 
   validate :table_name_ok
+  validate :foreign_key_type_compatible
+  validate :view_handler_master_foreign_key_compatible
   before_save :set_field_list_from_table
   before_save :set_comments_from_table
   before_create :set_keys_from_columns
@@ -111,7 +114,7 @@ class DynamicModel < ActiveRecord::Base
       Master.has_many man, inverse_of: :master,
                            class_name: "DynamicModel::#{model_class_name}",
                            foreign_key: foreign_key_name,
-                           primary_key: primary_key_name
+                           primary_key: master_primary_key_name
     end
     # Add a filtered scope method, which allows master associations to remove non-accessible items automatically
     # This is not the default scope, since it calls #calc_if(:showable_if,...) under the covers, and that may
@@ -119,6 +122,36 @@ class DynamicModel < ActiveRecord::Base
     Master.send :define_method, "#{Master::FilteredAssocPrefix}#{man}" do
       send(man).filter_results
     end
+  end
+
+  #
+  # The column *on the masters table* that this definition's foreign_key_name values are
+  # matched against, for a direct master association. This is not the dynamic model's own
+  # primary_key_name, which identifies records within its own table (see issue #1399 - the
+  # two used to be conflated in a single setting).
+  # Only the direct association consults this. The foreign_key_through_external_id route
+  # matches on the external identifier's own ID column instead, so it never reaches here -
+  # see #add_master_association and #add_master_association_through_external_id.
+  # @return [Symbol | nil] nil only when there is no master association at all
+  def master_primary_key_name
+    return if foreign_key_name.blank?
+    return foreign_key_name.to_sym if master_crosswalk_association?
+
+    :id
+  end
+
+  #
+  # True when the foreign key matches a masters crosswalk column directly, rather than
+  # master_id or an external identifier value.
+  def master_crosswalk_association?
+    foreign_key_name.present? && Master.crosswalk_attr?(foreign_key_name) && !foreign_key_through_external_id
+  end
+
+  #
+  # True when records resolve their master through an association rather than a real
+  # master_id column, so UserHandler must derive master_id from the association.
+  def virtual_master_id?
+    master_crosswalk_association? || foreign_key_through_external_id.present?
   end
 
   #
@@ -145,13 +178,8 @@ class DynamicModel < ActiveRecord::Base
                                     primary_key: external_id_attribute
 
     # The master can then be matched through the external identifier association
+    # UserHandler supplies the virtual master_id used by shared master handling.
     implementation_class.has_one :master, through: through_ext_id_assoc
-
-    # A master_id attribute doesn't exist, so we define one, since master association code
-    # assumes one exists
-    implementation_class.define_method :master_id do
-      @master_id ||= master&.id
-    end
 
     # To get back from the master to this dynamic model, we will go back through the
     # the external identifier. The external identifier needs to have an association on it
@@ -174,7 +202,7 @@ class DynamicModel < ActiveRecord::Base
   # Get the :foreign_key_through_external_id value from the configurations
   def foreign_key_through_external_id
     @memo_foreign_key_through_external_id ||= {}
-    return @memo_foreign_key_through_external_id[:config] if @memo_foreign_key_through_external_id.has_key?(:config)
+    return @memo_foreign_key_through_external_id[:config] if @memo_foreign_key_through_external_id.key?(:config)
 
     option_configs
     @memo_foreign_key_through_external_id[:config] = configurations&.dig(:foreign_key_through_external_id)&.to_sym
@@ -259,6 +287,19 @@ class DynamicModel < ActiveRecord::Base
               @primary_key_name ||= definition.primary_key_name.blank? ? :id : definition.primary_key_name.to_sym
             end
 
+            # nil when the definition has no master association at all
+            def master_primary_key_name
+              definition.master_primary_key_name
+            end
+
+            def master_crosswalk_association?
+              definition.master_crosswalk_association?
+            end
+
+            def virtual_master_id?
+              definition.virtual_master_id?
+            end
+
             def foreign_key_through_external_id
               @foreign_key_through_external_id ||= definition.foreign_key_through_external_id
             end
@@ -311,6 +352,7 @@ class DynamicModel < ActiveRecord::Base
         res2.include DynamicModelControllerHandler
       rescue StandardError => e
         failed = true
+        record_generation_failure(e)
         warn "Failure creating dynamic model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
         logger.info '*************************************************************************************'
         logger.info "Failure creating dynamic log model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
@@ -424,6 +466,63 @@ class DynamicModel < ActiveRecord::Base
     end
   end
 
+  def foreign_key_type_compatible
+    return if foreign_key_name.blank?
+
+    source_column = dynamic_model_foreign_key_column
+    target = foreign_key_type_target
+    return unless source_column && target
+    return if source_column.type == target[:type]
+
+    errors.add :foreign_key_name,
+               "type must match #{target[:name]} (#{source_column.type} versus #{target[:type]})"
+  end
+
+  def view_handler_master_foreign_key_compatible
+    handlers = begin
+      configured_handlers = default_options&.view_options&.[](:view_handlers)
+      configured_handlers.is_a?(Array) ? configured_handlers : [configured_handlers]
+    rescue StandardError
+      []
+    end
+    required_handlers = handlers.compact.map { |handler| handler.to_s.underscore }
+    required_handlers.select! { |handler| ViewHandlersRequiringMasterId.include?(handler) }
+    required_handlers.uniq!
+    return if required_handlers.empty? || foreign_key_name.to_s == 'master_id'
+
+    errors.add :foreign_key_name,
+               "must be master_id for view handler(s): #{required_handlers.join(', ')}"
+  end
+
+  def dynamic_model_foreign_key_column
+    qualified_table_name = [schema_name, table_name].compact.join('.')
+    unless Admin::MigrationGenerator.table_or_view_exists?(qualified_table_name)
+      Rails.logger.warn "Dynamic model #{name.inspect} (#{self.class.name}##{id || 'new'}) " \
+                        "cannot validate foreign key #{foreign_key_name.inspect}: " \
+                        "table or view #{qualified_table_name.inspect} does not exist"
+      return
+    end
+
+    Admin::MigrationGenerator.connection.columns(qualified_table_name)
+                             .find { |column| column.name == foreign_key_name.to_s }
+  rescue ActiveRecord::StatementInvalid
+    nil
+  end
+
+  def foreign_key_type_target
+    if Master.crosswalk_attr?(foreign_key_name)
+      column = Master.columns_hash[foreign_key_name.to_s]
+      { name: "Master.#{foreign_key_name}", type: column.type } if column
+    elsif foreign_key_through_external_id
+      external_id_model = Resources::Models.find_by(resource_name: foreign_key_through_external_id)&.model
+      return unless external_id_model
+
+      attribute = external_id_model.external_id_attribute.to_s
+      column = external_id_model.columns_hash[attribute]
+      { name: "#{foreign_key_through_external_id}.#{attribute}", type: column.type } if column
+    end
+  end
+
   #
   # before_save trigger forces the field list to be set, based on database fields
   # @return [String] - space separated field list
@@ -487,8 +586,8 @@ class DynamicModel < ActiveRecord::Base
     return unless Admin::MigrationGenerator.table_or_view_exists? table_name
 
     tc = Admin::MigrationGenerator.table_column_names(table_name)
-    self.primary_key_name = 'id' if tc.include?('id')
-    self.foreign_key_name = 'master_id' if tc.include?('master_id')
+    self.primary_key_name = 'id' if primary_key_name.blank? && tc.include?('id')
+    self.foreign_key_name = 'master_id' if foreign_key_name.blank? && tc.include?('master_id')
   end
 
   #

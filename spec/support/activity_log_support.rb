@@ -143,18 +143,21 @@ module ActivityLogSupport
   end
 
   def create_al_for_resource_name(resource_name, att = nil)
-    setup_access :player_contacts, user: @user
-    att ||= valid_attribs
-    # master ||= @master || @player_contact.master
-    # item ||= @player_contact
-    # att[:player_contact] = item
-    att[:master] ||= @player_contact.master
-    @player_contact.current_user = @user
+    skip_setup = att.delete(:skip_setup) if att && att[:skip_setup]
 
-    setup_access resource_name, user: @user
-    setup_access "#{resource_name.singularize}__primary".to_sym, resource_type: :activity_log_type, user: @user
-    setup_access "#{resource_name.singularize}__blank_log".to_sym, resource_type: :activity_log_type, user: @user
+    unless skip_setup
+      setup_access :player_contacts, user: @user
+      att ||= valid_attribs
+      # master ||= @master || @player_contact.master
+      # item ||= @player_contact
+      # att[:player_contact] = item
+      att[:master] ||= @player_contact.master
+      @player_contact.current_user = @user
 
+      setup_access resource_name, user: @user
+      setup_access :"#{resource_name.singularize}__primary", resource_type: :activity_log_type, user: @user
+      setup_access :"#{resource_name.singularize}__blank_log", resource_type: :activity_log_type, user: @user
+    end
     @activity_log = @player_contact.send(resource_name).create! att
   end
 
