@@ -43,10 +43,6 @@ RSpec.describe OptionConfigs::ExtraOptions, '.parsed_options_text', type: :model
     change_setting('AllowDynamicMigrations', false)
   end
 
-  after :all do
-    change_setting('AllowDynamicMigrations', false)
-  end
-
   describe 'resolving YAML anchors' do
     it 'resolves anchors and aliases in the options text' do
       yaml_with_anchors = <<~YAML

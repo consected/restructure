@@ -240,7 +240,9 @@ RSpec.describe 'Dynamic Model hash_digest_class option', type: :model do
 
       # Force regeneration of the implementation class
       begin
-        DynamicModel.send(:remove_const, :TestHashDigestField) if DynamicModel.const_defined?(:TestHashDigestField, false)
+        if DynamicModel.const_defined?(:TestHashDigestField, false)
+          DynamicModel.send(:remove_const, :TestHashDigestField)
+        end
       rescue NameError
         nil
       end
@@ -286,7 +288,9 @@ RSpec.describe 'Dynamic Model hash_digest_class option', type: :model do
         YAML
       )
       begin
-        DynamicModel.send(:remove_const, :TestHashDigestField) if DynamicModel.const_defined?(:TestHashDigestField, false)
+        if DynamicModel.const_defined?(:TestHashDigestField, false)
+          DynamicModel.send(:remove_const, :TestHashDigestField)
+        end
       rescue NameError
         nil
       end

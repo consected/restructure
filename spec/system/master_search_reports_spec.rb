@@ -32,6 +32,9 @@ describe 'master search with reports', js: true, driver: $browser_driver do
       user: @user
     )
 
+    # Committed reports from earlier runs would crowd out the tabs under test
+    disable_reports_from_previous_runs
+
     # Create searchable reports for master search
     create_searchable_report
     create_searchable_report_with_auto_run
@@ -93,34 +96,15 @@ describe 'master search with reports', js: true, driver: $browser_driver do
     )
   end
 
+  # Disable searchable and auto-run reports committed by previous runs of this spec
+  def disable_reports_from_previous_runs
+    Report.where(report_type: 'search', searchable: true, disabled: [false, nil])
+          .where('name LIKE ? OR name LIKE ?', 'Searchable Report %', 'Auto Run Report %')
+          .find_each { |report| report.update!(disabled: true, current_admin: @admin) }
+  end
+
   # Create additional auto-run reports for multi-tab rotation testing
-  # Also restores @auto_run_reports if reports were already created in a previous run
   def create_additional_auto_run_reports
-    # Check if reports were already created by looking for existing reports
-    existing_reports = Report.where('name like ?', 'Auto Run Report%').where(auto: true, searchable: true).order(:position).to_a
-
-    if existing_reports.length >= 3
-      # Reports exist from previous run, just restore the array
-      @auto_run_reports = existing_reports.take(3)
-      # Ensure the current user has access to these restored reports
-      @auto_run_reports.each do |report|
-        next if Admin::UserAccessControl.exists?(
-          app_type: @user.app_type,
-          resource_type: :report,
-          resource_name: report.alt_resource_name
-        )
-
-        Admin::UserAccessControl.create!(
-          app_type: @user.app_type,
-          access: :read,
-          resource_type: :report,
-          resource_name: report.alt_resource_name,
-          current_admin: @admin
-        )
-      end
-      return
-    end
-
     @auto_run_reports = [@auto_run_report]
 
     2.times do |i|

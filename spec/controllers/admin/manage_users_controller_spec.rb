@@ -15,6 +15,7 @@
 #     the admin's current app type
 #   - Filtering by current_app_access: 'false' returns only users without access
 #     to the admin's current app type
+#   - Column filters are applied before per-user access is evaluated (performance)
 # - id filter for Issue #1386
 #   - filters hash includes :id key
 #   - filters_on includes :id
@@ -417,6 +418,20 @@ RSpec.describe Admin::ManageUsersController, type: :controller do
         expect(assigns(:users)).not_to include(@user_with_access)
         expect(assigns(:users)).to include(@user_without_access)
       end
+
+      it 'evaluates app access only for users matching the column filters' do
+        evaluated_ids = []
+        allow_any_instance_of(User).to receive(:accessible_app_type_ids).and_wrap_original do |m, *args|
+          evaluated_ids << m.receiver.id
+          m.call(*args)
+        end
+
+        get :index, params: { filter: { email: @user_with_access.email, current_app_access: 'true' } }
+        expect(response).to have_http_status(200)
+        expect(evaluated_ids.uniq).to eq [@user_with_access.id]
+        expect(assigns(:users)).to include(@user_with_access)
+        expect(assigns(:users)).not_to include(@user_without_access)
+      end
     end
   end
 
@@ -494,6 +509,92 @@ RSpec.describe Admin::ManageUsersController, type: :controller do
       get :index, params: { filter: { email: @disabled_user.email } }
       expect(response).to have_http_status(200)
       expect(assigns(:users)).to include(@disabled_user)
+    end
+  end
+
+  # Pins filtered_primary_model results for every column and virtual filter combination
+  describe 'filtered_primary_model combined filters' do
+    before_each_login_admin
+
+    before :each do
+      @at = Admin::AppType.active.first
+      raise 'No active app type found for combined filter tests' unless @at
+
+      @other_at = Admin::AppType.active.where.not(id: @at.id).first
+      raise 'No second active app type found for combined filter tests' unless @other_at
+
+      @granted_app_type_ids = {}
+      prefix = "fpm_#{SecureRandom.hex(4)}"
+      @u_access = create_fpm_user("#{prefix}_access@test.com", app_type: @at)
+      @u_none = create_fpm_user("#{prefix}_none@test.com")
+      @u_access_disabled = create_fpm_user("#{prefix}_access_disabled@test.com", app_type: @at)
+      @u_access_disabled.update!(disabled: true, current_admin: @admin)
+      @u_none_disabled = create_fpm_user("#{prefix}_none_disabled@test.com")
+      @u_none_disabled.update!(disabled: true, current_admin: @admin)
+      @u_other = create_fpm_user("#{prefix}_other@test.com", app_type: @other_at)
+      @test_users = [@u_access, @u_none, @u_access_disabled, @u_none_disabled, @u_other]
+      @test_user_ids = @test_users.map(&:id)
+    end
+
+    def create_fpm_user(email, app_type: nil)
+      user = User.create!(email: email, current_admin: @admin)
+      @granted_app_type_ids[user.id] = []
+      if app_type
+        Admin::UserAccessControl.create!(
+          user: user, app_type: app_type, access: :read, resource_type: :general,
+          resource_name: :app_type, current_admin: @admin
+        )
+        @granted_app_type_ids[user.id] << app_type.id
+      end
+      Rails.cache.delete("all_app_type_ids_available_to::#{user.id}")
+      user
+    end
+
+    # Oracle built from how the test users were created, not from the code under test
+    def expected_user_ids(filter)
+      filter ||= { disabled: 'enabled', current_app_access: 'true' }
+      @test_users.select do |u|
+        # Disabled users have no effective app access
+        granted = u.disabled ? [] : @granted_app_type_ids[u.id]
+        has_access = granted.include?(@at.id)
+        next false if filter[:disabled] == 'enabled' && u.disabled
+        next false if filter[:disabled] == 'disabled' && !u.disabled
+        next false if filter.key?(:email) && u.email != filter[:email]
+        next false if filter.key?(:app_type_id) && !granted.include?(filter[:app_type_id].to_i)
+        next false if filter[:current_app_access] == 'true' && !has_access
+        next false if filter[:current_app_access] == 'false' && has_access
+
+        true
+      end.map(&:id)
+    end
+
+    filter_cases = {
+      'no filter params' => -> { nil },
+      "current_app_access 'true'" => -> { { current_app_access: 'true' } },
+      "current_app_access 'false'" => -> { { current_app_access: 'false' } },
+      "current_app_access 'true' with disabled 'disabled'" => -> { { current_app_access: 'true', disabled: 'disabled' } },
+      "current_app_access 'false' with disabled 'enabled'" => -> { { current_app_access: 'false', disabled: 'enabled' } },
+      'app_type_id of the other app type' => -> { { app_type_id: @other_at.id } },
+      "app_type_id with disabled 'enabled'" => -> { { app_type_id: @at.id, disabled: 'enabled' } },
+      "app_type_id with current_app_access 'false'" => -> { { app_type_id: @at.id, current_app_access: 'false' } },
+      "email with access with current_app_access 'true'" => -> { { email: @u_access.email, current_app_access: 'true' } },
+      "email without access with current_app_access 'true'" => -> { { email: @u_none.email, current_app_access: 'true' } },
+      'email without access and no other filters' => -> { { email: @u_none.email } }
+    }
+
+    filter_cases.each do |label, build|
+      it "returns the expected users for #{label}" do
+        filter = instance_exec(&build)
+        if filter
+          get :index, params: { filter: filter }
+        else
+          get :index
+        end
+
+        expect(response).to have_http_status(200)
+        actual = (assigns(:users).to_a.map(&:id) & @test_user_ids).sort
+        expect(actual).to eq(expected_user_ids(filter).sort)
+      end
     end
   end
 end

@@ -12,8 +12,8 @@ RSpec.describe 'ActivityLogOptions config_class_registry', type: :model do
   include DynamicModelSupport
   include ExtraOptionConfigsSupport
 
-  before(:all) do
-    set_up_extra_options_configs
+  before_all do
+    set_up_extra_options_configs alt_type: alt_name_for_file(__FILE__)
   end
 
   it 'extends parent registry with nfs_store' do

@@ -48,6 +48,7 @@ If requested to create a PR, follow these steps:
 NOTE: Only a human user will merge branches after code review; AI agents should not merge branches.
 
 ### Testing Conventions
+- App specs import or resume their definitions lazily in `before(:all)` and suspend them in `after(:all)`; keep new app schemas registered in `SetupHelper::LAZY_APP_SCHEMAS`.
 - When fixing implementation bugs, **always write new Rspec or Jasmine tests** to demonstrate the bug, before fixing it.
 - Check for reusable support methods in `spec/support/` before writing new test code.
 - After writing tests, always add comments to the top of the spec files explaining the purpose of the tests.

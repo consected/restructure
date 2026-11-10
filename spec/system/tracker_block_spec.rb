@@ -53,21 +53,30 @@ describe 'tracker block', js: true, driver: $browser_driver do
     login
   end
 
-  def tracker_field_event_date(match_date = nil)
-    sleep 0.1
+  # The browser's local "today" (the value the date field defaults to), which may differ from the Ruby server's date
+  def browser_local_today
+    Date.parse(page.evaluate_script('(new Date()).asYMD()'))
+  end
 
-    dd = find('.tracker-event_date input')
-
-    d = match_date || DateTime.now
+  def tracker_date_matches?(dd, d)
     if dd[:type] == 'date'
-      dd.value.match(/#{d.year}-0?#{d.month}-0?#{d.day}/)
+      dd.value.match?(/#{d.year}-0?#{d.month}-0?#{d.day}/)
     else
-      dd.value.match(%r{0?#{d.month}/0?#{d.day}/#{d.year}})
+      dd.value.match?(%r{0?#{d.month}/0?#{d.day}/#{d.year}})
     end
   end
 
+  # Non-waiting probe: true if the tracker event date field holds the given date (default: browser today)
+  def tracker_field_event_date(match_date = nil)
+    tracker_date_matches?(find('.tracker-event_date input'), match_date || browser_local_today)
+  end
+
+  # Retries until the event date field shows today's date in the browser's local time zone
   def expect_tracker_date_to_be_today
-    expect(tracker_field_event_date).not_to be nil
+    today = browser_local_today
+    page.document.synchronize(10) do
+      raise Capybara::ExpectationNotMet, "tracker event date is not #{today}" unless tracker_field_event_date(today)
+    end
   end
 
   it 'should create a new tracker item in an empty list' do
@@ -82,7 +91,7 @@ describe 'tracker block', js: true, driver: $browser_driver do
     # Without this, the player info record that is normally created doesn't provide a completely empty set of tracker records
     # We must test this edge case, since it has broken the UI in development
 
-    have_css('form#new_master')
+    expect(page).to have_css('form#new_master', wait: 10)
     within 'form#new_master' do
       all('input[type="submit"]').first.click
     end
@@ -90,9 +99,7 @@ describe 'tracker block', js: true, driver: $browser_driver do
     dismiss_modal
     expand_tracker_panel
 
-    has_css? '.tracker-tree-results'
-
-    sleep 2.5
+    expect(page).to have_css('.tracker-tree-results a.add-tracker-record', wait: 10)
 
     within '.tracker-tree-results' do
       find('a.add-tracker-record').click
@@ -122,30 +129,18 @@ describe 'tracker block', js: true, driver: $browser_driver do
     within '#advanced_search_master' do
       click_link 'clear fields'
       fill_in 'master_player_infos_attributes_0_first_name', with: @full_player_info.first_name
-      sleep 0.5
       fill_in 'master_player_infos_attributes_0_last_name', with: @full_player_info.last_name.to_s
-      sleep 0.5
       find('#master_player_infos_attributes_0_last_name').send_keys :tab
     end
 
-    have_css '#advanced_search_master.ajax-running'
+    # The search runs via AJAX; the running state may be brief, so wait for the settled results instead
     dismiss_modal
-    sleep 1
-    have_css '#master_results_block'
-    expect(page).to have_css '#master_results_block', text: ''
-    have_css '#search_count'
+    expect(page).to have_css '#master_results_block', wait: 10
     expect(page).not_to have_css '#advanced_search_master.ajax-running'
 
     dismiss_modal
-    has_css? '#search_count .search_count'
-    sleep 2
-    v = find('#search_count').text
-    unless v&.match(/[0-9]+/)
-      # puts "About to fail"
-      # puts @full_player_info.inspect
-      sleep 10
-    end
-    expect(page).to have_css '#search_count', text: /[0-9]+/
+    expect(page).to have_css '#search_count .search_count', wait: 10
+    expect(page).to have_css '#search_count', text: /[0-9]+/, wait: 15
 
     # Check we got some results
     items = page.all(:css, '.master-expander')
@@ -164,7 +159,6 @@ describe 'tracker block', js: true, driver: $browser_driver do
     #    if t.first.text == '0'
     #      t.click
     #    end
-    have_css "##{h}.tracker-block.collapse.in"
 
     # Validate that we don't already have a protocol / sub process tracked for this player
     protocol = Classification::Protocol.active.selectable.find_by(name: 'Q1')
@@ -189,12 +183,10 @@ describe 'tracker block', js: true, driver: $browser_driver do
       expect(i).to be <= spslen
     end
 
-    have_css "##{h}.tracker-block.collapse.in"
     expand_tracker_panel
     expect(page).not_to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-protocol_name", text: protocol.name
     expect(page).not_to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-sub_process_name", text: sp.name.captionize
 
-    sleep 2.5
     # Now add a new tracker item
     within '.tracker-tree-results' do
       find('a.add-tracker-record').click
@@ -215,20 +207,16 @@ describe 'tracker block', js: true, driver: $browser_driver do
     # After a moment the tracker will show the newly created item
     expect(page).to have_css 'tbody[data-template="tracker-result-template"][data-tracker-protocol="' + protocol.name.downcase.underscore + '"] span.record-meta', text: @user.email.to_s
 
-    sleep 1
-    have_css '.tracker-tree-results tbody.new-block'
+    expect(page).to have_css '.tracker-tree-results tbody.new-block', wait: 10
     dismiss_modal
-    sleep 1
     dismiss_modal
-    sleep 1
     # Now add a new item to be merged within the current protocol
     pe = pes[1]
     within '.tracker-tree-results' do
       find('a.add-tracker-record').click
     end
 
-    have_css '.tracker-tree-results #new_tracker'
-    have_css '.tracker-tree-results #new_tracker'
+    expect(page).to have_css '.tracker-tree-results #new_tracker', wait: 10
 
     within '.tracker-tree-results #new_tracker' do
       select protocol.name, from: 'tracker_protocol_id'
@@ -242,7 +230,6 @@ describe 'tracker block', js: true, driver: $browser_driver do
         dd.send_keys '2030-02-02'
       else
         dd.set ''
-        sleep 0.5
         dd.set '02/02/2030'
       end
       click_button 'Create Tracker'
@@ -256,26 +243,20 @@ describe 'tracker block', js: true, driver: $browser_driver do
       find('a.add-tracker-record').click
     end
 
-    have_css '.tracker-tree-results #new_tracker'
-    have_css '.tracker-tree-results #new_tracker'
+    expect(page).to have_css '.tracker-tree-results #new_tracker', wait: 10
 
     within '.tracker-tree-results #new_tracker' do
       select protocol.name, from: 'tracker_protocol_id'
-      sleep 0.5
       find("#tracker_sub_process_id[data-parent-filter-id='#{protocol.id}'] option[value='#{sp.id}']").select_option
-      sleep 0.5
       find("#tracker_protocol_event_id[data-parent-filter-id='#{sp.id}'] option[value='#{pe.id}']").select_option
       # We have to set this explicitly rather than use fill_in, since the shim for date fields in Firefox creates a separate input
-      sleep 0.5
       dd = find('.tracker-event_date input')
       if dd[:type] == 'date'
         dd.send_keys '2010-01-02'
       else
         dd.set ''
-        sleep 0.5
         dd.set '01/02/2010'
       end
-      sleep 0.5
       click_button 'Create Tracker'
     end
 
@@ -288,8 +269,6 @@ describe 'tracker block', js: true, driver: $browser_driver do
       click_link 'show history'
     end
 
-    have_css "##{h}.tracker-history.collapse.in"
-
     expect(page).to have_css 'tbody.tracker-history .tracker-history-event_name', text: pe_orig.name.captionize
     expect(page).to have_css 'tbody.tracker-history .tracker-history span.record-meta', text: @user.email.to_s
 
@@ -298,38 +277,24 @@ describe 'tracker block', js: true, driver: $browser_driver do
     click_link 'clear fields'
     within '#advanced_search_master' do
       fill_in 'master_player_infos_attributes_0_first_name', with: @full_player_info.first_name
-      sleep 0.5
       fill_in 'master_player_infos_attributes_0_last_name', with: @full_player_info.last_name.to_s
-      sleep 0.5
       find('#master_player_infos_attributes_0_last_name').send_keys :tab
-      sleep 0.5
       select protocol.name, from: 'master_trackers_attributes_0_protocol_id'
-      sleep 0.5
       find("#master_trackers_attributes_0_sub_process_id option[value='#{sp.id}']").select_option
-      sleep 0.5
       find("#master_trackers_attributes_0_protocol_event_id option[value='#{pe.id}']").select_option
-      sleep 0.5
     end
 
     dismiss_modal
-    have_css '.master-expander'
+    # Results load via AJAX; wait for them rather than retrying the search with a fixed pause
+    expect(page).to have_css '.master-expander', wait: 15
     items = page.all(:css, '.master-expander')
-
-    ### Occasionally we fail here, perhaps due to bad test data?????
-    if items.empty?
-      # puts 'About to fail with a bad result'
-      # puts @full_player_info.inspect
-      # puts protocol.name, sp.id, pe.id
-      sleep 10
-      items = page.all(:css, '.master-expander')
-    end
     expect(items.length).to be > 0
 
     # Open the first person
     h = open_player_element items.first, items
 
-    # We know the tracker has records, so open it
-    have_css "##{h}.tracker-block.collapse.in"
+    # We know the tracker has records, so open the tracker panel
+    expand_tracker_panel
 
     # Validate the current protocol item appears as expected
     expect(page).to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-protocol_name", text: protocol.name
@@ -341,8 +306,7 @@ describe 'tracker block', js: true, driver: $browser_driver do
       click_link 'show history'
     end
 
-    have_css "##{h}.tracker-history.collapse.in"
-    have_css 'tbody.tracker-history .tracker-history-event_name'
+    expect(page).to have_css 'tbody.tracker-history .tracker-history-event_name'
 
     # The previous item is there still
     expect(page).to have_css('tbody.tracker-history .tracker-history-event_name', text: /#{pe_orig.name}/i), "Tracker history event name not found '#{pe_orig.name}'. #{page.all("##{h}.tracker-history").first&.text}"
@@ -351,9 +315,7 @@ describe 'tracker block', js: true, driver: $browser_driver do
     # Search for the player by current Classification::Protocol, subprocess and event, but not the historical event
     within '#advanced_search_master' do
       find("#master_not_tracker_histories_attributes_0_sub_process_id option[value='#{sp.id}']").select_option
-      sleep 0.5
       find("#master_not_tracker_histories_attributes_0_protocol_event_id option[value='#{pe_orig.id}']").select_option
-      sleep 0.5
     end
 
     # We expect no results, as we know this player has that historical record
@@ -362,36 +324,23 @@ describe 'tracker block', js: true, driver: $browser_driver do
     # Now remove the Not condition, and instead require the historical item
     within '#advanced_search_master' do
       find("#master_not_tracker_histories_attributes_0_sub_process_id option[value='']").select_option
-      sleep 0.5
       find("#master_not_tracker_histories_attributes_0_protocol_event_id option[value='']").select_option
-      sleep 0.5
       find("#master_tracker_histories_attributes_0_sub_process_id option[value='#{sp.id}']").select_option
-      sleep 0.5
       find("#master_tracker_histories_attributes_0_protocol_event_id option[value='#{pe_orig.id}']").select_option
-      sleep 0.5
     end
 
     dismiss_modal
-    have_css('.master-expander')
     # The results should show at least this one player
+    expect(page).to have_css '.master-expander', wait: 15
     items = page.all(:css, '.master-expander')
-    if items.empty?
-      # puts 'About to fail with a bad result'
-      # puts @full_player_info.inspect
-      # puts protocol.name, sp.id, pe.id
-      sleep 10
-      items = page.all(:css, '.master-expander')
-    end
 
     expect(items.length).to be > 0
 
     h = open_player_element items.first, items
-    sleep 1
     within "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}']" do
       edit_link = find('a.edit-tracker', visible: :all, wait: 10)
       # Scroll into view and click using JavaScript since element exists but may not be interactable
       page.execute_script('arguments[0].scrollIntoView(true);', edit_link)
-      sleep 0.5
       click_link 'edit tracker record'
     end
 
@@ -409,9 +358,7 @@ describe 'tracker block', js: true, driver: $browser_driver do
 
     within "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] form" do
       find("#tracker_sub_process_id[data-parent-filter-id='#{protocol.id}'] option[value='#{sp_new.id}']").select_option
-      sleep 0.5
       find("#tracker_protocol_event_id[data-parent-filter-id='#{sp_new.id}'] option[value='#{pe_new.id}']").select_option
-      sleep 0.5
 
       # Avoid a failure when we don't need to
       expect_tracker_date_to_be_today unless tracker_field_event_date(Date.parse('2030-02-02'))
@@ -422,23 +369,18 @@ describe 'tracker block', js: true, driver: $browser_driver do
         dd.send_keys '2125-10-01'
       else
         dd.set ''
-        sleep 0.5
         dd.set '10/01/2125'
       end
-      sleep 0.5
       click_button 'Update Tracker'
     end
 
-    sleep 4
-    have_css '.master-expander'
+    expect(page).to have_css '.master-expander', wait: 10
     expect(page).to have_css "##{h} " + 'tbody[data-template="tracker-result-template"][data-tracker-protocol="' + protocol.name.downcase + '"] span.record-meta', text: @user.email.to_s
     expect(page).to have_css "##{h} " + 'tbody[data-template="tracker-result-template"][data-tracker-protocol="' + protocol.name.downcase + '"] .tracker-event_date', text: %r{10/0?1/2125}
 
     within "##{h} " + 'tbody[data-template="tracker-result-template"][data-tracker-protocol="' + protocol.name.downcase + '"]' do
       click_link 'show history'
     end
-
-    have_css "##{h}.tracker-history.collapse.in"
 
     # The previous item is there still
     expect(page).to have_css "##{h} " + 'tbody.tracker-history .tracker-history-sub_process_name', text: /#{sp_orig.name}/i

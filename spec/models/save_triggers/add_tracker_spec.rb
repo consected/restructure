@@ -1,14 +1,14 @@
 require 'rails_helper'
 
-AlNameGenTestAt = 'Gen Test ELT 2'
+AlNameGenTestAt = 'Gen Test ELT 2 AT'
 
 RSpec.describe SaveTriggers::AddTracker, type: :model do
   include ModelSupport
   include ActivityLogSupport
 
-  before :example do
+  before_all do
     SetupHelper.setup_al_player_contact_phones
-    SetupHelper.setup_al_gen_tests AlNameGenTestAt, 'elt2_test', 'player_contact'
+    SetupHelper.setup_al_gen_tests AlNameGenTestAt, 'elt2_at', 'player_contact'
     ud, = create_user
     ud.disable!
     u0, = create_user
@@ -16,7 +16,7 @@ RSpec.describe SaveTriggers::AddTracker, type: :model do
     create_user
     let_user_create :player_contacts
     ActivityLog::PlayerContactPhone.definition.update_tracker_events
-    ActivityLog::PlayerContactElt2Test.definition.update_tracker_events
+    ActivityLog::PlayerContactElt2At.definition.update_tracker_events
 
     @master0 = create_master
     @player_contact = @master0.player_contacts.create! data: '(617)123-1234', rec_type: :phone, rank: 10
@@ -281,14 +281,14 @@ RSpec.describe SaveTriggers::AddTracker, type: :model do
 
     setup_access al.resource_name, resource_type: :table, access: :create, user: user
 
-    alstep1 = @player_contact.activity_log__player_contact_elt2_tests.build(select_call_direction: 'from player', select_who: 'user', extra_log_type: 'step_1')
+    alstep1 = @player_contact.activity_log__player_contact_elt2_ats.build(select_call_direction: 'from player', select_who: 'user', extra_log_type: 'step_1')
 
     setup_access alstep1.resource_name, resource_type: :activity_log_type, access: :create, user: user
 
     alstep1.save!
     expect(alstep1).to be_persisted
 
-    alstep2 = @player_contact.activity_log__player_contact_elt2_tests.build(select_call_direction: 'from staff', select_who: 'user', extra_log_type: 'step_1', called_when: Date.today - 15.days)
+    alstep2 = @player_contact.activity_log__player_contact_elt2_ats.build(select_call_direction: 'from staff', select_who: 'user', extra_log_type: 'step_1', called_when: Date.today - 15.days)
     alstep2.save!
 
     tracker = TrackerHistory.reorder('').last

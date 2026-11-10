@@ -50,7 +50,8 @@ describe 'reports', js: true, driver: $browser_driver do
     5.times { create_item }
     expect(Report.connection.execute(sql).first).not_to be nil
 
-    Report.active.where('id != :id', id: r.id).update_all(disabled: true, admin_id: @admin.id)
+    @disabled_report_ids = Report.active.where('id != :id', id: r.id).pluck(:id)
+    Report.where(id: @disabled_report_ids).update_all(disabled: true, admin_id: @admin.id)
 
     create_report_with_all_criteria_fields
     create_report_with_add_item_button
@@ -59,6 +60,11 @@ describe 'reports', js: true, driver: $browser_driver do
     create_report_with_filter_selector
 
     @report = r
+  end
+
+  # Committed by this suite, so other specs can see reports disabled here
+  after(:all) do
+    Report.where(id: @disabled_report_ids).update_all(disabled: false) if @disabled_report_ids
   end
 
   def setup_report_user

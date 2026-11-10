@@ -15,8 +15,8 @@ require './db/table_generators/dynamic_models_table'
 #   - the edit_form_field_list of instances pinned to the prior version
 #   - the TemplateOptionMapping item_list for the prior version
 #
-# Strategy: The test table test_created_by_recs has columns: test1, test2, created_by_user_id,
-# use_def_version_time, text_array. We create the DM with an explicit field_list of just
+# Strategy: The test table test_created_by_vfl_recs has columns: test1, test2, created_by_user_id,
+# use_def_version_at, text_array. We create the DM with an explicit field_list of just
 # "test1 test2" (v1), then later update it to "test1 test2 text_array" (v2) - simulating
 # a new field being added to the definition. This avoids ALTER TABLE and migration issues.
 #
@@ -56,7 +56,9 @@ RSpec.describe 'Versioned field list for dynamic model instances', type: :model 
     change_setting('DisableVDef', @prev_disable_vdef)
   end
 
-  before :example do
+  before_all do
+    table_name = 'test_created_by_vfl_recs'
+    DynamicModelSupport.generate_test_dynamic_model(table_name: table_name, name: 'test versioned field list', allow_updating: true)
     @user0, = create_user
     create_admin
     create_user
@@ -67,25 +69,25 @@ RSpec.describe 'Versioned field list for dynamic model instances', type: :model 
   # Creates a DM with an explicit restricted field_list (only test1, test2)
   # instead of letting it pick up all columns from the table
   def generate_dm_with_restricted_fields
-    unless Admin::MigrationGenerator.table_exists? 'test_created_by_recs'
-      TableGenerators.dynamic_models_table('test_created_by_recs', :create_do,
+    unless Admin::MigrationGenerator.table_exists? 'test_created_by_vfl_recs'
+      TableGenerators.dynamic_models_table('test_created_by_vfl_recs', :create_do,
                                            'test1', 'test2', 'created_by_user_id',
-                                           'use_def_version_time', 'text_array')
+                                           'use_def_version_at', 'text_array')
     end
 
     @master = Master.create! current_user: @user
     @master.current_user = @user
 
-    DynamicModel.active.where(table_name: 'test_created_by_recs').reload.each { |dm| dm.disable!(@admin) }
+    DynamicModel.active.where(table_name: 'test_created_by_vfl_recs').reload.each { |dm| dm.disable!(@admin) }
     begin
-      DynamicModel.send(:remove_const, :TestCreatedByRec) if DynamicModel.const_defined?(:TestCreatedByRec, false)
+      DynamicModel.send(:remove_const, :TestCreatedByVflRec) if DynamicModel.const_defined?(:TestCreatedByVflRec, false)
     rescue NameError
       # Constant may have been removed by another parallel test
     end
 
     dm = DynamicModel.create! current_admin: @admin,
                               name: 'test created by',
-                              table_name: 'test_created_by_recs',
+                              table_name: 'test_created_by_vfl_recs',
                               primary_key_name: :id,
                               foreign_key_name: :master_id,
                               field_list: v1_fields_str,
@@ -93,8 +95,8 @@ RSpec.describe 'Versioned field list for dynamic model instances', type: :model 
     dm.current_admin = @admin
     dm.update_tracker_events
 
-    setup_access :dynamic_model__test_created_by_recs, user: @user
-    setup_access :dynamic_model__test_created_by_recs, user: @user0
+    setup_access :dynamic_model__test_created_by_vfl_recs, user: @user
+    setup_access :dynamic_model__test_created_by_vfl_recs, user: @user0
     dm.send :reset_all_versions
     dm
   end
@@ -142,7 +144,7 @@ RSpec.describe 'Versioned field list for dynamic model instances', type: :model 
 
     # Create an instance under v1
     sleep 2
-    instance_v1 = @master.dynamic_model__test_created_by_recs.create!(test1: 'v1_record')
+    instance_v1 = @master.dynamic_model__test_created_by_vfl_recs.create!(test1: 'v1_record')
 
     sleep 2
 
@@ -163,7 +165,7 @@ RSpec.describe 'Versioned field list for dynamic model instances', type: :model 
     expect(current_otc.fields).to include(new_field)
 
     # Reload the v1 instance to clear any memoization
-    instance_v1 = DynamicModel::TestCreatedByRec.find(instance_v1.id)
+    instance_v1 = DynamicModel::TestCreatedByVflRec.find(instance_v1.id)
 
     # The v1 instance's versioned definition's option_type_config should NOT include the new field
     versioned_otc = instance_v1.versioned_definition.option_type_config_for(:default)
@@ -179,7 +181,7 @@ RSpec.describe 'Versioned field list for dynamic model instances', type: :model 
 
     # Create an instance under v1
     sleep 2
-    instance_v1 = @master.dynamic_model__test_created_by_recs.create!(test1: 'v1_record')
+    instance_v1 = @master.dynamic_model__test_created_by_vfl_recs.create!(test1: 'v1_record')
     instance_v1.current_user = @user
 
     v1_edit_fields = instance_v1.edit_form_field_list.dup
@@ -199,7 +201,7 @@ RSpec.describe 'Versioned field list for dynamic model instances', type: :model 
 
     # Create an instance under v2
     sleep 2
-    instance_v2 = @master.dynamic_model__test_created_by_recs.create!(test1: 'v2_record')
+    instance_v2 = @master.dynamic_model__test_created_by_vfl_recs.create!(test1: 'v2_record')
     instance_v2.current_user = @user
 
     # v2 instance should include the new field in edit_form_field_list
@@ -208,7 +210,7 @@ RSpec.describe 'Versioned field list for dynamic model instances', type: :model 
                                           "Expected v2 instance edit_form_field_list to include '#{new_field}', but got: #{v2_edit_fields}"
 
     # Reload the v1 instance to clear memoization
-    instance_v1 = DynamicModel::TestCreatedByRec.find(instance_v1.id)
+    instance_v1 = DynamicModel::TestCreatedByVflRec.find(instance_v1.id)
     instance_v1.current_user = @user
 
     # v1 instance should NOT include the new field in edit_form_field_list
@@ -224,7 +226,7 @@ RSpec.describe 'Versioned field list for dynamic model instances', type: :model 
 
     # Create an instance under v1
     sleep 2
-    instance_v1 = @master.dynamic_model__test_created_by_recs.create!(test1: 'v1_record')
+    instance_v1 = @master.dynamic_model__test_created_by_vfl_recs.create!(test1: 'v1_record')
 
     sleep 2
 
@@ -240,7 +242,7 @@ RSpec.describe 'Versioned field list for dynamic model instances', type: :model 
     dmdef.force_option_config_parse
 
     # Reload the v1 instance and get its versioned definition
-    instance_v1 = DynamicModel::TestCreatedByRec.find(instance_v1.id)
+    instance_v1 = DynamicModel::TestCreatedByVflRec.find(instance_v1.id)
     versioned_def = instance_v1.versioned_definition
 
     # Get the option_type_config from the versioned definition

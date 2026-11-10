@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-AlNameGenTestAlet = 'Gen Test ELT'
+AlNameGenTestAlet = 'Gen Test ELT ALET'
 # Use the activity log player contact phone activity log implementation,
 # since it includes the works_with concern
 
@@ -15,7 +15,7 @@ RSpec.describe 'Activity Log extra types implementation', type: :model do
   include PlayerContactSupport
 
   before :context do
-    SetupHelper.setup_al_gen_tests AlNameGenTestAlet, 'elt', 'player_contact'
+    SetupHelper.setup_al_gen_tests AlNameGenTestAlet, 'elt_alet', 'player_contact'
     # seed_database
     # ::ActivityLog.define_models
     # Seeds::ActivityLogPlayerContactPhone.setup

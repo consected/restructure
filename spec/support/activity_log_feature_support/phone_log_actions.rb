@@ -27,8 +27,7 @@ module PhoneLogActions
     phone_ranks.each do |rank|
       phone_block_css = player_contact_phone_block_css(rank)
       scroll_to phone_block_css, check_it: false
-      sleep 1
-      top_ranked = all(phone_block_css).first
+      top_ranked = first(phone_block_css, minimum: 0, wait: 1)
       if top_ranked
         break
       end

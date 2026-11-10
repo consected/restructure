@@ -161,8 +161,7 @@ describe 'admin sign in process', js: true, driver: $browser_driver do
 
     visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
 
-    # Wait until the next otp becomes valid
-    sleep 31
+    reset_last_otp_timestamp(@final_admin)
     just_signed_in = false
 
     # visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
@@ -181,15 +180,7 @@ describe 'admin sign in process', js: true, driver: $browser_driver do
       click_button 'Log in'
     end
 
-    have_css '.flash .alert'
-
-    fa = all('.flash .alert')[0]
-    if fa
-      just_signed_in = (fa.text == "×\nSigned in successfully.")
-      puts fa.text unless just_signed_in
-    end
-
-    expect(just_signed_in).to be true
+    expect(page).to have_css('.flash .alert', text: 'Signed in successfully.', wait: 10)
   end
 
   it 'should prevent sign in if admin disabled' do

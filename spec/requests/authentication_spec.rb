@@ -7,7 +7,6 @@ describe 'user and admin authentication' do
   include ModelSupport
 
   before :each do
-    seed_database
     expect(ActivityLog.active.length).to be > 0
     expect(defined?(ActivityLog::PlayerContactPhone) && ActivityLog::PlayerContactPhone.is_a?(Class)).to be true
   end

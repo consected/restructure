@@ -44,10 +44,6 @@ RSpec.describe Imports::Import, type: :model do
     @resource_name = "dynamic_model__#{@short_table_name}"
   end
 
-  after :all do
-    change_setting('AllowDynamicMigrations', false)
-  end
-
   before :example do
     create_admin
     create_user

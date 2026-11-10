@@ -1,13 +1,14 @@
 # frozen_string_literal: true
 
 module TableGenerators
-  def self.external_identifiers_table(name = nil, generate_table = false, attrib = nil, created_by = nil, assign_access = nil, add_disabled = nil)
+  def self.external_identifiers_table(name = nil, generate_table = false, attrib = nil, created_by = nil, assign_access = nil, add_disabled = nil, skip_if_exists: nil)
     if name.nil? || name == ''
       puts "Usage:
       db/table_generators/generate.sh external_identifiers_table <pluralized_table_name> create|drop 'identifier_field_id'
       "
       return
     end
+    return if skip_if_exists && Admin::MigrationGenerator.table_exists?(name)
 
     @implementation_table_name = name
     if name.end_with? 'ies'
@@ -51,11 +52,11 @@ EOF
                           (
                               master_id,
                               #{attrib},
-                              #{created_by ? 'created_by_user_id,' : ''}
-                              #{assign_access ? 'assign_access_to_user_id,' : ''}
+                              #{'created_by_user_id,' if created_by}
+                              #{'assign_access_to_user_id,' if assign_access}
                               user_id,
                               admin_id,
-                              #{add_disabled ? 'disabled,' : ''}
+                              #{'disabled,' if add_disabled}
                               created_at,
                               updated_at,
                               #{singular_name}_table_id
@@ -63,11 +64,11 @@ EOF
                           SELECT
                               NEW.master_id,
                               NEW.#{attrib},
-                              #{created_by ? 'NEW.created_by_user_id,' : ''}
-                              #{assign_access ? 'NEW.assign_access_to_user_id,' : ''}
+                              #{'NEW.created_by_user_id,' if created_by}
+                              #{'NEW.assign_access_to_user_id,' if assign_access}
                               NEW.user_id,
                               NEW.admin_id,
-                              #{add_disabled ? 'NEW.disabled,' : ''}
+                              #{'NEW.disabled,' if add_disabled}
                               NEW.created_at,
                               NEW.updated_at,
                               NEW.id
@@ -79,11 +80,11 @@ EOF
                   id integer NOT NULL,
                   master_id integer,
                   #{attrib} bigint,
-                  #{created_by ? 'created_by_user_id integer,' : ''}
-                  #{assign_access ? 'assign_access_to_user_id integer,' : ''}
+                  #{'created_by_user_id integer,' if created_by}
+                  #{'assign_access_to_user_id integer,' if assign_access}
                   user_id integer,
                   admin_id integer,
-                  #{add_disabled ? 'disabled boolean,' : ''}
+                  #{'disabled boolean,' if add_disabled}
                   created_at timestamp without time zone NOT NULL,
                   updated_at timestamp without time zone NOT NULL,
                   #{singular_name}_table_id integer
@@ -102,11 +103,11 @@ EOF
                   id integer NOT NULL,
                   master_id integer,
                   #{attrib} bigint,
-                  #{created_by ? 'created_by_user_id integer,' : ''}
-                  #{assign_access ? 'assign_access_to_user_id integer,' : ''}
+                  #{'created_by_user_id integer,' if created_by}
+                  #{'assign_access_to_user_id integer,' if assign_access}
                   user_id integer,
                   admin_id integer,
-                  #{add_disabled ? 'disabled boolean,' : ''}
+                  #{'disabled boolean,' if add_disabled}
                   created_at timestamp without time zone NOT NULL,
                   updated_at timestamp without time zone NOT NULL
               );
@@ -150,8 +151,8 @@ EOF
               ALTER TABLE ONLY #{name}
                   ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES masters(id);
 
-              #{created_by ? '' : '--'} ALTER TABLE ONLY #{name}
-              #{created_by ? '' : '--'}     ADD CONSTRAINT fk_rails_982635401e0 FOREIGN KEY (created_by_user_id) REFERENCES users(id);
+              #{'--' unless created_by} ALTER TABLE ONLY #{name}
+              #{'--' unless created_by}     ADD CONSTRAINT fk_rails_982635401e0 FOREIGN KEY (created_by_user_id) REFERENCES users(id);
 
 
               ALTER TABLE ONLY #{singular_name}_history
@@ -166,8 +167,8 @@ EOF
               ALTER TABLE ONLY #{singular_name}_history
                   ADD CONSTRAINT fk_#{singular_name}_history_#{name} FOREIGN KEY (#{singular_name}_table_id) REFERENCES #{name}(id);
 
-              #{created_by ? '' : '--'} ALTER TABLE ONLY #{singular_name}_history
-              #{created_by ? '' : '--'}     ADD CONSTRAINT fk_#{singular_name}_history_cb_users FOREIGN KEY (created_by_user_id) REFERENCES users(id);
+              #{'--' unless created_by} ALTER TABLE ONLY #{singular_name}_history
+              #{'--' unless created_by}     ADD CONSTRAINT fk_#{singular_name}_history_cb_users FOREIGN KEY (created_by_user_id) REFERENCES users(id);
 
 
               GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA ml_app TO fphs;

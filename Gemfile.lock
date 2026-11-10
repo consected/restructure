@@ -464,6 +464,7 @@ GEM
       actionpack (>= 6.1)
       activesupport (>= 6.1)
       sprockets (>= 3.0.0)
+    stackprof (0.2.28)
     stringio (3.2.0)
     strong_password (0.0.10)
     syslog (0.4.0)
@@ -473,6 +474,8 @@ GEM
       unicode-display_width (>= 1.1.1, < 4)
     terser (1.2.8)
       execjs (>= 0.3.0, < 3)
+    test-prof (1.6.3)
+      logger
     thor (1.5.0)
     timeout (0.6.1)
     tsort (0.2.0)
@@ -570,11 +573,13 @@ DEPENDENCIES
   spring-commands-rspec
   sprockets (~> 4.2)
   sprockets-rails (~> 3.5)
+  stackprof
   stringio (>= 3.1.2)
   strong_password (~> 0.0.5)
   syslog
   syslog-logger
   terser
+  test-prof (~> 1.0)
   web-console
   webmock
 

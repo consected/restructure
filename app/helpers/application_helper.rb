@@ -31,7 +31,7 @@ module ApplicationHelper
   def option_type_url_marker
     return unless object_instance.class.respond_to? :definition
 
-    'OPTION_TYPE-' if object_instance.class.definition.option_type_attr_name
+    'OPTION_TYPE-' if object_instance.class.definition&.option_type_attr_name
   end
 
   #

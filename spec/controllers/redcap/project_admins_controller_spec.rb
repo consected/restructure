@@ -1,13 +1,15 @@
 # frozen_string_literal: true
 
+# Covers REDCap project-admin actions and standard admin-controller behavior.
 require 'rails_helper'
 
 RSpec.describe Redcap::ProjectAdminsController, type: :controller do
   include UserSupport
 
   include MasterSupport
-  include Redcap::RedcapSupport
   include Redcap::ProjectAdminSupport
+
+  include_context 'with redcap project admins'
 
   around do |example|
     if example.metadata[:queue_adapter_test]
@@ -32,14 +34,16 @@ RSpec.describe Redcap::ProjectAdminsController, type: :controller do
     @edit_form_admin = 'admin/common_templates/_form'
   end
 
+  def create_items
+    @created_items = Redcap::ProjectAdmin.active.to_a
+  end
+
   # def saved_item_template
   #   'admin/common_templates/_item'
   # end
 
   before(:context) do
     @path_prefix = '/redcap'
-    @admin, = ControllerMacros.create_admin
-    create_admin_matching_user
   end
 
   before(:example) do
@@ -50,10 +54,6 @@ RSpec.describe Redcap::ProjectAdminsController, type: :controller do
 
   describe 'transfer mode "none" action restrictions' do
     before_each_login_admin
-
-    before(:each) do
-      setup_redcap_project_admin_configs
-    end
 
     let!(:project_admin) do
       pa = Redcap::ProjectAdmin.active.first
@@ -169,10 +169,6 @@ RSpec.describe Redcap::ProjectAdminsController, type: :controller do
 
   describe 'remove_user action' do
     before_each_login_admin
-
-    before(:each) do
-      setup_redcap_project_admin_configs
-    end
 
     let!(:project_admin) do
       pa = Redcap::ProjectAdmin.active.first

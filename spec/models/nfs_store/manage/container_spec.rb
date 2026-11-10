@@ -15,7 +15,7 @@ RSpec.describe NfsStore::Manage::Container, type: :model do
   include NfsStore::InNfsStoreContainer
 
   before :each do
-    seed_database && ::ActivityLog.define_models
+    ::ActivityLog.define_models
 
     setup_nfs_store
     generate_test_dynamic_model
@@ -25,7 +25,7 @@ RSpec.describe NfsStore::Manage::Container, type: :model do
   it 'creates a single container for the user, shared across activities and masters' do
     create_user
     create_item
-    als = ActivityLog::PlayerContactPhone.where(extra_log_type: 'file_config_user_creator')
+    als = nfs_al_class.where(extra_log_type: 'file_config_user_creator')
     expect(als.count).to eq 0
 
     cs = NfsStore::Manage::Container.last
@@ -38,7 +38,7 @@ RSpec.describe NfsStore::Manage::Container, type: :model do
     activity_log_for_container_access
     expect(@activity_log).to eq al_orig
 
-    als = ActivityLog::PlayerContactPhone.where(extra_log_type: 'file_config_user_creator').reload
+    als = nfs_al_class.where(extra_log_type: 'file_config_user_creator').reload
     cs = NfsStore::Manage::Container.last.reload
     new_cs_id = cs.id
 
@@ -48,7 +48,7 @@ RSpec.describe NfsStore::Manage::Container, type: :model do
     create_item
     setup_container_and_al activity: :file_config_user_creator
 
-    als = ActivityLog::PlayerContactPhone.where(extra_log_type: 'file_config_user_creator').reload
+    als = nfs_al_class.where(extra_log_type: 'file_config_user_creator').reload
     cs = NfsStore::Manage::Container.last.reload
     new_cs_id = cs.id
     expect(als.count).to eq 2

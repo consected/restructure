@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 # Tests for SaveTriggers::RedcapRequest, covering the import_records and
@@ -10,24 +12,21 @@ require 'rails_helper'
 # attributes must be resolved before the Redcap::ProjectAdmin lookup, and the
 # error message for a missing project must have correct formatting.
 RSpec.describe SaveTriggers::RedcapRequest, type: :model do
-  include ModelSupport
   include ActivityLogSupport
 
-  include Redcap::RedcapSupport
+  include_context 'with redcap project admins'
 
-  before :example do
-    create_admin
-    @projects = setup_redcap_project_admin_configs
-    @project = @projects.find { |h| h[:name] == 'save_trigger' }
+  before_all do
+    SetupHelper.setup_al_player_contact_phones
+    @aldef = SetupHelper.setup_al_gen_tests 'Test Pull External RR', 'test_pull_rr', 'player_contact'
   end
 
   before :example do
-    SetupHelper.setup_al_player_contact_phones
-    res = SetupHelper.setup_al_gen_tests 'Test Pull External', 'test_pull_external', 'player_contact'
+    @project = @projects.find { |h| h[:name] == 'save_trigger' }
     create_user
     @master = create_master
     @player_contact = @master.player_contacts.create! data: '(617)123-1234 b', rec_type: :phone, rank: 10
-    @al = create_al_for_resource_name(res.resource_name, master: @master)
+    @al = create_al_for_resource_name(@aldef.resource_name, master: @master)
     expect(@al.master_id).to eq @master.id
     setup_access @al.resource_name, resource_type: :activity_log_type, access: :create, user: @user
   end
@@ -35,8 +34,6 @@ RSpec.describe SaveTriggers::RedcapRequest, type: :model do
   it 'pushes data to Redcap' do
     # SetupHelper.get_webmock_responses
     # WebMock.allow_net_connect!
-
-    lead_email = 'phil-test12@consected.com'
 
     instrument = 'research_form'
     record_id = -1

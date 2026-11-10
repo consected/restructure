@@ -68,7 +68,7 @@ RSpec.describe Admin::ConfigLibrariesController, type: :controller do
       expect(diffs[0][:changes].keys).to include('options')
     end
 
-    it 'returns empty array when there are no changes' do
+    it 'returns an empty changes hash when there are no changes' do
       versions = [
         {
           'id' => '1',
@@ -90,7 +90,8 @@ RSpec.describe Admin::ConfigLibrariesController, type: :controller do
 
       diffs = @controller.send(:calculate_version_diffs, versions)
 
-      expect(diffs).to be_empty
+      expect(diffs.length).to eq(1)
+      expect(diffs.first[:changes]).to be_empty
     end
 
     it 'handles empty versions array' do
@@ -141,7 +142,8 @@ RSpec.describe Admin::ConfigLibrariesController, type: :controller do
 
       diffs = @controller.send(:calculate_version_diffs, versions)
 
-      expect(diffs).to be_empty
+      expect(diffs.length).to eq(1)
+      expect(diffs.first[:changes]).to be_empty
     end
 
     it 'filters out timestamp-only changes' do
@@ -166,8 +168,8 @@ RSpec.describe Admin::ConfigLibrariesController, type: :controller do
 
       diffs = @controller.send(:calculate_version_diffs, versions)
 
-      # Should be empty because only timestamps changed
-      expect(diffs).to be_empty
+      expect(diffs.length).to eq(1)
+      expect(diffs.first[:changes]).to be_empty
     end
   end
 

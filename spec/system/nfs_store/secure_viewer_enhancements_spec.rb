@@ -28,9 +28,26 @@ require_relative '../../support/nfs_store_feature_support/z_filestore_feature_ma
 describe 'Secure viewer enhancements (Issue #590)', js: true, driver: $browser_driver, type: :system do
   include FilestoreFeatureMain
 
-  # rubocop:disable Lint/ConstantDefinitionInBlock
-  ActivityLogName = 'Secure Viewer Test'
-  # rubocop:enable Lint/ConstantDefinitionInBlock
+  def activity_log_name
+    'Secure Viewer Test'
+  end
+
+  def activity_log_process_name
+    'sec_view'
+  end
+
+  def activity_log_class
+    @aldef.implementation_class
+  end
+
+  def activity_log_resource_name
+    @aldef.resource_name
+  end
+
+  def activity_log_step_resource_name
+    step_1_config = @aldef.option_configs(force: true).find { |config| config.name.to_s == 'step_1' }
+    step_1_config.resource_name
+  end
 
   # Generate a valid PNG file with specific dimensions using Ruby's Zlib
   # @param width [Integer] image width in pixels
@@ -151,8 +168,8 @@ describe 'Secure viewer enhancements (Issue #590)', js: true, driver: $browser_d
 
   def set_up_user_access
     setup_access :player_contacts, user: @user
-    setup_access :activity_log__player_contact_phones, user: @user
-    setup_access :activity_log__player_contact_phone__step_1, resource_type: :activity_log_type, user: @user
+    setup_access activity_log_resource_name.to_sym, user: @user
+    setup_access activity_log_step_resource_name.to_sym, resource_type: :activity_log_type, user: @user
 
     # NFS Store access
     setup_access :nfs_store__manage__containers, user: @user
@@ -166,7 +183,7 @@ describe 'Secure viewer enhancements (Issue #590)', js: true, driver: $browser_d
   end
 
   def expand_phone_log_tab
-    expand_master_record_and_tab(master_id: @master.id, tab_name: 'activity_log__player_contact_phones')
+    expand_master_record_and_tab(master_id: @master.id, tab_name: activity_log_resource_name)
   end
 
   # Open the secure viewer by clicking a file link in the filestore browser
@@ -184,7 +201,7 @@ describe 'Secure viewer enhancements (Issue #590)', js: true, driver: $browser_d
     change_setting('TwoFactorAuthDisabledForUser', true)
     change_setting('TwoFactorAuthDisabledForAdmin', true)
 
-    SetupHelper.setup_al_gen_tests ActivityLogName, nil, 'player_contact', rec_type: 'phone'
+    SetupHelper.setup_al_gen_tests activity_log_name, activity_log_process_name, 'player_contact'
 
     create_user(create_master: false)
     SetupHelper.feature_setup
@@ -205,7 +222,7 @@ describe 'Secure viewer enhancements (Issue #590)', js: true, driver: $browser_d
     FileUtils.mkdir_p test_dir
 
     # Find and configure the activity log definition
-    @aldef = ActivityLog.active.where(name: ActivityLogName).first
+    @aldef = ActivityLog.active.where(name: activity_log_name, process_name: activity_log_process_name).first
     expect(@aldef).not_to be_nil
 
     @aldef.extra_log_types = <<~ENDDEF
@@ -244,12 +261,12 @@ describe 'Secure viewer enhancements (Issue #590)', js: true, driver: $browser_d
     @aldef.save!
     @aldef.option_configs(force: true)
     ActivityLog.define_models
-    ActivityLog::PlayerContactPhone.definition.option_configs(force: true)
+    activity_log_class.definition.option_configs(force: true)
 
     set_up_user_access
 
     # Setup NFS store filters
-    resource_name = 'activity_log__player_contact_phone__step_1'
+    resource_name = activity_log_step_resource_name
     NfsStore::Filter::Filter.active.where(app_type: @app_type, resource_name:).update_all(disabled: true)
     NfsStore::Filter::Filter.create!(
       current_admin: @admin,
@@ -268,9 +285,10 @@ describe 'Secure viewer enhancements (Issue #590)', js: true, driver: $browser_d
       rec_type: :phone
     )
     @player_contact.master.current_user = @user
+    @master.current_user = @user
 
     # Create the activity log with filestore
-    @activity_log = ActivityLog::PlayerContactPhone.create!(
+    @activity_log = activity_log_class.create!(
       select_call_direction: 'from player',
       select_who: 'user',
       extra_log_type: :step_1,

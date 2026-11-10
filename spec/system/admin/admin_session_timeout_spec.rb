@@ -77,9 +77,8 @@ describe 'admin session timeout via shared authentication gate', js: true, drive
 
     row = ActiveRecord::SessionStore::Session.order(:id).last
     expect(row&.data && row.data['warden.user.user.session']).to be_present,
-                                                                  'matching user sign-in should establish the :user warden scope'
+                                                                 'matching user sign-in should establish the :user warden scope'
   end
-
 
   # Fires the same XHR keep-alive request as the "Continue working" link
   # (GET /pages/version.json, data-remote="true") and returns its HTTP status.
@@ -93,28 +92,24 @@ describe 'admin session timeout via shared authentication gate', js: true, drive
         .catch(function(e) { window.__keepAliveStatus = 'error'; window.__keepAliveBody = e.toString(); });
     JS
 
-    status = nil
-    Timeout.timeout(10) do
-      loop do
-        status = page.evaluate_script('window.__keepAliveStatus')
-        break unless status == 'pending'
+    # Poll for the response with a retrying synchronize (not a fixed sleep); raises if still pending after 10s
+    page.document.synchronize(10) do
+      status = page.evaluate_script('window.__keepAliveStatus')
+      raise Capybara::ExpectationNotMet, 'keep-alive request still pending' if status == 'pending'
 
-        sleep 0.2
-      end
+      status
     end
-    status
   end
 
   # PagesController#index (the root path) renders the admin panel when current_admin
   # is present, or redirects to masters search when only current_user remains.
   def admin_area_reachable?
     visit '/'
-    finish_page_loading
     current_path == '/'
   end
 
   it 'keeps the admin session alive across AdminTimeout when only shared XHR keep-alive requests occur' do
-    admin_timeout = 60
+    admin_timeout = 30
     change_setting('AdminTimeout', admin_timeout.seconds)
     change_setting('UserTimeout', 10.minutes)
 
@@ -127,9 +122,19 @@ describe 'admin session timeout via shared authentication gate', js: true, drive
     # Fire the same XHR keep-alive request the "Continue working" link uses, repeatedly,
     # spanning well past admin_timeout - this only proves the fix if the admin scope's
     # inactivity timer is genuinely being refreshed by these background requests.
-    3.times do
-      sleep (admin_timeout * 0.7).round
-      expect(keep_alive_ping).to eq(200), "keep-alive ping should succeed #{(Time.now - start).round}s since sign-in"
+    # A baseline ping right after sign-in confirms the keep-alive path works before the timed loop.
+    expect(keep_alive_ping).to eq(200), 'baseline keep-alive ping should succeed right after sign-in'
+    last_success_at = Time.now
+
+    # Six pings every admin_timeout / 3 seconds (10s), so no gap between refreshes approaches the timeout.
+    # The sleep is the real-time ping cadence, not synchronisation; each ping's result is asserted with retries.
+    6.times do |i|
+      sleep admin_timeout / 3
+      status = keep_alive_ping
+      expect(status).to eq(200),
+                        "keep-alive ping #{i + 1} should succeed; #{(Time.now - last_success_at).round}s since " \
+                        "last success, #{(Time.now - start).round}s since sign-in (status: #{status.inspect})"
+      last_success_at = Time.now
     end
 
     expect(admin_area_reachable?).to be(true),
@@ -138,7 +143,7 @@ describe 'admin session timeout via shared authentication gate', js: true, drive
   end
 
   it 'still times out the admin session on genuine inactivity' do
-    admin_timeout = 60
+    admin_timeout = 30
     change_setting('AdminTimeout', admin_timeout.seconds)
     change_setting('UserTimeout', 10.minutes)
 
@@ -147,7 +152,9 @@ describe 'admin session timeout via shared authentication gate', js: true, drive
 
     expect(admin_area_reachable?).to be(true)
 
-    sleep admin_timeout + 20
+    # Deliberate expiry control: sleep past AdminTimeout with no requests at all, so the timeout must fire.
+    # This is a real-time wait by design, not a synchronisation sleep, so it cannot be replaced by a DOM wait.
+    sleep admin_timeout + 10
 
     expect(admin_area_reachable?).to be(false),
                                      'admin session should time out after genuine inactivity beyond AdminTimeout'

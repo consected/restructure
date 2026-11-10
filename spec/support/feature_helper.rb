@@ -26,6 +26,38 @@ module FeatureHelper
     page.execute_script('arguments[0].scrollIntoView(true);', element)
   end
 
+  UI_BUSY_SCRIPT = <<~JS
+    (function() {
+      if (!window.jQuery) return false;
+      return jQuery.active > 0 ||
+        jQuery(':animated').length > 0 ||
+        jQuery('.ajax-running, .formatting-block, .collapsing').length > 0;
+    })()
+  JS
+
+  # Wait until AJAX requests, jQuery animations (such as the app's animated scrolling after results load)
+  # and formatting / collapse transitions have finished, and the page has then stayed idle for a short period.
+  # Clicks made while the page is scrolling or re-rendering can land on the wrong element or be undone.
+  # Does not fail on timeout - the caller's expectations report the actual problem.
+  def wait_for_ui_to_settle(timeout: 10, quiet_period: 1.2, interval: 0.15)
+    deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + timeout
+    quiet_since = nil
+
+    loop do
+      now = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      return if now > deadline
+
+      if page.evaluate_script(UI_BUSY_SCRIPT)
+        quiet_since = nil
+      else
+        quiet_since ||= now
+        return if now - quiet_since >= quiet_period
+      end
+
+      sleep interval
+    end
+  end
+
   def scroll_to(el_selector, options = {})
     options[:check_it] = true if options[:check_it].nil?
 

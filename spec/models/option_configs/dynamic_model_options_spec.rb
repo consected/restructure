@@ -12,23 +12,104 @@ RSpec.describe 'Dynamic Model Options', type: :model do
   include DynamicModelSupport
   include OptionsSupport
 
+  TableNameTestReplaceOpts = 'test_replace_opt_recs'
+  TableNameTestOriginalOpts = 'test_orig_opt_recs'
+
   let :dynamic_type do
-    'DynamicModel::TestCreatedByRec'
+    'DynamicModel::TestOrigOptRec'
+  end
+
+  def db_connection
+    @db_connection ||= ActiveRecord::Base.connection
   end
 
   before :all do
     # Use a unique table name to avoid conflicts with generate_test_dynamic_model
-    # which creates test_created_by_recs with additional columns (use_def_version_time, text_array)
-    table_name = 'test_replace_opts'
-    unless Admin::MigrationGenerator.table_exists? table_name
-      TableGenerators.dynamic_models_table(table_name, :create_do, 'test1', 'test2', 'created_by_user_id')
-    end
-
-    DynamicModel.active.where(table_name: 'test_created_by_recs').each { |dm| dm.disable!(@admin) }
-    DynamicModel.reset_active_model_configurations!
+    # which creates test_created_by_recs with additional columns (use_def_version_at, text_array)
+    table_name = TableNameTestReplaceOpts
+    TableGenerators.dynamic_models_table(table_name, :create_do, 'test1', 'test2', 'created_by_user_id', skip_if_exists: true)
+    DynamicModelSupport.generate_test_dynamic_model(table_name: table_name, name: 'test replace opt', allow_updating: true)
   end
 
-  before :example do
+  before :all do
+    # Create admin and user for this context
+    create_admin
+    create_user
+
+    # Enable migrations for this test suite
+    change_setting('AllowDynamicMigrations', true)
+
+    @schema_name = 'dynamic_test'
+    @table_name = 'test_field_type_changes'
+    @history_table_name = 'test_field_type_change_history'
+    # Clean up any existing test tables and model
+    DynamicModel.active.where(table_name: @table_name).each { |dm| dm.disable!(@admin) }
+    DynamicModel.send(:remove_const, :TestFieldTypeChange) if defined?(DynamicModel::TestFieldTypeChange)
+
+    # Drop existing tables if they exist
+    @conn = ActiveRecord::Base.connection
+    @conn.execute("DROP TABLE IF EXISTS #{@schema_name}.#{@history_table_name} CASCADE")
+    @conn.execute("DROP TABLE IF EXISTS #{@schema_name}.#{@table_name} CASCADE")
+
+    # Create the dynamic model definition with initial db_columns configuration
+    # This will create both the primary and history tables in the dynamic_test schema
+    @dm_field_type_changes = DynamicModel.create!(
+      current_admin: @admin,
+      name: 'Test Field Type Changes',
+      table_name: @table_name,
+      schema_name: @schema_name,
+      primary_key_name: :id,
+      foreign_key_name: :master_id,
+      category: :test,
+      field_list: 'input_a input_b input_c',
+      options: <<~YAML
+        _db_columns:
+          input_a:
+            type: string
+          input_b:
+            type: string
+          input_c:
+            type: string
+      YAML
+    )
+
+    @dm_field_type_changes.update_tracker_events
+  end
+
+  before :all do
+    create_admin
+    create_user
+
+    change_setting('AllowDynamicMigrations', true)
+
+    @schema_name = 'dynamic_test'
+    @table_name_renames = 'test_field_renames'
+    @history_table_name_renames = 'test_field_rename_history'
+
+    @dm_field_renames = DynamicModel.create!(
+      current_admin: @admin,
+      name: 'Test Field Renames',
+      table_name: @table_name_renames,
+      schema_name: @schema_name,
+      primary_key_name: :id,
+      foreign_key_name: :master_id,
+      category: :test,
+      field_list: 'select_still_interested select_continue_now notes',
+      options: <<~YAML
+        _db_columns:
+          select_still_interested:
+            type: string
+          select_continue_now:
+            type: string
+          notes:
+            type: string
+      YAML
+    )
+
+    @dm_field_renames.update_tracker_events
+  end
+
+  before_all do
     @user0, = create_user
     create_admin
     create_user
@@ -48,7 +129,10 @@ RSpec.describe 'Dynamic Model Options', type: :model do
 
     # Setup a simple dynamic model definition without any extra options
     # It will gain db column configurations pulled from the table definition
-    dmdef = generate_test_dynamic_model
+    create_user
+    dmdef = generate_test_dynamic_model(table_name: TableNameTestOriginalOpts, reset_access: true)
+    @master = create_master
+
     @option_texts[1] = <<~END_CONFIG
       _db_columns:
         id:
@@ -61,8 +145,8 @@ RSpec.describe 'Dynamic Model Options', type: :model do
           type: string
         created_by_user_id:
           type: integer
-        use_def_version_time:
-          type: time
+        use_def_version_at:
+          type: datetime
         text_array:
           type: string
           array: true
@@ -82,7 +166,7 @@ RSpec.describe 'Dynamic Model Options', type: :model do
 
     # Create an instance of the dynamic model (v1)
     sleep 2 # ensure there are no timing issues
-    @dyn_instances[1] = @master.dynamic_model__test_created_by_recs.create! test1: 'abc'
+    @dyn_instances[1] = @master.dynamic_model__test_orig_opt_recs.create! test1: 'abc'
     expect(@dyn_instances[1].class.to_s).to eq dynamic_type
     expect(@dyn_instances[1].class.definition).to eq dynamic_type.constantize.definition
 
@@ -100,7 +184,7 @@ RSpec.describe 'Dynamic Model Options', type: :model do
           all_fields: show before all fields
           test2: has a caption before test2
     END_DEF
-    dmdef.update!(options: @option_texts[2], current_admin: @admin)
+    dmdef.update!(options: @option_texts[2], current_admin: @admin, force_prevent_migrations: true)
     @def_updated_at[2] = dmdef.updated_at
     @option_configs[2] = dmdef.option_configs
 
@@ -111,13 +195,13 @@ RSpec.describe 'Dynamic Model Options', type: :model do
 
     # Create an instance of the dynamic model (v2)
     sleep 2 # ensure there are no timing issues
-    @dyn_instances[2] = @master.dynamic_model__test_created_by_recs.create! test1: 'abc2'
+    @dyn_instances[2] = @master.dynamic_model__test_orig_opt_recs.create! test1: 'abc2'
 
     # Generate an instance to always use the latest version
-    fixed_version = @master.dynamic_model__test_created_by_recs.create! test1: 'abc2', use_def_version_time: (DateTime.now + 99.years)
+    fixed_version = @master.dynamic_model__test_orig_opt_recs.create! test1: 'abc2', use_def_version_at: (DateTime.now + 99.years)
 
     ###
-    # With a fixed version def *use_def_version_time* set, the correct version should be returned
+    # With a fixed version def *use_def_version_at* set, the correct version should be returned
     fixed_opt = option_configs_comparable(fixed_version.versioned_definition.option_configs)
     expect(fixed_opt).to eql option_configs_comparable(@option_configs[2])
 
@@ -138,25 +222,25 @@ RSpec.describe 'Dynamic Model Options', type: :model do
           test1: test1 label
     END_DEF
 
-    dmdef.update!(options: @option_texts[3], current_admin: @admin)
+    dmdef.update!(options: @option_texts[3], current_admin: @admin, force_prevent_migrations: true)
     @def_updated_at[3] = dmdef.updated_at
     @option_configs[3] = dmdef.option_configs
 
     # Create an instance of the dynamic model (v2)
     sleep 2 # ensure there are no timing issues
-    @dyn_instances[3] = @master.dynamic_model__test_created_by_recs.create! test1: 'abc3'
+    @dyn_instances[3] = @master.dynamic_model__test_orig_opt_recs.create! test1: 'abc3'
 
     check_version 3
     check_version 1
     check_version 2
 
     ###
-    # With a fixed version def *use_def_version_time* set, the correct version should be returned
+    # With a fixed version def *use_def_version_at* set, the correct version should be returned
     expect(option_configs_comparable(fixed_version.versioned_definition.option_configs)).to eql option_configs_comparable(@option_configs[3])
   end
 
   it 'replaces option configurations' do
-    table_name = 'test_replace_opts'
+    table_name = TableNameTestReplaceOpts
     DynamicModel.active.where(table_name:).each { |dm| dm.disable!(@admin) }
 
     name = 'test replace opts'
@@ -334,7 +418,7 @@ RSpec.describe 'Dynamic Model Options', type: :model do
   # GitHub issue #1029: A comment value like Alzheimer\'s Disease must survive a replace cycle
   # without corrupting the options text or losing other sections.
   it 'handles comments containing escaped quotes in prepend_to_options' do
-    table_name = 'test_replace_opts'
+    table_name = TableNameTestReplaceOpts
     DynamicModel.active.where(table_name:).each { |dm| dm.disable!(@admin) }
 
     name = 'test replace opts'
@@ -383,7 +467,7 @@ RSpec.describe 'Dynamic Model Options', type: :model do
   # GitHub issue #1029: Simulates "Update Config from Table" where _comments are regenerated
   # from captions containing single quotes.
   it 'handles re-saving comments derived from caption_before with quotes' do
-    table_name = 'test_replace_opts'
+    table_name = TableNameTestReplaceOpts
     DynamicModel.active.where(table_name:).each { |dm| dm.disable!(@admin) }
 
     name = 'test replace opts'
@@ -443,7 +527,7 @@ RSpec.describe 'Dynamic Model Options', type: :model do
   # the options text, even when the options YAML fails to parse (e.g. due to
   # unescaped single-quotes in a caption_before value as reported in issue #676).
   it 'does not grow options text on repeated prepends when YAML is invalid' do
-    table_name = 'test_replace_opts'
+    table_name = TableNameTestReplaceOpts
     DynamicModel.active.where(table_name:).each { |dm| dm.disable!(@admin) }
 
     dm = DynamicModel.create! current_admin: @admin,
@@ -501,7 +585,7 @@ RSpec.describe 'Dynamic Model Options', type: :model do
   # followed by _data_dictionary must never merge into "...wivesdata_dictionary:".
   # Repeated prepends must keep the options stable and parseable.
   it 'keeps quoted captions adjacent to _data_dictionary intact across saves' do
-    table_name = 'test_replace_opts'
+    table_name = TableNameTestReplaceOpts
     DynamicModel.active.where(table_name:).each { |dm| dm.disable!(@admin) }
 
     dm = DynamicModel.create! current_admin: @admin,
@@ -596,7 +680,7 @@ RSpec.describe 'Dynamic Model Options', type: :model do
   # break runtime parsing. The DB-definition sections are not needed at runtime,
   # so parse_options_text recovers the runtime configuration by stripping them.
   it 'recovers the runtime configuration when _comments is corrupted' do
-    table_name = 'test_replace_opts'
+    table_name = TableNameTestReplaceOpts
     DynamicModel.active.where(table_name:).each { |dm| dm.disable!(@admin) }
 
     dm = DynamicModel.create! current_admin: @admin,
@@ -639,7 +723,8 @@ RSpec.describe 'Dynamic Model Options', type: :model do
   end
 
   it 'generates show_if from show_if_condition_strings' do
-    dmdef = generate_test_dynamic_model
+    dmdef = generate_test_dynamic_model(table_name: TableNameTestOriginalOpts, reset_access: true)
+    @master = create_master
     opt = <<~END_CONFIG
       _db_columns:
         id:
@@ -652,8 +737,8 @@ RSpec.describe 'Dynamic Model Options', type: :model do
           type: string
         created_by_user_id:
           type: integer
-        use_def_version_time:
-          type: time
+        use_def_version_at:
+          type: datetime
         text_array:
           type: string
           array: true
@@ -672,7 +757,7 @@ RSpec.describe 'Dynamic Model Options', type: :model do
           test2: has a caption before test2
     END_CONFIG
 
-    dmdef.update!(options: opt, current_admin: @admin)
+    dmdef.update!(options: opt, current_admin: @admin, force_prevent_migrations: true)
 
     expect(dmdef.default_options.show_if[:user_id]).to be_a Hash
 
@@ -687,7 +772,8 @@ RSpec.describe 'Dynamic Model Options', type: :model do
   end
 
   it 'handles field_configs' do
-    dmdef = generate_test_dynamic_model
+    dmdef = generate_test_dynamic_model(table_name: TableNameTestOriginalOpts, reset_access: true)
+    @master = create_master
     opt = <<~END_CONFIG
 
       default:
@@ -704,7 +790,7 @@ RSpec.describe 'Dynamic Model Options', type: :model do
             # This will be merged into the field_configs def
     END_CONFIG
 
-    dmdef.update!(options: opt, current_admin: @admin)
+    dmdef.update!(options: opt, current_admin: @admin, force_prevent_migrations: true)
 
     expect(dmdef.default_options.show_if[:test1]).to be_a Hash
     expect(dmdef.default_options.show_if[:test1]).to eq(never: true)
@@ -722,7 +808,8 @@ RSpec.describe 'Dynamic Model Options', type: :model do
   end
 
   it 'shows different view options' do
-    dmdef = generate_test_dynamic_model
+    dmdef = generate_test_dynamic_model(table_name: TableNameTestOriginalOpts, reset_access: true)
+    @master = create_master
 
     opt = <<~END_CONFIG
 
@@ -769,7 +856,7 @@ RSpec.describe 'Dynamic Model Options', type: :model do
 
     END_CONFIG
 
-    dmdef.update!(options: opt, current_admin: @admin)
+    dmdef.update!(options: opt, current_admin: @admin, force_prevent_migrations: true)
     expect(dmdef.default_options.fields).to eq(dmdef.field_list_array)
     expect(dmdef.default_options.show_if[:test1]).to be_a Hash
     expect(dmdef.default_options.show_if[:test1]).to eq(never: true)
@@ -804,7 +891,8 @@ RSpec.describe 'Dynamic Model Options', type: :model do
   end
 
   it 'handles show_if conditions with embedded_item data' do
-    dmdef = generate_test_dynamic_model
+    dmdef = generate_test_dynamic_model(table_name: TableNameTestOriginalOpts, reset_access: true)
+    @master = create_master
 
     opt = <<~END_CONFIG
 
@@ -830,7 +918,7 @@ RSpec.describe 'Dynamic Model Options', type: :model do
 
     END_CONFIG
 
-    dmdef.update!(options: opt, current_admin: @admin)
+    dmdef.update!(options: opt, current_admin: @admin, force_prevent_migrations: true)
 
     # Verify the show_if configuration is properly structured
     expect(dmdef.default_options.show_if[:test1]).to be_a Hash
@@ -847,7 +935,8 @@ RSpec.describe 'Dynamic Model Options', type: :model do
   end
 
   it 'handles nested show_if conditions with embedded_item' do
-    dmdef = generate_test_dynamic_model
+    dmdef = generate_test_dynamic_model(table_name: TableNameTestOriginalOpts, reset_access: true)
+    @master = create_master
 
     opt = <<~END_CONFIG
 
@@ -864,8 +953,7 @@ RSpec.describe 'Dynamic Model Options', type: :model do
                     value: 10
 
     END_CONFIG
-
-    dmdef.update!(options: opt, current_admin: @admin)
+    dmdef.update!(options: opt, current_admin: @admin, force_prevent_migrations: true)
 
     option_type_3 = dmdef.option_type_config_for(:option_type_3)
 
@@ -902,69 +990,16 @@ RSpec.describe 'Dynamic Model Options', type: :model do
   # - Verify both tables have integer columns
   # - Verify trigger still works by updating a record and checking history
   context 'field type changes' do
-    before :all do
-      # Create admin and user for this context
-      create_admin
-      create_user
-
-      # Enable migrations for this test suite
-      @original_allow_migrations = Settings::AllowDynamicMigrations
-      change_setting('AllowDynamicMigrations', true)
-
-      @schema_name = 'dynamic_test'
-      @table_name = 'test_field_type_changes'
-      @history_table_name = 'test_field_type_change_history'
-
-      # Clean up any existing test tables and model
-      DynamicModel.active.where(table_name: @table_name).each { |dm| dm.disable!(@admin) }
-      DynamicModel.send(:remove_const, :TestFieldTypeChange) if defined?(DynamicModel::TestFieldTypeChange)
-
-      # Drop existing tables if they exist
-      @conn = ActiveRecord::Base.connection
-      @conn.execute("DROP TABLE IF EXISTS #{@schema_name}.#{@history_table_name} CASCADE")
-      @conn.execute("DROP TABLE IF EXISTS #{@schema_name}.#{@table_name} CASCADE")
-
-      # Create the dynamic model definition with initial db_columns configuration
-      # This will create both the primary and history tables in the dynamic_test schema
-      @dm = DynamicModel.create!(
-        current_admin: @admin,
-        name: 'Test Field Type Changes',
-        table_name: @table_name,
-        schema_name: @schema_name,
-        primary_key_name: :id,
-        foreign_key_name: :master_id,
-        category: :test,
-        field_list: 'input_a input_b input_c',
-        options: <<~YAML
-          _db_columns:
-            input_a:
-              type: string
-            input_b:
-              type: string
-            input_c:
-              type: string
-        YAML
-      )
-
-      @dm.update_tracker_events
-    end
-
-    after :all do
-      # Clean up
-      @dm&.disable!(@admin)
-      # Restore original migration setting
-      change_setting('AllowDynamicMigrations', @original_allow_migrations)
-    end
-
     it 'correctly changes field types in both primary and history tables' do
+      change_setting('AllowDynamicMigrations', false)
       # Create a master record for testing
       master = Master.create! current_user: @user
       master.current_user = @user
 
       # Verify initial table structure - all fields should be strings by default
-      @conn.schema_cache.clear!
-      primary_columns = @conn.columns("#{@schema_name}.#{@table_name}")
-      history_columns = @conn.columns("#{@schema_name}.#{@history_table_name}")
+      db_connection.schema_cache.clear!
+      primary_columns = db_connection.columns("#{@schema_name}.#{@table_name}")
+      history_columns = db_connection.columns("#{@schema_name}.#{@history_table_name}")
 
       input_b_primary = primary_columns.find { |c| c.name == 'input_b' }
       input_b_history = history_columns.find { |c| c.name == 'input_b' }
@@ -985,8 +1020,8 @@ RSpec.describe 'Dynamic Model Options', type: :model do
       expect(test_record.id).not_to be_nil
 
       # Now change input_b to integer type
-      @dm.instance_variable_set(:@ran_migration, nil) # Reset flag to allow second migration
-      @dm.update!(
+      #
+      @dm_field_type_changes.update!(
         current_admin: @admin,
         options: <<~YAML
           _db_columns:
@@ -999,21 +1034,11 @@ RSpec.describe 'Dynamic Model Options', type: :model do
         YAML
       )
 
-      # Manually trigger migration generation and execution
-      # Force reset the migration generator to ensure it picks up the new db_configs
-      @dm.instance_variable_set(:@migration_generator, nil)
-      @dm.send(:generate_migration)
-      @dm.send(:run_migration) if @dm.instance_variable_get(:@do_migration)
-
-      @dm.update_tracker_events
-
-      # Force column cache refresh
-      @conn.schema_cache.clear!
-      DynamicModel.reset_active_model_configurations!
+      force_migration(@dm_field_type_changes)
 
       # Verify the type changed in both tables
-      primary_columns = @conn.columns("#{@schema_name}.#{@table_name}")
-      history_columns = @conn.columns("#{@schema_name}.#{@history_table_name}")
+      primary_columns = db_connection.columns("#{@schema_name}.#{@table_name}")
+      history_columns = db_connection.columns("#{@schema_name}.#{@history_table_name}")
 
       input_b_primary = primary_columns.find { |c| c.name == 'input_b' }
       input_b_history = history_columns.find { |c| c.name == 'input_b' }
@@ -1026,8 +1051,8 @@ RSpec.describe 'Dynamic Model Options', type: :model do
       # Verify that the existing data was preserved and converted
       # The model class needs to be regenerated to pick up the new column types
       # Clear schema cache and force model class to reload its columns
-      @conn.schema_cache.clear!
-      model_class = @dm.implementation_class
+      db_connection.schema_cache.clear!
+      model_class = @dm_field_type_changes.implementation_class
       model_class.reset_column_information
 
       # Re-fetch the record with the updated model class
@@ -1038,70 +1063,26 @@ RSpec.describe 'Dynamic Model Options', type: :model do
       test_record.update!(current_user: @user, input_b: 456)
 
       # Check that history table received the update correctly
-      history_records = @conn.execute(
+      history_records = db_connection.execute(
         "SELECT input_b FROM #{@schema_name}.#{@history_table_name} WHERE #{@table_name.singularize}_id = #{test_record.id} ORDER BY id DESC LIMIT 1"
       )
       expect(history_records.first['input_b'].to_i).to eq(456)
+      change_setting('AllowDynamicMigrations', false)
     end
   end
 
   # Test for renamed dynamic-model fields keeping history tables and triggers in sync.
   # This protects create/update paths after field names change in app configuration.
   context 'field renames' do
-    before :all do
-      create_admin
-      create_user
-
-      @original_allow_migrations = Settings::AllowDynamicMigrations
-      change_setting('AllowDynamicMigrations', true)
-
-      @schema_name = 'dynamic_test'
-      @table_name = 'test_field_renames'
-      @history_table_name = 'test_field_rename_history'
-
-      DynamicModel.active.where(table_name: @table_name).each { |dm| dm.disable!(@admin) }
-      DynamicModel.send(:remove_const, :TestFieldRename) if defined?(DynamicModel::TestFieldRename)
-
-      @conn = ActiveRecord::Base.connection
-      @conn.execute("DROP TABLE IF EXISTS #{@schema_name}.#{@history_table_name} CASCADE")
-      @conn.execute("DROP TABLE IF EXISTS #{@schema_name}.#{@table_name} CASCADE")
-
-      @dm = DynamicModel.create!(
-        current_admin: @admin,
-        name: 'Test Field Renames',
-        table_name: @table_name,
-        schema_name: @schema_name,
-        primary_key_name: :id,
-        foreign_key_name: :master_id,
-        category: :test,
-        field_list: 'select_still_interested select_continue_now notes',
-        options: <<~YAML
-          _db_columns:
-            select_still_interested:
-              type: string
-            select_continue_now:
-              type: string
-            notes:
-              type: string
-        YAML
-      )
-
-      @dm.update_tracker_events
-    end
-
-    after :all do
-      @dm&.disable!(@admin)
-      change_setting('AllowDynamicMigrations', @original_allow_migrations)
-    end
-
     it 'rebuilds the history trigger when fields are renamed' do
       master = Master.create! current_user: @user
       master.current_user = @user
 
       setup_access :dynamic_model__test_field_renames
 
-      @dm.instance_variable_set(:@ran_migration, nil)
-      @dm.update!(
+      @dm_field_renames.instance_variable_set(:@ran_migration, nil)
+      @dm_field_renames.update!(
+        force_prevent_migrations: true,
         current_admin: @admin,
         field_list: 'still_interested continue_now notes',
         options: <<~YAML
@@ -1114,20 +1095,21 @@ RSpec.describe 'Dynamic Model Options', type: :model do
               type: string
         YAML
       )
+      force_migration(@dm_field_renames)
 
-      @dm.instance_variable_set(:@migration_generator, nil)
-      @dm.send(:generate_migration)
-      @dm.send(:run_migration) if @dm.instance_variable_get(:@do_migration)
-      @dm.update_tracker_events
+      # @dm_field_renames.instance_variable_set(:@migration_generator, nil)
+      # @dm_field_renames.send(:generate_migration)
+      # @dm_field_renames.send(:run_migration) if @dm_field_renames.instance_variable_get(:@do_migration)
+      # @dm_field_renames.update_tracker_events
 
-      @conn.schema_cache.clear!
-      DynamicModel.reset_active_model_configurations!
+      # db_connection.schema_cache.clear!
+      # DynamicModel.reset_active_model_configurations!
 
-      history_columns = @conn.columns("#{@schema_name}.#{@history_table_name}").map(&:name)
+      history_columns = db_connection.columns("#{@schema_name}.#{@history_table_name_renames}").map(&:name)
       expect(history_columns).to include('still_interested', 'continue_now')
       expect(history_columns).not_to include('select_still_interested', 'select_continue_now')
 
-      model_class = @dm.implementation_class
+      model_class = @dm_field_renames.implementation_class
       model_class.reset_column_information
 
       record = master.dynamic_model__test_field_renames.create!(
@@ -1137,9 +1119,9 @@ RSpec.describe 'Dynamic Model Options', type: :model do
         notes: 'renamed fields'
       )
 
-      history_record = @conn.exec_query(
-        "SELECT still_interested, continue_now FROM #{@schema_name}.#{@history_table_name} " \
-        "WHERE #{@table_name.singularize}_id = #{record.id} ORDER BY id DESC LIMIT 1"
+      history_record = db_connection.exec_query(
+        "SELECT still_interested, continue_now FROM #{@schema_name}.#{@history_table_name_renames} " \
+        "WHERE #{@table_name_renames.singularize}_id = #{record.id} ORDER BY id DESC LIMIT 1"
       ).first
 
       expect(history_record['still_interested']).to eq('yes')
