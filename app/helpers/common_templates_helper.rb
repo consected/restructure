@@ -14,7 +14,10 @@ module CommonTemplatesHelper
   # Use reset: true to clear the memo, which speeds up some large forms
   # @return [Hash]
   def field_options_for(form_object_instance, field_name_sym, reset: nil)
-    @field_options_for = nil if reset
+    # Recompute whenever the field or object changes, so options never leak across them (issue #1457)
+    cache_key = [form_object_instance.object_id, field_name_sym]
+    @field_options_for = nil if reset || @field_options_for_key != cache_key
+    @field_options_for_key = cache_key
     return @field_options_for if @field_options_for
 
     if form_object_instance.respond_to?(:option_type_config) && form_object_instance.option_type_config

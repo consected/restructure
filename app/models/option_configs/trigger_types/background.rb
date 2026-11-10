@@ -7,6 +7,7 @@ module OptionConfigs
     class Background < Base
       trigger_name :background
       pattern :delegate
+      task_list_config!
     end
   end
 end

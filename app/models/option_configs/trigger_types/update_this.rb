@@ -15,6 +15,7 @@ module OptionConfigs
       key_type :boolean, :force_not_editable_save, :force_not_valid
       key_type :hash_or_array, :with_result
       key_type :hash, :with
+      value_map_keys :with
     end
   end
 end

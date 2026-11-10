@@ -4,22 +4,32 @@ module RecTypeHandler
   extend ActiveSupport::Concern
 
   included do
+    has_rank = attribute_names.include?('rank')
+
     valid_rec_types&.each do |rt|
       is_rt = :"is_#{rt}?"
-      scope rt, -> { where(rec_type: rt).order(rank: :desc) }
+      scope rt, lambda {
+        records = where(rec_type: rt)
+        records = records.order(rank: :desc) if has_rank
+        records
+      }
       before_validation :force_data_format
       if File.exist? "#{::Rails.root}/app/models/validates/#{rt}_validator.rb"
         validates :data, "validates/#{rt}": true, if: is_rt
       end
-      validates :rec_type, presence: true, unless: :ignore_configurable_valid_if
-
       Master.has_many "#{name.ns_underscore}_#{rt}".pluralize.to_sym,
                       lambda {
-                        where(rec_type: rt).order(Master::RankNotNullClause)
+                        association = where(rec_type: rt)
+                        association = association.order(Master::RankNotNullClause) if has_rank
+                        association
                       },
                       inverse_of: :master,
                       class_name: name.to_s
     end
+
+    validates :rec_type, presence: true,
+                         if: -> { self.class.valid_rec_types.present? },
+                         unless: :ignore_configurable_valid_if
 
     validate :valid_data_format?
 

@@ -29,6 +29,7 @@ These options appear outside the `default:` key.
 - [labels](../general/labels.md) — field label overrides
 - [show_if](../general/show_if.md) — conditional field visibility
 - [view_options](../general/view_options.md) — layout, ordering, embedding, and UI class settings
+- [view_handlers](../general/view_handlers.md) — model handlers for rec types, ranks, contacts, addresses and subjects
 - [filestore](../general/filestore_container.md) — attach a filestore container
 - [save_action](../general/save_action.md) — post-save UI actions
 - [field_options](../general/field_options.md) — per-field configuration (values, validators, edit_as, big-select)

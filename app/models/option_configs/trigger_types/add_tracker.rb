@@ -13,6 +13,7 @@ module OptionConfigs
       allowed_keys %i[if with on_complete on_failure]
       standard_hook_key_types
       key_type :hash, :with
+      value_map_keys :with
     end
   end
 end

@@ -13,15 +13,20 @@
 8. **Create new files and edit directly in the editor**; avoid using command line file operations to generate source code
 9. **Never update CHANGELOG.md directly** - the release process will handle this based on commit messages and pull request titles
 10. **You have permission to use interactive debugging tools** (e.g., `interactive_debug_session`, `debugger`) to pause execution and inspect state, either in Rspec tests or if we are collaborating on a development server.
+11. **Workspaces are isolated environments for each feature branch** - the database, file system, test environment and other resources are separate, ensuring changes in one branch do not affect others. This is controlled by the environment variable `TEST_ENV_SET`, which is normally set when opening a new terminal. There is no need to check the database for other workspace connections.
 
 
 ### Critical Rules for Running Terminal Commands
+
+**Before running any commands in the terminal**
+- Source the workspace with the trusted script:`source app-scripts/source-workspace-env.sh`
+- Always instruct a subagent to do this as well, unless you've told it to read the copilot-instructions file.
+
 1. **Never set environment variables inline** - use app-scripts instead or `export` them in the terminal before running commands
 2. **Always wait for commands to complete before proceeding** - for long-running commands (such as rspec tests), don't poll - call the `get_terminal_output` once so you can be notified automatically when the command exits
 3. **Never redirect scripts stdout or stderr to /dev/null or /tmp**
 4. If creating long text files (e.g., PR body, issue body), **write them directly to a temporary or session file** rather than using command line tools that may escape characters or truncate output
 
-When not in a sandboxed environment, **preferably run each command in a terminal** on a single line rather than chaining multiple commands together with semicolons. This avoids the need for unnecessary human approvals.
 
 `app-scripts/headless_rspec.sh` and `app-scripts/not_headless_rspec.sh` automatically run `app-scripts/check_rspec_processes.sh` and refuse to start (exit 1) if another RSpec process is using this workspace; do not call the check separately for them. Before any direct `bundle exec rspec` call, run `app-scripts/check_rspec_processes.sh` and do not start the new run if it exits with status 1; inspect the reported workspace, PID, and test-environment values first.
 

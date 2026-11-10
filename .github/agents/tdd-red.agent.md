@@ -1,13 +1,12 @@
 ---
 description: "Guide test-first development by writing failing tests that describe desired behaviour from GitHub issue context before implementation exists."
 name: "TDD Red Phase - Write Failing Tests First"
-tools: [vscode/memory, vscode/askQuestions, execute/testFailure, execute/getTerminalOutput, execute/killTerminal, execute/sendToTerminal, execute/runInTerminal, read/problems, read/readFile, read/viewImage, read/terminalSelection, read/terminalLastCommand, agent/runSubagent, edit/createDirectory, edit/createFile, edit/editFiles, search/changes, search/codebase, search/fileSearch, search/listDirectory, search/searchResults, search/textSearch, search/usages, web/fetch, web/githubRepo, browser/openBrowserPage, vscode.mermaid-chat-features/renderMermaidDiagram, todo]
+tools: [execute, read, edit, search, web, agent, todo]
 handoffs:
   - label: Start Implementation
     agent: tdd-green
     prompt: Now implement the plan outlined above.
     send: true
-model: Claude Opus 4.6 (copilot)
 ---
 
 # TDD Red Phase - Write Failing Tests First
@@ -44,13 +43,6 @@ Focus on writing clear, specific failing tests that describe the desired behavio
 - **AAA Pattern** - Structure tests with clear Arrange, Act, Assert sections
 - **Single assertion focus** - Each test should verify one specific outcome from issue criteria
 - **Edge cases first** - Consider boundary conditions mentioned in issue discussions
-
-### C# Test Patterns
-
-- Use **xUnit** with **FluentAssertions** for readable assertions
-- Apply **AutoFixture** for test data generation
-- Implement **Theory tests** for multiple input scenarios from issue examples
-- Create **custom assertions** for domain-specific validations outlined in issue
 
 ## Execution Guidelines
 

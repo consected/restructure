@@ -10,6 +10,7 @@ module OptionConfigs
       allowed_keys %i[first if force_not_editable_save flags add_flags remove_flags on_complete on_failure]
       standard_hook_key_types
       key_type :scalar_or_array_or_hash, :first, :flags, :add_flags, :remove_flags
+      value_keys :first
       key_type :boolean, :force_not_editable_save
     end
   end

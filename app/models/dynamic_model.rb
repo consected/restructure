@@ -8,11 +8,13 @@ class DynamicModel < ActiveRecord::Base
   include AdminHandler
 
   StandardFields = %w[id created_at updated_at contactid user_id master_id].freeze
+  ViewHandlersRequiringMasterId = %w[rec_type contact subject].freeze
 
   default_scope -> { order disabled: :asc, category: :asc, position: :asc, updated_at: :desc }
 
   validate :table_name_ok
   validate :foreign_key_type_compatible
+  validate :view_handler_master_foreign_key_compatible
   before_save :set_field_list_from_table
   before_save :set_comments_from_table
   before_create :set_keys_from_columns
@@ -474,6 +476,22 @@ class DynamicModel < ActiveRecord::Base
 
     errors.add :foreign_key_name,
                "type must match #{target[:name]} (#{source_column.type} versus #{target[:type]})"
+  end
+
+  def view_handler_master_foreign_key_compatible
+    handlers = begin
+      configured_handlers = default_options&.view_options&.[](:view_handlers)
+      configured_handlers.is_a?(Array) ? configured_handlers : [configured_handlers]
+    rescue StandardError
+      []
+    end
+    required_handlers = handlers.compact.map { |handler| handler.to_s.underscore }
+    required_handlers.select! { |handler| ViewHandlersRequiringMasterId.include?(handler) }
+    required_handlers.uniq!
+    return if required_handlers.empty? || foreign_key_name.to_s == 'master_id'
+
+    errors.add :foreign_key_name,
+               "must be master_id for view handler(s): #{required_handlers.join(', ')}"
   end
 
   def dynamic_model_foreign_key_column

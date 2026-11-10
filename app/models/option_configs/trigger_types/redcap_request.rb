@@ -22,6 +22,7 @@ module OptionConfigs
       key_type :string, :response_code_field
       key_type :scalar_or_array_or_hash, :post_data
       key_type :hash, :success_if, :request_options
+      condition_keys :success_if
       key_type :array, :allow_response_codes
       key_type :boolean, :force_not_editable_save, :force_not_valid, :allow_empty_result
 

@@ -11,6 +11,8 @@ module OptionConfigs
       key_type :scalar_or_array_or_hash, :value
       key_type :string, :iterator_name
       key_type :hash_or_array, :do
+      value_keys :value
+      task_keys :do
     end
   end
 end

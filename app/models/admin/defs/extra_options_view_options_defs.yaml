@@ -5,7 +5,7 @@
 #   header_caption: String,
 #   alt_width_classes: String,
 #   extra_class: String,
-#   view_handlers: String | Array(String),
+#   view_handlers: Array(String),
 #   show_embedded_at_top: Boolean,
 #   always_embed_reference: String | <never>,
 #   always_embed_creatable_reference: String | <never>,
@@ -37,7 +37,9 @@
 # Notes:
 # - view_options must be a Hash.
 # - Only the documented top-level keys are supported.
-# - data_attribute, alt_order and view_handlers may be a single string or an array of strings.
+# - data_attribute and alt_order may be a single string or an array of strings.
+# - view_handlers must be a YAML list of strings, including when there is only one handler.
+# - view_handlers may include model handlers such as address, contact, rec_type and rank.
 # - sort_references must be a Hash when present.
 # - Boolean flags such as show_embedded_at_top, hide_unless_creatable, show_cancel and only_create_as_reference should use true or false.
 # - Common extra_class values include prevent-reload-on-reference-save, no-scroll-on-click-edit,

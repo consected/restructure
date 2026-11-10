@@ -471,6 +471,11 @@ class Admin
         res += ces if ces
       end
 
+      page_layouts.active.each do |object_instance|
+        ces = OptionConfigs::ExtraOptions.all_option_configs_notices(object_instance)
+        res += ces if ces
+      end
+
       res
     end
 

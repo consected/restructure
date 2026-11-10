@@ -87,7 +87,7 @@
 
 
 <%= handlebars_template_tag('master_id_summary_result-partial', css_class: 'hidden handlebars-partial') do %>
-<% id_list = app_config_items(:show_ids_in_master_result, ['master_id']) %>
+<% id_list = master_result_id_list %>
 <%
   # Get the alternative ID labels for display
   id_labels = Master.alternative_id_labels(access_by: current_user)
