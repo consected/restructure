@@ -122,7 +122,7 @@ RSpec.describe 'Cost of revalidating pages#template instead of caching it immuta
   # handlebars_compile_cost_benchmark_spec.rb).
   def bust_page_fragment_cache!
     scv = Rails.cache.read('server_cache_version')
-    Rails.cache.clear
+    Application.clear_cache_preserving_generation
     Rails.cache.write('server_cache_version', scv) if scv
   end
 
