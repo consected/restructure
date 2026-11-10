@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 # CommonTemplatesHelper#field_options_for specs (issues #1453, #1456, #1457)
+# Issue #1460 specs also verify select field options become HTML attributes
+# without leaking select-only or edit configuration keys onto the select.
 # Covers field option literal handling, pass-through attributes, and issue #1457
 # regressions where memoized options leak between fields or form objects.
 
@@ -193,6 +195,130 @@ RSpec.describe CommonTemplatesHelper, type: :helper do
 
       reset_result = helper.field_options_for(form_object, :test1, reset: true)
       expect(reset_result[:value]).to eq 'second-value'
+    end
+  end
+
+  describe '#html_options_for_field_options' do
+    it 'separates select options and field configuration from HTML attributes' do
+      field_options = {
+        class: 'configured-select',
+        placeholder: 'Choose a person',
+        disabled: true,
+        include_blank: true,
+        selected: 'person-1',
+        prompt: 'Choose',
+        include_hidden: false,
+        edit_as: { big_select: true },
+        format: 'example',
+        data: { custom_attribute: 'custom-value' }
+      }
+
+      result = helper.html_options_for_field_options(field_options, { data: { attr_name: 'person' } })
+
+      expect(result).to include(class: 'configured-select', placeholder: 'Choose a person', disabled: true)
+      expect(result[:data]).to eq(attr_name: 'person', custom_attribute: 'custom-value')
+      expect(result).not_to include(:include_blank, :selected, :prompt, :include_hidden, :edit_as, :format)
+    end
+
+    it 'appends a configured class to a default class rather than replacing it' do
+      result = helper.html_options_for_field_options({ class: 'extra' }, { class: 'form-control input-sm' })
+
+      expect(result[:class]).to eq 'form-control input-sm extra'
+    end
+
+    it 'keeps disabled choice arrays in the select options rather than HTML attributes' do
+      result = helper.html_options_for_field_options({ disabled: %w[person-1 person-2] })
+
+      expect(result).not_to have_key(:disabled)
+    end
+  end
+
+  describe 'select edit field partials HTML options (issue #1460)' do
+    # Each changed partial with the field name that routes to it
+    partial_field_names = {
+      'name_is_protocol_id' => 'protocol_id',
+      'name_starts_with_multi' => 'multi_things',
+      'name_starts_with_pick_multiple_records_from_table' => 'pick_multiple_records_from_table_test_items',
+      'name_starts_with_select' => 'select_things',
+      'name_starts_with_select_record_from' => 'select_record_from_people',
+      'name_starts_with_select_record_from_table' => 'select_record_from_table_people',
+      'name_starts_with_select_record_id_from' => 'select_record_id_from_people',
+      'name_starts_with_select_record_id_from_table' => 'select_record_id_from_table_people',
+      'name_starts_with_select_user_with_role' => 'select_user_with_role_reviewer',
+      'name_starts_with_tag_select' => 'tag_select_things',
+      'name_starts_with_tag_select_record_from' => 'tag_select_record_from_people',
+      'name_starts_with_tag_select_record_from_table' => 'tag_select_record_from_table_people',
+      'name_starts_with_tag_select_record_id_from' => 'tag_select_record_id_from_people',
+      'name_starts_with_tag_select_users_with_role' => 'tag_select_users_with_role_reviewer'
+    }
+
+    before do
+      test_item_class = Class.new do
+        def self.all
+          self
+        end
+
+        def self.order(*)
+          [Struct.new(:data, :table_key, :id).new('Ada', 'ada', 1)]
+        end
+      end
+      stub_const('TestItem', test_item_class)
+
+      user_scope = double(users: double(not_template: double(all: [{ 'email' => 'a@example.com' }.tap { |u| u.define_singleton_method(:email) { self['email'] } }])))
+      allow(Admin::UserRole).to receive_message_chain(:active, :where).and_return(user_scope)
+      allow(helper).to receive(:current_user).and_return(double(app_type: nil))
+
+      # These helpers live in other modules or controllers, so define them on the helper directly
+      {
+        list_record_data_for_select: ['Person', [%w[Ada ada]]],
+        edit_field_label: '',
+        general_selection_name: 'test',
+        general_selection: [['Ada', 'ada', nil, nil, nil, nil, nil]],
+        general_selection_missing_fallback?: false,
+        protocol_array_without_updates: [['Protocol', 1]]
+      }.each do |name, value|
+        helper.define_singleton_method(name) { |*_args, **_kwargs| value }
+      end
+    end
+
+    partial_field_names.each do |partial, field_name|
+      it "renders field_options disabled and class on the select element for #{partial}" do
+        field_name_sym = field_name.to_sym
+        option_type_config = double(
+          field_options: {
+            field_name_sym => {
+              disabled: true,
+              class: 'configured-select',
+              edit_as: { value_attr: :data }
+            }
+          }
+        )
+        form_object = double(
+          option_type_config: option_type_config,
+          attributes: { field_name => nil },
+          persisted?: false,
+          field_name_sym => nil
+        )
+        allow(form_object).to receive(:[]).and_return(nil)
+        form = ActionView::Helpers::FormBuilder.new(:record, form_object, helper, {})
+
+        rendered = helper.render(
+          partial: "common_templates/edit_fields/#{partial}",
+          locals: {
+            form:,
+            field_name:,
+            field_name_sym:,
+            form_object_instance: form_object,
+            labels: {},
+            form_object_item_type_us: 'test_model'
+          }
+        )
+
+        select_tag = rendered[/<select[^>]*>/]
+        expect(select_tag).to include('disabled="disabled"')
+        expect(select_tag).to match(/class="[^"]*configured-select[^"]*"/)
+        expect(select_tag).not_to include('edit_as=')
+      end
     end
   end
 end
