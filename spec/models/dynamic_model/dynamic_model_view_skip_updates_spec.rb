@@ -101,10 +101,6 @@ RSpec.describe 'Dynamic model view_skip_updates', type: :model do
     end
   end
 
-  after :all do
-    change_setting('AllowDynamicMigrations', false)
-  end
-
   before :each do
     create_user
   end

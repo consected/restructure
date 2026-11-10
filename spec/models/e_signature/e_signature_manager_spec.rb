@@ -4,6 +4,7 @@ require 'rails_helper'
 
 RSpec.describe 'electronic signature of records', type: 'model' do
   include ModelSupport
+  include FeatureSupport
   include ESignatureSupport
   include ESignImportConfig
 
@@ -327,7 +328,8 @@ RSpec.describe 'electronic signature of records', type: 'model' do
     end
 
     it 'prevents the signed record being signed again' do
-      sleep 30 # to allow OTP to reset
+      # Avoid the need for a sleep to allow OTP to reset
+      reset_last_otp_timestamp
       @al = create_item
       @al.prepare_activity_for_signature
       @al.save!
@@ -335,7 +337,8 @@ RSpec.describe 'electronic signature of records', type: 'model' do
       @al.e_signature_password = @good_password
       @al.e_signature_otp_attempt = @user.current_otp
       @al.save!
-      sleep 30 # to allow OTP to reset
+      # Avoid the need for a sleep to allow OTP to reset
+      reset_last_otp_timestamp
 
       @al.reload
       @al.current_user = @user

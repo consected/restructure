@@ -410,6 +410,7 @@ module Dynamic
           # All fields will be included
           ot_fields = all_field_names.dup
           ot_field_options = {}
+          all_field_options = field_options
           external_fields = all_field_names - fields_for_ot
           all_field_names.each do |fn|
             if external_fields.include?(fn)
@@ -422,14 +423,14 @@ module Dynamic
 
               # Set the field to be hidden
               # and maintain the other field options if they exist
-              ot_field_options[fn] = (field_options[fn] || {}).deep_dup.merge(
+              ot_field_options[fn] = (all_field_options[fn] || {}).deep_dup.merge(
                 edit_as: {
                   field_type: "hidden_#{fn}"
                 }
               )
-            elsif field_options[fn]
+            elsif all_field_options[fn]
               # Use the normal field options
-              ot_field_options[fn] = field_options[fn].deep_dup
+              ot_field_options[fn] = all_field_options[fn].deep_dup
             end
           end
         else

@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'test_prof/recipes/rspec/let_it_be'
+require 'test_prof/recipes/rspec/before_all'
+
 def put_now(msg)
   puts "#{Time.now} #{msg}"
 end
@@ -7,6 +10,14 @@ end
 def put_to_saved_log(msg)
   msg = "#{Time.now} #{msg}\n"
   File.write('tmp/test_saved.log', msg, mode: 'a')
+end
+
+def reset_inline_migration_caches
+  return unless Admin::MigrationConnection.reset_inline_migration_flag!
+
+  SetupHelper.move_rolled_back_migration_files(Admin::MigrationConnection.take_inline_migration_files!)
+  Admin::MigrationGenerator.tables_and_views_reset!
+  ActiveRecord::Base.connection.schema_cache.clear!
 end
 
 # Provide a method to change app settings without a warning
@@ -58,7 +69,6 @@ end
 put_now 'Require spec_helper'
 require 'spec_helper'
 put_now 'Require environment'
-
 require File.expand_path('../config/environment', __dir__)
 put_now 'Require rspec/rails'
 require 'rspec/rails'
@@ -152,11 +162,6 @@ SetupHelper.check_bhs_assignments_table
 
 SetupHelper.run_test_migrations unless ENV['SKIP_DB_SETUP']
 
-if ENV['RUN_APP_SPECS'] == 'true' && !ENV.fetch('SKIP_APP_SETUP', nil)
-  put_now 'Run extra app setups'
-  SetupHelper.run_extra_setups
-end
-
 put_now 'RSpec configure'
 
 RSpec.configure do |config|
@@ -174,6 +179,10 @@ RSpec.configure do |config|
     if ENV['JS_SETUP'] || !(ENV['SKIP_ASSETS'] || ENV.fetch('SKIP_APP_SETUP', nil))
       Rake::Task['assets:precompile'].invoke
     end
+    put_now 'Precompiled assets'
+
+    SetupHelper.suspend_app_definitions
+    SetupHelper.seed_database
     put_now 'Done before suite'
   end
 
@@ -213,6 +222,7 @@ RSpec.configure do |config|
 
   config.extend ControllerMacros, type: :controller
   config.after :each do
+    reset_inline_migration_caches
     Warden.test_reset!
   end
 
@@ -233,11 +243,15 @@ RSpec.configure do |config|
     SetupHelper.raise_if_stale_instance_variables!(instance_variables)
   end
 
+  default_2fa_idle_timeout = Settings::TwoFactorAuthIdleTimeout
+
   # Set a default before(:all) for system tests setup consistent app settings.
   config.before(:all, type: :system) do
     change_setting('TwoFactorAuthDisabledForUser', true)
     change_setting('TwoFactorAuthDisabledForAdmin', false)
     change_setting('AllowDynamicMigrations', true)
+    # Timeout specs shorten this; a leaked short value signs users out mid-test
+    change_setting('TwoFactorAuthIdleTimeout', default_2fa_idle_timeout)
   end
 
   config.before(:all, type: :models) do
@@ -250,6 +264,30 @@ RSpec.configure do |config|
 
   config.before(:all, type: :requests) do
     change_setting('AllowDynamicMigrations', nil)
+  end
+
+  config.after(:context) do
+    reset_inline_migration_caches
+    SetupHelper.record_seed_database_info_change(self.class)
+  rescue StandardError, RuntimeError => e
+    put_now 'RuntimeError encountered during after(:context) hook.'
+    puts e.message
+    puts e.short_string_backtrace
+  end
+
+  config.after(:suite) do
+    res = SetupHelper.seed_database_info_changes
+    if res.any?
+      put_now 'Seed database info changes detected:'
+      res.each do |caller_info, diff|
+        put_now "Caller info: #{caller_info}"
+        put_now "Diff: #{diff}"
+      end
+    end
+  rescue StandardError, RuntimeError => e
+    put_now 'RuntimeError encountered during after(:suite) hook.'
+    puts e.message
+    puts e.backtrace.join("\n")
   end
 
   Shoulda::Matchers.configure do |config|

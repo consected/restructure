@@ -79,6 +79,7 @@ group :development, :test do
   gem 'ruby_parser'
   gem 'sassc-embedded'
   gem 'spring'
+  gem 'stackprof', require: false
   # gem 'spring-commands-parallel-tests'
 end
 
@@ -91,6 +92,7 @@ group :test do
   gem 'simplecov'
   gem 'simplecov-console'
   gem 'spring-commands-rspec'
+  gem 'test-prof', '~> 1.0'
   gem 'webmock'
 end
 

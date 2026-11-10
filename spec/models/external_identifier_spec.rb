@@ -27,7 +27,7 @@ RSpec.describe ExternalIdentifier, type: :model do
   end
 
   def setup_ei_table(test_num)
-    # Seeds.setup
+    # seed_database
     @implementation_table_name = "test_external_#{test_num}_identifiers"
     @implementation_attr_name = "test_#{test_num}_id"
 
@@ -39,17 +39,14 @@ RSpec.describe ExternalIdentifier, type: :model do
 
     ExternalIdentifier.define_models
 
-    ActiveRecord::Base.connection.schema_cache.clear!
-    unless ActiveRecord::Base.connection.table_exists? @implementation_table_name
-      TableGenerators.external_identifiers_table(@implementation_table_name, true, @implementation_attr_name)
-    end
+    TableGenerators.external_identifiers_table(@implementation_table_name, true, @implementation_attr_name, skip_if_exists: true)
 
     ExternalIdentifier.define_models
   end
 
   describe 'external identifier implementation' do
     before :example do
-      # Seeds.setup
+      # seed_database
       r = 'test7'
       @implementation_table_name = "test_external_#{r}_identifiers"
       @implementation_attr_name = "test_#{r}_id"
@@ -81,10 +78,7 @@ RSpec.describe ExternalIdentifier, type: :model do
       # No duplicate external_id_attribute
       new_vals = list_valid_attribs.last.dup
 
-      ActiveRecord::Base.connection.schema_cache.clear!
-      unless ActiveRecord::Base.connection.table_exists? new_vals[:name]
-        TableGenerators.external_identifiers_table(new_vals[:name], true, @implementation_attr_name)
-      end
+      TableGenerators.external_identifiers_table(new_vals[:name], true, @implementation_attr_name, skip_if_exists: true)
       new_vals[:external_id_attribute] = vals[:external_id_attribute]
       new_vals[:disabled] = false
       expect do

@@ -235,7 +235,7 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
 
   before :all do
     SetupHelper.setup_al_player_contact_phones
-    @aldef = SetupHelper.setup_al_gen_tests 'Test Pull External', 'test_pull_external', 'player_contact'
+    @aldef = SetupHelper.setup_al_gen_tests 'Test Pull External PED', 'test_pull_ped', 'player_contact'
     create_user
     @master = create_master
     @player_contact = @master.player_contacts.create! data: '(617)123-1234 b', rec_type: :phone, rank: 10
@@ -243,7 +243,7 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
   end
 
   before :each do
-    @al = create_al_for_resource_name(@aldef.resource_name, master: @master, skip_setup: true)
+    @al = create_al_for_resource_name(@aldef.resource_name, master: @master)
     expect(@al.master_id).to eq @master.id
     setup_access @al.resource_name, resource_type: :activity_log_type, access: :create, user: @user
   end

@@ -40,7 +40,9 @@ RSpec.describe OptionConfigs::TriggerTypes::Notify, type: :model do
       role_name: @existing_role_name,
       current_admin: @admin
     )
-    @other_app_type = Admin::AppType.create!(name: 'notify-validation-other', label: 'Notify Validation Other', current_admin: @admin)
+    # Committed by earlier runs, so find the existing app type before creating it
+    @other_app_type = Admin::AppType.active.find_by(name: 'notify-validation-other') ||
+                      Admin::AppType.create!(name: 'notify-validation-other', label: 'Notify Validation Other', current_admin: @admin)
     @other_role_name = "notify_val_other_role_#{SecureRandom.hex(4)}"
     Admin::UserRole.create!(
       app_type: @other_app_type,

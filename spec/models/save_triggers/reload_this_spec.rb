@@ -6,14 +6,10 @@ RSpec.describe SaveTriggers::ReloadThis, type: :model do
   include ModelSupport
   include PlayerContactSupport
 
-  before :each do
+  before_all do
     create_user
     setup_access :player_contacts
     let_user_create_player_contacts
-    create_item(data: rand(10_000_000_000_000_000), rank: 10)
-    @player_contact.master.current_user = @user
-    @master = @player_contact.master
-    expect(@master).not_to be nil
 
     # Set up activity log definition
     al_def = ActivityLog.find(ActivityLog::PlayerContactPhone.definition.id)
@@ -40,19 +36,47 @@ RSpec.describe SaveTriggers::ReloadThis, type: :model do
     setup_access :activity_log__player_contact_phone__step_1, resource_type: :activity_log_type, access: :create,
                                                               user: @user
     al_def.add_master_association
+  end
 
-    @activity_log = @master.activity_log__player_contact_phones.create!(
-      select_call_direction: 'to player',
-      select_who: 'user',
-      extra_log_type: 'step_1',
-      player_contact: @player_contact,
-      master: @master,
-      current_user: @user
-    )
-    @activity_log.save_trigger_results ||= {}
+  before :each do
+    create_item(data: rand(10_000_000_000_000_000), rank: 10)
+    @player_contact.master.current_user = @user
+    @master = @player_contact.master
+    expect(@master).not_to be nil
+  end
+
+  def reset_step_one_definition
+    al_def = ActivityLog.find(ActivityLog::PlayerContactPhone.definition.id)
+    al_def.extra_log_types = <<~END_DEF
+      step_1:
+        label: Step 1
+    END_DEF
+    al_def.current_admin = @admin
+    al_def.force_regenerate = true
+    al_def.updated_at = DateTime.now
+    al_def.save!
+    ActivityLog.refresh_outdated
+    al_def.reload
+    al_def.force_option_config_parse
+    setup_access :activity_log__player_contact_phones, resource_type: :table, access: :create, user: @user
+    setup_access :activity_log__player_contact_phone__step_1, resource_type: :activity_log_type, access: :create,
+                                                              user: @user
+    al_def.add_master_association
   end
 
   describe '#perform' do
+    before :each do
+      @activity_log = @master.activity_log__player_contact_phones.create!(
+        select_call_direction: 'to player',
+        select_who: 'user',
+        extra_log_type: 'step_1',
+        player_contact: @player_contact,
+        master: @master,
+        current_user: @user
+      )
+      @activity_log.save_trigger_results = {}
+    end
+
     context 'basic functionality' do
       it 'reloads the item from the database' do
         original_who = @activity_log.select_who
@@ -351,6 +375,10 @@ RSpec.describe SaveTriggers::ReloadThis, type: :model do
   end
 
   describe 'reload_this with views demonstrating stale join data' do
+    before :each do
+      reset_step_one_definition
+    end
+
     # This test demonstrates the primary use case for reload_this:
     # When a dynamic model is based on a view with joins, and a trigger
     # modifies the joined table, the view record has stale data until reloaded.

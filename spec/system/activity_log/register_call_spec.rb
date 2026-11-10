@@ -153,7 +153,9 @@ describe 'Register an incoming call', driver: $browser_driver do
     mark_next_step_status ActivityLogMain::NextStepComplete
     select_related_protocol ActivityLogMain::StudyProtocol
     add_free_text_notes 'Look at me!'
-    sleep 2
+    within PhoneListActions::NewPhoneLogFormCss do
+      expect(page).to have_css("[data-edit-field-name='notes'] .custom-editor", text: 'Look at me!', wait: 10)
+    end
     save_log
 
     expect_log_to_show select_call_direction: ActivityLogMain::CallToPlayer,

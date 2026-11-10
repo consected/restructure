@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# Covers REDCap dictionary memoization and invalidation.
+
 require 'rails_helper'
 
 RSpec.describe Redcap::DataDictionary, type: :model do
@@ -10,9 +12,9 @@ RSpec.describe Redcap::DataDictionary, type: :model do
     create_admin
     setup_redcap_project_admin_configs
     setup_repeat_instrument_fields
-  end
+    # end
 
-  before :example do
+    # before :example do
     @bad_admin, = create_admin
     @bad_admin.update! disabled: true
     create_admin
@@ -26,6 +28,38 @@ RSpec.describe Redcap::DataDictionary, type: :model do
     rc.current_admin = @admin
 
     expect(rc.redcap_data_dictionary.captured_metadata).to eq rc.api_client.metadata
+  end
+
+  it 'symbolizes captured metadata only when its value changes' do
+    data_dictionary = Redcap::DataDictionary.find_by!(redcap_project_admin: @project_admin_metadata)
+
+    expect(Redcap::ApiClient).to receive(:symbolize_result).twice.and_call_original
+    3.times { data_dictionary.captured_metadata }
+    data_dictionary.captured_metadata = data_dictionary.captured_metadata.map(&:dup)
+    3.times { data_dictionary.captured_metadata }
+  end
+
+  it 'refreshes forms and fields when captured metadata changes' do
+    data_dictionary = Redcap::DataDictionary.find_by!(redcap_project_admin: @project_admin_metadata)
+    metadata = data_dictionary.captured_metadata
+    field_name = data_dictionary.all_fields.keys.first
+    updated_metadata = metadata.reject { |field| field[:field_name].to_sym == field_name }
+
+    data_dictionary.captured_metadata = updated_metadata
+
+    expect(data_dictionary.forms.values.flat_map { |form| form.fields.keys }).not_to include(field_name)
+    expect(data_dictionary.all_fields).not_to have_key(field_name)
+  end
+
+  it 'memoizes retrievable fields when summary fields are disabled' do
+    data_dictionary = Redcap::DataDictionary.find_by!(redcap_project_admin: @project_admin_metadata)
+    data_options = data_dictionary.redcap_project_admin.data_options
+    expect(data_options.add_multi_choice_summary_fields).to be_falsey
+
+    expect(Redcap::DataDictionaries::Form).to receive(:all_retrievable_fields).once.and_call_original
+    result = data_dictionary.all_retrievable_fields(summary_fields: true)
+    2.times { expect(data_dictionary.all_retrievable_fields(summary_fields: true)).to be(result) }
+    expect(data_dictionary.all_retrievable_fields(summary_fields: false)).to be(result)
   end
 
   it 'produces a list of all fields from all forms' do

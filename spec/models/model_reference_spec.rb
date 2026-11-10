@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-AlNameGenTestMr = 'Gen Test ELT'
+AlNameGenTestMr = 'Gen Test ELT MR'
 # Use the activity log player contact phone activity log implementation,
 # since it includes the works_with concern
 
@@ -16,7 +16,7 @@ RSpec.describe 'Model references', type: :model do
   include PlayerContactSupport
 
   before :context do
-    SetupHelper.setup_al_gen_tests AlNameGenTestMr, 'elt', 'player_contact'
+    SetupHelper.setup_al_gen_tests AlNameGenTestMr, 'elt_mr', 'player_contact'
   end
 
   before :each do
@@ -84,9 +84,9 @@ RSpec.describe 'Model references', type: :model do
 
   it 'creates a model reference record from a master record' do
     @player_contact.current_user = @user
-    al_simple = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
-                                                                        extra_log_type: 'mr_simple_test',
-                                                                        select_who: 'abc')
+    al_simple = @player_contact.activity_log__player_contact_elt_mrs.build(select_call_direction: 'from staff',
+                                                                           extra_log_type: 'mr_simple_test',
+                                                                           select_who: 'abc')
     al_simple.save!
 
     mr = ModelReference.create_from_master_with(al_simple.master, @player_contact)
@@ -108,9 +108,9 @@ RSpec.describe 'Model references', type: :model do
 
   it 'creates a model reference record from a model' do
     @player_contact.current_user = @user
-    al_simple = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
-                                                                        extra_log_type: 'mr_simple_test',
-                                                                        select_who: 'abc')
+    al_simple = @player_contact.activity_log__player_contact_elt_mrs.build(select_call_direction: 'from staff',
+                                                                           extra_log_type: 'mr_simple_test',
+                                                                           select_who: 'abc')
     al_simple.save!
 
     mr = ModelReference.create_with(al_simple, @address)
@@ -120,7 +120,7 @@ RSpec.describe 'Model references', type: :model do
     expect(mr.attributes.symbolize_keys.slice(:from_record_master_id, :from_record_id, :from_record_type)).to eq(
       from_record_master_id: @master.id,
       from_record_id: al_simple.id,
-      from_record_type: 'ActivityLog::PlayerContactElt'
+      from_record_type: 'ActivityLog::PlayerContactEltMr'
     )
 
     expect(mr.attributes.symbolize_keys.slice(:to_record_master_id, :to_record_id, :to_record_type)).to eq(
@@ -132,9 +132,9 @@ RSpec.describe 'Model references', type: :model do
 
   it 'creates a multiple model reference records' do
     @player_contact.current_user = @user
-    al_simple = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
-                                                                        extra_log_type: 'mr_simple_test',
-                                                                        select_who: 'abc')
+    al_simple = @player_contact.activity_log__player_contact_elt_mrs.build(select_call_direction: 'from staff',
+                                                                           extra_log_type: 'mr_simple_test',
+                                                                           select_who: 'abc')
     al_simple.save!
 
     mr = ModelReference.create_from_master_with(al_simple.master, @player_contact)

@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-AlNameGenTestCur = 'Gen Test ELT Save'
+AlNameGenTestCur = 'Gen Test ELT Cur'
 
 RSpec.describe SaveTriggers::ChangeUserRoles, type: :model do
   include ModelSupport
@@ -8,7 +8,14 @@ RSpec.describe SaveTriggers::ChangeUserRoles, type: :model do
 
   before :all do
     SetupHelper.setup_al_player_contact_phones
-    SetupHelper.setup_al_gen_tests AlNameGenTestCur, 'elt_save_test', 'player_contact'
+    SetupHelper.setup_al_gen_tests AlNameGenTestCur, 'elt_save_cur', 'player_contact'
+
+    # Use a dedicated alt app type rather than the last active one, which changes between runs
+    # as other specs commit app types. Committed records persist, so find before creating.
+    create_admin
+    @alt_app_type = Admin::AppType.active.find_by(name: 'change-user-roles-alt') ||
+                    Admin::AppType.create!(name: 'change-user-roles-alt', label: 'Change User Roles Alt', current_admin: @admin)
+    Admin::AppType.reset_active_app_types!
   end
 
   before :example do
@@ -56,7 +63,6 @@ RSpec.describe SaveTriggers::ChangeUserRoles, type: :model do
 
   it 'changes the roles of the current user in another app' do
     @orig_app_type = @user.app_type
-    @alt_app_type = Admin::AppType.active_app_types(force: true).last
     expect(@alt_app_type.id).not_to eq @user.app_type_id
 
     Admin::UserAccessControl.create app_type: @alt_app_type, role_name: 'user', resource_type: 'general', resource_name: 'app_type', access: 'read', current_admin: @admin
@@ -108,7 +114,6 @@ RSpec.describe SaveTriggers::ChangeUserRoles, type: :model do
 
   it 'changes the roles of the current user in another app specified by app_type id' do
     @orig_app_type = @user.app_type
-    @alt_app_type = Admin::AppType.active_app_types(force: true).last
     expect(@alt_app_type.id).not_to eq @user.app_type_id
 
     Admin::UserAccessControl.create app_type: @alt_app_type, role_name: 'user', resource_type: 'general', resource_name: 'app_type', access: 'read', current_admin: @admin
@@ -143,7 +148,6 @@ RSpec.describe SaveTriggers::ChangeUserRoles, type: :model do
     # This proves app_type is resolved via FieldDefaults.calculate_default before use,
     # so a Hash config (in addition to a literal id/name) now works.
     @orig_app_type = @user.app_type
-    @alt_app_type = Admin::AppType.active_app_types(force: true).last
     expect(@alt_app_type.id).not_to eq @user.app_type_id
 
     Admin::UserAccessControl.create app_type: @alt_app_type, role_name: 'user', resource_type: 'general', resource_name: 'app_type', access: 'read', current_admin: @admin
@@ -173,7 +177,6 @@ RSpec.describe SaveTriggers::ChangeUserRoles, type: :model do
   end
 
   it 'does not resolve a config app_type outside the app types loaded on this server (OnlyLoadAppTypes) - issue #1318' do
-    @alt_app_type = Admin::AppType.active_app_types(force: true).last
     expect(@alt_app_type.id).not_to eq @user.app_type_id
 
     # Restrict the server to only load @user's app type, excluding @alt_app_type.
@@ -196,7 +199,6 @@ RSpec.describe SaveTriggers::ChangeUserRoles, type: :model do
 
   it 'changes the roles of the specified user' do
     @orig_app_type = @user.app_type
-    @alt_app_type = Admin::AppType.active_app_types(force: true).last
     expect(@alt_app_type.id).not_to eq @user.app_type_id
 
     Admin::UserAccessControl.create app_type: @alt_app_type, role_name: 'user', resource_type: 'general', resource_name: 'app_type', access: 'read', current_admin: @admin
@@ -255,7 +257,8 @@ RSpec.describe SaveTriggers::ChangeUserRoles, type: :model do
     @trigger = SaveTriggers::ChangeUserRoles.new(config, @al)
     @trigger.perform
 
-    expect(other_user.user_roles.active.reload.pluck(:role_name)).to eq(['viewer-has-agreement', 'viewer-has-agreement2'])
+    # pluck has no ORDER BY, so compare sorted role names to avoid row-order flakiness
+    expect(other_user.user_roles.active.reload.pluck(:role_name).sort).to eq(['viewer-has-agreement', 'viewer-has-agreement2'])
 
     config = {
       remove_role_names: ['viewer-has-agreement']

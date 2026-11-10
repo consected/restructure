@@ -1,20 +1,34 @@
 require 'rails_helper'
 
-AlNameGenTestUt = 'Gen Test ELT Save'
+# Tests for SaveTriggers::UpdateThis, covering updates of a referenced model and of a
+# referenced activity log triggered by on_update, including the single-write behaviour
+# of embedded_item updates (issue #1384).
+AlNameGenTestUt = 'Gen Test ELT Save UT'
 
 RSpec.describe SaveTriggers::UpdateThis, type: :model do
   include ModelSupport
   include ActivityLogSupport
 
+  # Definitions identical for every example are set up once per context (committed),
+  # rather than per example (rolled back). Users, masters, access and records stay per example.
+  before :context do
+    SetupHelper.setup_al_player_contact_phones
+    SetupHelper.setup_al_gen_tests AlNameGenTestUt, 'elt_save_ut', 'player_contact'
+  end
+
+  before :example do
+    # Reset parsed options between examples: add_reference_def_to mutates the shared parsed
+    # phone options, which would otherwise leak references into later examples
+    ActivityLog::PlayerContactPhone.definition.option_configs(force: true)
+  end
+
   describe 'updating a referenced model from an activity log' do
     before :example do
-      SetupHelper.setup_al_player_contact_phones
-      SetupHelper.setup_al_gen_tests AlNameGenTestUt, 'elt_save_test', 'player_contact'
       create_user
       @master = create_master
       @player_contact = @master.player_contacts.create! data: '(617)123-1234 b', rec_type: :phone, rank: 10
       @al = create_item master: @master
-      add_reference_def_to(@al, [player_contacts: { from: 'this', add: 'many' }])
+      add_reference_def_to(@al, [{ player_contacts: { from: 'this', add: 'many' } }])
       expect(@al.master_id).to eq @master.id
       setup_access @al.resource_name, resource_type: :activity_log_type, access: :create, user: @user
     end
@@ -47,24 +61,14 @@ RSpec.describe SaveTriggers::UpdateThis, type: :model do
 
   describe 'updating a referenced activity log from an activity log' do
     before :context do
-      SetupHelper.setup_al_gen_tests 'Gen Test ELT', 'elt', 'player_contact'
-    end
+      SetupHelper.setup_al_gen_tests 'Gen Test ELT UT', 'elt_ut', 'player_contact'
 
-    before :example do
-      al_name = 'Gen Test ELT'
-
+      al_name = 'Gen Test ELT UT'
       create_admin
-      create_user
-      @master = create_master
-
-      setup_access :player_contacts, user: @user
-      setup_access :addresses, user: @user
-      setup_access :activity_log__player_contact_phones, user: @user
-
-      @activity_log = al = ActivityLog.active.where(name: al_name).first
       @working_data = '(111)222-3333 ext 12312312'
       @working_data2 = '(111)222-3333 ext 7654321'
 
+      al = ActivityLog.active.where(name: al_name).first
       raise "Activity Log #{al_name} not set up" if al.nil?
 
       al.extra_log_types = <<~END_DEF
@@ -94,9 +98,22 @@ RSpec.describe SaveTriggers::UpdateThis, type: :model do
 
       al.current_admin = @admin
       al.save!
-      al = @activity_log
+    end
 
-      setup_access al.resource_name, resource_type: :table, user: @user
+    before :example do
+      al_name = 'Gen Test ELT UT'
+
+      create_admin
+      create_user
+      @master = create_master
+
+      setup_access :player_contacts, user: @user
+      setup_access :addresses, user: @user
+      setup_access :activity_log__player_contact_phones, user: @user
+
+      @activity_log = ActivityLog.active.where(name: al_name).first
+
+      setup_access @activity_log.resource_name, resource_type: :table, user: @user
 
       setup_option_config 0, 'Reference Player Contact', %w[select_call_direction select_who]
     end
@@ -124,10 +141,10 @@ RSpec.describe SaveTriggers::UpdateThis, type: :model do
                   master_id: @master.id }
 
       # Check we can create the basic activity log
-      al_pc = ActivityLog::PlayerContactElt.new(select_call_direction: 'from staff',
-                                                extra_log_type: 'mr_ref_pc',
-                                                select_who: 'abc',
-                                                master: @master)
+      al_pc = ActivityLog::PlayerContactEltUt.new(select_call_direction: 'from staff',
+                                                  extra_log_type: 'mr_ref_pc',
+                                                  select_who: 'abc',
+                                                  master: @master)
 
       al_pc.save!
       ei = al_pc.create_embedded_item({ rank: 10, data: pn_first, rec_type: :phone })
@@ -137,7 +154,7 @@ RSpec.describe SaveTriggers::UpdateThis, type: :model do
       pc = PlayerContact.find_by(pc_hash)
       expect(pc).not_to be nil
 
-      expect(ActivityLog::PlayerContactElt.find_by(al_hash)).to eq al_pc
+      expect(ActivityLog::PlayerContactEltUt.find_by(al_hash)).to eq al_pc
       al_pc.clear_embedded_item_memo
       ei = al_pc.embedded_item
 
@@ -153,10 +170,10 @@ RSpec.describe SaveTriggers::UpdateThis, type: :model do
       # from vals before merging into the real #update! call, so it's applied only once, via
       # #update_embedded_item's #update! - not also via the lenient (non-bang) #update called
       # as a side effect of the #embedded_item= setter receiving a Hash through assign_attributes.
-      al_pc = ActivityLog::PlayerContactElt.new(select_call_direction: 'from staff',
-                                                extra_log_type: 'mr_ref_pc',
-                                                select_who: 'abc',
-                                                master: @master)
+      al_pc = ActivityLog::PlayerContactEltUt.new(select_call_direction: 'from staff',
+                                                  extra_log_type: 'mr_ref_pc',
+                                                  select_who: 'abc',
+                                                  master: @master)
       al_pc.save!
       ei = al_pc.create_embedded_item({ rank: 10, data: random_phone_number, rec_type: :phone })
       expect(ei).to be_a PlayerContact

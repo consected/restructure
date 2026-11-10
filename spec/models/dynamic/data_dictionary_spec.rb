@@ -12,7 +12,7 @@ RSpec.describe 'Dynamic Data Dictionary', type: :model do
   include DynamicModelSupport
 
   before :example do
-    # Seeds.setup
+    # seed_database
 
     @user0, = create_user
     create_admin

@@ -85,10 +85,11 @@ module Dynamic
                       dm.class.name.constantize
                     end
 
-            if dm.ready_to_generate? && dm.implementation_class_defined?(klass, fail_without_exception: true)
+            if rtg = dm.ready_to_generate? &&
+                     icd = dm.implementation_class_defined?(klass, fail_without_exception: true)
               dm.add_master_association
             else
-              msg = "Failed to enable #{dm} #{dm.id} #{dm.resource_name}. Table ready? #{dm.table_or_view_ready?}. #{disable_on_failure && 'Disabling!'}"
+              msg = "Failed to enable #{dm} #{dm.id} #{dm.resource_name}. Table ready? #{dm.table_or_view_ready?}. Ready to generate? #{rtg}. Class defined? #{icd}. Implementation class defined? #{icd}. #{disable_on_failure && 'Disabling!'}"
               warn msg
               Rails.logger.warn msg
               dm.class.where(id: dm.id).update_all(disabled: true) if disable_on_failure

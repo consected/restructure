@@ -32,7 +32,7 @@ RSpec.describe 'Dynamic model view_sql with blank primary_key_name', type: :mode
   include MasterDataSupport
 
   # The dynamic model/view must be created outside the per-example transaction
-  # (before(:all), like the existing 'dynamic models with foreign key as
+  # (before_all), like the existing 'dynamic models with foreign key as
   # master_id' spec does), otherwise the migration - which runs in a separate
   # thread/connection - deadlocks against the example's open transaction.
   before :all do
@@ -75,10 +75,6 @@ RSpec.describe 'Dynamic model view_sql with blank primary_key_name', type: :mode
     rescue StandardError => e
       @create_error = e
     end
-  end
-
-  after :all do
-    change_setting('AllowDynamicMigrations', false)
   end
 
   before :each do

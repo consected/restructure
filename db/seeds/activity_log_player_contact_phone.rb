@@ -14,6 +14,13 @@ module Seeds
       res ||= ActivityLog.find_or_initialize_by(name: 'Phone Log', item_type: 'player_contact', rec_type: 'phone', disabled: false, action_when_attribute: 'called_when',
                                                 field_list: 'data, select_call_direction, select_who, called_when, select_result, select_next_step, follow_up_when, notes, protocol_id, set_related_player_contact_rank',
                                                 blank_log_field_list: 'select_who, called_when, select_next_step, follow_up_when, notes, protocol_id', process_name: nil)
+      Admin::MigrationGenerator.tables_and_views_reset!
+      schema_name = Admin::MigrationGenerator.table_schema_hash[res.table_name]
+      schema_name ||= Admin::AppType.where(name: :zeus).first&.default_schema_name
+      if schema_name.present? && res.schema_name != schema_name
+        res.schema_name = schema_name
+        res.update_columns(schema_name:) if res.persisted?
+      end
       unless res.active_model_configuration?
         Trackers.setup
         GeneralSelections.setup

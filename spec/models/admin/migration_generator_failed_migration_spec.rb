@@ -13,6 +13,8 @@ RSpec.describe Admin::MigrationGenerator, type: :model do
       migration_context = double
       allow(Admin::AppTypeImport).to receive(:prevent_migrations?).and_return(false)
       allow(described_class).to receive(:migration_context).and_return(migration_context)
+      allow(migration_context).to receive(:open).and_return(double(pending_migrations: []))
+      allow(migration_context).to receive(:get_all_versions).and_return([])
       allow(migration_context).to receive(:migrate).and_raise(StandardError, 'original migration failure')
 
       expect { migration_generator.run_migration }
@@ -27,6 +29,8 @@ RSpec.describe Admin::MigrationGenerator, type: :model do
       migration_context = double
       allow(Admin::AppTypeImport).to receive(:prevent_migrations?).and_return(false)
       allow(described_class).to receive(:migration_context).and_return(migration_context)
+      allow(migration_context).to receive(:open).and_return(double(pending_migrations: []))
+      allow(migration_context).to receive(:get_all_versions).and_return([])
       allow(migration_context).to receive(:migrate).and_raise(StandardError, 'original migration failure')
       allow(File).to receive(:exist?).with(migration_file.to_s).and_return(true)
       allow(FileUtils).to receive(:mkdir_p)
