@@ -38,12 +38,9 @@ function drop() {
     sudo -u postgres psql -c "drop database $DBNAME;" > /dev/null
   fi
 
+  rm -rf "/var/tmp/nfs_store_test${DBNUM}${TEST_ENV_SET}"
+  rm -rf "/var/tmp/nfs_store_tmp${DBNUM}${TEST_ENV_SET}"
 }
-
-# Clean up the temporary nfs_store directories
-rm -rf /var/tmp/nfs_store_tmp*
-rm -rf /var/tmp/nfs_store_test*
-
 
 if [ -z $1 ]; then
   PARALLEL=$(nproc)

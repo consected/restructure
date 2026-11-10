@@ -86,9 +86,7 @@ RSpec.describe 'embed via create_reference investigation', type: :model do
   #       a non-blank field) — exposes H4 force_not_valid gap
   def setup_embed_target_models
     %w[test_embed_invs test_embed_validifs].each do |tn|
-      unless Admin::MigrationGenerator.table_exists? tn
-        TableGenerators.dynamic_models_table(tn, :create_do, 'test1', 'test2', @al_fk)
-      end
+      TableGenerators.dynamic_models_table(tn, :create_do, 'test1', 'test2', @al_fk, skip_if_exists: true)
     end
 
     DynamicModel.active.where(table_name: %w[test_embed_invs test_embed_validifs])

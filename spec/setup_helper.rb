@@ -8,6 +8,74 @@ $STARTED_AT = DateTime.now.to_i
 
 module SetupHelper
   SpecTallyTable = 'rails_spec_db_tally'
+  DefaultMigrationsDir = 'db/migrations'
+  LAZY_APP_SCHEMAS = %w[play_ipa sample_tracking study_info study_rec].freeze
+
+  class AppDefinitionTally < ActiveRecord::Base
+    self.table_name = 'ml_app.rails_spec_db_tally'
+    self.primary_key = nil
+  end
+
+  def self.app_definition_classes
+    [ExternalIdentifier, DynamicModel, ActivityLog]
+  end
+
+  def self.suspend_app_definitions(*schemas)
+    schemas = LAZY_APP_SCHEMAS if schemas.empty?
+    raise ArgumentError, 'Not a lazy app schema' unless (schemas - LAZY_APP_SCHEMAS).empty?
+
+    changed = false
+    ActiveRecord::Base.transaction do
+      app_definition_classes.each do |klass|
+        definitions = klass.active.where(schema_name: schemas)
+        ids = definitions.pluck(:id)
+        next if ids.empty?
+
+        names = ids.map { |id| "suspended_app_definition/#{klass.name}/#{id}" }
+        existing_names = AppDefinitionTally.where(name: names).pluck(:name)
+        rows = (names - existing_names).map { |name| { name:, updated_at: Time.current } }
+        AppDefinitionTally.insert_all!(rows) if rows.any?
+        definitions.where(id: ids).update_all(disabled: true, updated_at: Time.current)
+        ids.each { |id| klass.definition_cache.delete(id) }
+        changed = true
+      end
+    end
+    refresh_app_definitions if changed
+  end
+
+  def self.resume_app_definitions(*schemas)
+    raise ArgumentError, 'Not a lazy app schema' unless schemas.any? && (schemas - LAZY_APP_SCHEMAS).empty?
+
+    resumed = []
+    ActiveRecord::Base.transaction do
+      app_definition_classes.each do |klass|
+        prefix = "suspended_app_definition/#{klass.name}/"
+        names = AppDefinitionTally.where('name LIKE ?', "#{prefix}%").pluck(:name)
+        ids = names.map { |name| Integer(name.delete_prefix(prefix)) }
+        definitions = klass.where(schema_name: schemas, id: ids)
+        restored = definitions.to_a
+        resumed.concat(restored)
+        definitions.update_all(disabled: false, updated_at: Time.current) if definitions.exists?
+        restored.each { |definition| klass.definition_cache.delete(definition.id) }
+        restored_names = restored.map { |definition| "#{prefix}#{definition.id}" }
+        AppDefinitionTally.where(name: restored_names).delete_all
+      end
+    end
+    return if resumed.empty?
+
+    app_definition_classes.each(&:reset_active_model_configurations!)
+    resumed.each do |definition|
+      definition.reload.generate_model
+      definition.add_master_association
+    end
+    refresh_app_definitions
+  end
+
+  def self.refresh_app_definitions
+    app_definition_classes.each(&:reset_active_model_configurations!)
+    reload_configs
+    Rails.cache.clear
+  end
 
   def self.raise_if_stale_instance_variables!(instance_variables)
     instance_variables.each do |var|
@@ -29,6 +97,7 @@ module SetupHelper
   end
 
   def self.registration_admin
+    @registration_admin = nil if @registration_admin && !Admin.exists?(id: @registration_admin.id)
     @registration_admin ||= ::UserSupport.create_admin('registration').first
   end
 
@@ -39,10 +108,11 @@ module SetupHelper
   def self.clear_delayed_job
     put_now 'Clear delayed_job'
 
-    Delayed::Job.delete_all
+    ActiveRecord::Base.connection.execute 'truncate delayed_jobs;'
   end
 
   def self.setup_template_user
+    put_now 'Setup template user'
     # Do some setup that could impact all tests through the availability of master associations
     tue = Settings::TemplateUserEmail&.downcase
     require "#{Rails.root}/db/seeds.rb" unless User.active.find_by(email: tue)
@@ -64,11 +134,9 @@ module SetupHelper
     ActiveRecord::Base.connection.execute sql
     put_now 'Setup ActivityLogPlayerContactPhone'
     SetupHelper.setup_al_player_contact_phones
-    # Seeds::ActivityLogPlayerContactPhone.setup
-    put_now 'setup_al_player_contact_emails'
-    SetupHelper.setup_al_player_contact_emails
-    put_now 'setup_al_player_contact_embed_tests'
-    SetupHelper.setup_al_player_contact_embed_tests
+    %i[email embed_test].each do |process_name|
+      SetupHelper.setup_al_player_contact(process_name)
+    end
     put_now 'Setup ext_identifier'
     SetupHelper.setup_ext_identifier
     put_now 'setup_test_app'
@@ -86,15 +154,51 @@ module SetupHelper
       a.update! current_admin: a.admin, disabled: true if a.enabled?
     end
 
+    # Create DMs that should never be edited
+    %w[test_created_by_recs test_dm_spec_created_by_recs].each do |table_name|
+      DynamicModelSupport.generate_test_dynamic_model table_name: table_name
+    end
+
+    # Create DMs that can be updated during tests (uses an alt option to generate the full name)
+    # test_<alt-option>_recs
+    %w[orig_opt dialog_before comments config_triggers].each do |alt_option|
+      table_name = "test_#{alt_option}_recs"
+      DynamicModelSupport.generate_test_dynamic_model table_name: table_name, allow_updating: true
+    end
+
     SetupHelper.add_to_spec_db('app_setup')
   end
 
   def self.clean_app_migrations_dirs
     put_now 'Clean app migrations dirs'
-    `mkdir -p db/app_migrations/redcap_test; rm -f db/app_migrations/redcap_test/*test_*.rb`
-    `mkdir -p db/app_migrations/imports_test; rm -f db/app_migrations/imports_test/*test_imports*.rb`
-    `mkdir -p db/app_migrations/dynamic_test; rm -f db/app_migrations/dynamic_test/*.rb`
-    `rm -f db/app_migrations/test/*test_*.rb`
+    app_migrations_root = Rails.root.join(Admin::MigrationGenerator.app_migrations_root)
+    FileUtils.mkdir_p app_migrations_root
+    clean_rolled_back_migrations_dir
+    FileUtils.rm_f Dir.glob(File.join(app_migrations_root, 'redcap_test', '*test_*.rb'))
+    FileUtils.rm_f Dir.glob(File.join(app_migrations_root, 'imports_test', '*test_imports*.rb'))
+    FileUtils.rm_f Dir.glob(File.join(app_migrations_root, 'dynamic_test', '*.rb'))
+    FileUtils.rm_f Dir.glob(File.join(app_migrations_root, 'test', '*test_*.rb'))
+  end
+
+  def self.rolled_back_migrations_dirname
+    Rails.root.join(Admin::MigrationGenerator.app_migrations_root, 'rolled_back')
+  end
+
+  def self.move_rolled_back_migration_files(files)
+    FileUtils.mkdir_p rolled_back_migrations_dirname
+    files.each do |file|
+      next unless File.exist?(file)
+
+      FileUtils.mv file, rolled_back_migrations_dirname, force: true
+    rescue SystemCallError => e
+      Rails.logger.warn "Failed to move rolled-back migration '#{file}': #{e.message}"
+    end
+  end
+
+  def self.clean_rolled_back_migrations_dir
+    Dir.glob(File.join(rolled_back_migrations_dirname, '*.rb')).each do |file|
+      FileUtils.rm_f file
+    end
   end
 
   def self.clean_handlebars_dirs
@@ -110,7 +214,7 @@ module SetupHelper
     puts "Cleaning up migrations for schemas: #{schema_names.join(', ')}"
     schema_names.each do |schema_name|
       puts "Cleaning up migrations for schema: #{schema_name}"
-      db_migration_dirname = Rails.root.join('db', 'app_migrations', schema_name)
+      db_migration_dirname = Rails.root.join(Admin::MigrationGenerator.app_migrations_root, schema_name)
       FileUtils.rm_rf(db_migration_dirname)
     end
   end
@@ -254,19 +358,11 @@ module SetupHelper
     puts 'Check migrations'
 
     # Outside the current transaction
-    Thread.new do
-      ActiveRecord::Base.connection_pool.with_connection do
-        dirname = 'db/migrations'
-        mc = Admin::MigrationGenerator.migration_context(dirname)
-        if mc.needs_migration?
-          puts 'Running migrations'
-          mc.migrate
-        end
-      end
-    end.join
+    Admin::MigrationGenerator.migrate(DefaultMigrationsDir)
   end
 
   def self.reload_configs
+    put_now 'Reload configs'
     Rails.logger.info 'Reload configs'
     Admin::AppType.reset_memo_associated_items!
     AppControl.define_models
@@ -302,29 +398,22 @@ module SetupHelper
     # MasterDataSupport.create_data_set_outside_tx options
   end
 
-  def self.setup_al_player_contact_emails
-    Rails.logger.info 'Setting up al player contact emails'
+  def self.setup_al_player_contact(process_name)
+    suffix = process_name.to_s.pluralize
+    msg = "Setting up al player contact #{suffix}"
+    Rails.logger.info msg
+    put_now msg
+
     ActiveRecord::Base.connection.schema_cache.clear!
 
-    return if ActivityLog.connection.table_exists? 'activity_log_player_contact_emails'
+    table_name = "activity_log_player_contact_#{suffix}"
+    return if ActivityLog.connection.table_exists? table_name
 
-    TableGenerators.activity_logs_table('activity_log_player_contact_emails', 'player_contacts', true,
+    TableGenerators.activity_logs_table(table_name, 'player_contacts', true,
                                         'data', 'select_email_direction', 'select_who',
                                         'emailed_when', 'select_result', 'select_next_step', 'follow_up_when',
-                                        'protocol_id', 'notes', 'set_related_player_contact_rank')
-    Rails.cache.clear
-  end
-
-  def self.setup_al_player_contact_embed_tests
-    Rails.logger.info 'Setting up al player contact embed tests'
-    ActiveRecord::Base.connection.schema_cache.clear!
-
-    return if ActivityLog.connection.table_exists? 'activity_log_player_contact_embed_tests'
-
-    TableGenerators.activity_logs_table('activity_log_player_contact_embed_tests', 'player_contacts', true,
-                                        'data', 'select_email_direction', 'select_who',
-                                        'emailed_when', 'select_result', 'select_next_step', 'follow_up_when',
-                                        'protocol_id', 'notes', 'set_related_player_contact_rank')
+                                        'protocol_id', 'notes', 'set_related_player_contact_rank',
+                                        schema_name: 'dynamic_test')
     Rails.cache.clear
   end
 
@@ -425,10 +514,8 @@ module SetupHelper
     Rails.logger.info "Setting up external identifier #{name}"
     @implementation_table_name = implementation_table_name || "test_external_#{name}_identifiers"
     @implementation_attr_name = implementation_attr_name || "test_#{name}_id"
-    ActiveRecord::Base.connection.schema_cache.clear!
-    return if ActiveRecord::Base.connection.table_exists? @implementation_table_name
 
-    TableGenerators.external_identifiers_table(@implementation_table_name, true, @implementation_attr_name, created_by, assign_access, add_disabled)
+    TableGenerators.external_identifiers_table(@implementation_table_name, true, @implementation_attr_name, created_by, assign_access, add_disabled, skip_if_exists: true)
   end
 
   def self.setup_test_app
@@ -493,8 +580,18 @@ module SetupHelper
     a
   end
 
+  def self.setup_nfs_group_directories
+    NfsStore::Manage::Filesystem.group_id_range.each do |i|
+      check_dir = File.join(NfsStore::Manage::Filesystem.nfs_store_directory,
+                            "#{NfsStore::Manage::Group::NfsMountNamePrefix}#{i}")
+      FileUtils.mkdir_p check_dir
+    end
+  end
+
   def self.setup_nfs_directories
+    FileUtils.rm_rf NfsStore::Manage::Filesystem.nfs_store_directory
     FileUtils.mkdir_p NfsStore::Manage::Filesystem.nfs_store_directory
+    setup_nfs_group_directories
     FileUtils.rm_rf NfsStore::Manage::Filesystem.temp_directory
     FileUtils.mkdir_p NfsStore::Manage::Filesystem.temp_directory
     setup_ref_data_app_nfs
@@ -631,5 +728,60 @@ module SetupHelper
   def self.add_to_extra_setups(block)
     @@extra_setups ||= []
     @@extra_setups << block
+  end
+
+  def self.seed_database_info
+    put_now 'Getting seed database info'
+    table_list = %w[app_types app_configurations message_templates
+                    page_layouts
+                    reports activity_logs external_identifiers accuracy_scores
+                    general_selections item_flag_names protocols sub_processes protocol_events]
+
+    # excluded [masters users user_access_controls user_roles]
+
+    results = {}
+    table_list.each do |table|
+      sql = <<~SQL
+        SELECT count(*) "count", max(updated_at) "max_updated_at", md5(string_agg(id::text || ':' || coalesce(disabled::text,'-'), ',' ORDER BY id)) "md5"
+        from #{table};
+      SQL
+      results[table] = ActiveRecord::Base.connection.execute(sql).first.to_h
+    end
+
+    put_now 'Finished getting seed database info'
+
+    results
+  end
+
+  def self.orig_seed_database_info
+    @orig_seed_database_info
+  end
+
+  def self.seed_database_info_correct?
+    (seed_database_info.to_a - orig_seed_database_info.to_a).empty?
+  end
+
+  def self.seed_database_info_diff
+    (seed_database_info.to_a - orig_seed_database_info.to_a).to_h
+  end
+
+  def self.seed_database
+    put_now 'Seeding database'
+    unless SetupHelper.spec_tally_done?('seed_database')
+      SeedSupport.setup
+      SetupHelper.add_to_spec_db('seed_database')
+    end
+    put_now 'Seeded database'
+    @orig_seed_database_info = seed_database_info
+  end
+
+  def self.record_seed_database_info_change(caller_info)
+    return if SetupHelper.seed_database_info_correct?
+
+    seed_database_info_changes << [caller_info, SetupHelper.seed_database_info_diff]
+  end
+
+  def self.seed_database_info_changes
+    @seed_database_info_changes ||= []
   end
 end

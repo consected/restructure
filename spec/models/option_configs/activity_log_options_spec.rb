@@ -15,12 +15,13 @@ RSpec.describe 'Activity Log Options', type: :model do
     'ActivityLog::PlayerContactEmail'
   end
 
-  before :example do
+  before_all do
     @user0, = create_user
     create_admin
     create_user
     setup_access :trackers
     setup_access :tracker_histories
+    generate_test_activity_log
   end
 
   it 'gets the correct version of extra options based on creation date of the instance' do

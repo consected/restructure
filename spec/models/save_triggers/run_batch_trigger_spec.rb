@@ -7,14 +7,10 @@ RSpec.describe SaveTriggers::RunBatchTrigger, type: :model do
   include PlayerContactSupport
 
   describe 'running batch triggers from a save trigger' do
-    before :each do
+    before_all do
       create_user
       setup_access :player_contacts
       let_user_create_player_contacts
-      create_item(data: rand(10_000_000_000_000_000), rank: 10)
-      @player_contact.master.current_user = @user
-      @master = @player_contact.master
-      expect(@master).not_to be nil
 
       # Set up the activity log definition with batch_trigger configuration
       al_def = ActivityLog.find(ActivityLog::PlayerContactPhone.definition.id)
@@ -65,8 +61,12 @@ RSpec.describe SaveTriggers::RunBatchTrigger, type: :model do
       al_def.add_master_association
 
       @al_def = al_def
+    end
 
-      # Create some records for batch processing
+    before :each do
+      @master = create_master
+      @player_contact = @master.player_contacts.create!(data: '(617)123-1234 b', rec_type: :phone, rank: 10)
+      @player_contact.master.current_user = @user
       @al1 = @player_contact.activity_log__player_contact_phones.create!(
         select_call_direction: 'from player',
         select_who: 'original value 1',
@@ -78,7 +78,6 @@ RSpec.describe SaveTriggers::RunBatchTrigger, type: :model do
         extra_log_type: 'run_batch_test_1'
       )
 
-      # Create caller activity log
       @al_caller = @player_contact.activity_log__player_contact_phones.create!(
         select_call_direction: 'from player',
         select_who: 'caller',

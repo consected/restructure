@@ -14,17 +14,13 @@ require 'rails_helper'
 RSpec.describe Admin::ConfigLibrary, type: :model do
   include ModelSupport
 
-  before :all do
+  before_all do
     change_setting('AllowDynamicMigrations', true)
     create_admin
   end
 
-  after :all do
-    change_setting('AllowDynamicMigrations', false)
-  end
-
   describe '#referenced_by' do
-    before :all do
+    before_all do
       @rand_suffix = rand(1_000_000_000)
       @lib_name = "test_ref_lib_#{@rand_suffix}"
       @lib_category = "test_ref_cat_#{@rand_suffix}"

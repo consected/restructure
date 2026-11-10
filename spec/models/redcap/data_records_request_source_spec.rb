@@ -34,16 +34,8 @@ RSpec.describe 'Redcap::DataRecords request source recording', type: :model do
   include ModelSupport
   include Redcap::RedcapSupport
 
-  before :all do
+  before_all do
     change_setting('AllowDynamicMigrations', true)
-    @bad_admin, = create_admin
-    @bad_admin.update! disabled: true
-    create_admin
-    @projects = setup_redcap_project_admin_configs
-    @project = @projects.first
-  end
-
-  before :example do
     @bad_admin, = create_admin
     @bad_admin.update! disabled: true
     create_admin
@@ -51,16 +43,19 @@ RSpec.describe 'Redcap::DataRecords request source recording', type: :model do
     setup_file_store
     @projects = setup_redcap_project_admin_configs
     @project = @projects.first
+    dm = create_dynamic_model_for_sample_response
+  end
+
+  before :example do
     reset_mocks
   end
 
   #
   # Helper: return a ProjectAdmin with current_admin set and a valid dynamic model class_name
   def project_admin_with_dm
-    dm = create_dynamic_model_for_sample_response
     rc = Redcap::ProjectAdmin.active.first
     rc.current_admin = @admin
-    [rc, dm.implementation_class.name]
+    [rc, @dynamic_model.implementation_class.name]
   end
 
   #

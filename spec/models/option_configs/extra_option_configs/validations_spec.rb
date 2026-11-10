@@ -12,8 +12,8 @@ RSpec.describe 'ExtraOptionConfigs ActiveModel::Validations integration', type: 
   include DynamicModelSupport
   include ExtraOptionConfigsSupport
 
-  before(:all) do
-    set_up_extra_options_configs
+  before_all do
+    set_up_extra_options_configs alt_type: alt_name_for_file(__FILE__)
   end
 
   describe 'ActiveModel::Validations integration' do

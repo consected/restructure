@@ -40,12 +40,13 @@ describe 'admin config library versions', js: true, driver: $browser_driver do
     visit '/admin/config_libraries'
 
     # Find and click the Edit button (glyphicon) for our config library
+    expect(page).to have_css("#admin-item-#{cl.id} a.edit-entity.glyphicon-pencil", wait: 10)
     within "#admin-item-#{cl.id}" do
       find('a.edit-entity.glyphicon-pencil').click
     end
 
     # Wait for the edit form to load via AJAX
-    expect(page).to have_css('.nav-tabs', wait: 10)
+    expect(page).to have_css('.nav-tabs a', text: 'Versions', wait: 15)
 
     # Navigate to the Versions tab (on-open-click will auto-trigger Load)
     click_link 'Versions'
@@ -98,8 +99,7 @@ describe 'admin config library versions', js: true, driver: $browser_driver do
     end
 
     # Wait for the edit form to load via AJAX
-    expect(page).to have_css('.nav-tabs', wait: 15)
-    sleep 1 # Extra pause for JS to initialize
+    expect(page).to have_css('.nav-tabs a', text: 'Versions', wait: 15)
 
     # Navigate to the Versions tab
     within '.nav-tabs' do
@@ -158,8 +158,7 @@ describe 'admin config library versions', js: true, driver: $browser_driver do
       find('a.edit-entity.glyphicon-pencil').click
     end
 
-    expect(page).to have_css('.nav-tabs', wait: 15)
-    sleep 1
+    expect(page).to have_css('.nav-tabs a', text: 'Versions', wait: 15)
 
     within '.nav-tabs' do
       click_link 'Versions'
@@ -217,8 +216,7 @@ describe 'admin config library versions', js: true, driver: $browser_driver do
     end
 
     # Wait for the edit form to load via AJAX
-    expect(page).to have_css('.nav-tabs', wait: 15)
-    sleep 1 # Extra pause for JS to initialize
+    expect(page).to have_css('.nav-tabs a', text: 'Versions', wait: 15)
 
     # Navigate to the Versions tab
     within '.nav-tabs' do
@@ -275,8 +273,7 @@ describe 'admin config library versions', js: true, driver: $browser_driver do
       find('a.edit-entity.glyphicon-pencil').click
     end
 
-    expect(page).to have_css('.nav-tabs', wait: 15)
-    sleep 1
+    expect(page).to have_css('.nav-tabs a', text: 'Versions', wait: 15)
 
     within '.nav-tabs' do
       click_link 'Versions'
@@ -324,8 +321,7 @@ describe 'admin config library versions', js: true, driver: $browser_driver do
       find('a.edit-entity.glyphicon-pencil').click
     end
 
-    expect(page).to have_css('.nav-tabs', wait: 15)
-    sleep 1
+    expect(page).to have_css('.nav-tabs a', text: 'Versions', wait: 15)
 
     within '.nav-tabs' do
       click_link 'Versions'

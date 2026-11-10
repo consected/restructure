@@ -119,10 +119,6 @@ RSpec.describe Reports::ReportList, type: :model do
     change_setting('AllowDynamicMigrations', false)
   end
 
-  after :all do
-    change_setting('AllowDynamicMigrations', false)
-  end
-
   before :example do
     # Remove all list records between tests for isolation.
     # History must be deleted first to satisfy the FK constraint.
@@ -220,6 +216,17 @@ RSpec.describe Reports::ReportList, type: :model do
     context 'authorization' do
       it 'raises FphsException with "not authorized" when user has neither view_report_not_list nor view_reports' do
         items_text = build_items([@source_rec.id])
+
+        # Committed app-wide report UACs from other specs would grant access; disable them for this example only.
+        # updated_at is bumped and the memo reset so the access-control cache key changes.
+        Admin::UserAccessControl.active
+                                .where(resource_type: 'general', resource_name: %w[view_reports view_report_not_list],
+                                       app_type_id: @unauthorized_user.app_type_id)
+                                .where('user_id IS NULL OR user_id != ?', @authorized_user.id)
+                                .update_all(disabled: true, updated_at: Time.current)
+        Admin::UserAccessControl.reset_latest_update
+        expect(@unauthorized_user.can?(:view_report_not_list)).to be_falsey
+        expect(@unauthorized_user.can?(:view_reports)).to be_falsey
 
         expect do
           Reports::ReportList.setup(LIST_TABLE_NAME, items_text, @unauthorized_user)

@@ -11,7 +11,7 @@ RSpec.describe Admin::MessageTemplate, type: :model do
   include ReportSupport
   include ItemFlagSupport
 
-  before :all do
+  before_all do
     seed_database # to ensure embedded reports work
     create_admin
     create_user
@@ -210,8 +210,11 @@ RSpec.describe Admin::MessageTemplate, type: :model do
 
     expect(@item_flag).not_to be nil
 
-    Admin::UserAccessControl.create! app_type: @user.app_type, access: :read, resource_type: :general,
-                                     resource_name: :view_reports, current_admin: @admin
+    # An app-wide view_reports UAC may already be committed by another spec, which would fail validation
+    unless @user.can? :view_reports, :general
+      Admin::UserAccessControl.create! app_type: @user.app_type, access: :read, resource_type: :general,
+                                       resource_name: :view_reports, current_admin: @admin
+    end
 
     check_reports_accessible
 

@@ -12,7 +12,7 @@
 
 require 'rails_helper'
 
-AlNameGenTestN = 'Gen Test ELT 2'
+AlNameGenTestN = 'Gen Test ELT 2 N'
 # Minimal valid 1x1 red pixel PNG in base64
 PNG_BASE64_NOTIFY = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwADhQGAWjR9awAAAABJRU5ErkJggg=='
 
@@ -30,7 +30,7 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     let_user_create :player_contacts
     create_master
     ActivityLog::PlayerContactPhone.definition.update_tracker_events
-    ActivityLog::PlayerContactElt2Test.definition.update_tracker_events
+    ActivityLog::PlayerContactElt2N.definition.update_tracker_events
 
     @al = create_item
     setup_access @al.resource_name, resource_type: :activity_log_type, access: :create, user: @user
@@ -69,7 +69,7 @@ RSpec.describe SaveTriggers::Notify, type: :model do
   describe 'notify trigger' do
     before :all do
       SetupHelper.setup_al_player_contact_phones
-      SetupHelper.setup_al_gen_tests AlNameGenTestN, 'elt2_test', 'player_contact'
+      SetupHelper.setup_al_gen_tests AlNameGenTestN, 'elt2_n', 'player_contact'
     end
 
     before :example do
@@ -947,14 +947,14 @@ RSpec.describe SaveTriggers::Notify, type: :model do
       setup_access al.resource_name, resource_type: :table, access: :create, user: user
 
       sleep 1.5
-      alstep1 = @player_contact.activity_log__player_contact_elt2_tests.build(select_call_direction: 'from player', select_who: 'user', extra_log_type: 'step_1')
+      alstep1 = @player_contact.activity_log__player_contact_elt2_ns.build(select_call_direction: 'from player', select_who: 'user', extra_log_type: 'step_1')
 
       setup_access alstep1.resource_name, resource_type: :activity_log_type, access: :create, user: user
 
       alstep1.save!
       expect(alstep1).to be_persisted
 
-      alstep2 = @player_contact.activity_log__player_contact_elt2_tests.build(select_call_direction: 'from staff', select_who: 'staff', extra_log_type: 'step_1')
+      alstep2 = @player_contact.activity_log__player_contact_elt2_ns.build(select_call_direction: 'from staff', select_who: 'staff', extra_log_type: 'step_1')
       alstep2.save!
 
       lastid = Messaging::MessageNotification.last.id
@@ -1512,7 +1512,7 @@ RSpec.describe SaveTriggers::Notify, type: :model do
   describe 'resolving app_type and user from conditional Hash references - issue #1318' do
     before :all do
       SetupHelper.setup_al_player_contact_phones
-      SetupHelper.setup_al_gen_tests AlNameGenTestN, 'elt2_test', 'player_contact'
+      SetupHelper.setup_al_gen_tests AlNameGenTestN, 'elt2_n', 'player_contact'
     end
 
     before :example do

@@ -23,6 +23,8 @@ describe 'Master Records admin URL search formats', js: true, driver: $browser_d
 
     @user, = create_user
     @master = Master.create!(current_user: @user)
+    @admin_master_was_defined = Settings.const_defined?(:AdminMaster, false)
+    @original_admin_master = Settings::AdminMaster if @admin_master_was_defined
     change_setting('AdminMaster', @master.id)
   end
 
@@ -32,6 +34,12 @@ describe 'Master Records admin URL search formats', js: true, driver: $browser_d
 
   after(:all) do
     change_setting('TwoFactorAuthDisabledForAdmin', false)
+
+    if @admin_master_was_defined
+      change_setting('AdminMaster', @original_admin_master)
+    elsif Settings.const_defined?(:AdminMaster, false)
+      Settings.send(:remove_const, :AdminMaster)
+    end
   end
 
   def open_masters_url_search_tab
@@ -105,22 +113,28 @@ describe 'Master Records admin URL search formats', js: true, driver: $browser_d
   end
 
   describe 'External identifier details panel' do
+    # Stable existing active identifier, so the panel tests do not depend on list ordering
+    def url_search_external_identifier
+      candidates = ExternalIdentifier.active.order(:id).to_a
+      candidates.find { |ei| ei.name == 'bhs_assignments' } || candidates.first
+    end
+
+    def open_url_search_ei_details
+      ei = url_search_external_identifier
+      skip 'No active external identifiers found' unless ei
+
+      visit admin_external_identifiers_path(filter: { id: ei.id }, perform_action: 'edit')
+      expect(page).to have_css('.dynamic-details-section', wait: 20)
+    end
+
     it 'shows the URL search format for the external identifier' do
-      visit '/admin/external_identifiers'
-
-      first('.admin-list-item:not(.disabled-result) .simple-admin-edit').click
-
-      expect(page).to have_css('.dynamic-details-section', wait: 10)
+      open_url_search_ei_details
 
       expect(page).to have_content('URL search format')
     end
 
     it 'shows the correct URL with the external id attribute name' do
-      visit '/admin/external_identifiers'
-
-      first('.admin-list-item:not(.disabled-result) .simple-admin-edit').click
-
-      expect(page).to have_css('.dynamic-details-section', wait: 10)
+      open_url_search_ei_details
 
       attr_name = find('.dynamic-details-section').text[%r{/masters/<value>\?type=(\w+)}, 1]
       expect(attr_name).to be_present

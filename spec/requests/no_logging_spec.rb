@@ -12,7 +12,7 @@ describe 'no logging in production' do
     log = Rails.root.join('log/test.log')
     n = `grep "#{s}" "#{log}"`
     n = n.gsub("\n", '')
-    expect(n).to match(s)
+    expect(n).to include(s)
   end
 
   it 'should not log if the environment variable is not set' do

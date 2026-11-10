@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Covers REDCap dynamic model generation and option-type field configuration.
 require 'rails_helper'
 require './db/table_generators/dynamic_models_table'
 
@@ -8,7 +9,9 @@ RSpec.describe Redcap::DynamicStorage, type: :model do
   include Redcap::RedcapSupport
 
   describe 'dynamic storage for Redcap project' do
-    before :all do
+    # This has to be before :all not before_all, to avoid a transaction
+    # failure causing all following tests to fail
+    before(:all) do
       change_setting('AllowDynamicMigrations', true)
       @bad_admin, = create_admin
       @bad_admin.update! disabled: true
@@ -19,14 +22,16 @@ RSpec.describe Redcap::DynamicStorage, type: :model do
       # Create the first DM without multiple choice summary fields
       rc = Redcap::ProjectAdmin.active.first
       rc.current_admin = @admin
-      @table_name = "redcap_test.test_rc#{rand 100_000_000_000_000}_recs"
+      @table_name = 'redcap_test.test_rc_ds_recs'
+      ActiveRecord::Base.connection.execute("DROP TABLE IF EXISTS #{@table_name} CASCADE")
+
       @ds = ds = Redcap::DynamicStorage.new rc, @table_name
       ds.category = 'redcap-test-env'
       @dm = ds.create_dynamic_model
       expect(ds.dynamic_model_ready?).to be_truthy
-    end
+      # end
 
-    before :example do
+      # before :example do
       @bad_admin, = create_admin
       @bad_admin.update! disabled: true
       create_admin
@@ -130,7 +135,7 @@ RSpec.describe Redcap::DynamicStorage, type: :model do
 
       rc.api_key = @project[:api_key]
       rc.dynamic_model_table = table_name
-      rc.save!
+      # rc.save!
 
       rc.update_dynamic_model
       dm = rc.dynamic_storage.dynamic_model
@@ -171,7 +176,9 @@ RSpec.describe Redcap::DynamicStorage, type: :model do
       # First, simulate adding a new option to the _configurations through the Redcap project admin
       @ds.project_admin.data_options.associate_master_through_external_identifer = 'dynamic_model__tests'
       #  Update the dynamic model
+      change_setting('AllowDynamicMigrations', false)
       @ds.create_dynamic_model
+      change_setting('AllowDynamicMigrations', true)
       # Reload the dynamic model
       new_options = @ds.dynamic_model(force: true).options
       expect(new_options.index(/^  use_current_version: true$/)).to be_truthy
@@ -227,6 +234,15 @@ RSpec.describe Redcap::DynamicStorage, type: :model do
     end
 
     it 'generates a dynamic model with fields by option type from the data dictionary' do
+      storage_used_for_generation = nil
+      allow(Redcap::DynamicStorage).to receive(:new).and_wrap_original do |original, project_admin, table_name|
+        dynamic_storage = original.call(project_admin, table_name)
+        if table_name == 'test.test_repinst_field_recs' && storage_used_for_generation.nil?
+          storage_used_for_generation = dynamic_storage
+          expect(dynamic_storage).to receive(:field_options).thrice.and_call_original
+        end
+        dynamic_storage
+      end
       setup_repeat_instrument_fields
       rc = @project_admin_metadata
       rc.reload

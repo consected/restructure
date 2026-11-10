@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-AlNameGenTestVh = 'Gen Test ELT'
+AlNameGenTestVh = 'Gen Test ELT VH'
 # Use the activity log player contact phone activity log implementation,
 # since it includes the works_with concern
 
@@ -15,7 +15,7 @@ RSpec.describe 'Definition versioning', type: :model do
   end
 
   before :context do
-    SetupHelper.setup_al_gen_tests AlNameGenTestVh, 'elt', 'player_contact'
+    SetupHelper.setup_al_gen_tests AlNameGenTestVh, 'elt_vh', 'player_contact'
   end
 
   before :each do
@@ -107,12 +107,12 @@ RSpec.describe 'Definition versioning', type: :model do
 
     # Save an instance using v2
     @player_contact.current_user = @user
-    al_v2 = @player_contact.activity_log__player_contact_elts.create!(select_call_direction: 'from staff',
-                                                                      extra_log_type: 'step_2',
-                                                                      select_who: 'abc',
-                                                                      master: @player_contact.master)
+    al_v2 = @player_contact.activity_log__player_contact_elt_vhs.create!(select_call_direction: 'from staff',
+                                                                         extra_log_type: 'step_2',
+                                                                         select_who: 'abc',
+                                                                         master: @player_contact.master)
 
-    new_al = ActivityLog::PlayerContactElt.find(al_v2.id)
+    new_al = ActivityLog::PlayerContactEltVh.find(al_v2.id)
     c1 = new_al.versioned_definition.option_configs[1]
     expect(c1.label).to eq 'Step 2 v2'
 
@@ -154,7 +154,7 @@ RSpec.describe 'Definition versioning', type: :model do
     expect(c1.label).to eq 'Step 3 v3'
     sleep 2
 
-    # al_v3 = @player_contact.activity_log__player_contact_elts.create!(select_call_direction: 'from staff',
+    # al_v3 = @player_contact.activity_log__player_contact_elt_vhs.create!(select_call_direction: 'from staff',
     #                                                                   extra_log_type: 'step_3',
     #                                                                   select_who: 'abc')
 
@@ -166,9 +166,9 @@ RSpec.describe 'Definition versioning', type: :model do
     expect(@activity_log.versioned(at_2)).to eq all_versions[1]
     expect(@activity_log.versioned(at_3)).to be nil # since it is the current version and this is what is returned
 
-    expect(@activity_log.versioned(DateTime.now + 99.years)).to be nil # simulates *use_def_version_time*
+    expect(@activity_log.versioned(DateTime.now + 99.years)).to be nil # simulates *use_def_version_at*
 
-    new_al = ActivityLog::PlayerContactElt.find(al_v2.id)
+    new_al = ActivityLog::PlayerContactEltVh.find(al_v2.id)
     c1 = new_al.versioned_definition.option_configs[1]
     expect(c1.label).to eq 'Step 2 v2'
 
@@ -213,7 +213,7 @@ RSpec.describe 'Definition versioning', type: :model do
     expect(c1.label).to eq 'Step 3 v4'
     sleep 2
 
-    # al_v3 = @player_contact.activity_log__player_contact_elts.create!(select_call_direction: 'from staff',
+    # al_v3 = @player_contact.activity_log__player_contact_elt_vhs.create!(select_call_direction: 'from staff',
     #                                                                   extra_log_type: 'step_3',
     #                                                                   select_who: 'abc')
 
@@ -227,14 +227,14 @@ RSpec.describe 'Definition versioning', type: :model do
     expect(@activity_log.versioned(at_4)).to be nil # since it is the current version and this is what is returned
 
     # Instance should be using definition v4 - since use_current_version is set
-    new_al = ActivityLog::PlayerContactElt.find(al_v2.id)
+    new_al = ActivityLog::PlayerContactEltVh.find(al_v2.id)
     c1 = new_al.versioned_definition.option_configs[1]
     expect(c1.label).to eq 'Step 2 v4'
 
-    al_v4 = @player_contact.activity_log__player_contact_elts.create!(select_call_direction: 'from staff',
-                                                                      extra_log_type: 'step_2',
-                                                                      select_who: 'abc',
-                                                                      master: @player_contact.master)
+    al_v4 = @player_contact.activity_log__player_contact_elt_vhs.create!(select_call_direction: 'from staff',
+                                                                         extra_log_type: 'step_2',
+                                                                         select_who: 'abc',
+                                                                         master: @player_contact.master)
 
     c4 = al_v4.versioned_definition.option_configs[1]
     expect(c4.label).to eq 'Step 2 v4'

@@ -151,7 +151,7 @@ RSpec.describe 'NfsStore stored file symlink handling', type: :model do
     # production may live behind a *different* per-role bindfs mount (e.g. gid600 vs
     # gid601). Anchoring containment on the whole filestore root alone would not catch a
     # symlink pointing here, since this container is still nested under that same root.
-    setup_access('activity_log__player_contact_phone__step_2', resource_type: :activity_log_type)
+    setup_access(nfs_al_step_rn(:step_2), resource_type: :activity_log_type)
     setup_default_filters(activity: :step_2)
     setup_container_and_al(activity: :step_2)
     upload_file('secret.txt', 'unauthorized secret content')
@@ -187,7 +187,7 @@ RSpec.describe 'NfsStore stored file symlink handling', type: :model do
     container_a_path = File.dirname(container_a.stored_files.last.retrieval_path)
 
     # A second, distinct container, standing in for another tenant's container.
-    setup_access('activity_log__player_contact_phone__step_2', resource_type: :activity_log_type)
+    setup_access(nfs_al_step_rn(:step_2), resource_type: :activity_log_type)
     setup_default_filters(activity: :step_2)
     setup_container_and_al(activity: :step_2)
     upload_file('secret.txt', 'unauthorized secret content')

@@ -12,8 +12,8 @@ RSpec.describe 'ExtraOptionConfigs::Comments', type: :model do
   include DynamicModelSupport
   include ExtraOptionConfigsSupport
 
-  before(:all) do
-    set_up_extra_options_configs
+  before_all do
+    set_up_extra_options_configs alt_type: alt_name_for_file(__FILE__)
   end
 
   let(:klass) { OptionConfigs::ExtraOptionConfigs::Comments }
@@ -48,6 +48,10 @@ RSpec.describe 'ExtraOptionConfigs::Comments', type: :model do
   end
 
   describe 'parse_config integration' do
+    before_all do
+      set_up_extra_options_configs alt_type: 'comments'
+    end
+
     it 'wraps _comments in a Comments instance' do
       @dm.update!(options: <<~YAML)
         _comments:

@@ -11,14 +11,7 @@
 require 'rails_helper'
 
 RSpec.describe Redcap::ApiClient, type: :model do
-  include ModelSupport
-  include Redcap::RedcapSupport
-
-  before :example do
-    create_admin
-    @projects = setup_redcap_project_admin_configs
-    @project = @projects.first
-  end
+  include_context 'with redcap project admins'
 
   it 'connects and gets project info' do
     name = @projects.first[:name]
@@ -266,7 +259,7 @@ RSpec.describe Redcap::ApiClient, type: :model do
     pc = rc.api_client
 
     data = [
-      {'record_id' => 101, 'redcap_survey_identifier' => "651237"}
+      { 'record_id' => 101, 'redcap_survey_identifier' => '651237' }
     ]
 
     json_data = data.to_json
@@ -277,7 +270,6 @@ RSpec.describe Redcap::ApiClient, type: :model do
     expect(res).to be_a Array
     expect(res.first).to be_a String
     expect(res[0]).to eq '101'
-
   end
 
   it 'gets a survey link for instrument and record' do

@@ -39,6 +39,11 @@ RSpec.describe EditFields::SelectFieldHandler, type: :model do
     DynamicModel::TestWithIdRec.new(master: @master, current_user: @user)
   end
 
+  # Rows committed by other specs persist between runs; remove them for each example (rolled back afterwards)
+  before :each do
+    DynamicModel::TestWithIdRec.where.not(name: ['test name 1', 'test name 2', 'test name 3']).delete_all
+  end
+
   describe '.list_record_data_for_select with defined attributes (list_for_defined_attributes path)' do
     let(:common_args) do
       {

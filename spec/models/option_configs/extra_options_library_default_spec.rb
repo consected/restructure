@@ -27,10 +27,6 @@ RSpec.describe OptionConfigs::ExtraOptions, '.include_libraries with _default an
     end
   end
 
-  after :all do
-    change_setting('AllowDynamicMigrations', false)
-  end
-
   # Creates a pair of config libraries: one with _definitions: anchors,
   # one with both _definitions: anchors and a _default: block.
   # Returns [definitions_only_name, default_with_definitions_name]
@@ -72,9 +68,7 @@ RSpec.describe OptionConfigs::ExtraOptions, '.include_libraries with _default an
 
   def generate_dm_with_options(options_yaml)
     DynamicModel.active.where(table_name: 'test_lib_default_opts').reload.each { |d| d.disable!(@admin) }
-    if DynamicModel.const_defined?(:TestLibDefaultOpt, false)
-      DynamicModel.send(:remove_const, :TestLibDefaultOpt)
-    end
+    DynamicModel.send(:remove_const, :TestLibDefaultOpt) if DynamicModel.const_defined?(:TestLibDefaultOpt, false)
 
     DynamicModel.create!(
       current_admin: @admin,
@@ -154,7 +148,7 @@ RSpec.describe OptionConfigs::ExtraOptions, '.include_libraries with _default an
       config_names = configs.map(&:name)
       definitions_as_types = config_names.select { |n| n.to_s.start_with?('_definitions') }
       expect(definitions_as_types).to be_empty,
-        "Expected no _definitions entries as option types, but found: #{definitions_as_types}"
+                                      "Expected no _definitions entries as option types, but found: #{definitions_as_types}"
       expect(config_names).to include(:real_option_type)
     end
   end

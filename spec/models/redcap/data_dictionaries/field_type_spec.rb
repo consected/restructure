@@ -3,15 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe Redcap::DataDictionaries::FieldType, type: :model do
-  include ModelSupport
-  include Redcap::RedcapSupport
-
-  before :example do
-    @bad_admin, = create_admin
-    @bad_admin.update! disabled: true
-    create_admin
-    @projects = setup_redcap_project_admin_configs
-  end
+  include_context 'with redcap project admins'
 
   it 'generates produces sensible field type definitions' do
     rc = Redcap::ProjectAdmin.active.first
@@ -53,7 +45,6 @@ RSpec.describe Redcap::DataDictionaries::FieldType, type: :model do
     expect(field_type.cast_value_to_real('some value')).to be_a String
 
     form = forms[:test]
-    fields = form.fields
 
     field_type = form.fields_of_variable_type('dichotomous').first.last.field_type
     expect(field_type.cast_value_to_real('1')).to be_a TrueClass

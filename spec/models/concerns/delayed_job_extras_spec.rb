@@ -23,7 +23,7 @@ require 'rails_helper'
 # These specs demonstrate both problems and confirm the fix makes job_id
 # lookups resilient to handler formatting differences.
 RSpec.describe DelayedJobExtras do
-  before :all do
+  before_all do
     # DelayedJobExtras is normally included inside config.after_initialize in
     # delayed_job_tasks.rb. In isolated model specs the initializer may not have
     # run, so we include it here to ensure the class methods are available.

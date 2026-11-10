@@ -129,7 +129,6 @@ RSpec.describe Formatter::DateTime, type: :model do
   end
 
   it 'uses database dates and times correctly' do
-    seed_database
     create_user
     create_master
     create_item

@@ -81,7 +81,7 @@ module MasterDataSupport
   end
 
   def get_a_rank
-    ranks = Classification::AccuracyScore.all
+    ranks = Classification::AccuracyScore.active
     ranks[rand(ranks.length)].value
   end
 
