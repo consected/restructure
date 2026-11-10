@@ -1191,6 +1191,134 @@ RSpec.describe HandlebarsPrecompilerHelper, type: :helper do
     end
   end
 
+  # Issue consected/restructure#1543 - after a Handlebars CLI dependency bump (handlebars 4.7.10),
+  # the CLI emits registrations with double-quoted names (templates["name"],
+  # Handlebars.partials["name"]) rather than single-quoted. The name parser only matched single
+  # quotes, so no compiled files were written and the requested templates 404'd.
+  # These specs prove #split_compiled_output splits and writes each template and partial to its
+  # own compiled file regardless of quote style, using fake CLI output (no real CLI call).
+  describe '#split_compiled_output quote style handling (issue #1543)' do
+    let(:cache_key) { 'quotestyle15430' }
+    let(:cli_output_file) { HandlebarsPrecompiler::TMP_DIR.join('fake_cli_output_quote_style.js') }
+
+    before do
+      allow(helper).to receive(:handlebars_cache_key).and_return(cache_key)
+      HandlebarsPrecompiler.setup_directories
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler.templates_compiled_dir.join('*')))
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler.partials_compiled_dir.join('*')))
+    end
+
+    after do
+      FileUtils.rm_f(cli_output_file)
+    end
+
+    def write_source(name, source, is_partial:)
+      temp_dir = helper.handlebars_temp_dir(is_partial:)
+      FileUtils.mkdir_p(temp_dir)
+      File.write(temp_dir.join("#{name}.handlebars"), source)
+    end
+
+    def compiled_path(name, source, is_partial:)
+      helper.handlebars_public_dir(is_partial:).join(helper.handlebars_compiled_filename(name, source))
+    end
+
+    context 'with templates' do
+      let(:dq_source) { '<div>{{dq_template}}</div>' }
+      let(:sq_source) { '<div>{{sq_template}}</div>' }
+
+      before do
+        File.write(cli_output_file, <<~JS)
+          (function() {
+            var template = Handlebars.template, templates = Handlebars.templates = Handlebars.templates || {};
+          templates["dq-template"] = template({"1":function(){return "dq template";}});
+          templates['sq-template'] = template({"1":function(){return "sq template";}});
+          })();
+        JS
+        write_source('dq-template', dq_source, is_partial: false)
+        write_source('sq-template', sq_source, is_partial: false)
+      end
+
+      it 'writes a compiled file for a double-quoted template name' do
+        helper.send(:split_compiled_output, cli_output_file, is_partial: false)
+
+        path = compiled_path('dq-template', dq_source, is_partial: false)
+        expect(File.exist?(path)).to be true
+        expect(File.read(path)).to include('templates["dq-template"]')
+        expect(File.read(path)).to include('dq template')
+      end
+
+      it 'writes a compiled file for a single-quoted template name (regression)' do
+        helper.send(:split_compiled_output, cli_output_file, is_partial: false)
+
+        path = compiled_path('sq-template', sq_source, is_partial: false)
+        expect(File.exist?(path)).to be true
+        expect(File.read(path)).to include("templates['sq-template']")
+        expect(File.read(path)).to include('sq template')
+      end
+
+      it 'keeps each template in its own file without bleeding content between them' do
+        helper.send(:split_compiled_output, cli_output_file, is_partial: false)
+
+        expect(File.read(compiled_path('dq-template', dq_source, is_partial: false))).not_to include('sq template')
+        expect(File.read(compiled_path('sq-template', sq_source, is_partial: false))).not_to include('dq template')
+      end
+    end
+
+    it 'raises when CLI output has registrations in an unrecognized format' do
+      File.write(cli_output_file, <<~JS)
+        (function() {
+          var template = Handlebars.template, templates = Handlebars.templates = Handlebars.templates || {};
+        templates[`odd-template`] = template({"1":function(){return "odd";}});
+        })();
+      JS
+
+      expect { helper.send(:split_compiled_output, cli_output_file, is_partial: false) }
+        .to raise_error(FphsException, /not recognized/)
+    end
+
+    context 'with partials' do
+      let(:dq_source) { '<span>{{dq_partial}}</span>' }
+      let(:sq_source) { '<span>{{sq_partial}}</span>' }
+
+      before do
+        File.write(cli_output_file, <<~JS)
+          (function() {
+            var template = Handlebars.template, templates = Handlebars.templates = Handlebars.templates || {};
+          Handlebars.partials["dq-partial"] = template({"1":function(){return "dq partial";}});
+          Handlebars.partials['sq-partial'] = template({"1":function(){return "sq partial";}});
+          })();
+        JS
+        write_source('dq-partial', dq_source, is_partial: true)
+        write_source('sq-partial', sq_source, is_partial: true)
+      end
+
+      it 'writes a compiled file for a double-quoted partial name' do
+        helper.send(:split_compiled_output, cli_output_file, is_partial: true)
+
+        path = compiled_path('dq-partial', dq_source, is_partial: true)
+        expect(File.exist?(path)).to be true
+        expect(File.read(path)).to include('Handlebars.partials["dq-partial"]')
+        expect(File.read(path)).to include('dq partial')
+      end
+
+      it 'writes a compiled file for a single-quoted partial name (regression)' do
+        helper.send(:split_compiled_output, cli_output_file, is_partial: true)
+
+        path = compiled_path('sq-partial', sq_source, is_partial: true)
+        expect(File.exist?(path)).to be true
+        expect(File.read(path)).to include("Handlebars.partials['sq-partial']")
+        expect(File.read(path)).to include('sq partial')
+      end
+
+      it 'keeps each partial in its own file without bleeding content between them' do
+        helper.send(:split_compiled_output, cli_output_file, is_partial: true)
+
+        expect(File.read(compiled_path('dq-partial', dq_source, is_partial: true))).not_to include('sq partial')
+        expect(File.read(compiled_path('sq-partial', sq_source, is_partial: true))).not_to include('dq partial')
+      end
+    end
+  end
+
   # Issue #1362 (Stage 1) - write_multiple_handlebars_templates must never leave a
   # partially-written multi bundle visible to a concurrent reader.
   describe '#write_multiple_handlebars_templates atomic writes (issue #1362)' do
