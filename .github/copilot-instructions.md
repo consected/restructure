@@ -52,6 +52,8 @@ NOTE: Only a human user will merge branches after code review; AI agents should 
 - Check for reusable support methods in `spec/support/` before writing new test code.
 - After writing tests, always add comments to the top of the spec files explaining the purpose of the tests.
 
+NOTE: The test database can be cleaned or mutated if required, without additional authorization.
+
 ### Ruby on Rails Conventions
 
 For all Ruby on Rails code you write, follow these conventions: [Ruby on Rails Coding Standards](instructions/ruby-on-rails.instructions.md)
