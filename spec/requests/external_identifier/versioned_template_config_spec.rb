@@ -313,8 +313,8 @@ RSpec.describe 'ExternalIdentifier versioned template config', type: :request do
       expect(response.body).to include('EiFieldLabelV1')
       expect(response.body).not_to include('EiFieldLabelV2')
       expect(response.body)
-        .to include("set_v0(_fpa.state.template_config.#{state_name}, " \
-                    "_fpa.state.template_config.#{state_name}.#{token});")
+        .to include("_fpa.promote_template_state_v0(_fpa.state.template_config.#{state_name}, " \
+                    "_fpa.state.template_config.#{state_name}.#{token}, #{token.delete_prefix('v')})")
       expect(response.body).not_to include('_fpa.retrieve_requested_handlebars_templates')
       expect(response.body).not_to include('references_results')
     end

@@ -28,6 +28,11 @@
 # config blocks for current definition versions, aliases that state under `v0`,
 # and does not emit historical version blocks. This count is independent of
 # wall-clock timing and remains robust under any server load.
+#
+# The state scripts promote the current token to the v0 aliases through the shared
+# _fpa.promote_template_state_v0 (live definitions only). A historical-version state
+# script is emitted without any promotion call, and neither emits a runtime
+# is_historical_version check.
 # Form responses promote v0 for current-definition New and Edit forms only when no newer v0 is
 # installed, and never for historical records. Secondary option-type forms must not replace
 # the base list aliases.
@@ -129,24 +134,24 @@ RSpec.describe 'Global page template historical version emission', type: :reques
   def expect_skeleton_base_v0_promotions(text, base_name, option_type_names, promoted_option_type)
     promoted_name = "#{base_name}_#{promoted_option_type}"
     expected_promotions = [
-      "set_v0(_fpa.state.template_config.#{base_name}, " \
+      "_fpa.promote_template_state_v0(_fpa.state.template_config.#{base_name}, " \
       "_fpa.state.template_config.#{promoted_name}.v0);",
-      "set_v0(_fpa.show_if.forms.#{base_name}, " \
+      "_fpa.promote_template_state_v0(_fpa.show_if.forms.#{base_name}, " \
       "_fpa.show_if.forms['#{promoted_name}'].v0);"
     ]
     base_promotions = text.lines.map(&:strip).grep(
-      /\Aset_v0\(_fpa\.(?:state\.template_config|show_if\.forms)\.#{Regexp.escape(base_name)},/
-    )
+      /\A_fpa\.promote_template_state_v0\(_fpa\.(?:state\.template_config|show_if\.forms)\.#{Regexp.escape(base_name)},/
+    ).map { |line| line.sub(/, \d+\);\z/, ');') }
 
     expect(base_promotions).to contain_exactly(*expected_promotions)
     option_type_names.each do |option_type_name|
       option_name = "#{base_name}_#{option_type_name}"
       expect(text).to include(
-        "set_v0(_fpa.state.template_config.#{option_name}, " \
+        "_fpa.promote_template_state_v0(_fpa.state.template_config.#{option_name}, " \
         "_fpa.state.template_config.#{option_name}.v"
       )
       expect(text).to include(
-        "set_v0(_fpa.show_if.forms['#{option_name}'], " \
+        "_fpa.promote_template_state_v0(_fpa.show_if.forms['#{option_name}'], " \
         "_fpa.show_if.forms['#{option_name}'].v"
       )
     end
@@ -373,10 +378,12 @@ RSpec.describe 'Global page template historical version emission', type: :reques
       bundle = requested_handlebars_bundle(text)
 
       expect(text).to include(
-        "set_v0(#{state_reference}, #{state_reference}.v#{dm.current_def_version});"
+        "_fpa.promote_template_state_v0(#{state_reference}, #{state_reference}.v#{dm.current_def_version}, " \
+        "#{dm.current_def_version})"
       )
       expect(text).to include(
-        "set_v0(#{show_if_reference}, #{show_if_reference}.v#{dm.current_def_version});"
+        "_fpa.promote_template_state_v0(#{show_if_reference}, #{show_if_reference}.v#{dm.current_def_version}, " \
+        "#{dm.current_def_version});"
       )
       expect(text).not_to match(
         /_fpa\.state\.template_config\.[^\n]*#{Regexp.escape(DM_TABLE.singularize)}[^\n]*\.v0 = [^\n]*\|\|/
@@ -465,8 +472,8 @@ RSpec.describe 'Global page template historical version emission', type: :reques
         "_fpa.state.template_config.#{form_state_name}.v#{dm.current_def_version}  = {"
       )
       expect(response.body).to include(
-        "set_v0(_fpa.state.template_config.#{form_state_name}, " \
-        "_fpa.state.template_config.#{form_state_name}.v#{dm.current_def_version});"
+        "_fpa.promote_template_state_v0(_fpa.state.template_config.#{form_state_name}, " \
+        "_fpa.state.template_config.#{form_state_name}.v#{dm.current_def_version}, #{dm.current_def_version})"
       )
       expect(response.body).not_to include('preserve_existing_v0')
     end
@@ -489,18 +496,18 @@ RSpec.describe 'Global page template historical version emission', type: :reques
         "fpa_state_config--#{secondary_name}--v#{dm.current_def_version}--form"
       )
       expect(response.body).to include(
-        "set_v0(_fpa.state.template_config.#{secondary_name}, " \
-        "_fpa.state.template_config.#{secondary_name}.v#{dm.current_def_version});"
+        "_fpa.promote_template_state_v0(_fpa.state.template_config.#{secondary_name}, " \
+        "_fpa.state.template_config.#{secondary_name}.v#{dm.current_def_version}, #{dm.current_def_version})"
       )
 
       option_type_promotions = [
-        "set_v0(_fpa.state.caption_before.#{secondary_name},",
-        "set_v0(_fpa.state.labels_#{secondary_name},",
-        "set_v0(_fpa.state.template_config.#{secondary_name},",
-        "set_v0(_fpa.show_if.forms['#{secondary_name}'],"
+        "_fpa.promote_template_state_v0(_fpa.state.caption_before.#{secondary_name},",
+        "_fpa.promote_template_state_v0(_fpa.state.labels_#{secondary_name},",
+        "_fpa.promote_template_state_v0(_fpa.state.template_config.#{secondary_name},",
+        "_fpa.promote_template_state_v0(_fpa.show_if.forms['#{secondary_name}'],"
       ]
       option_type_promotions.each { |promotion| expect(response.body).to include(promotion) }
-      promoted_base_aliases = response.body.lines.grep(/set_v0\(/).reject do |line|
+      promoted_base_aliases = response.body.lines.grep(/promote_template_state_v0\(/).reject do |line|
         option_type_promotions.any? { |promotion| line.include?(promotion) }
       end
       expect(promoted_base_aliases).to be_empty
@@ -540,7 +547,8 @@ RSpec.describe 'Global page template historical version emission', type: :reques
       expect(response.body).to include("def_version: #{old_token.delete_prefix('v')}")
       expect(response.body).to include("item_list: 'test1,test2'")
       expect(response.body).not_to include("fpa_state_config--#{state_name}--#{current_token}--form")
-      expect(response.body).not_to include('set_v0(')
+      expect(response.body).not_to include('promote_template_state_v0(')
+      expect(response.body).not_to include('is_historical_version')
 
       get edit_path.call(live_record)
 
@@ -553,12 +561,10 @@ RSpec.describe 'Global page template historical version emission', type: :reques
       )
       # A live record's edit form promotes the current token to v0, unless a newer v0 is installed
       expect(response.body).to include(
-        "set_v0(_fpa.state.template_config.#{state_name}, " \
-        "_fpa.state.template_config.#{state_name}.#{current_token});"
+        "if (_fpa.promote_template_state_v0(_fpa.state.template_config.#{state_name}, " \
+        "_fpa.state.template_config.#{state_name}.#{current_token}, #{current_token.delete_prefix('v')}))"
       )
-      expect(response.body).to include(
-        "installed_v0_token(_fpa.state.template_config.#{state_name}) <= #{current_token.delete_prefix('v')}"
-      )
+      expect(response.body).not_to include('is_historical_version')
     end
 
     it 'promotes only option-type-specific aliases from a secondary-option edit form' do
@@ -579,13 +585,13 @@ RSpec.describe 'Global page template historical version emission', type: :reques
       expect(response).to have_http_status(:ok)
       secondary_name = "dynamic_model__#{DM_TABLE.singularize}_secondary"
       option_type_promotions = [
-        "set_v0(_fpa.state.caption_before.#{secondary_name},",
-        "set_v0(_fpa.state.labels_#{secondary_name},",
-        "set_v0(_fpa.state.template_config.#{secondary_name},",
-        "set_v0(_fpa.show_if.forms['#{secondary_name}'],"
+        "_fpa.promote_template_state_v0(_fpa.state.caption_before.#{secondary_name},",
+        "_fpa.promote_template_state_v0(_fpa.state.labels_#{secondary_name},",
+        "_fpa.promote_template_state_v0(_fpa.state.template_config.#{secondary_name},",
+        "_fpa.promote_template_state_v0(_fpa.show_if.forms['#{secondary_name}'],"
       ]
       option_type_promotions.each { |promotion| expect(response.body).to include(promotion) }
-      promoted_base_aliases = response.body.lines.grep(/set_v0\(/).reject do |line|
+      promoted_base_aliases = response.body.lines.grep(/promote_template_state_v0\(/).reject do |line|
         option_type_promotions.any? { |promotion| line.include?(promotion) }
       end
       expect(promoted_base_aliases).to be_empty
@@ -610,7 +616,8 @@ RSpec.describe 'Global page template historical version emission', type: :reques
       expect(response).to have_http_status(:ok)
       base_name = "dynamic_model__#{DM_TABLE.singularize}"
       expect(response.body).to include(
-        "set_v0(_fpa.state.template_config.#{base_name}, _fpa.state.template_config.#{base_name}_default.v0);"
+        "_fpa.promote_template_state_v0(_fpa.state.template_config.#{base_name}, " \
+        "_fpa.state.template_config.#{base_name}_default.v0, "
       )
       expect(dm.current_def_version).to be_present
     end
@@ -719,8 +726,8 @@ RSpec.describe 'Global page template historical version emission', type: :reques
       option_type_names.each do |option_type_name|
         option_config = al.option_type_config_for(option_type_name)
         state_name = "#{al.full_item_type_name}_#{option_type_name}".underscore
-        promotion = "set_v0(_fpa.state.template_config.#{option_config.resource_name}, " \
-                    "_fpa.state.template_config.#{state_name}.v0);"
+        promotion = "_fpa.promote_template_state_v0(_fpa.state.template_config.#{option_config.resource_name}, " \
+                    "_fpa.state.template_config.#{state_name}.v0, "
         expect(skeleton).to include(promotion)
 
         get "/masters/#{@master.id}/#{al.base_route_segments}/new", params: { extra_type: option_type_name }

@@ -6,7 +6,9 @@
 // collecting the versioned embedded dependencies of a data item (embedded_item and embedded_items,
 // with a single definition of "is a versioned definition type"), building the dependency identity
 // used in request grouping and pending-request keys, and reporting whether the state slots a record
-// needs are present (and whether a v0 alias beside a live version is stale).
+// needs are present (and whether a v0 alias beside a live version is stale). It also covers
+// promote_template_state_v0, the shared guard used by the emitted state scripts so that a form
+// served with an older token never replaces a newer v0 alias.
 // Behaviour of the full request flow is covered by _fpa_prepare_template_configs_spec.js.
 
 describe('_fpa.template_config helpers', function () {
@@ -23,6 +25,43 @@ describe('_fpa.template_config helpers', function () {
       expect(_fpa.template_config_version_number('v1a')).toBe(0);
       expect(_fpa.template_config_version_number(undefined)).toBe(0);
       expect(_fpa.template_config_version_number(null)).toBe(0);
+    });
+  });
+
+  describe('promote_template_state_v0', function () {
+    it('assigns v0 when the target has no v0 yet', function () {
+      var target = { v5: { vdef_version: 'v5' } };
+
+      expect(_fpa.promote_template_state_v0(target, target.v5, 5)).toBe(true);
+      expect(target.v0).toBe(target.v5);
+    });
+
+    it('replaces a v0 with an older or equal token', function () {
+      var target = { v0: { vdef_version: 'v4' }, v4: {}, v5: { vdef_version: 'v5' } };
+
+      expect(_fpa.promote_template_state_v0(target, target.v5, 5)).toBe(true);
+      expect(target.v0).toBe(target.v5);
+
+      var same_token = { v0: { vdef_version: 'v5' } };
+      var replacement = { vdef_version: 'v5' };
+      expect(_fpa.promote_template_state_v0(same_token, replacement, 5)).toBe(true);
+      expect(same_token.v0).toBe(replacement);
+    });
+
+    it('never replaces a newer v0 with an older token', function () {
+      var newer = { vdef_version: 'v7' };
+      var target = { v0: newer };
+
+      expect(_fpa.promote_template_state_v0(target, { vdef_version: 'v5' }, 5)).toBe(false);
+      expect(target.v0).toBe(newer);
+    });
+
+    it('treats a v0 without a v<n> version as installable, as for labels and show_if', function () {
+      var target = { v0: { some: 'labels' } };
+      var value = { other: 'labels' };
+
+      expect(_fpa.promote_template_state_v0(target, value, 3)).toBe(true);
+      expect(target.v0).toBe(value);
     });
   });
 

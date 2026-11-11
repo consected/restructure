@@ -281,6 +281,19 @@ _fpa = {
     return match ? Number(match[1]) : 0;
   },
 
+  // Points the v0 alias of a state container (template_config slot, labels, caption_before or show_if
+  // forms) at value, which is the slot for the given numeric version token. A newer v0 is never
+  // replaced: a form served with an older token, e.g. by a worker with stale definitions, must not
+  // win. Containers whose v0 carries no "v<n>" vdef_version always accept the promotion. Returns
+  // whether v0 was assigned.
+  promote_template_state_v0: function (target, value, token) {
+    var installed = target.v0 && _fpa.template_config_version_number(target.v0.vdef_version);
+    if (installed > token) return false;
+
+    target.v0 = value;
+    return true;
+  },
+
   // The versioned definition items (dynamic model, activity log, external identifier) embedded in a
   // data item through embedded_item and embedded_items, as [{ item, type, version }].
   template_config_dependencies: function (data_item) {

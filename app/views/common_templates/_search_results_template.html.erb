@@ -42,13 +42,8 @@
     state_only = false
   end
 
-  unless defined? promote_v0
-    promote_v0 = true
-  end
-
   historical_version = def_version.present? || def_record&.current_definition.present?
   def_version ||= def_record&.def_version if historical_version
-  write_v0 = promote_v0 && (!state_only || !historical_version)
   template_version_token ||= def_version || Dynamic::TemplateVersionTokens.resource_token(def_record)
   template_version_token = template_version_token.to_i
   vdef_version = "v#{template_version_token}"
@@ -396,42 +391,36 @@
   _fpa.show_if.forms.<%=full_name.underscore%> = _fpa.show_if.forms.<%=full_name.underscore%> || {};
   _fpa.show_if.forms.<%=full_name.underscore%>.<%=vdef_version%> = _fpa.show_if.forms.<%=full_name.underscore%>.<%=vdef_version%> || _fpa.show_if.forms.<%=name_with_option_type.underscore%>.<%=vdef_version%>;
 <% end %>
-  (function (is_historical_version) {
-<% if write_v0 %>
-    var set_v0 = function (target, value) {
-      target.v0 = value;
-    };
-    // A form served with an older token, e.g. by a worker with stale definitions, must not replace a newer v0
-    var installed_v0_token = function (slot) {
-      var installed = slot && slot.v0, match = installed && /^v(\d+)$/.exec(String(installed.vdef_version || ''));
-      return match ? Number(match[1]) : 0;
-    };
-    if (!is_historical_version && installed_v0_token(_fpa.state.template_config.<%=name_with_option_type.underscore%>) <= <%=template_version_token%>) {
-      set_v0(_fpa.state.caption_before.<%=name_with_option_type.underscore%>, _fpa.state.caption_before.<%=name_with_option_type.underscore%>.v<%=template_version_token%>);
-      set_v0(_fpa.state.labels_<%=name_with_option_type.underscore%>, _fpa.state.labels_<%=name_with_option_type.underscore%>.v<%=template_version_token%>);
-      set_v0(_fpa.state.template_config.<%=name_with_option_type.underscore%>, _fpa.state.template_config.<%=name_with_option_type.underscore%>.v<%=template_version_token%>);
+<%# Historical versions are served from their own v<token> slot and never touch the v0 aliases. The
+    template_config promotion comes first: it only succeeds when no newer v0 is installed (a form served
+    with an older token, e.g. by a worker with stale definitions, must not replace a newer v0), and it
+    guards the remaining aliases. %>
+<% unless historical_version %>
+  if (_fpa.promote_template_state_v0(_fpa.state.template_config.<%=name_with_option_type.underscore%>, _fpa.state.template_config.<%=name_with_option_type.underscore%>.v<%=template_version_token%>, <%=template_version_token%>)) {
+    _fpa.promote_template_state_v0(_fpa.state.caption_before.<%=name_with_option_type.underscore%>, _fpa.state.caption_before.<%=name_with_option_type.underscore%>.v<%=template_version_token%>, <%=template_version_token%>);
+    _fpa.promote_template_state_v0(_fpa.state.labels_<%=name_with_option_type.underscore%>, _fpa.state.labels_<%=name_with_option_type.underscore%>.v<%=template_version_token%>, <%=template_version_token%>);
 <% if promote_base_v0 %>
 <% unless full_name.underscore.to_s == name_with_option_type.underscore.to_s %>
-      set_v0(_fpa.state.template_config.<%=full_name.underscore%>, _fpa.state.template_config.<%=name_with_option_type.underscore%>.v0);
+    _fpa.promote_template_state_v0(_fpa.state.template_config.<%=full_name.underscore%>, _fpa.state.template_config.<%=name_with_option_type.underscore%>.v0, <%=template_version_token%>);
 <% end %>
 <% if resource_name && resource_name != name_with_option_type.underscore.to_s && resource_name != full_name.underscore.to_s %>
-      set_v0(_fpa.state.template_config.<%=resource_name%>, _fpa.state.template_config.<%=name.underscore%>.v0);
+    _fpa.promote_template_state_v0(_fpa.state.template_config.<%=resource_name%>, _fpa.state.template_config.<%=name.underscore%>.v0, <%=template_version_token%>);
 <% end %>
 <% end %>
-      set_v0(_fpa.show_if.forms['<%=name_with_option_type%>'], _fpa.show_if.forms['<%=name_with_option_type%>'].<%=vdef_version%>);
+    _fpa.promote_template_state_v0(_fpa.show_if.forms['<%=name_with_option_type%>'], _fpa.show_if.forms['<%=name_with_option_type%>'].<%=vdef_version%>, <%=template_version_token%>);
 <% if promote_base_v0 %>
 <% if full_name.to_s.end_with?('_primary') %>
-      set_v0(_fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'], _fpa.show_if.forms['<%=name_with_option_type%>'].v0);
+    _fpa.promote_template_state_v0(_fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'], _fpa.show_if.forms['<%=name_with_option_type%>'].v0, <%=template_version_token%>);
 <% end %>
 <% unless full_name.underscore.to_s == name_with_option_type.underscore.to_s %>
-      set_v0(_fpa.show_if.forms.<%=full_name.underscore%>, _fpa.show_if.forms['<%=name_with_option_type%>'].v0);
+    _fpa.promote_template_state_v0(_fpa.show_if.forms.<%=full_name.underscore%>, _fpa.show_if.forms['<%=name_with_option_type%>'].v0, <%=template_version_token%>);
 <% end %>
-  <% end %>
-    }
-  <% end %>
+<% end %>
+  }
+<% end %>
 <% if full_name.to_s.start_with?('dynamic_model__') && option_type_config_name.to_s == default_option_type_name.to_s %>
-    _fpa.state.caption_before.<%=name.underscore%> = _fpa.state.caption_before.<%=name_with_option_type.underscore%>;
-    _fpa.state.labels_<%=name.underscore%> = _fpa.state.labels_<%=name_with_option_type.underscore%>;
+  _fpa.state.caption_before.<%=name.underscore%> = _fpa.state.caption_before.<%=name_with_option_type.underscore%>;
+  _fpa.state.labels_<%=name.underscore%> = _fpa.state.labels_<%=name_with_option_type.underscore%>;
   <%# Alias the dynamic model's template config under its alternative resource
       names (plural resource_name, pluralized name, and short name). The current
       version's template object is aliased as before, but we must ALSO alias the
@@ -443,14 +432,11 @@
   <% [resource_name, name.underscore.pluralize, name.underscore.sub('dynamic_model__', '')].uniq.each do |alias_name| %>
   _fpa.state.template_config.<%=alias_name%> = _fpa.state.template_config.<%=alias_name%> || _fpa.state.template_config.<%=name.underscore%>;
   _fpa.state.template_config.<%=alias_name%>.v<%=template_version_token%> = _fpa.state.template_config.<%=alias_name%>.v<%=template_version_token%> || _fpa.state.template_config.<%=name.underscore%>.v<%=template_version_token%>;
-<% if write_v0 && promote_base_v0 %>
-  if (!is_historical_version) {
-    set_v0(_fpa.state.template_config.<%=alias_name%>, _fpa.state.template_config.<%=name.underscore%>.v0);
-  }
+<% if !historical_version && promote_base_v0 %>
+  _fpa.promote_template_state_v0(_fpa.state.template_config.<%=alias_name%>, _fpa.state.template_config.<%=name.underscore%>.v0, <%=template_version_token%>);
 <% end %>
   <% end %>
 <% end %>
-  })(<%= historical_version ? 'true' : 'false' %>);
 <% end %>
 
 
