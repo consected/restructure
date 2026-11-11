@@ -244,13 +244,18 @@ module CalcActions
     def lint_field(field, cond, path, source, ctx)
       return lint_calculate(cond, path, source) if field == :calculate
 
-      check_attribute(field, source.klass, path, source.table) unless pseudo_field?(field)
+      check_attribute(field, source.klass, path, source.table) unless pseudo_field?(field, source)
       lint_field_value(cond, path, source, ctx)
     end
 
-    # The return pseudo-field (return: return_result) and special fields are not attributes of the record
-    def pseudo_field?(field)
-      field == :return || field.in?(SPECIAL_FIELDS)
+    # The return pseudo-field (return: return_result) and special fields are not attributes of the record.
+    # Protocol, sub process and protocol event names are only special for tracker_history conditions.
+    def pseudo_field?(field, source)
+      field == :return || field.in?(SPECIAL_FIELDS) || tracker_history_name?(field, source)
+    end
+
+    def tracker_history_name?(field, source)
+      field.in?(TrackerHistoryNames::NAME_KEYS) && source.table.in?(TrackerHistoryNames::TABLES)
     end
 
     def lint_field_value(cond, path, source, ctx)

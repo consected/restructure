@@ -727,6 +727,7 @@ module CalcActions
           @non_query_conditions.top_level_error = top_level_error
           @non_query_conditions.top_level_error_above = top_level_error_above
         else
+          t_conds = resolve_tracker_history_names(table_name, t_conds)
           @non_query_conditions.table = table_name
           t_conds.each do |field_name, val|
             if field_name == :invalid_error_message
@@ -768,6 +769,13 @@ module CalcActions
 
       limit_to_masters
       setup_base_query
+    end
+
+    # tracker_history conditions may name protocols, sub processes and protocol events, rather than give their ids
+    def resolve_tracker_history_names(table_name, t_conds)
+      return t_conds unless table_name.in?(TrackerHistoryNames::TABLES) && t_conds.is_a?(Hash)
+
+      TrackerHistoryNames.new(t_conds) { |val| dynamic_value(val) }.resolve
     end
 
     def setup_no_masters
