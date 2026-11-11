@@ -53,3 +53,26 @@ SQL that limits the files the current user can see in the final report.
     order by 
       ipa_id, "session type", "file path", "perform action: view file"  
     ;
+
+---
+
+## How selected files are submitted
+
+The `filestore_report_select_fields()` function returns a checkbox definition with the `field_name`
+`nfs_store_download[selected_items][]`, whose value is a JSON object identifying the file
+(`id`, `retrieval_type`, `container_id`, `activity_log_type`, `activity_log_id`).
+
+When the user clicks **download files**, the checked values are not posted as individual form
+parameters. Instead they are collected into a single parameter, `nfs_store_download[selected_items_json]`,
+containing a JSON array of those objects, and posted to `/nfs_store/downloads/multi`. This avoids
+the web server's limit of 4096 form parameters per request, so thousands of files can be selected
+at once. The same single-parameter approach is used by the container file browser for download,
+trash, move, rename and file-action requests to `/nfs_store/downloads`.
+
+API clients may use either form. The legacy `nfs_store_download[selected_items][]` array of JSON
+strings is still accepted, but should be avoided for large selections since it is subject to the
+parameter limit. For example:
+
+    nfs_store_download[selected_items_json]=[{"id":123,"retrieval_type":"stored_file"},{"id":45,"retrieval_type":"archived_file"}]
+
+The overall request body remains subject to a 4 MB size limit.
