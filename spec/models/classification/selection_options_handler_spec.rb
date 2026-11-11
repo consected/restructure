@@ -108,7 +108,7 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
     shared_key = "dynamic-definitions-cache-version-#{Application.version}"
     handler.instance_variable_set(:@cache_keys_list, nil)
     handler::RequestCache.reset
-    token_before_rotation = DynamicModel.shared_definition_cache_version_token
+    token_before_rotation = Dynamic::DefinitionCacheVersion.token
     allow(handler).to receive(:selector_with_config_overrides_processing).and_return([])
     allow(Rails.cache).to receive(:fetch).and_call_original
 
@@ -116,7 +116,7 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
     handler.selector_with_config_overrides(condition.merge(field_name: 'second_field'))
 
     expect(Rails.cache).to have_received(:fetch).with(shared_key).once
-    ActivityLog.rotate_definition_cache_version!
+    Dynamic::DefinitionCacheVersion.rotate!
 
     handler::RequestCache.reset
     handler.selector_with_config_overrides(condition)

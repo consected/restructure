@@ -183,19 +183,6 @@ module Dynamic
         @definition_cache ||= {}
       end
 
-      def definition_cache_version_token
-        Rails.cache.fetch("#{name}_definition_cache_version-#{Application.version}") { SecureRandom.hex }
-      end
-
-      def shared_definition_cache_version_token
-        Rails.cache.fetch("dynamic-definitions-cache-version-#{Application.version}") { SecureRandom.hex }
-      end
-
-      def rotate_definition_cache_version!
-        Rails.cache.write("#{name}_definition_cache_version-#{Application.version}", SecureRandom.hex)
-        Rails.cache.write("dynamic-definitions-cache-version-#{Application.version}", SecureRandom.hex)
-      end
-
       def reset_active_model_configurations!
         Admin::AppType.reset_memo_associated_items!
         @active_model_configurations = nil
@@ -634,7 +621,7 @@ module Dynamic
     end
 
     def rotate_dynamic_definition_cache_version
-      self.class.rotate_definition_cache_version!
+      Dynamic::DefinitionCacheVersion.rotate!
     end
 
     # Get a complete set of all tables to be accessed by embed configurations

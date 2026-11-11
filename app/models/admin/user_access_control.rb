@@ -377,7 +377,7 @@ class Admin::UserAccessControl < Admin::AdminBase
   # now that these saves no longer clear the whole Rails cache.
   # @return [String]
   def self.definition_cache_versions
-    [ActivityLog, DynamicModel, ExternalIdentifier].map(&:definition_cache_version_token).join('-')
+    Dynamic::DefinitionCacheVersion.token
   end
 
   #

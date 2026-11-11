@@ -293,7 +293,7 @@ class Classification::SelectionOptionsHandler
 
   def self.selector_with_config_overrides(conditions = nil)
     definition_versions = RequestCache.shared_definition_cache_version ||=
-      DynamicModel.shared_definition_cache_version_token
+      Dynamic::DefinitionCacheVersion.token
     cname = "#{CacheKeySelectorWithConfigOverrides}--#{Classification::GeneralSelection.selector_cache_version_token}--#{definition_versions}--#{conditions}"
     @cache_keys_list ||= {}
     unless @cache_keys_list.key?(cname)
