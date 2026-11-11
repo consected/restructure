@@ -48,7 +48,8 @@ module Resources
             'tracker_histories': 'All tracker entries',
             'latest_tracker_history': 'Most recent tracker entry',
             'item_flags': 'Item Flags core table',
-            'user_preferences': 'User preferences'
+            'user_preferences': 'User preferences',
+            message_notifications: 'Message notification previews'
           }
       }
 

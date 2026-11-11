@@ -24,6 +24,7 @@
  *= require admin/admin_options
  *= require admin/api_panel
  *= require admin/message_notification
+ *= require shared/message_notification_iframe
  *= require admin/server_info
  *= require admin/sortable
  *= require admin/report_admin
