@@ -275,120 +275,111 @@ _fpa = {
     return typeof salt === 'string' && /^[0-9a-z]+$/.test(salt) ? salt + '.' + session_hash : session_hash;
   },
 
+  // The numeric part of a "v<n>" version, or 0 when it is not in that form.
+  template_config_version_number: function (version) {
+    var match = /^v(\d+)$/.exec(String(version || ''));
+    return match ? Number(match[1]) : 0;
+  },
+
+  // The versioned definition items (dynamic model, activity log, external identifier) embedded in a
+  // data item through embedded_item and embedded_items, as [{ item, type, version }].
+  template_config_dependencies: function (data_item) {
+    var embedded_items = [];
+    if (data_item.embedded_item) embedded_items.push(data_item.embedded_item);
+    if (Array.isArray(data_item.embedded_items)) embedded_items = embedded_items.concat(data_item.embedded_items);
+
+    return embedded_items.map(function (item) {
+      var type = item.item_type || item.resource_name || item.name_with_option_type || item.model_data_type;
+      var is_versioned = ['dynamic_model', 'activity_log', 'external_identifier']
+        .indexOf(String(item.model_data_type)) >= 0 ||
+        /^(dynamic_model|activity_log|external_identifier)__/.test(String(type || ''));
+
+      return is_versioned ? { item: item, type: type, version: item.vdef_version || 'v0' } : null;
+    }).filter(Boolean);
+  },
+
+  // The identity of the embedded dependencies, used so that requests sharing a root record and
+  // version are still separate when their embedded items are at different versions.
+  template_config_dependency_groups: function (dependencies) {
+    return dependencies.map(function (dependency) {
+      return JSON.stringify([
+        dependency.type,
+        dependency.item.name_with_option_type || dependency.item.option_type || dependency.type,
+        dependency.version
+      ]);
+    }).sort();
+  },
+
+  // A slot installed by a form for a live record can sit beside an older v0 alias, because
+  // forms only promote v0 from their own option type. The v0 alias is stale when it carries an
+  // older token than the live version requested; historical versions never use v0.
+  template_config_v0_alias_is_stale: function (data_item, template_config, version) {
+    if (data_item.def_version || version === 'v0') return false;
+
+    var v0_token = _fpa.template_config_version_number(template_config.v0 && template_config.v0.vdef_version);
+    return v0_token > 0 && v0_token < _fpa.template_config_version_number(version);
+  },
+
+  // Reports whether the state slot for one item and version is present, and whether it sits
+  // beside a stale v0 alias.
+  template_config_slot_status: function (data_item, data_type, version) {
+    var status = { present: false, v0_stale: false };
+    var type_names = [
+      data_item.item_type,
+      data_item.model_data_type,
+      data_item.resource_name,
+      data_item.name_with_option_type,
+      data_type
+    ];
+    for (var type_index = 0; type_index < type_names.length; type_index++) {
+      if (!type_names[type_index]) continue;
+
+      var type_name = String(type_names[type_index]);
+      var type_parts = type_name.split('__');
+      var last_type_part = type_parts.pop();
+      var singular_type_name = type_parts.concat(last_type_part.singularize()).join('__');
+      var candidate_type_names = [type_name, singular_type_name];
+
+      for (var candidate_index = 0; candidate_index < candidate_type_names.length; candidate_index++) {
+        var template_config = _fpa.state.template_config[candidate_type_names[candidate_index]];
+        if (!template_config) continue;
+
+        if (Object.prototype.hasOwnProperty.call(template_config, version)) {
+          status.present = true;
+          if (_fpa.template_config_v0_alias_is_stale(data_item, template_config, version)) status.v0_stale = true;
+        }
+      }
+    }
+
+    return status;
+  },
+
+  // Reports whether every required slot (the root and its versioned embedded items) is present,
+  // and whether any of them sits beside a stale v0 alias.
+  template_config_slots_status: function (data_item, data_type, version, dependencies) {
+    var root_status = _fpa.template_config_slot_status(data_item, data_type, version);
+    var status = { present: root_status.present, v0_stale: root_status.v0_stale };
+    if (!status.present) return status;
+
+    for (var dependency_index = 0; dependency_index < dependencies.length; dependency_index++) {
+      var dependency = dependencies[dependency_index];
+      var dependency_status = _fpa.template_config_slot_status(dependency.item, dependency.type, dependency.version);
+      if (!dependency_status.present) {
+        status.present = false;
+        return status;
+      }
+      if (dependency_status.v0_stale) status.v0_stale = true;
+    }
+
+    return status;
+  },
+
   // A function that provides a promise.
   // Allow background loading of versioned definition template configs
   // that have not already been downloaded.
   // The promise is only resolved when the download has completed.
   prepare_template_configs: function (data) {
     return new Promise(function (resolve, reject) {
-      var version_number = function (version) {
-        var match = /^v(\d+)$/.exec(String(version || ''));
-        return match ? Number(match[1]) : 0;
-      };
-
-      // A slot installed by a form for a live record can sit beside an older v0 alias, because
-      // forms only promote v0 from their own option type. The v0 alias is stale when it carries an
-      // older token than the live version requested; historical versions never use v0.
-      var v0_alias_is_stale = function (data_item, template_config, version) {
-        if (data_item.def_version || version === 'v0') return false;
-
-        var v0_token = version_number(template_config.v0 && template_config.v0.vdef_version);
-        return v0_token > 0 && v0_token < version_number(version);
-      };
-
-      var state_slot_status = function (data_item, data_type, version) {
-        var status = { present: false, v0_stale: false };
-        var type_names = [
-          data_item.item_type,
-          data_item.model_data_type,
-          data_item.resource_name,
-          data_item.name_with_option_type,
-          data_type
-        ];
-        for (var type_index = 0; type_index < type_names.length; type_index++) {
-          if (!type_names[type_index]) continue;
-
-          var type_name = String(type_names[type_index]);
-          var type_parts = type_name.split('__');
-          var last_type_part = type_parts.pop();
-          var singular_type_name = type_parts.concat(last_type_part.singularize()).join('__');
-          var candidate_type_names = [type_name, singular_type_name];
-
-          for (var candidate_index = 0; candidate_index < candidate_type_names.length; candidate_index++) {
-            var template_config = _fpa.state.template_config[candidate_type_names[candidate_index]];
-            if (!template_config) continue;
-
-            if (Object.prototype.hasOwnProperty.call(template_config, version)) {
-              status.present = true;
-              if (v0_alias_is_stale(data_item, template_config, version)) status.v0_stale = true;
-            }
-          }
-        }
-
-        return status;
-      };
-
-      // Reports whether every required slot (the root and its versioned embedded items) is present,
-      // and whether any of them sits beside a stale v0 alias.
-      var state_slots_status = function (data_item, data_type, version) {
-        var root_status = state_slot_status(data_item, data_type, version);
-        var status = { present: root_status.present, v0_stale: root_status.v0_stale };
-        if (!status.present) return status;
-
-        var dependency_items = [];
-        if (data_item.embedded_item) dependency_items.push(data_item.embedded_item);
-        if (Array.isArray(data_item.embedded_items)) {
-          dependency_items = dependency_items.concat(data_item.embedded_items);
-        }
-
-        for (var dependency_index = 0; dependency_index < dependency_items.length; dependency_index++) {
-          var dependency_item = dependency_items[dependency_index];
-          var dependency_type = dependency_item.item_type || dependency_item.resource_name ||
-            dependency_item.name_with_option_type || dependency_item.model_data_type;
-          var dependency_type_name = String(dependency_type || '');
-          var dependency_is_versioned = ['dynamic_model', 'activity_log', 'external_identifier']
-            .indexOf(String(dependency_item.model_data_type)) >= 0 ||
-            /^(dynamic_model|activity_log|external_identifier)__/.test(dependency_type_name);
-
-          if (!dependency_is_versioned) continue;
-
-          var dependency_version = dependency_item.vdef_version || 'v0';
-          var dependency_status = state_slot_status(dependency_item, dependency_type, dependency_version);
-          if (!dependency_status.present) {
-            status.present = false;
-            return status;
-          }
-          if (dependency_status.v0_stale) status.v0_stale = true;
-        }
-
-        return status;
-      };
-
-      var embedded_dependency_groups = function (data_item) {
-        var dependency_items = [];
-        if (data_item.embedded_item) dependency_items.push(data_item.embedded_item);
-        if (Array.isArray(data_item.embedded_items)) {
-          dependency_items = dependency_items.concat(data_item.embedded_items);
-        }
-
-        return dependency_items.map(function (dependency_item) {
-          var dependency_type = dependency_item.item_type || dependency_item.resource_name ||
-            dependency_item.name_with_option_type || dependency_item.model_data_type;
-          var dependency_type_name = String(dependency_type || '');
-          var is_versioned = ['dynamic_model', 'activity_log', 'external_identifier']
-            .indexOf(String(dependency_item.model_data_type)) >= 0 ||
-            /^(dynamic_model|activity_log|external_identifier)__/.test(dependency_type_name);
-
-          if (!is_versioned) return null;
-
-          return JSON.stringify([
-            dependency_type,
-            dependency_item.name_with_option_type || dependency_item.option_type || dependency_type,
-            dependency_item.vdef_version || 'v0'
-          ]);
-        }).filter(Boolean).sort();
-      };
-
       var data_type = data.multiple_results;
 
       if (!data_type) {
@@ -448,17 +439,13 @@ _fpa = {
           var requested_version = data_item.vdef_version || 'v0';
           var option_type = data_item.name_with_option_type || data_item.option_type ||
             data_item.item_type || data_item.resource_name || data_type;
-          var request_group_id = JSON.stringify([
-            url_data_type,
-            option_type,
-            requested_version,
-            embedded_dependency_groups(data_item)
-          ]);
           if (!data_item.id) continue;
 
+          var dependencies = _fpa.template_config_dependencies(data_item);
+          var dependency_groups = _fpa.template_config_dependency_groups(dependencies);
+          var request_group_id = JSON.stringify([url_data_type, option_type, requested_version, dependency_groups]);
           // Requests that share a root record and version still differ when their embedded
           // items are at different versions, so the dependency identity is part of the key.
-          var dependency_groups = embedded_dependency_groups(data_item);
           var pending_key = dependency_groups.length ? did + '|' + JSON.stringify(dependency_groups) : did;
 
           var pending_request = _fpa.state.template_config_requests[pending_key];
@@ -467,7 +454,7 @@ _fpa = {
             continue;
           }
 
-          var slots_status = state_slots_status(data_item, data_type, requested_version);
+          var slots_status = _fpa.template_config_slots_status(data_item, data_type, requested_version, dependencies);
           if (slots_status.present) {
             // Fetch once to reconcile a stale v0 alias; a worker that still answers with an older
             // token must not cause a refetch on every render.
