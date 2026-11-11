@@ -19,13 +19,13 @@
 ### Critical Rules for Running Terminal Commands
 
 **Before running any commands in the terminal**
-- Source the workspace with the trusted script:`source app-scripts/source-workspace-env.sh`
-- Always instruct a subagent to do this as well, unless you've told it to read the copilot-instructions file.
 
 1. **Never set environment variables inline** - use app-scripts instead or `export` them in the terminal before running commands
 2. **Always wait for commands to complete before proceeding** - for long-running commands (such as rspec tests), don't poll - call the `get_terminal_output` once so you can be notified automatically when the command exits
 3. **Never redirect scripts stdout or stderr to /dev/null or /tmp**
 4. If creating long text files (e.g., PR body, issue body), **write them directly to a temporary or session file** rather than using command line tools that may escape characters or truncate output
+
+NOTE: It is no longer necessary to source the workspace directly using:`source app-scripts/source-workspace-env.sh`
 
 
 `app-scripts/headless_rspec.sh` and `app-scripts/not_headless_rspec.sh` automatically run `app-scripts/check_rspec_processes.sh` and refuse to start (exit 1) if another RSpec process is using this workspace; do not call the check separately for them. Before any direct `bundle exec rspec` call, run `app-scripts/check_rspec_processes.sh` and do not start the new run if it exits with status 1; inspect the reported workspace, PID, and test-environment values first.
