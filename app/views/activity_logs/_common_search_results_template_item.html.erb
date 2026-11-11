@@ -1,7 +1,7 @@
 <% 
+  # state_only is the caller's decision: the template_config set partial requests state alone
+  state_only = local_assigns.fetch(:state_only, false)
   mapped_vars = OptionConfigs::TemplateOptionMapping.activity_log_mapping(def_record, option_type_config, current_user)
 %>
 <%= render partial: 'common_templates/search_results_template', 
-           locals: mapped_vars.merge(
-             state_only: def_record.def_version.nil? && def_record.current_definition.nil?
-           ) if current_user.has_access_to?(:access, :table, def_record.full_item_type_name.pluralize) %>
+           locals: mapped_vars.merge(state_only:) if current_user.has_access_to?(:access, :table, def_record.full_item_type_name.pluralize) %>

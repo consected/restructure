@@ -30,7 +30,8 @@ end
 <%=   render partial: "#{type}/common_search_results_template_item",
                  locals: {
                    def_record: ovd,
-                   option_type_config: otc
+                   option_type_config: otc,
+                   state_only: true
                  } %>
 <% 
     end
@@ -51,7 +52,8 @@ end
 <%=       render partial: "#{view_type}/common_search_results_template_item",
               locals: {
                 def_record: evd,
-                option_type_config: etc
+                option_type_config: etc,
+                state_only: true
               } %>
 <% 
       end
@@ -75,7 +77,8 @@ end
 <%=     render partial: "#{mrto_view_type}/common_search_results_template_item",
               locals: {
                 def_record: mrtovd,
-                option_type_config: mrtoetc
+                option_type_config: mrtoetc,
+                state_only: true
               } %>  
 <%
     end

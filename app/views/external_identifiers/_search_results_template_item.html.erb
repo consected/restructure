@@ -1,6 +1,6 @@
 <%
   # Master skeleton item: always the full templates and state. The lazy template_config
-  # response uses _common_search_results_template_item, which emits state only for live definitions.
+  # response uses _common_search_results_template_item with state_only: true.
   mapped_vars = OptionConfigs::TemplateOptionMapping.external_identifier_mapping(def_record, def_record.default_options, current_user)
 %>
 <%= render partial: 'common_templates/search_results_template', 
