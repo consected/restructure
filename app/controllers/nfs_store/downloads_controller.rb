@@ -84,22 +84,9 @@ module NfsStore
     #
     # Download multiple files as a zip file
     def multi
-      selected_items = secure_params[:selected_items]
+      selected_items_info = normalized_selected_items
 
-      unless selected_items.is_a?(Array) && !selected_items.empty?
-        raise FsException::Download, 'No items were selected for download'
-      end
-
-      selected_items_info = selected_items.map do |s|
-        h = JSON.parse(s)
-        {
-          id: h['id'].to_i,
-          container_id: h['container_id'].to_i,
-          retrieval_type: h['retrieval_type'].to_sym,
-          activity_log_type: h['activity_log_type'],
-          activity_log_id: h['activity_log_id'].to_i
-        }
-      end
+      raise FsException::Download, 'No items were selected for download' if selected_items_info.blank?
 
       container_ids = selected_items_info.map { |s| s[:container_id] }.uniq
 
@@ -229,8 +216,8 @@ module NfsStore
     end
 
     def secure_params
-      params.require(:nfs_store_download).permit(:container_id, :activity_log_id, :activity_log_type, :new_path,
-                                                 :new_name, selected_items: [])
+      params.expect(nfs_store_download: [:container_id, :activity_log_id, :activity_log_type, :new_path,
+                                         :new_name, :selected_items_json, { selected_items: [] }])
     end
 
     # Handle find container differently for multi container actions
@@ -243,17 +230,36 @@ module NfsStore
 
     def setup_selected_items
       @commit = params[:commit]
-      selected_items = secure_params[:selected_items]
+      selected_items = normalized_selected_items
 
-      unless selected_items.is_a?(Array) && !selected_items.empty?
+      if selected_items.blank?
         redirect_to nfs_store_browse_path(@container)
         return
       end
 
-      @selected_items_info = selected_items.map do |s|
-        h = JSON.parse(s)
-        { id: h['id'].to_i, retrieval_type: h['retrieval_type'].to_sym }
+      @selected_items_info = selected_items.map { |item| item.slice(:id, :retrieval_type) }
+    end
+
+    def normalized_selected_items
+      permitted_params = secure_params
+      selected_items = if permitted_params[:selected_items_json].present?
+                         JSON.parse(permitted_params[:selected_items_json])
+                       else
+                         permitted_params[:selected_items]&.map { |item| JSON.parse(item) }
+                       end
+      return unless selected_items.is_a?(Array) && selected_items.all?(Hash)
+
+      selected_items.map do |item|
+        {
+          id: item['id'].to_s.to_i,
+          container_id: item['container_id'].to_s.to_i,
+          retrieval_type: item['retrieval_type'].to_s.to_sym,
+          activity_log_type: item['activity_log_type'],
+          activity_log_id: item['activity_log_id'].to_s.to_i
+        }
       end
+    rescue JSON::ParserError, TypeError
+      nil
     end
 
     def setup_action(action_class)
