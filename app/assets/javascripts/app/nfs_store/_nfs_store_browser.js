@@ -88,6 +88,9 @@ _nfs_store.fs_browser = function ($outer) {
     var form = btn.parents('form').first();
     form.removeAttr("data-remote");
     form.removeData("remote");
+    _fpa.form_utils.set_json_array_param(
+      form, '.container-file-selector', 'nfs_store_download[selected_items_json]', false
+    );
     _fpa.form_utils.set_auth_tokens(form);
 
     $('body').addClass('prevent-page-transition');
@@ -117,6 +120,9 @@ _nfs_store.fs_browser = function ($outer) {
     }
 
 
+    _fpa.form_utils.set_json_array_param(
+      form, '.container-file-selector', 'nfs_store_download[selected_items_json]', false
+    );
     form.attr('data-remote', 'true');
     form[0].app_callback = function () {
       window.setTimeout(function () {
