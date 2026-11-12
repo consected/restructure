@@ -6,6 +6,24 @@ module OptionConfigs
   # This is a stopgap until dynamic model and activity log definitions
   # are fully aligned
   class TemplateOptionMapping
+    #
+    # The template option mapping for a definition, by the model data type of the records it defines
+    # @param [Symbol] model_data_type - :dynamic_model, :activity_log or :external_identifier
+    # @param [DynamicModel|ActivityLog|ExternalIdentifier] def_record
+    # @param [OptionConfigs::ExtraOptions] option_type_config
+    # @param [User] current_user
+    # @return [Hash|nil] - nil if the model data type has no mapping
+    def self.mapping_for(model_data_type, def_record, option_type_config, current_user)
+      case model_data_type
+      when :dynamic_model
+        dynamic_model_mapping(def_record, option_type_config, current_user)
+      when :activity_log
+        activity_log_mapping(def_record, option_type_config, current_user)
+      when :external_identifier
+        external_identifier_mapping(def_record, option_type_config, current_user)
+      end
+    end
+
     def self.external_identifier_mapping(def_record, option_type_config, current_user)
       external_id_type = def_record.implementation_class
 
