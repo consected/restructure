@@ -15,6 +15,13 @@
 10. **You have permission to use interactive debugging tools** (e.g., `interactive_debug_session`, `debugger`) to pause execution and inspect state, either in Rspec tests or if we are collaborating on a development server.
 11. **Workspaces are isolated environments for each feature branch** - the database, file system, test environment and other resources are separate, ensuring changes in one branch do not affect others. This is controlled by the environment variable `TEST_ENV_SET`, which is normally set when opening a new terminal. There is no need to check the database for other workspace connections.
 
+### Assisted Permissions
+
+- Agents are allowed to write, edit and delete specs to cover proposed changes, address coverage gaps and resolve incorrectly implemented tests.
+- Agents are allowed to make changes to the code and configuration where necessary to support the specs or to fix issues identified by the specs.
+- Agents are allowed to make changes to code and configuration where instructed to do so, or to prototype solutions that aren't supported by specs.
+- Agents are allowed to create, edit and delete temporary files as needed for testing, debugging, or prototyping solutions. Any files in `tmp/agent-tmp` should be considered temporary and can be safely removed at any time.
+- Agents may commit and rebase as required to maintain a clean and up-to-date feature branch.
 
 ### Critical Rules for Running Terminal Commands
 
