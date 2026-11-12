@@ -687,10 +687,8 @@ RSpec.describe 'Pages template freshness after dynamic definition edits', type: 
       @master.dynamic_model__issue1525_template_recs.create!(current_user: @user, test1: 'first'),
       @master.dynamic_model__issue1525_template_recs.create!(current_user: @user, test1: 'second')
     ]
-    controller = DynamicModel::DynamicModelsController.new
-    controller.instance_variable_set(:@instance_list, records)
 
-    cache_records = controller.send(:template_config_records)
+    cache_records = Dynamic::TemplateConfigFreshness.new(records).records
 
     expect(cache_records.count { |record| record.instance_of?(definition_class) }).to eq(1)
   end
@@ -702,11 +700,10 @@ RSpec.describe 'Pages template freshness after dynamic definition edits', type: 
       @master.dynamic_model__issue1525_template_recs.create!(current_user: @user, test1: 'first'),
       @master.dynamic_model__issue1525_template_recs.create!(current_user: @user, test1: 'second')
     ]
-    controller = DynamicModel::DynamicModelsController.new
     expect(records.first).to receive(:model_references).once.and_return([])
     expect(records.second).not_to receive(:model_references)
 
-    controller.send(:refresh_live_template_version_tokens, records)
+    Dynamic::TemplateConfigFreshness.refresh_live_definitions(records)
   end
 
   it 'does not refresh dynamic definitions when revalidating a matching template etag' do

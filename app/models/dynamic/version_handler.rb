@@ -211,7 +211,7 @@ module Dynamic
     def current_template_library_tokens
       return [] unless uses_current_definition_version?
 
-      @current_template_library_tokens ||= Dynamic::TemplateVersionTokens.live_config_library_tokens([self])
+      @current_template_library_tokens ||= Dynamic::TemplateVersionTokens.live_config_library_tokens(self)
     end
 
     private

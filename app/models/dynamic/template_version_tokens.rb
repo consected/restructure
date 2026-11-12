@@ -17,20 +17,21 @@ module Dynamic
       history_row_id_sum(ActivityLog.table_name, definitions:)
     end
 
-    def self.live_config_library_tokens(definitions)
-      unique_definitions = Array(definitions).compact.uniq do |definition|
-        [definition.class.name, definition.id, definition.def_version, definition.updated_at]
-      end
-      tokens = unique_definitions.flat_map do |definition|
-        next [] unless definition.respond_to?(:uses_current_definition_version?) &&
-                       definition.uses_current_definition_version?
+    # Live token of a definition: its resource token plus the tokens of the config libraries it uses.
+    # Shared by the index and template_config cache keys.
+    # @return [Array]
+    def self.definition_token(definition)
+      [resource_token(definition), *definition&.current_template_library_tokens]
+    end
 
-        OptionConfigs::ExtraOptions.requested_libraries(definition.options_text).map do |reference|
-          library = Admin::ConfigLibrary.find_active_library!(
-            reference[:category], reference[:name], format: 'yaml'
-          )
-          [reference[:category], reference[:name], library.id, library.updated_at.to_f]
-        end
+    def self.live_config_library_tokens(definition)
+      return [] unless definition&.uses_current_definition_version?
+
+      tokens = OptionConfigs::ExtraOptions.requested_libraries(definition.options_text).map do |reference|
+        library = Admin::ConfigLibrary.find_active_library!(
+          reference[:category], reference[:name], format: 'yaml'
+        )
+        [reference[:category], reference[:name], library.id, library.updated_at.to_f]
       end
       tokens.uniq.sort_by { |token| [token[0], token[1]] }
     end

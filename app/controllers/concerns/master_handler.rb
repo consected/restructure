@@ -32,7 +32,7 @@ module MasterHandler
   # Any change to the params will cause a new version to be retrieved if using cache,
   # so simply add a parameter like :cache_version => current timestamp to force new data
   def index
-    refresh_live_template_version_tokens
+    Dynamic::TemplateConfigFreshness.refresh_live_definitions(@master_objects)
 
     index_res = if params[:cache_result].present?
                   set_browser_cache(max_age: 30)
@@ -49,7 +49,7 @@ module MasterHandler
   end
 
   def show
-    refresh_live_template_version_tokens([object_instance])
+    Dynamic::TemplateConfigFreshness.refresh_live_definitions([object_instance])
     p = { full_object_name => object_instance.as_json, _control: control_feedback }
 
     render json: p
@@ -228,41 +228,16 @@ module MasterHandler
   def current_definition_cache_token(record)
     return unless record.respond_to?(:current_definition)
 
-    definition = record.current_definition
-    [Dynamic::TemplateVersionTokens.resource_token(definition), *definition.try(:current_template_library_tokens)]
+    Dynamic::TemplateVersionTokens.definition_token(record.current_definition)
   end
 
   def template_config_cache_key
-    records = template_config_records
-    refresh_live_template_version_tokens(records)
+    freshness = Dynamic::TemplateConfigFreshness.new(@instance_list)
+    freshness.refresh!
 
-    paired_user = current_user || current_admin&.matching_user
+    paired_user = helpers.paired_user_for(current_user || current_admin)
     app_type_id = paired_user&.app_type_id
     access_timestamps = helpers.partial_cache_key_access_control_timestamps(app_type_id)
-    resource_tokens = records.map do |record|
-      version_token = record.vdef_version if record.respond_to?(:vdef_version)
-      [record.class.name, record.id, record.updated_at&.to_f, version_token, record.try(:extra_log_type)]
-    end
-    definitions = records.filter_map do |record|
-      record.current_definition if record.respond_to?(:current_definition)
-    end
-    config_library_tokens = definitions.flat_map do |definition|
-      if definition.respond_to?(:current_template_library_tokens)
-        definition.current_template_library_tokens
-      else
-        Dynamic::TemplateVersionTokens.live_config_library_tokens([definition])
-      end
-    end.uniq
-    activity_type_tokens = if controller_name == 'activity_logs'
-                             item_types = records.filter_map do |record|
-                               record.item_type if record.respond_to?(:item_type)
-                             end.uniq
-                             item_types.map do |item_type|
-                               Dynamic::TemplateVersionTokens.activity_log_item_type_token(item_type)
-                             end
-                           else
-                             []
-                           end
 
     Digest::SHA256.hexdigest([
       Application.version,
@@ -274,53 +249,11 @@ module MasterHandler
       app_type_id,
       access_timestamps,
       Dynamic::TemplateVersionTokens.panel_chrome_token,
-      config_library_tokens,
-      activity_type_tokens,
+      freshness.tokens(include_activity_item_types: controller_name == 'activity_logs'),
       @master&.id,
       @master&.updated_at&.to_f,
-      @id_list,
-      resource_tokens
+      @id_list
     ].to_json)
-  end
-
-  def refresh_live_template_version_tokens(records = @master_objects)
-    representative_records = Array(records).compact.uniq do |record|
-      [record.class.name, record.try(:option_type) || record.try(:extra_log_type)]
-    end
-    definitions = representative_records.filter_map do |record|
-      record.current_definition if record.respond_to?(:current_definition)
-    end
-
-    reference_types = representative_records.flat_map do |record|
-      next [] unless record.respond_to?(:model_references)
-
-      Array(record.model_references).filter_map(&:to_record_type)
-    end
-    reference_types.uniq.each do |reference_type|
-      reference_class = ModelReference.to_record_class_for_type(reference_type)
-      definitions << reference_class.definition if reference_class.respond_to?(:definition)
-    end
-
-    definitions.compact.uniq { |definition| [definition.class.name, definition.id] }.each do |definition|
-      definition.refresh_current_def_version! if definition.respond_to?(:refresh_current_def_version!)
-    end
-  end
-
-  def template_config_records
-    root_records = Array(@instance_list).compact
-    representative_roots = root_records.uniq do |record|
-      [record.class.name, record.try(:option_type) || record.try(:extra_log_type), record.try(:def_version)]
-    end
-    related_records = representative_roots.flat_map do |record|
-      related = []
-      embedded_item = record.embedded_item if record.respond_to?(:embedded_item)
-      related << embedded_item if embedded_item
-      related.concat(Array(record.model_references).filter_map(&:to_record)) if record.respond_to?(:model_references)
-      related
-    end
-
-    records = (representative_roots + related_records).uniq { |record| [record.class.name, record.id] }
-    records.sort_by { |record| [record.class.name, record.id.to_i] }
   end
 
   # Before update and before insert triggers can lead update and create actions to return incorrect

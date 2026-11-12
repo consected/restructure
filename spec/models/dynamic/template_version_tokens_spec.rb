@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
-# Verifies panel/chrome version tokens track current PageLayout and AppConfiguration history.
+# Verifies panel/chrome version tokens track current PageLayout and AppConfiguration history,
+# that live config library tokens are resolved for a single definition, and that
+# definition_token combines a definition's live resource token with its library tokens.
 require 'rails_helper'
 
 RSpec.describe 'Dynamic template version tokens', type: :model do
@@ -101,14 +103,31 @@ RSpec.describe 'Dynamic template version tokens', type: :model do
       options_text: "# @library #{category} root\ndefault:\n  fields: [test1]\n"
     )
 
-    initial_tokens = Dynamic::TemplateVersionTokens.live_config_library_tokens([definition])
+    initial_tokens = Dynamic::TemplateVersionTokens.live_config_library_tokens(definition)
     expect(initial_tokens.map { |token| token.first(2) }).to contain_exactly([category, 'root'], [category, 'leaf'])
 
     leaf.update_columns(updated_at: Time.current + 3.seconds)
-    expect(Dynamic::TemplateVersionTokens.live_config_library_tokens([definition])).not_to eq(initial_tokens)
+    expect(Dynamic::TemplateVersionTokens.live_config_library_tokens(definition)).not_to eq(initial_tokens)
 
     allow(definition).to receive(:uses_current_definition_version?).and_return(false)
-    expect(Dynamic::TemplateVersionTokens.live_config_library_tokens([definition])).to eq([])
+    expect(Dynamic::TemplateVersionTokens.live_config_library_tokens(definition)).to eq([])
+  end
+
+  it 'returns no library tokens without a definition' do
+    expect(Dynamic::TemplateVersionTokens.live_config_library_tokens(nil)).to eq([])
+  end
+
+  describe '.definition_token' do
+    it 'combines the resource token with the definition library tokens' do
+      library_tokens = [['cat', 'lib', 1, 2.0]]
+      definition = double(template_version_token: 42, current_template_library_tokens: library_tokens)
+
+      expect(Dynamic::TemplateVersionTokens.definition_token(definition)).to eq([42, *library_tokens])
+    end
+
+    it 'is just the zero resource token for a missing definition' do
+      expect(Dynamic::TemplateVersionTokens.definition_token(nil)).to eq([0])
+    end
   end
 
   it 'resolves library token metadata through the same active-library lookup as rendering' do
@@ -127,7 +146,7 @@ RSpec.describe 'Dynamic template version tokens', type: :model do
       .with(category, 'canonical-library', format: 'yaml').and_return(library)
     allow(Admin::ConfigLibrary).to receive(:find_by).and_return(nil)
 
-    token = Dynamic::TemplateVersionTokens.live_config_library_tokens([definition]).first
+    token = Dynamic::TemplateVersionTokens.live_config_library_tokens(definition).first
 
     expect(token).to eq([category, 'canonical-library', library.id, library.updated_at.to_f])
   end
