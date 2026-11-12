@@ -19,11 +19,11 @@ module Prewarm
     def initialize(server_cache_version: nil, handlebars_generation_version: nil)
       @server_cache_version = server_cache_version
       @handlebars_generation_version = handlebars_generation_version
-      @master_templates_cache_helper = ApplicationController.helpers
     end
 
     def run
       @warm_marker_versions = {}
+      @skeleton_signature = ::MasterTemplates::SkeletonSignature.new
       Application.server_cache_version = @server_cache_version if @server_cache_version
       Application.handlebars_generation_version = @handlebars_generation_version if @handlebars_generation_version
 
@@ -88,11 +88,15 @@ module Prewarm
 
     def warm_marker_path(user, app_type)
       marker_version = (@warm_marker_versions ||= {})[app_type.id] ||= begin
-        signature = @master_templates_cache_helper.master_templates_skeleton_cache_signature(app_type_id: app_type.id)
+        signature = skeleton_signature.signature(app_type_id: app_type.id)
         # The epoch changes on any whole-cache clear, which leaves fragment caches cold
         Digest::SHA256.hexdigest([signature, Application.cache_epoch].join('-'))[0..31]
       end
       HandlebarsPrecompiler.tmp_generation_dir.join('warm', "#{user.id}-#{app_type.id}-#{marker_version}")
+    end
+
+    def skeleton_signature
+      @skeleton_signature ||= ::MasterTemplates::SkeletonSignature.new
     end
   end
 end

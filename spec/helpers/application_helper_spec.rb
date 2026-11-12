@@ -14,8 +14,10 @@
 #   user's app type genuinely changes
 # - #partial_cache_key (issue #1400 Phase 1): shared role/UAC timestamp lookups include
 #   global rows, item updates use the precompiler list, and current_sign_in_at remains active
-# - #master_templates_skeleton_cache_signature (issue #1481): tracks structural definition,
-#   panel/configuration, and global access-control changes without depending on process-local registries
+# - #master_templates_skeleton_cache_key (issue #1481): delegates to one
+#   MasterTemplates::SkeletonSignature per view context (signature inputs are covered in
+#   spec/models/master_templates/skeleton_signature_spec.rb)
+# - #paired_user_for: the effective user shared by the partial and skeleton cache keys
 
 require 'rails_helper'
 
@@ -379,95 +381,22 @@ describe '#partial_cache_key' do
   end
 end
 
-describe '#master_templates_skeleton_cache_signature' do
+describe '#master_templates_skeleton_cache_key' do
   include ModelSupport
 
   before do
     @admin, = create_admin
     @user, = create_user
-    allow(Application).to receive(:server_cache_version).and_return('stable-skeleton-test-version')
   end
 
-  def skeleton_signature
-    helper.instance_variable_set(:@master_templates_skeleton_cache_signatures, nil)
-    helper.instance_variable_set(:@partial_cache_key_access_control_timestamps, nil)
-    helper.master_templates_skeleton_cache_signature(app_type_id: @user.app_type_id)
-  end
+  it 'delegates to one skeleton signature instance per view context' do
+    signature = instance_double(MasterTemplates::SkeletonSignature, cache_key: 'a-key')
+    allow(MasterTemplates::SkeletonSignature).to receive(:new).and_return(signature)
 
-  it 'changes with page-layout and app-configuration content' do
-    initial_signature = skeleton_signature
-    layout = Admin::PageLayout.create!(
-      current_admin: @admin,
-      app_type_id: @user.app_type_id,
-      layout_name: 'master',
-      panel_name: "skeleton-signature-#{SecureRandom.hex(4)}",
-      panel_label: 'Initial panel',
-      panel_position: 301,
-      options: "contains:\n  resources:\n    - player_contacts\n"
-    )
-    layout_signature = skeleton_signature
-    expect(layout_signature).not_to eq(initial_signature)
+    2.times { expect(helper.master_templates_skeleton_cache_key(force_user_or_admin: @user)).to eq('a-key') }
 
-    layout.update!(panel_label: 'Changed panel', current_admin: @admin)
-    expect(skeleton_signature).not_to eq(layout_signature)
-
-    configuration = Admin::AppConfiguration.create!(
-      current_admin: @admin,
-      app_type_id: @user.app_type_id,
-      user_id: @user.id,
-      name: 'notes field format',
-      value: 'initial'
-    )
-    configuration_signature = skeleton_signature
-    expect(configuration_signature).not_to eq(layout_signature)
-
-    configuration.update!(value: 'changed', current_admin: @admin)
-    expect(skeleton_signature).not_to eq(configuration_signature)
-  end
-
-  it 'includes global role and access-control updates' do
-    initial_signature = skeleton_signature
-    allow_any_instance_of(Admin::UserAccessControl).to receive(:clear_rails_cache_on_save?).and_return(false)
-    allow_any_instance_of(Admin::UserRole).to receive(:clear_rails_cache_on_save?).and_return(false)
-
-    Admin::UserAccessControl.create!(
-      app_type: nil,
-      resource_type: :general,
-      resource_name: :app_type,
-      access: :read,
-      user: @user,
-      current_admin: @admin,
-      created_at: Admin::UserAccessControl.where(app_type_id: [@user.app_type_id, nil]).maximum(:updated_at) + 3.seconds,
-      updated_at: Admin::UserAccessControl.where(app_type_id: [@user.app_type_id, nil]).maximum(:updated_at) + 3.seconds
-    )
-    access_signature = skeleton_signature
-    expect(access_signature).not_to eq(initial_signature)
-
-    previous_timestamp = Admin::UserRole.where(app_type_id: [@user.app_type_id, nil]).maximum(:updated_at)
-    updated_at = previous_timestamp + 3.seconds
-    Admin::UserRole.create!(
-      current_admin: @admin,
-      app_type: nil,
-      role_name: "skeleton-global-role-#{SecureRandom.hex(3)}",
-      user: @user,
-      created_at: updated_at,
-      updated_at:
-    )
-    expect(skeleton_signature).not_to eq(access_signature)
-  end
-
-  it 'does not depend on the process-local model registry' do
-    initial_signature = skeleton_signature
-    original_resources = Resources::Models.resources.dup
-    Resources::Models.resources[:process_local_only] = Resources::Models::Item.new.merge(
-      type: :dynamic_model,
-      class_name: 'ProcessLocalOnly',
-      resource_name: :process_local_only
-    )
-
-    expect(skeleton_signature).to eq(initial_signature)
-  ensure
-    Resources::Models.resources.replace(original_resources) if original_resources
+    expect(MasterTemplates::SkeletonSignature).to have_received(:new).once
+    expect(signature).to have_received(:cache_key).with(user_or_admin: @user, paired_user: @user).twice
   end
 
   it 'builds a skeleton key when no user or admin is available' do
@@ -475,5 +404,27 @@ describe '#master_templates_skeleton_cache_signature' do
     allow(helper).to receive(:current_admin).and_return(nil)
 
     expect(helper.master_templates_skeleton_cache_key).to match(/\A[a-f0-9]{64}\z/)
+  end
+end
+
+describe '#paired_user_for' do
+  include ModelSupport
+
+  before do
+    @admin, = create_admin
+    @user, = create_user
+  end
+
+  it 'pairs a user with itself and an admin with the signed-in user, falling back to its matching user' do
+    expect(helper.paired_user_for(@user)).to eq(@user)
+    expect(helper.paired_user_for(nil)).to be_nil
+
+    allow(helper).to receive(:current_user).and_return(@user)
+    expect(helper.paired_user_for(@admin)).to eq(@user)
+
+    matching_user = instance_double(User)
+    allow(helper).to receive(:current_user).and_raise(StandardError)
+    allow(@admin).to receive(:matching_user).and_return(matching_user)
+    expect(helper.paired_user_for(@admin)).to eq(matching_user)
   end
 end

@@ -266,8 +266,7 @@ RSpec.describe 'Pages template discovery for new dynamic definitions', type: :re
   end
 
   def master_skeleton_cache_key
-    reset_shared_helper_cache_key_memoization
-    ApplicationController.helpers.master_templates_skeleton_cache_key(force_user_or_admin: @user)
+    fresh_master_skeleton_cache_key(@user)
   end
 
   def template_version_for(user)

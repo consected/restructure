@@ -505,10 +505,7 @@ describe 'dynamic model show_if with embedded_item', js: true, driver: $browser_
     end
 
     def skeleton_key
-      helpers = ApplicationController.helpers
-      helpers.instance_variable_set(:@master_templates_skeleton_cache_signatures, nil)
-      helpers.instance_variable_set(:@partial_cache_key_access_control_timestamps, nil)
-      helpers.master_templates_skeleton_cache_key(force_user_or_admin: @user)
+      ApplicationController.new.helpers.master_templates_skeleton_cache_key(force_user_or_admin: @user)
     end
 
     def load_details_tab

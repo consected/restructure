@@ -61,8 +61,7 @@ describe 'dynamic model discovery on full page reload', js: true, driver: $brows
   end
 
   def master_skeleton_cache_key
-    reset_shared_helper_cache_key_memoization
-    ApplicationController.helpers.master_templates_skeleton_cache_key(force_user_or_admin: @user)
+    fresh_master_skeleton_cache_key(@user)
   end
 
   before(:all) do
