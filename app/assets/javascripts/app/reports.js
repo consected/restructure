@@ -318,6 +318,11 @@ _fpa.reports = {
     if (dct_action == 'download files') {
       var $f = $('<form id="itemselection-for-report" method="post" action="/nfs_store/downloads/multi" target="download_files"><input type="hidden" name="nfs_store_download[container_id]" value="multi"><input name="authenticity_token" type="hidden" class="set-auth-token" value="" /></form>');
       _fpa.form_utils.set_auth_tokens($f);
+      $f.on('submit', function () {
+        _fpa.form_utils.set_json_array_param(
+          $f, '.report-file-selector', 'nfs_store_download[selected_items_json]', true
+        );
+      });
     }
     else if (dct_action == 'add to list') {
       var $f = $(`<form id="itemselection-for-report" method="post" action="/reports/${report_id}/add_to_list.json" class="report-add-to-list" data-remote="true"><input type="hidden" name="add_to_list[list_name]" value="${extra_val}"></form>`);
