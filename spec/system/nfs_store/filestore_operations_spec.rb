@@ -604,10 +604,15 @@ describe 'Filestore file operations', js: true, driver: $browser_driver, type: :
       # Click the download button
       # Note: In headless mode, the download happens but we can't easily verify
       # the file was saved. We verify that the button click doesn't cause errors.
-      click_download_button
+      # A single selected file is delivered directly under its own name, not packed into a zip (issue #1553)
+      with_browser_download_dir do |dir|
+        click_download_button
+        expect(has_error_alert?).to be(false), "Unexpected error: #{error_alert_text}"
 
-      # Verify no error occurred
-      expect(has_error_alert?).to be(false), "Unexpected error: #{error_alert_text}"
+        downloaded = wait_for_downloaded_file(dir)
+        expect(File.basename(downloaded)).to eq(filename)
+        expect(File.read(downloaded)).to eq(content)
+      end
     end
 
     it 'downloads multiple files as a zip' do
@@ -638,10 +643,16 @@ describe 'Filestore file operations', js: true, driver: $browser_driver, type: :
 
       # Click the download button
       # When multiple files are selected, they download as a zip archive
-      click_download_button
+      # Multiple files are still delivered as a zip containing each file (issue #1553)
+      with_browser_download_dir do |dir|
+        click_download_button
+        expect(has_error_alert?).to be(false), "Unexpected error: #{error_alert_text}"
 
-      # Verify no error occurred
-      expect(has_error_alert?).to be(false), "Unexpected error: #{error_alert_text}"
+        downloaded = wait_for_downloaded_file(dir)
+        expect(File.basename(downloaded)).to end_with('2 files.zip')
+        entries = Zip::File.open(downloaded) { |zip| zip.entries.map { |e| File.basename(e.name) } }
+        expect(entries).to match_array([file1_name, file2_name])
+      end
     end
   end
 

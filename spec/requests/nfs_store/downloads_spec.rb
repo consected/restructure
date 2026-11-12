@@ -91,3 +91,104 @@ RSpec.describe 'NfsStore downloads selected items (issue #1551)', type: :request
     end
   end
 end
+
+# Purpose: issue #1553 - a single file selected for download is sent as the original file (named by its
+# own file_name) rather than a zip, while multiple selected files continue to be zipped. Symlink blocking
+# must still apply to the single file path.
+RSpec.describe 'NfsStore downloads of a single selected file (issue #1553)', type: :request do
+  include PlayerContactSupport
+  include ModelSupport
+  include NfsStoreSupport
+
+  before :example do
+    setup_nfs_store
+    setup_container_and_al
+    setup_default_filters
+    sign_in @user
+    allow_any_instance_of(NfsStore::DownloadsController).to receive(:nfs_store_browse_path).and_return('/')
+  end
+
+  def selected_item_hash(file_name)
+    stored_file = @container.stored_files.find_by(file_name:)
+    { id: stored_file.id, retrieval_type: 'stored_file', container_id: @container.id,
+      activity_log_type: @activity_log.class.name.ns_underscore, activity_log_id: @activity_log.id }
+  end
+
+  def post_multi(*file_names)
+    post '/nfs_store/downloads/multi', params: {
+      nfs_store_download: { container_id: 'multi', selected_items_json: file_names.map { |name| selected_item_hash(name) }.to_json }
+    }
+  end
+
+  def zip_entry_names(body)
+    names = []
+    Zip::InputStream.open(StringIO.new(body)) do |zis|
+      while (entry = zis.get_next_entry)
+        names << File.basename(entry.name)
+      end
+    end
+    names
+  end
+
+  it 'sends a single selected file directly with its own file name, not as a zip' do
+    upload_file 'single-direct.txt', 'direct file content'
+
+    post_multi 'single-direct.txt'
+
+    expect(response).to have_http_status(:ok)
+    expect(response.headers['Content-Type']).not_to include('zip')
+    expect(response.headers['Content-Disposition']).to include('single-direct.txt')
+    expect(response.body).to eq 'direct file content'
+  end
+
+  it 'sends a single selected file directly when using the download action' do
+    upload_file 'single-action.txt', 'action file content'
+    stored_file = @container.stored_files.find_by(file_name: 'single-action.txt')
+
+    post '/nfs_store/downloads', params: {
+      commit: 'Download',
+      nfs_store_download: {
+        container_id: @container.id,
+        activity_log_type: @activity_log.class.name.ns_underscore,
+        activity_log_id: @activity_log.id,
+        selected_items_json: [{ id: stored_file.id, retrieval_type: 'stored_file', container_id: @container.id }].to_json
+      }
+    }
+
+    expect(response).to have_http_status(:ok)
+    expect(response.headers['Content-Type']).not_to include('zip')
+    expect(response.headers['Content-Disposition']).to include('single-action.txt')
+    expect(response.body).to eq 'action file content'
+  end
+
+  it 'continues to zip multiple selected files with their original file names' do
+    upload_file 'multi-one.txt', 'content one'
+    upload_file 'multi-two.txt', 'content two'
+
+    post_multi 'multi-one.txt', 'multi-two.txt'
+
+    expect(response).to have_http_status(:ok)
+    expect(response.headers['Content-Type']).to include('zip')
+    expect(response.headers['Content-Disposition']).to include("#{@container.name} - 2 files.zip")
+    expect(zip_entry_names(response.body)).to contain_exactly('multi-one.txt', 'multi-two.txt')
+  end
+
+  it 'blocks a single selected file that has been replaced by a symbolic link' do
+    upload_file 'linked-direct.txt', 'legitimate content'
+    retrieval_path = @container.stored_files.find_by(file_name: 'linked-direct.txt').retrieval_path
+    secret_path = Rails.root.join('tmp', "secret-#{SecureRandom.hex}.txt").to_s
+    File.write(secret_path, 'unauthorized secret content')
+
+    begin
+      File.delete(retrieval_path)
+      File.symlink(secret_path, retrieval_path)
+
+      post_multi 'linked-direct.txt'
+
+      expect(response.body).to eq NfsStore::DownloadsController::SymlinkBlockedMessage
+      expect(response.body).not_to include('unauthorized secret content')
+    ensure
+      FileUtils.rm_f secret_path
+    end
+  end
+end

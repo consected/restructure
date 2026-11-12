@@ -95,10 +95,7 @@ module NfsStore
 
       retrieved_files = @download.retrieve_files_from selected_items_info
       if retrieved_files&.length&.> 0
-        filename = "#{@download.container.name} - #{retrieved_files.length} #{'file'.pluralize(retrieved_files.length)}.zip"
-        @download.save!
-        send_file @download.zip_file_path, filename: filename
-        # Do not attempt to cleanup the temp file by unlinking, since this will cause the out of band download to fail
+        send_retrieved_files @download, retrieved_files
       else
         redirect_to nfs_store_browse_path(@container)
       end
@@ -206,10 +203,7 @@ module NfsStore
       @download = @action
       retrieved_files = @download.retrieve_files_from @selected_items_info
       if retrieved_files&.present?
-        filename = "#{@download.container.name} - #{retrieved_files.length} #{'file'.pluralize(retrieved_files.length)}.zip"
-        @download.save!
-        send_file @download.zip_file_path, filename: filename
-        # Do not attempt to cleanup the temp file by unlinking, since this will cause the out of band download to fail
+        send_retrieved_files @download, retrieved_files
       else
         redirect_to nfs_store_browse_path(@container)
       end
@@ -275,6 +269,20 @@ module NfsStore
         render json: action_files
       else
         redirect_to nfs_store_browse_path(@container)
+      end
+    end
+
+    #
+    # Send the retrieved files for download. A single file is sent as the original file under its own
+    # name; multiple files are sent as a zip file.
+    # The temp zip file is not unlinked, since this will cause the out of band download to fail
+    def send_retrieved_files(download, retrieved_files)
+      download.save!
+      if download.single_file?
+        send_file download.single_file_path, filename: download.single_file_name
+      else
+        filename = "#{download.container.name} - #{retrieved_files.length} #{'file'.pluralize(retrieved_files.length)}.zip"
+        send_file download.zip_file_path, filename: filename
       end
     end
 

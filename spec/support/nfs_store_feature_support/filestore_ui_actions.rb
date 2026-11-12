@@ -263,6 +263,36 @@ module FilestoreUiActions
     finish_page_loading
   end
 
+  # Directs the browser's downloads to a temp directory for the duration of the block, so the
+  # file delivered by the real download button can be inspected.
+  # Skips the example when the driver cannot do this (Chrome DevTools Protocol is Chrome only).
+  # @yield [String] path of the temporary download directory
+  def with_browser_download_dir
+    unless page.driver.browser.respond_to?(:execute_cdp)
+      skip 'Inspecting downloaded files requires a Chrome driver (Chrome DevTools Protocol)'
+    end
+
+    dir = Dir.mktmpdir('filestore-downloads')
+    page.driver.browser.execute_cdp('Browser.setDownloadBehavior', behavior: 'allow', downloadPath: dir)
+    yield dir
+  ensure
+    FileUtils.rm_rf(dir) if dir
+  end
+
+  # Waits for exactly one completed (non-partial) download in the directory
+  # @param dir [String] the directory used by #with_browser_download_dir
+  # @return [String] path to the downloaded file
+  def wait_for_downloaded_file(dir)
+    Timeout.timeout(15) do
+      loop do
+        children = Dir.children(dir)
+        return File.join(dir, children.first) if children.length == 1 && !children.first.end_with?('.crdownload', '.tmp')
+
+        sleep 0.2
+      end
+    end
+  end
+
   # Check if a folder exists in the filestore browser
   # @param folder_name [String] name of the folder to check
   # @return [Boolean] true if the folder exists

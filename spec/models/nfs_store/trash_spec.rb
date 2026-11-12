@@ -58,7 +58,7 @@ RSpec.describe 'Trash archive files', type: :model do
 
     # Upload the generated zip
     delfn = 'test-name-trash.zip'
-    upload_file delfn, File.read(download.zip_file_path)
+    upload_file delfn, File.read(NfsStore::Archive::ZipFileGenerator.zip_retrieved_items(download.all_action_items).path)
     sf = @container.stored_files.where(file_name: delfn).first
     expect(sf).not_to be nil
     expect(sf.file_name).to eq delfn
@@ -99,7 +99,7 @@ RSpec.describe 'Trash archive files', type: :model do
 
     # Upload the generated zip
     delfn = 'test-name-replace.zip'
-    upload_file delfn, File.read(download.zip_file_path)
+    upload_file delfn, File.read(NfsStore::Archive::ZipFileGenerator.zip_retrieved_items(download.all_action_items).path)
     sf = @container.stored_files.where(file_name: delfn).first
     expect(sf).not_to be nil
     expect(sf.file_name).to eq delfn
