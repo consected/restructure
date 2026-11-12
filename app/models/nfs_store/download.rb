@@ -39,6 +39,7 @@ module NfsStore
 
     # Handle the retrieval of muliple requested files, returning an array of results
     # Each result is a hash referencing the requested id/retrieval_type
+    # A single requested file is not zipped; use #single_file? with #single_file_path and #single_file_name
     # @param selected_items [Hash{id=>Integer, retrieval_type=>Symbol}] a hash of items to retrieve, with each ID qualified by a retrieval type
     # @return [Array(Hash{retrieval_type=>Symbol, id=>Integer, file_name=>String, container_path=>String, retrieval_path=>String})]
     #  id and retrieval_type match the requested item
@@ -48,9 +49,30 @@ module NfsStore
     def retrieve_files_from(selected_items)
       setup_items selected_items, :download
 
-      self.zip_file_path = NfsStore::Archive::ZipFileGenerator.zip_retrieved_items all_action_items
+      self.zip_file_path = NfsStore::Archive::ZipFileGenerator.zip_retrieved_items all_action_items unless single_file?
 
       all_action_items
+    end
+
+    # @return [True, False] true if exactly one item has been retrieved, so it can be sent without zipping
+    def single_file?
+      all_action_items&.length == 1
+    end
+
+    # @return [String, nil] filesystem path of the single retrieved file
+    def single_file_path
+      single_file_item&.dig(:retrieval_path)
+    end
+
+    # @return [String, nil] file name of the single retrieved file
+    def single_file_name
+      single_file_item&.dig(:file_name)
+    end
+
+    private
+
+    def single_file_item
+      all_action_items.first if single_file?
     end
   end
 end
