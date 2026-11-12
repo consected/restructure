@@ -34,7 +34,8 @@
   default_option_type_name = template_definition.default_option_type_name if
     template_definition.respond_to?(:default_option_type_name)
 
-  template_state_locals = if !embedded && template_definition && option_type_config
+  # An embedded form emits the state for its OWN definition version, independent of the outer form
+  template_state_locals = if template_definition && option_type_config
                             case form_object_instance.model_data_type
                             when :dynamic_model
                               OptionConfigs::TemplateOptionMapping.dynamic_model_mapping(
@@ -149,6 +150,10 @@
   select_desc = {}
 
 %>
+<% if embedded && template_state_locals %>
+  <%= render partial: 'common_templates/search_results_template',
+             locals: template_state_locals.merge(state_only: true) %>
+<% end %>
 <% unless embedded %>
 <div class="data-results">
   <div data-result="<%= edit_form_id %>"<% if template_state_locals %> data-vdef-version="v<%= template_state_locals[:template_version_token] %>"<% end %>>
@@ -196,7 +201,10 @@
            end
          else 
       %>
-        <%= hidden_field_tag :option_type, nil, data: {attr_name: 'option_type', option_type: 'embedded', object_name: form_object_item_type_us} %>
+        <%
+          embedded_vdef_version = "v#{template_state_locals[:template_version_token]}" if embedded && template_state_locals
+        %>
+        <%= hidden_field_tag :option_type, nil, data: {attr_name: 'option_type', option_type: 'embedded', object_name: form_object_item_type_us, vdef_version: embedded_vdef_version} %>
       <% end %>
       <%= model_reference_fields form %>
 
