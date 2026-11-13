@@ -53,6 +53,18 @@ RSpec.describe 'common_search_results_template_item partials', type: :view do
       expect(rendered).to include("#{state_id_prefix}--form")
       expect(requested_template_ids).to be_empty
     end
+
+    it 'emits the live order of the definition and uses it, not the token, to promote v0' do
+      render partial: partial_path, locals: { def_record: definition, option_type_config: option_config }
+
+      live_order = Dynamic::TemplateVersionTokens.live_order(definition)
+      expect(live_order).to be_a(Integer)
+      expect(rendered).to include("live_order: #{live_order},")
+      expect(rendered).to include(
+        "_fpa.promote_template_state_v0(_fpa.state.template_config.#{state_name}, " \
+        "_fpa.state.template_config.#{state_name}.v#{definition.current_def_version}, #{live_order})"
+      )
+    end
   end
 
   describe 'dynamic_models' do

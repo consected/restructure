@@ -24,6 +24,25 @@ module Dynamic
       [resource_token(definition), *definition&.current_template_library_tokens]
     end
 
+    # Monotonic order of a live definition's states, compared by the client to decide which of two
+    # live states is newer. The resource token is only an identity (a hash, when config libraries are
+    # used), so it can't be compared. Nil for a historical definition version or a missing definition.
+    # @return [Integer|nil]
+    def self.live_order(definition)
+      return unless definition.respond_to?(:template_live_order)
+
+      definition.template_live_order
+    end
+
+    # Latest history row id of a table, which only ever increases as rows are added.
+    # @return [Integer]
+    def self.history_row_max_id(table_name)
+      connection = ActiveRecord::Base.connection
+      history_table = connection.quote_table_name(Admin::MigrationGenerator.history_table_name_for(table_name))
+
+      connection.select_value("SELECT COALESCE(MAX(id), 0) FROM #{history_table}").to_i
+    end
+
     def self.live_config_library_tokens(definition)
       return [] unless definition&.uses_current_definition_version?
 

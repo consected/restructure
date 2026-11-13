@@ -29,7 +29,7 @@
 # and does not emit historical version blocks. This count is independent of
 # wall-clock timing and remains robust under any server load.
 #
-# The state scripts promote the current token to the v0 aliases through the shared
+# The state scripts promote the current state to the v0 aliases, by its live order, through the shared
 # _fpa.promote_template_state_v0 (live definitions only). A historical-version state
 # script is emitted without any promotion call, and neither emits a runtime
 # is_historical_version check.
@@ -377,13 +377,15 @@ RSpec.describe 'Global page template historical version emission', type: :reques
       show_if_reference = "_fpa.show_if.forms['#{state_name}']"
       bundle = requested_handlebars_bundle(text)
 
+      live_order = dm.template_live_order
+
       expect(text).to include(
         "_fpa.promote_template_state_v0(#{state_reference}, #{state_reference}.v#{dm.current_def_version}, " \
-        "#{dm.current_def_version})"
+        "#{live_order})"
       )
       expect(text).to include(
         "_fpa.promote_template_state_v0(#{show_if_reference}, #{show_if_reference}.v#{dm.current_def_version}, " \
-        "#{dm.current_def_version});"
+        "#{live_order});"
       )
       expect(text).not_to match(
         /_fpa\.state\.template_config\.[^\n]*#{Regexp.escape(DM_TABLE.singularize)}[^\n]*\.v0 = [^\n]*\|\|/
@@ -473,7 +475,7 @@ RSpec.describe 'Global page template historical version emission', type: :reques
       )
       expect(response.body).to include(
         "_fpa.promote_template_state_v0(_fpa.state.template_config.#{form_state_name}, " \
-        "_fpa.state.template_config.#{form_state_name}.v#{dm.current_def_version}, #{dm.current_def_version})"
+        "_fpa.state.template_config.#{form_state_name}.v#{dm.current_def_version}, #{dm.template_live_order})"
       )
       expect(response.body).not_to include('preserve_existing_v0')
     end
@@ -497,7 +499,7 @@ RSpec.describe 'Global page template historical version emission', type: :reques
       )
       expect(response.body).to include(
         "_fpa.promote_template_state_v0(_fpa.state.template_config.#{secondary_name}, " \
-        "_fpa.state.template_config.#{secondary_name}.v#{dm.current_def_version}, #{dm.current_def_version})"
+        "_fpa.state.template_config.#{secondary_name}.v#{dm.current_def_version}, #{dm.template_live_order})"
       )
 
       option_type_promotions = [
@@ -562,7 +564,7 @@ RSpec.describe 'Global page template historical version emission', type: :reques
       # A live record's edit form promotes the current token to v0, unless a newer v0 is installed
       expect(response.body).to include(
         "if (_fpa.promote_template_state_v0(_fpa.state.template_config.#{state_name}, " \
-        "_fpa.state.template_config.#{state_name}.#{current_token}, #{current_token.delete_prefix('v')}))"
+        "_fpa.state.template_config.#{state_name}.#{current_token}, #{dm.template_live_order}))"
       )
       expect(response.body).not_to include('is_historical_version')
     end

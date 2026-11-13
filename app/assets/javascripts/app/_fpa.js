@@ -275,20 +275,16 @@ _fpa = {
     return typeof salt === 'string' && /^[0-9a-z]+$/.test(salt) ? salt + '.' + session_hash : session_hash;
   },
 
-  // The numeric part of a "v<n>" version, or 0 when it is not in that form.
-  template_config_version_number: function (version) {
-    var match = /^v(\d+)$/.exec(String(version || ''));
-    return match ? Number(match[1]) : 0;
-  },
-
   // Points the v0 alias of a state container (template_config slot, labels, caption_before or show_if
-  // forms) at value, which is the slot for the given numeric version token. A newer v0 is never
-  // replaced: a form served with an older token, e.g. by a worker with stale definitions, must not
-  // win. Containers whose v0 carries no "v<n>" vdef_version always accept the promotion. Returns
-  // whether v0 was assigned.
-  promote_template_state_v0: function (target, value, token) {
-    var installed = target.v0 && _fpa.template_config_version_number(target.v0.vdef_version);
-    if (installed > token) return false;
+  // forms) at value, which is the slot for a live state with the given live_order. The slot token is
+  // only an identity (a hash when config libraries are used), so states are compared by live_order,
+  // which strictly increases with every change of the live definition. A newer v0 is never
+  // replaced: a form served for an older state, e.g. by a worker with stale definitions, must not
+  // win. Containers whose v0 carries no live_order (labels, caption_before, show_if forms) always
+  // accept the promotion. Returns whether v0 was assigned.
+  promote_template_state_v0: function (target, value, live_order) {
+    var installed = target.v0 && target.v0.live_order;
+    if (typeof installed === 'number' && typeof live_order === 'number' && installed > live_order) return false;
 
     target.v0 = value;
     return true;
@@ -324,19 +320,33 @@ _fpa = {
   },
 
   // A slot installed by a form for a live record can sit beside an older v0 alias, because
-  // forms only promote v0 from their own option type. The v0 alias is stale when it carries an
-  // older token than the live version requested; historical versions never use v0.
+  // forms only promote v0 from their own option type. The v0 alias is stale when the live slot for
+  // the requested version has a newer live_order; historical versions never use v0.
   template_config_v0_alias_is_stale: function (data_item, template_config, version) {
     if (data_item.def_version || version === 'v0') return false;
 
-    var v0_token = _fpa.template_config_version_number(template_config.v0 && template_config.v0.vdef_version);
-    return v0_token > 0 && v0_token < _fpa.template_config_version_number(version);
+    var v0_order = template_config.v0 && template_config.v0.live_order;
+    var slot_order = template_config[version] && template_config[version].live_order;
+    return typeof v0_order === 'number' && typeof slot_order === 'number' && v0_order < slot_order;
+  },
+
+  // The name of the state slot container for the option type of a record, which is the only one
+  // that holds the config the record renders with. Null when the record does not identify its
+  // option type, in which case any container for the item type may supply the slot.
+  template_config_option_slot_name: function (data_item) {
+    if (!data_item.item_type || !data_item.option_type) return null;
+
+    return (String(data_item.item_type) + '_' + String(data_item.option_type)).underscore();
   },
 
   // Reports whether the state slot for one item and version is present, and whether it sits
-  // beside a stale v0 alias.
+  // beside a stale v0 alias. A record that identifies its option type needs the slot of that
+  // option type: a slot present only under the base type name (installed by a form of another option
+  // type) is not enough, and is reported as option_slot_missing.
   template_config_slot_status: function (data_item, data_type, version) {
     var status = { present: false, v0_stale: false };
+    var option_slot_name = _fpa.template_config_option_slot_name(data_item);
+    var other_container_has_slot = false;
     var type_names = [
       data_item.item_type,
       data_item.model_data_type,
@@ -358,9 +368,24 @@ _fpa = {
         if (!template_config) continue;
 
         if (Object.prototype.hasOwnProperty.call(template_config, version)) {
+          if (option_slot_name) {
+            other_container_has_slot = true;
+            continue;
+          }
+
           status.present = true;
           if (_fpa.template_config_v0_alias_is_stale(data_item, template_config, version)) status.v0_stale = true;
         }
+      }
+    }
+
+    if (option_slot_name) {
+      var option_config = _fpa.state.template_config[option_slot_name];
+      if (option_config && Object.prototype.hasOwnProperty.call(option_config, version)) {
+        status.present = true;
+        status.v0_stale = _fpa.template_config_v0_alias_is_stale(data_item, option_config, version);
+      } else if (other_container_has_slot) {
+        status.option_slot_missing = true;
       }
     }
 
@@ -368,10 +393,12 @@ _fpa = {
   },
 
   // Reports whether every required slot (the root and its versioned embedded items) is present,
-  // and whether any of them sits beside a stale v0 alias.
+  // and whether any of them sits beside a stale v0 alias. option_slot_missing is set when the slot
+  // that is missing is present under another option type of the same item type.
   template_config_slots_status: function (data_item, data_type, version, dependencies) {
     var root_status = _fpa.template_config_slot_status(data_item, data_type, version);
     var status = { present: root_status.present, v0_stale: root_status.v0_stale };
+    if (root_status.option_slot_missing) status.option_slot_missing = true;
     if (!status.present) return status;
 
     for (var dependency_index = 0; dependency_index < dependencies.length; dependency_index++) {
@@ -379,6 +406,7 @@ _fpa = {
       var dependency_status = _fpa.template_config_slot_status(dependency.item, dependency.type, dependency.version);
       if (!dependency_status.present) {
         status.present = false;
+        if (dependency_status.option_slot_missing) status.option_slot_missing = true;
         return status;
       }
       if (dependency_status.v0_stale) status.v0_stale = true;
@@ -475,6 +503,14 @@ _fpa = {
 
             _fpa.state.template_config_v0_attempts[pending_key] = true;
             v0_attempt_keys.push(pending_key);
+          } else if (slots_status.option_slot_missing) {
+            // The slot is present only for another option type of the item type, so the record's own
+            // option type slot is fetched, once, in case the response can't supply it.
+            var option_attempt_key = pending_key + '|option-slot';
+            if (_fpa.state.template_config_v0_attempts[option_attempt_key]) continue;
+
+            _fpa.state.template_config_v0_attempts[option_attempt_key] = true;
+            v0_attempt_keys.push(option_attempt_key);
           }
 
           if (list_data_item_state_ids.indexOf(pending_key) < 0) list_data_item_state_ids.push(pending_key);

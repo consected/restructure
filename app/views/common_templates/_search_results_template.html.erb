@@ -47,6 +47,8 @@
   template_version_token ||= def_version || Dynamic::TemplateVersionTokens.resource_token(def_record)
   template_version_token = template_version_token.to_i
   vdef_version = "v#{template_version_token}"
+  # The monotonic order of live states, which v0 promotion compares (the token is only an identity)
+  live_order_js = (historical_version ? nil : Dynamic::TemplateVersionTokens.live_order(def_record)) || 'null'
 
   unless defined? caption
     caption = nil
@@ -324,6 +326,7 @@
   _fpa.state.template_config.<%=name_with_option_type.underscore%>.v<%=template_version_token%>  = {
     def_version: <%= def_version || 'null' %>,
     vdef_version: '<%= vdef_version %>',
+    live_order: <%= live_order_js %>,
     name: '<%=name%>',
     full_name: '<%=full_name%>',
     name_with_option_type: '<%= name_with_option_type %>',
@@ -396,24 +399,24 @@
     with an older token, e.g. by a worker with stale definitions, must not replace a newer v0), and it
     guards the remaining aliases. %>
 <% unless historical_version %>
-  if (_fpa.promote_template_state_v0(_fpa.state.template_config.<%=name_with_option_type.underscore%>, _fpa.state.template_config.<%=name_with_option_type.underscore%>.v<%=template_version_token%>, <%=template_version_token%>)) {
-    _fpa.promote_template_state_v0(_fpa.state.caption_before.<%=name_with_option_type.underscore%>, _fpa.state.caption_before.<%=name_with_option_type.underscore%>.v<%=template_version_token%>, <%=template_version_token%>);
-    _fpa.promote_template_state_v0(_fpa.state.labels_<%=name_with_option_type.underscore%>, _fpa.state.labels_<%=name_with_option_type.underscore%>.v<%=template_version_token%>, <%=template_version_token%>);
+  if (_fpa.promote_template_state_v0(_fpa.state.template_config.<%=name_with_option_type.underscore%>, _fpa.state.template_config.<%=name_with_option_type.underscore%>.v<%=template_version_token%>, <%=live_order_js%>)) {
+    _fpa.promote_template_state_v0(_fpa.state.caption_before.<%=name_with_option_type.underscore%>, _fpa.state.caption_before.<%=name_with_option_type.underscore%>.v<%=template_version_token%>, <%=live_order_js%>);
+    _fpa.promote_template_state_v0(_fpa.state.labels_<%=name_with_option_type.underscore%>, _fpa.state.labels_<%=name_with_option_type.underscore%>.v<%=template_version_token%>, <%=live_order_js%>);
 <% if promote_base_v0 %>
 <% unless full_name.underscore.to_s == name_with_option_type.underscore.to_s %>
-    _fpa.promote_template_state_v0(_fpa.state.template_config.<%=full_name.underscore%>, _fpa.state.template_config.<%=name_with_option_type.underscore%>.v0, <%=template_version_token%>);
+    _fpa.promote_template_state_v0(_fpa.state.template_config.<%=full_name.underscore%>, _fpa.state.template_config.<%=name_with_option_type.underscore%>.v0, <%=live_order_js%>);
 <% end %>
 <% if resource_name && resource_name != name_with_option_type.underscore.to_s && resource_name != full_name.underscore.to_s %>
-    _fpa.promote_template_state_v0(_fpa.state.template_config.<%=resource_name%>, _fpa.state.template_config.<%=name.underscore%>.v0, <%=template_version_token%>);
+    _fpa.promote_template_state_v0(_fpa.state.template_config.<%=resource_name%>, _fpa.state.template_config.<%=name.underscore%>.v0, <%=live_order_js%>);
 <% end %>
 <% end %>
-    _fpa.promote_template_state_v0(_fpa.show_if.forms['<%=name_with_option_type%>'], _fpa.show_if.forms['<%=name_with_option_type%>'].<%=vdef_version%>, <%=template_version_token%>);
+    _fpa.promote_template_state_v0(_fpa.show_if.forms['<%=name_with_option_type%>'], _fpa.show_if.forms['<%=name_with_option_type%>'].<%=vdef_version%>, <%=live_order_js%>);
 <% if promote_base_v0 %>
 <% if full_name.to_s.end_with?('_primary') %>
-    _fpa.promote_template_state_v0(_fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'], _fpa.show_if.forms['<%=name_with_option_type%>'].v0, <%=template_version_token%>);
+    _fpa.promote_template_state_v0(_fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'], _fpa.show_if.forms['<%=name_with_option_type%>'].v0, <%=live_order_js%>);
 <% end %>
 <% unless full_name.underscore.to_s == name_with_option_type.underscore.to_s %>
-    _fpa.promote_template_state_v0(_fpa.show_if.forms.<%=full_name.underscore%>, _fpa.show_if.forms['<%=name_with_option_type%>'].v0, <%=template_version_token%>);
+    _fpa.promote_template_state_v0(_fpa.show_if.forms.<%=full_name.underscore%>, _fpa.show_if.forms['<%=name_with_option_type%>'].v0, <%=live_order_js%>);
 <% end %>
 <% end %>
   }
@@ -433,7 +436,7 @@
   _fpa.state.template_config.<%=alias_name%> = _fpa.state.template_config.<%=alias_name%> || _fpa.state.template_config.<%=name.underscore%>;
   _fpa.state.template_config.<%=alias_name%>.v<%=template_version_token%> = _fpa.state.template_config.<%=alias_name%>.v<%=template_version_token%> || _fpa.state.template_config.<%=name.underscore%>.v<%=template_version_token%>;
 <% if !historical_version && promote_base_v0 %>
-  _fpa.promote_template_state_v0(_fpa.state.template_config.<%=alias_name%>, _fpa.state.template_config.<%=name.underscore%>.v0, <%=template_version_token%>);
+  _fpa.promote_template_state_v0(_fpa.state.template_config.<%=alias_name%>, _fpa.state.template_config.<%=name.underscore%>.v0, <%=live_order_js%>);
 <% end %>
   <% end %>
 <% end %>

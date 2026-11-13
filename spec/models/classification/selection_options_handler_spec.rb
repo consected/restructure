@@ -3,7 +3,10 @@
 require 'rails_helper'
 
 # Purpose: verify selector option caches are refreshed across workers when a
-# dynamic definition changes, even when process-local cache-key tracking is lost.
+# dynamic definition changes, even when process-local cache-key tracking is lost,
+# and that tracking and clearing the cache keys is safe across threads (adding a key while
+# a definition save clears the tracked keys must not raise "can't add a new key into hash
+# during iteration").
 RSpec.describe Classification::SelectionOptionsHandler, type: :model do
   AlNameGenTestSo = 'Gen Test ELT SO'
   include ModelSupport
@@ -138,6 +141,51 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
     expect(handler.instance_variable_get(:@cache_keys_list).size)
       .to eq(Classification::SelectionOptionsHandler::MaxTrackedCacheKeys)
     expect(Rails.cache.read(first_cache_key)).to be_nil
+  end
+
+  describe 'tracked selector cache keys under concurrency' do
+    let(:handler) { Classification::SelectionOptionsHandler }
+
+    before do
+      handler.instance_variable_set(:@cache_keys_list, {})
+      allow(handler).to receive(:selector_with_config_overrides_processing).and_return([])
+    end
+
+    it 'allows a key to be tracked while the tracked keys are being cleared' do
+      handler.selector_with_config_overrides(item_type: 'tracked-before-clear')
+      added_during_clear = nil
+      allow(Rails.cache).to receive(:delete).and_wrap_original do |original, *args|
+        unless added_during_clear
+          added_during_clear = "tracked-during-clear-#{SecureRandom.hex(4)}"
+          handler.selector_with_config_overrides(item_type: added_during_clear)
+        end
+        original.call(*args)
+      end
+
+      expect { handler.reset! }.not_to raise_error
+
+      tracked = handler.instance_variable_get(:@cache_keys_list).keys
+      expect(tracked.length).to eq 1
+      expect(tracked.first).to include(added_during_clear)
+    end
+
+    it 'does not raise when requests add keys concurrently with definition saves clearing them' do
+      allow(Classification::GeneralSelection).to receive(:selector_cache_version_token).and_return('stable')
+      adders = Array.new(4) do |thread_index|
+        Thread.new do
+          200.times { |index| handler.selector_with_config_overrides(item_type: "concurrent-#{thread_index}-#{index}") }
+        end
+      end
+      clearer = Thread.new { 50.times { handler.reset! } }
+      threads = adders + [clearer]
+      threads.each { |thread| thread.report_on_exception = false }
+
+      # Joining re-raises any error from a thread
+      expect do
+        ActiveSupport::Dependencies.interlock.permit_concurrent_loads { threads.each { |thread| thread.join(60) } }
+      end.not_to raise_error
+      expect(threads.select(&:alive?)).to eq []
+    end
   end
 
   it 'substitutes labels into data attributes for dynamic defintions' do

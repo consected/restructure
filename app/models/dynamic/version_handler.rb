@@ -197,6 +197,19 @@ module Dynamic
       @template_version_token = calculate_template_version_token
     end
 
+    # Monotonic order of the live definition's states: the definition's own latest history row id plus the
+    # latest config library history row id. Any edit of the definition adds a history row for it, and any
+    # edit of a config library adds a library history row, so the order strictly increases for either; it
+    # never decreases when a library reference is removed. It is an integer comfortably below 2^53 so
+    # the client can compare it. The token labels the state; this order says which is newer.
+    # @return [Integer|nil] nil for a historical version or an unsaved definition
+    def template_live_order
+      return if def_version || id.blank?
+
+      (current_def_version || updated_at_version_token) +
+        Dynamic::TemplateVersionTokens.history_row_max_id(Admin::ConfigLibrary.table_name)
+    end
+
     # Total number of historical version rows for this record, independent of
     # any display limit applied by all_versions_query.
     # @return [Integer]

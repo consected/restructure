@@ -9,13 +9,18 @@
 # Inputs that MUST move the signature:
 # - active definition identity (add, rename, disable, enable), category, dynamic model position
 # - activity log item_type / rec_type
+# - activity log values rendered into the skeleton: main_log_name, blank_log_name, hide_item_list_panel,
+#   action_when_attribute, the tab_caption configuration, and for each option type the button label
+#   (button_label or label of non primary / blank log types), e_sign presence, alt_width_classes and
+#   hide_unless_creatable. These change the signature once for activity logs compared with earlier builds.
 # - option type structure: option type names, references, embed, reference_* caption_before
 # - the default option type alt_width_classes (dynamic models and external identifiers only)
 # - master page layout panels, app configurations (page-layout / app-config history token)
 # - role and user access control timestamps, including global (app_type nil) rows
 #
 # Inputs that must NOT move the signature (they are delivered lazily as template_config):
-# - config-only option edits (label, non-reference caption_before, show_if, field_options)
+# - config-only option edits (label, non-reference caption_before, show_if, field_options), including
+#   the label, header_caption and caption_before of activity log primary and blank log types
 # - the process-local Resources::Models registry
 #
 # #cache_key adds the user scope (user or admin, paired user and app type) to the signature.
@@ -353,6 +358,29 @@ RSpec.describe MasterTemplates::SkeletonSignature, type: :model do
       activity_log&.update_columns(rec_type: original_rec_type) if original_rec_type
     end
 
+    it 'tracks the activity log definition values baked into the skeleton' do
+      activity_log = ActivityLog.active.first!
+      original_values = activity_log.attributes.slice(
+        'main_log_name', 'blank_log_name', 'hide_item_list_panel', 'action_when_attribute'
+      )
+      original_signature = skeleton_signature
+
+      signatures = [original_signature]
+      {
+        main_log_name: "Main #{SecureRandom.hex(3)}",
+        blank_log_name: "Blank #{SecureRandom.hex(3)}",
+        hide_item_list_panel: !original_values['hide_item_list_panel'],
+        action_when_attribute: 'updated_at'
+      }.each do |column, value|
+        activity_log.update_columns(column => value)
+        signatures << skeleton_signature
+      end
+
+      expect(signatures.uniq.length).to eq(signatures.length)
+    ensure
+      activity_log&.update_columns(original_values) if original_values
+    end
+
     it 'memoizes the signature per instance and app type' do
       instance = described_class.new
       first = instance.signature(app_type_id: @user.app_type_id)
@@ -364,11 +392,15 @@ RSpec.describe MasterTemplates::SkeletonSignature, type: :model do
   end
 
   describe '#definition_structure' do
-    def structure_for(definition, view_options)
-      default_name = definition.default_option_type_name.to_s.underscore.to_sym
-      option_config = double(name: default_name, references: nil, embed: nil, caption_before: nil, view_options:)
+    def structure_for(definition, view_options, name: nil, configurations: nil, **option_attributes)
+      name ||= definition.default_option_type_name.to_s.underscore.to_sym
+      option_config = double(
+        name:, references: nil, embed: nil, caption_before: {}, view_options:, label: nil, button_label: nil,
+        e_sign: nil, **option_attributes
+      )
       allow(definition.class).to receive(:definition_cache).and_return({})
       allow(definition).to receive(:option_configs).and_return([option_config])
+      allow(definition).to receive(:configurations).and_return(configurations) if configurations
       described_class.new.definition_structure(definition)
     end
 
@@ -380,6 +412,52 @@ RSpec.describe MasterTemplates::SkeletonSignature, type: :model do
         .to eq(['alt_width_classes', 'col-md-9'])
       expect(structure_for(activity_log, { alt_width_classes: 'col-md-9' }).last)
         .to eq(['alt_width_classes', nil])
+    end
+
+    describe 'for activity logs' do
+      let(:activity_log) { ActivityLog.active.first! }
+      let!(:base_structure) { structure_for(activity_log, {}, name: :secondary) }
+
+      it 'tracks the option type settings baked into the activity log skeleton' do
+        changed_structures = {
+          alt_width_classes: structure_for(activity_log, { alt_width_classes: 'col-md-9' }, name: :secondary),
+          hide_unless_creatable: structure_for(activity_log, { hide_unless_creatable: true }, name: :secondary),
+          e_sign: structure_for(activity_log, {}, name: :secondary, e_sign: { document_reference: {} }),
+          button_label: structure_for(activity_log, {}, name: :secondary, button_label: 'Do it'),
+          label_used_for_the_button: structure_for(activity_log, {}, name: :secondary, label: 'Labelled')
+        }
+
+        changed_structures.each do |setting, structure|
+          expect(structure).not_to eq(base_structure), "expected #{setting} to change the structure"
+        end
+        expect(changed_structures.values.uniq.length).to eq(changed_structures.length)
+      end
+
+      it 'tracks the primary and blank log hide_unless_creatable button setting' do
+        %i[primary blank_log].each do |name|
+          expect(structure_for(activity_log, { hide_unless_creatable: true }, name:))
+            .not_to eq(structure_for(activity_log, {}, name:))
+        end
+      end
+
+      it 'tracks the tab caption rendered into the skeleton' do
+        captioned = structure_for(activity_log, {}, name: :secondary, configurations: { tab_caption: 'Caption one' })
+
+        expect(captioned).not_to eq(base_structure)
+        expect(structure_for(activity_log, {}, name: :secondary, configurations: { tab_caption: 'Caption two' }))
+          .not_to eq(captioned)
+      end
+
+      it 'ignores values delivered lazily as template_config' do
+        lazy_values = structure_for(
+          activity_log, { header_caption: 'Lazy', extra_class: 'lazy' }, name: :secondary,
+                                                                           caption_before: { test1: 'Lazy caption' }
+        )
+        expect(lazy_values).to eq(base_structure)
+
+        primary_label = structure_for(activity_log, {}, name: :primary, label: 'Primary label')
+        expect(primary_label).to eq(structure_for(activity_log, {}, name: :primary))
+      end
     end
 
     it 'reuses a definition structure digest until its live template token changes' do

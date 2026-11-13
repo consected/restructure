@@ -3,11 +3,19 @@
 module MasterTemplates
   # Fingerprint of everything baked into the cached masters template skeleton (issue #1481).
   # Shared by the skeleton fragment cache key and the prewarm warm marker so both follow
-  # structural changes only; config edits are delivered lazily as template_config.
+  # structural changes only; config edits are delivered lazily as template_config, except the
+  # values that are rendered into the skeleton markup (see the activity log inputs below).
   #
   # Memoization is per instance: build one per view context or per prewarm pass, never share
   # an instance across requests.
   class SkeletonSignature
+    # Activity log columns rendered into the skeleton by activity_logs/_unversioned_handlebars_templates:
+    # the main and blank log button labels, the item list panel visibility (which also sets the
+    # width classes) and the sort attribute of the activity log list
+    ACTIVITY_LOG_SKELETON_COLUMNS = %i[
+      item_type rec_type main_log_name blank_log_name hide_item_list_panel action_when_attribute
+    ].freeze
+
     # @param app_type_id [Integer, nil]
     # @return [String] hex digest of the structural state for the app type
     def signature(app_type_id:)
@@ -67,7 +75,7 @@ module MasterTemplates
       columns << :category if definition_class.column_names.include?('category')
       # Position orders the dynamic model blocks baked into the master panels
       columns << :position if definition_class.column_names.include?('position')
-      columns += %i[item_type rec_type] if definition_class == ActivityLog
+      columns += ACTIVITY_LOG_SKELETON_COLUMNS if definition_class == ActivityLog
       columns
     end
 
@@ -80,16 +88,19 @@ module MasterTemplates
 
     def build_definition_structure(definition)
       option_configs = Array(definition.option_configs)
+      activity_log = definition.is_a?(ActivityLog)
       structure = option_configs.map do |option_config|
         embed = option_config.embed
         embed = embed.except(:resource_model_def) if embed.is_a?(Hash)
-        config_digest = Digest::SHA256.hexdigest({
+        digest_inputs = {
           references: option_config.references,
           embed:,
           reference_caption_before: reference_caption_before(option_config)
-        }.to_json)
-        [option_config.name.to_s, config_digest]
+        }
+        digest_inputs[:activity_log_skeleton] = activity_log_option_skeleton(option_config) if activity_log
+        [option_config.name.to_s, Digest::SHA256.hexdigest(digest_inputs.to_json)]
       end
+      structure << ['activity_log_tab_caption', definition.configurations&.dig(:tab_caption)] if activity_log
       structure << ['alt_width_classes', alt_width_classes(definition, option_configs)]
       structure
     end
@@ -99,8 +110,25 @@ module MasterTemplates
       option_config.caption_before.as_json&.select { |key, _| key.to_s.start_with?('reference_') }
     end
 
+    # The option type values that activity_logs/_unversioned_handlebars_templates renders into the
+    # skeleton. The primary and blank log buttons take their labels from the definition's
+    # main_log_name and blank_log_name, so only the other option types bake in a button label,
+    # a width class (alt_width_classes, or e_sign) and the element for the button.
+    def activity_log_option_skeleton(option_config)
+      view_options = option_config.view_options || {}
+      baked = { hide_unless_creatable: view_options[:hide_unless_creatable] }
+      return baked if %i[primary blank_log].include?(option_config.name)
+
+      baked.merge(
+        button_label: option_config.button_label || option_config.label,
+        e_sign: option_config.e_sign.present?,
+        alt_width_classes: view_options[:alt_width_classes]
+      )
+    end
+
     # Baked into the dynamic model and external identifier containers of the master panels.
-    # Activity logs take their width classes from lazily delivered template state.
+    # Activity logs bake their width classes in per option type (see #activity_log_option_skeleton),
+    # not for the default option type.
     def alt_width_classes(definition, option_configs)
       return if definition.is_a?(ActivityLog)
 

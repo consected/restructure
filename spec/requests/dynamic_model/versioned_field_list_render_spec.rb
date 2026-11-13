@@ -181,7 +181,7 @@ RSpec.describe 'DynamicModel versioned field list rendering', type: :request do
       expect(response.body)
         .to include("_fpa.promote_template_state_v0(_fpa.state.template_config.#{state_name}, " \
                     "_fpa.state.template_config.#{state_name}.#{v2_record.vdef_version}, " \
-                    "#{v2_record.vdef_version.delete_prefix('v')})")
+                    "#{Dynamic::TemplateVersionTokens.live_order(v2_record.versioned_definition)})")
       expect(response.body).not_to include('_fpa.retrieve_requested_handlebars_templates')
       expect(response.body).not_to include('references_results')
       expect(v2_item_list).to include(DmNewFieldVersionedRender),

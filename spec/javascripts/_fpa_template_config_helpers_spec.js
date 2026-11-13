@@ -8,7 +8,9 @@
 // used in request grouping and pending-request keys, and reporting whether the state slots a record
 // needs are present (and whether a v0 alias beside a live version is stale). It also covers
 // promote_template_state_v0, the shared guard used by the emitted state scripts so that a form
-// served with an older token never replaces a newer v0 alias.
+// served for an older live state never replaces a newer v0 alias. States are compared by live_order,
+// a monotonic number: the slot token is only an identity (a hash when config libraries are used), so
+// a newer state can have a numerically smaller token than an older one.
 // Behaviour of the full request flow is covered by _fpa_prepare_template_configs_spec.js.
 
 describe('_fpa.template_config helpers', function () {
@@ -16,51 +18,71 @@ describe('_fpa.template_config helpers', function () {
     _fpa.state.template_config = {};
   });
 
-  describe('template_config_version_number', function () {
-    it('parses v<n> versions and returns 0 for anything else', function () {
-      expect(_fpa.template_config_version_number('v12')).toBe(12);
-      expect(_fpa.template_config_version_number('v0')).toBe(0);
-      expect(_fpa.template_config_version_number('12')).toBe(0);
-      expect(_fpa.template_config_version_number('v')).toBe(0);
-      expect(_fpa.template_config_version_number('v1a')).toBe(0);
-      expect(_fpa.template_config_version_number(undefined)).toBe(0);
-      expect(_fpa.template_config_version_number(null)).toBe(0);
-    });
-  });
-
   describe('promote_template_state_v0', function () {
     it('assigns v0 when the target has no v0 yet', function () {
-      var target = { v5: { vdef_version: 'v5' } };
+      var target = { v5: { vdef_version: 'v5', live_order: 50 } };
 
-      expect(_fpa.promote_template_state_v0(target, target.v5, 5)).toBe(true);
+      expect(_fpa.promote_template_state_v0(target, target.v5, 50)).toBe(true);
       expect(target.v0).toBe(target.v5);
     });
 
-    it('replaces a v0 with an older or equal token', function () {
-      var target = { v0: { vdef_version: 'v4' }, v4: {}, v5: { vdef_version: 'v5' } };
+    it('replaces a v0 with an older or equal live order', function () {
+      var target = { v0: { vdef_version: 'v4', live_order: 40 }, v4: {}, v5: { vdef_version: 'v5', live_order: 50 } };
 
-      expect(_fpa.promote_template_state_v0(target, target.v5, 5)).toBe(true);
+      expect(_fpa.promote_template_state_v0(target, target.v5, 50)).toBe(true);
       expect(target.v0).toBe(target.v5);
 
-      var same_token = { v0: { vdef_version: 'v5' } };
-      var replacement = { vdef_version: 'v5' };
-      expect(_fpa.promote_template_state_v0(same_token, replacement, 5)).toBe(true);
-      expect(same_token.v0).toBe(replacement);
+      var same_order = { v0: { vdef_version: 'v5', live_order: 50 } };
+      var replacement = { vdef_version: 'v5', live_order: 50 };
+      expect(_fpa.promote_template_state_v0(same_order, replacement, 50)).toBe(true);
+      expect(same_order.v0).toBe(replacement);
     });
 
-    it('never replaces a newer v0 with an older token', function () {
-      var newer = { vdef_version: 'v7' };
+    it('never replaces a newer v0 with an older live order', function () {
+      var newer = { vdef_version: 'v7', live_order: 70 };
       var target = { v0: newer };
 
-      expect(_fpa.promote_template_state_v0(target, { vdef_version: 'v5' }, 5)).toBe(false);
+      expect(_fpa.promote_template_state_v0(target, { vdef_version: 'v5', live_order: 50 }, 50)).toBe(false);
       expect(target.v0).toBe(newer);
     });
 
-    it('treats a v0 without a v<n> version as installable, as for labels and show_if', function () {
+    it('replaces a v0 with a newer live order even when its composite token is numerically smaller', function () {
+      var older = { vdef_version: 'v1000000900000', live_order: 50 };
+      var newer = { vdef_version: 'v1000000100000', live_order: 60 };
+      var target = { v0: older };
+
+      expect(_fpa.promote_template_state_v0(target, newer, 60)).toBe(true);
+      expect(target.v0).toBe(newer);
+    });
+
+    it('refuses an older live order even when its composite token is numerically larger', function () {
+      var newer = { vdef_version: 'v1000000100000', live_order: 60 };
+      var target = { v0: newer };
+
+      expect(_fpa.promote_template_state_v0(target, { vdef_version: 'v1000000900000', live_order: 50 }, 50)).toBe(false);
+      expect(target.v0).toBe(newer);
+    });
+
+    it('compares orders beyond 32 bits exactly', function () {
+      var target = { v0: { live_order: 1700000000000001 } };
+
+      expect(_fpa.promote_template_state_v0(target, {}, 1700000000000000)).toBe(false);
+      expect(_fpa.promote_template_state_v0(target, {}, 1700000000000002)).toBe(true);
+    });
+
+    it('treats a v0 without a live order as installable, as for labels and show_if', function () {
       var target = { v0: { some: 'labels' } };
       var value = { other: 'labels' };
 
-      expect(_fpa.promote_template_state_v0(target, value, 3)).toBe(true);
+      expect(_fpa.promote_template_state_v0(target, value, 30)).toBe(true);
+      expect(target.v0).toBe(value);
+    });
+
+    it('promotes when the new state has no live order', function () {
+      var target = { v0: { live_order: 70 } };
+      var value = { live_order: null };
+
+      expect(_fpa.promote_template_state_v0(target, value, null)).toBe(true);
       expect(target.v0).toBe(value);
     });
   });
@@ -152,14 +174,71 @@ describe('_fpa.template_config helpers', function () {
       expect(_fpa.template_config_slot_status({ id: 1, item_type: 'dynamic_model__a_things' }, 'x', 'v1').present).toBe(true);
     });
 
-    it('flags a v0 alias older than the live version as stale, but never for historical versions', function () {
-      _fpa.state.template_config = { dynamic_model__a_things: { v0: { vdef_version: 'v2' }, v5: {} } };
+    it('flags a v0 alias with an older live order than the live version as stale, but never for historical versions', function () {
+      _fpa.state.template_config = {
+        dynamic_model__a_things: { v0: { vdef_version: 'v2', live_order: 20 }, v5: { live_order: 50 } }
+      };
 
       var live = { id: 1, item_type: 'dynamic_model__a_things' };
       expect(_fpa.template_config_slot_status(live, 'x', 'v5')).toEqual({ present: true, v0_stale: true });
 
       var historical = { id: 1, item_type: 'dynamic_model__a_things', def_version: 'v5' };
       expect(_fpa.template_config_slot_status(historical, 'x', 'v5')).toEqual({ present: true, v0_stale: false });
+    });
+
+    it('compares live orders, not tokens, when flagging a stale v0 alias', function () {
+      _fpa.state.template_config = {
+        dynamic_model__a_things: {
+          v0: { vdef_version: 'v1000000900000', live_order: 20 },
+          v1000000100000: { live_order: 50 }
+        }
+      };
+      var live = { id: 1, item_type: 'dynamic_model__a_things' };
+      expect(_fpa.template_config_slot_status(live, 'x', 'v1000000100000').v0_stale).toBe(true);
+
+      _fpa.state.template_config.dynamic_model__a_things.v0 = { vdef_version: 'v1000000100000', live_order: 50 };
+      _fpa.state.template_config.dynamic_model__a_things.v1000000900000 = { live_order: 20 };
+      expect(_fpa.template_config_slot_status(live, 'x', 'v1000000900000').v0_stale).toBe(false);
+    });
+
+    describe('for a record that identifies its option type', function () {
+      var record = function () {
+        return { id: 1, item_type: 'dynamic_model__a_thing', option_type: 'other' };
+      };
+
+      it('is absent, reporting option_slot_missing, when only another option type or the base slot is present', function () {
+        _fpa.state.template_config = {
+          dynamic_model__a_thing: { v5: {}, v0: { live_order: 50 } },
+          dynamic_model__a_thing_default: { v5: {} }
+        };
+
+        expect(_fpa.template_config_slot_status(record(), 'dynamic_model__a_things', 'v5'))
+          .toEqual({ present: false, v0_stale: false, option_slot_missing: true });
+      });
+
+      it('is present when its own option type slot is present, ignoring the base slot', function () {
+        _fpa.state.template_config = {
+          dynamic_model__a_thing: { v0: { live_order: 50 } },
+          dynamic_model__a_thing_other: { v5: { live_order: 50 }, v0: { live_order: 40 } }
+        };
+
+        expect(_fpa.template_config_slot_status(record(), 'dynamic_model__a_things', 'v5'))
+          .toEqual({ present: true, v0_stale: true });
+      });
+
+      it('is simply absent when no container has the version', function () {
+        _fpa.state.template_config = { dynamic_model__a_thing: { v4: {} } };
+
+        expect(_fpa.template_config_slot_status(record(), 'dynamic_model__a_things', 'v5'))
+          .toEqual({ present: false, v0_stale: false });
+      });
+
+      it('names the option slot as the underscored item type and option type', function () {
+        expect(_fpa.template_config_option_slot_name({ item_type: 'activity_log__phone', option_type: 'Step-One' }))
+          .toBe('activity_log__phone_step_one');
+        expect(_fpa.template_config_option_slot_name({ item_type: 'activity_log__phone' })).toBeNull();
+        expect(_fpa.template_config_option_slot_name({ option_type: 'other' })).toBeNull();
+      });
     });
   });
 
@@ -184,10 +263,23 @@ describe('_fpa.template_config helpers', function () {
       expect(status.present).toBe(false);
     });
 
+    it('reports option_slot_missing when an embedded item has only another option type slot', function () {
+      _fpa.state.template_config = {
+        dynamic_model__a_things: { v1: {} },
+        dynamic_model__b_thing: { v9: {} }
+      };
+      var item = root();
+      item.embedded_item = { item_type: 'dynamic_model__b_thing', option_type: 'other', vdef_version: 'v9' };
+
+      var status = _fpa.template_config_slots_status(item, 'x', 'v1', _fpa.template_config_dependencies(item));
+
+      expect(status).toEqual({ present: false, v0_stale: false, option_slot_missing: true });
+    });
+
     it('is present when root and embedded slots exist, carrying a stale v0 flag from an embedded item', function () {
       _fpa.state.template_config = {
         dynamic_model__a_things: { v1: {} },
-        dynamic_model__b_things: { v0: { vdef_version: 'v2' }, v9: {} }
+        dynamic_model__b_things: { v0: { vdef_version: 'v2', live_order: 20 }, v9: { live_order: 90 } }
       };
       var item = root();
       item.embedded_item = { item_type: 'dynamic_model__b_things', vdef_version: 'v9' };
