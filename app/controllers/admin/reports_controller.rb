@@ -34,6 +34,16 @@ class Admin::ReportsController < AdminController
 
   protected
 
+  def admin_labels
+    { searchable: 'show as search panel' }
+  end
+
+  def init_new_with_attrs
+    attrs = super
+    attrs[:options] = OptionConfigs::ReportOptions.new_report_options_skeleton if attrs[:options].blank?
+    attrs
+  end
+
   def set_defaults
     @show_again_on_save = true
   end
