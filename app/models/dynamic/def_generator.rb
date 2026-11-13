@@ -163,18 +163,23 @@ module Dynamic
           Rails.logger.warn "Refreshing #{rn}, last updated at #{u}"
           this_is_new = !m
           any_new ||= this_is_new
-          d.force_regenerate = true
-          d.generate_model
-          d.check_implementation_class
-          d.force_option_config_parse
-          d.add_master_association
-          # d.add_user_access_controls
-          d.reset_active_model_configurations! if this_is_new
-          # d.update_tracker_events
-          d.other_regenerate_actions
+          regenerate_from_stored(d, this_is_new:)
         end
 
         routes_reload if any_new
+      end
+
+      # Regenerate the implementation and parsed configuration from a freshly loaded definition record
+      def regenerate_from_stored(definition, this_is_new: false)
+        definition.force_regenerate = true
+        definition.generate_model
+        definition.check_implementation_class
+        definition.force_option_config_parse
+        definition.add_master_association
+        # definition.add_user_access_controls
+        definition.reset_active_model_configurations! if this_is_new
+        # definition.update_tracker_events
+        definition.other_regenerate_actions
       end
 
       # Cache the current definitions that are in use within the appropriate dynamic definition class,
@@ -622,6 +627,21 @@ module Dynamic
 
     def rotate_dynamic_definition_cache_version
       Dynamic::DefinitionCacheVersion.rotate!
+    end
+
+    # Another worker may have saved this definition since this worker parsed its config. Rather than wait
+    # for #refresh_outdated (which tolerates small timestamp differences), compare against the stored
+    # row and regenerate from it, so a token read from the DB always corresponds to the config in use.
+    # @return [ActiveRecord::Base] the definition this worker now uses for the record
+    def reload_if_stale
+      stored = self.class.active_model_configurations.reorder('').find_by(id:)
+      return self if stored.nil? || self.class.same_definition_version?(self, stored)
+      return self unless stored.table_or_view_ready?
+
+      Rails.logger.warn "Reloading #{self.class.name} #{resource_name}, stored update differs from loaded"
+      self.class.clear_all_versions_memo
+      self.class.regenerate_from_stored(stored)
+      self.class.definition_cache[id] || stored
     end
 
     # Get a complete set of all tables to be accessed by embed configurations

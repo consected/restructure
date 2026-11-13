@@ -7,7 +7,8 @@ module Dynamic
   class TemplateConfigFreshness
     # Refresh the live definition of one representative record per type, and of the target
     # classes of its model references, so their current version tokens are up to date.
-    # Each distinct definition is refreshed once.
+    # A definition changed by another worker is reloaded first, so the parsed config in use
+    # always corresponds to the token read. Each distinct definition is refreshed once.
     # @param records [Array<ActiveRecord::Base>]
     def self.refresh_live_definitions(records)
       representative_records = Array(records).compact.uniq do |record|
@@ -28,7 +29,7 @@ module Dynamic
       end
 
       definitions.compact.uniq { |definition| [definition.class.name, definition.id] }
-                 .each(&:refresh_current_def_version!)
+                 .each { |definition| definition.reload_if_stale.refresh_current_def_version! }
     end
 
     # @param root_records [Array<ActiveRecord::Base>] the records the config is requested for
@@ -36,17 +37,19 @@ module Dynamic
       @root_records = Array(root_records).compact
     end
 
-    # One representative root per definition version, plus the embedded item and referenced
-    # records of those roots, sorted by class name and id.
+    # One representative root per definition version and distinct set of embedded and referenced
+    # definitions, plus the embedded item and referenced records of those roots, sorted by class
+    # name and id. Roots sharing a definition version can still depend on different definitions.
     # @return [Array<ActiveRecord::Base>]
     def records
       @records ||= begin
-        representative_roots = @root_records.uniq do |record|
-          [record.class.name, record.try(:option_type) || record.try(:extra_log_type), record.try(:def_version)]
+        roots_with_related = @root_records.map { |record| [record, related_records_for(record)] }
+        representatives = roots_with_related.uniq do |record, related|
+          related_keys = related.map { |related_record| definition_key(related_record) }.uniq.sort_by(&:to_s)
+          [*definition_key(record), related_keys]
         end
-        related_records = representative_roots.flat_map { |record| related_records_for(record) }
 
-        (representative_roots + related_records)
+        (representatives.map(&:first) + representatives.flat_map(&:last))
           .uniq { |record| [record.class.name, record.id] }
           .sort_by { |record| [record.class.name, record.id.to_i] }
       end
@@ -65,6 +68,10 @@ module Dynamic
     end
 
     private
+
+    def definition_key(record)
+      [record.class.name, record.try(:option_type) || record.try(:extra_log_type), record.try(:def_version)]
+    end
 
     def related_records_for(record)
       related = []

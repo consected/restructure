@@ -432,12 +432,12 @@ RSpec.describe 'Pages template freshness after dynamic definition edits', type: 
     new_token = worker_definition.current_def_version
     expect(new_token).not_to eq(old_token)
     expect(record.current_definition).to equal(stale_definition)
-    expect(stale_definition).to receive(:refresh_current_def_version!).once.and_call_original
 
     get path
 
     expect(response).to have_http_status(:ok)
     expect(response.body).to include("\"vdef_version\":\"v#{new_token}\"")
+    expect(DynamicModel.definition_cache.fetch(definition.id)).not_to equal(stale_definition)
   end
 
   it 'revalidates cached data after another worker changes only the live definition' do
@@ -476,6 +476,57 @@ RSpec.describe 'Pages template freshness after dynamic definition edits', type: 
     expect(response).to have_http_status(:ok)
     expect(response.headers['ETag']).not_to eq(old_etag)
     expect(response.body).to include("\"vdef_version\":\"v#{worker_definition.current_def_version}\"")
+  end
+
+  it 'reloads a worker-stale definition before computing and caching an index result under its new token' do
+    definition = create_dynamic_model(live_caption_options('WorkerOne'))
+    @master.current_user = @user
+    @master.dynamic_model__issue1525_template_recs.create!(current_user: @user, test1: 'secret-marker')
+    path = "/masters/#{@master.id}/#{definition.base_route_segments}"
+
+    stale_definition = DynamicModel.definition_cache.fetch(definition.id)
+    old_token = stale_definition.current_def_version
+    worker_definition = DynamicModel.find(definition.id)
+    worker_definition.current_admin = @admin
+    worker_definition.options = <<~YAML
+      _configurations:
+        use_current_version: true
+
+      default:
+        fields:
+          - test1
+          - test2
+        showable_if:
+          all:
+            this:
+              test1: never-matches
+    YAML
+    change_setting('AllowDynamicMigrations', false)
+    begin
+      worker_definition.save!
+    ensure
+      change_setting('AllowDynamicMigrations', true)
+    end
+
+    # This worker still holds the permissive definition it parsed before the other worker's save
+    DynamicModel.definition_cache[definition.id] = stale_definition
+    expect(stale_definition.current_def_version).to eq(old_token)
+    expect(worker_definition.current_def_version).not_to eq(old_token)
+
+    cached_results = []
+    allow(Rails.cache).to receive(:fetch).and_wrap_original do |original, *args, **kwargs, &block|
+      original.call(*args, **kwargs, &block).tap { |result| cached_results << result }
+    end
+
+    get path, params: { cache_result: 'true' }
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).not_to include('secret-marker')
+    expect(cached_results.to_json).not_to include('secret-marker')
+    expect(DynamicModel.definition_cache.fetch(definition.id)).not_to equal(stale_definition)
+
+    get path, params: { cache_result: 'true' }
+    expect(response.body).not_to include('secret-marker')
   end
 
   it 'returns 304 for unchanged index data and refreshes after a live definition edit' do

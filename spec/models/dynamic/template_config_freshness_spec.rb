@@ -42,6 +42,23 @@ RSpec.describe Dynamic::TemplateConfigFreshness, type: :model do
       expect(records).to eq [roots[3], roots[0], roots[2]]
     end
 
+    it 'keeps one root per distinct dependency signature when roots share a definition version' do
+      embedded_x = fake(FreshnessFakeB, id: 20, option_type: 'x')
+      embedded_y = fake(FreshnessFakeB, id: 21, option_type: 'y')
+      referenced_z = fake(FreshnessFakeB, id: 22, option_type: 'z')
+      roots = [
+        fake(id: 1, option_type: 'main', def_version: 1, embedded_item: embedded_x),
+        fake(id: 2, option_type: 'main', def_version: 1, embedded_item: embedded_x),
+        fake(id: 3, option_type: 'main', def_version: 1, embedded_item: embedded_y),
+        fake(id: 4, option_type: 'main', def_version: 1)
+      ]
+      roots[3].model_references = [double(to_record: referenced_z)]
+
+      records = described_class.new(roots).records
+
+      expect(records).to eq [roots[0], roots[2], roots[3], embedded_x, embedded_y, referenced_z]
+    end
+
     it 'adds embedded items and referenced records once, ignoring blank roots' do
       embedded = fake(FreshnessFakeB, id: 20)
       referenced = fake(FreshnessFakeB, id: 21)
@@ -57,7 +74,9 @@ RSpec.describe Dynamic::TemplateConfigFreshness, type: :model do
 
   describe 'refreshing live definitions' do
     def definition(id)
-      instance_double(DynamicModel, id:, refresh_current_def_version!: nil)
+      instance_double(DynamicModel, id:, refresh_current_def_version!: nil).tap do |double|
+        allow(double).to receive(:reload_if_stale).and_return(double)
+      end
     end
 
     it 'refreshes each distinct live definition once per call' do
@@ -178,6 +197,26 @@ RSpec.describe Dynamic::TemplateConfigFreshness, type: :model do
       @library.update_columns(updated_at: @library.updated_at + 2.seconds)
 
       expect(live_tokens).not_to eq(before_tokens)
+    end
+
+    it 'changes when a definition used only by a later root sharing the same definition version is edited' do
+      other_definition = ActivityLog.active.first!
+      embedded_a = fake(FreshnessFakeB, id: 20, option_type: 'a', current_definition: other_definition)
+      embedded_b = fake(FreshnessFakeB, id: 21, option_type: 'b', current_definition: DynamicModel.find(@dm.id))
+      first_root = fake(id: 1, option_type: 'x', def_version: 1, embedded_item: embedded_a)
+      second_root = fake(id: 2, option_type: 'x', def_version: 1, embedded_item: embedded_b)
+      live_tokens_for_roots = lambda do
+        freshness = described_class.new([first_root, second_root])
+        freshness.refresh!
+        freshness.tokens
+      end
+      before_tokens = live_tokens_for_roots.call
+
+      definition = DynamicModel.find(@dm.id)
+      definition.current_admin = @admin
+      definition.update!(options: dm_options('Three'))
+
+      expect(live_tokens_for_roots.call).not_to eq(before_tokens)
     end
 
     it 'changes for an activity log item_type after a sibling definition edit' do
