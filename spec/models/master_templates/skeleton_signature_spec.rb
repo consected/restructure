@@ -372,13 +372,13 @@ RSpec.describe MasterTemplates::SkeletonSignature, type: :model do
         hide_item_list_panel: !original_values['hide_item_list_panel'],
         action_when_attribute: 'updated_at'
       }.each do |column, value|
-        activity_log.update_columns(column => value)
+        activity_log.update_columns(column => value) # rubocop:disable Rails/SkipsModelValidations
         signatures << skeleton_signature
       end
 
       expect(signatures.uniq.length).to eq(signatures.length)
     ensure
-      activity_log&.update_columns(original_values) if original_values
+      activity_log&.update_columns(original_values) if original_values # rubocop:disable Rails/SkipsModelValidations
     end
 
     it 'memoizes the signature per instance and app type' do
@@ -450,8 +450,10 @@ RSpec.describe MasterTemplates::SkeletonSignature, type: :model do
 
       it 'ignores values delivered lazily as template_config' do
         lazy_values = structure_for(
-          activity_log, { header_caption: 'Lazy', extra_class: 'lazy' }, name: :secondary,
-                                                                           caption_before: { test1: 'Lazy caption' }
+          activity_log,
+          { header_caption: 'Lazy', extra_class: 'lazy' },
+          name: :secondary,
+          caption_before: { test1: 'Lazy caption' }
         )
         expect(lazy_values).to eq(base_structure)
 

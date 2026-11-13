@@ -37,9 +37,12 @@ describe 'Activity log embedded form uses its own definition version (issue 1481
   AlNameOwnVer = 'Embed Own Ver 1481'
   AlProcessOwnVer = 'aa_own_version'
   # Edit requests resolve the AL from the player contact item (ActivityLog.implementation_class_for), which does not
-  # carry a process name, so the broad match is used: the first enabled AL for the item type ordered by process name.
-  # The AL has no rec_type (an AL with both rec_type and process name is not associated with the app type), and the
-  # process name sorts before those of other specs' ALs so this one is found for the test player contact.
+  # carry a process name, so the broad match is used: the first enabled AL for the item type ordered by
+  # rec_type then process name (nulls first). The AL has no rec_type (an AL with both rec_type and process name is not
+  # associated with the app type), and its process name sorts before those of other specs' ALs.
+  # That ordering is not something to rely on, so before :all disables (and after :all restores, with its original
+  # disabled value) every other enabled player_contact AL that has no rec_type or the test contact's rec_type.
+  # Those are the only ALs that can win the resolution, which leaves this AL as the only candidate.
   OwnVerContactRecType = 'email'
   OwnVerItemType = "player_contact_#{AlProcessOwnVer}"
   AlFkOwnVer = "activity_log_#{OwnVerItemType}_id"
@@ -173,6 +176,22 @@ describe 'Activity log embedded form uses its own definition version (issue 1481
     end
   end
 
+  # Make this AL the only candidate for edit requests on the test player contact, see the constants above
+  # rubocop:disable Rails/SkipsModelValidations
+  def disable_competing_activity_logs
+    competing = ActivityLog.enabled.where(item_type: 'player_contact').where.not(id: @activity_log.id)
+                           .where(rec_type: [nil, '', OwnVerContactRecType])
+    @competing_al_states = competing.pluck(:id, :disabled)
+    ActivityLog.where(id: @competing_al_states.map(&:first)).update_all(disabled: true)
+  end
+
+  def restore_competing_activity_logs
+    @competing_al_states&.each do |id, disabled|
+      ActivityLog.where(id:).update_all(disabled:)
+    end
+  end
+  # rubocop:enable Rails/SkipsModelValidations
+
   before :all do
     @prev_disable_vdef = Settings::DisableVDef
     change_setting('DisableVDef', false)
@@ -187,6 +206,7 @@ describe 'Activity log embedded form uses its own definition version (issue 1481
     setup_embed_target_model
     setup_activity_log
     setup_access_for_user
+    disable_competing_activity_logs
 
     @al_page_layout = Admin::PageLayout.create!(
       layout_name: 'master',
@@ -222,7 +242,9 @@ describe 'Activity log embedded form uses its own definition version (issue 1481
 
     # Keep the definitions from leaking into the Handlebars templates compiled by later specs
     ActivityLog.where(name: AlNameOwnVer).find_each { |al| al.update_column(:disabled, true) }
+    restore_competing_activity_logs
     DynamicModel.where(table_name: OwnVerDmTable).find_each { |dm| dm.update_column(:disabled, true) }
+    ActivityLog.reset_active_model_configurations!
     ActivityLog.define_models
     DynamicModel.define_models
   end
