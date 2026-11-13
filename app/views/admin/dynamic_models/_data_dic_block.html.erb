@@ -8,7 +8,7 @@
         pm = @all_reports_for_user = Report.enabled #.for_user(current_user)
         pm = pm.where(item_type: 'reference-data') #.where.not(short_name: 'table_data')
 
-        @reports = pm.order auto: :desc, report_type: :asc, position: :asc
+        @reports = pm.ordered_for_display
         @reports = @reports.reject { |r| r.report_options(fail_without_exception: true)&.list_options&.hide_in_list }
       
       %>
