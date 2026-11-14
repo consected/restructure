@@ -59,6 +59,7 @@ RSpec.describe 'Template recovery after memcached clear', type: :system, js: tru
 
       # Now apply the fix: invalidate server_cache_version
       Rails.cache.delete('server_cache_version')
+      Rails.cache.delete(Application::HANDLEBARS_GENERATION_CACHE_KEY)
 
       # After invalidation, a new server_cache_version is generated
       scv_after_fix = Application.server_cache_version

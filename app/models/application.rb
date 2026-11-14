@@ -28,6 +28,35 @@ class Application
     end
   end
 
+  HANDLEBARS_GENERATION_CACHE_KEY = 'handlebars_generation_version'
+
+  # Version identifying the current compiled Handlebars generation. Seeded from
+  # server_cache_version, but unlike it, preserved by clear_cache_preserving_generation so that
+  # saving a definition or config record does not discard every compiled template.
+  def self.handlebars_generation_version
+    Rails.cache.fetch(HANDLEBARS_GENERATION_CACHE_KEY) { server_cache_version }
+  end
+
+  # Force this process's generation version to the parent's (see server_cache_version=).
+  def self.handlebars_generation_version=(value)
+    Rails.cache.write(HANDLEBARS_GENERATION_CACHE_KEY, value)
+  end
+
+  # Token that changes whenever the whole Rails cache has been cleared, since it is itself
+  # discarded by the clear. Lets state that depends on cached fragments (such as prewarm
+  # markers) detect that those fragments are cold, even when the generation is preserved.
+  def self.cache_epoch
+    Rails.cache.fetch('cache_epoch') { SecureRandom.hex(8) }
+  end
+
+  # Clear the whole Rails cache, but keep the Handlebars generation version.
+  # Not atomic: a process reading between the clear and the write seeds a new version.
+  def self.clear_cache_preserving_generation
+    generation_version = handlebars_generation_version
+    Rails.cache.clear
+    Rails.cache.write(HANDLEBARS_GENERATION_CACHE_KEY, generation_version)
+  end
+
   # Force this process's cache to hold a specific server_cache_version (issue #1362) -
   # used to make a spawned process agree with its parent's value even when Rails.cache is
   # not actually shared across processes (e.g. :memory_store), rather than each process

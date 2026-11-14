@@ -41,11 +41,13 @@ RSpec.describe Prewarm::Spawner do
   it "passes the parent process's current Application.server_cache_version to the child via env" do
     change_setting('PrewarmTemplatesEnabled', true)
     current_version = Application.server_cache_version
+    generation_version = Application.handlebars_generation_version
 
     described_class.spawn_async
 
     expect(IO).to have_received(:popen)
-      .with({ 'PREWARM_SERVER_CACHE_VERSION' => current_version }, anything, anything)
+      .with({ 'PREWARM_SERVER_CACHE_VERSION' => current_version,
+              'PREWARM_HANDLEBARS_GENERATION_VERSION' => generation_version }, anything, anything)
   ensure
     change_setting('PrewarmTemplatesEnabled', false)
   end
