@@ -283,11 +283,7 @@ module ApplicationHelper
 
     auth_type = u.class.name
 
-    paired_user = if u.is_a?(User)
-                    u
-                  elsif u.is_a?(Admin)
-                    safe_current_user || u.matching_user
-                  end
+    paired_user = paired_user_for(u)
 
     if paired_user
       apptype = paired_user.app_type_id
@@ -315,10 +311,18 @@ module ApplicationHelper
       "#{apptype}-#{@item_updates}-#{userrole}-#{uac}#{paired_user_key}"
   end
 
+  # Skeleton state is independent of per-definition config edits, which are fetched lazily.
+  def master_templates_skeleton_cache_key(force_user_or_admin: nil)
+    user_or_admin = force_user_or_admin || current_user || current_admin
+    # One instance per view context, so memoized signatures never outlive the request
+    @master_templates_skeleton_signature ||= MasterTemplates::SkeletonSignature.new
+    @master_templates_skeleton_signature.cache_key(user_or_admin:, paired_user: paired_user_for(user_or_admin))
+  end
+
   #
   # Role/UAC updated_at timestamps for the given app type, delegated to
   # HandlebarsPrecompiler.app_type_access_control_timestamps (the single source of truth
-  # shared with HandlebarsPrecompilerHelper#handlebars_cache_key/#access_control_version -
+  # shared with HandlebarsPrecompilerHelper#handlebars_cache_key -
   # issue #1400 Phase 1). Memoized per app_type_id so the ETag and template_version
   # computations in one view context reuse the same values instead of re-querying.
   # @param app_type_id [Integer, nil] the app_type to scope the queries to
@@ -330,8 +334,20 @@ module ApplicationHelper
   end
 
   #
+  # The effective user for cache keys: a User is its own pair, an Admin pairs with the
+  # signed-in user or its matching user.
+  # @param user_or_admin [User, Admin, nil]
+  # @return [User, nil]
+  def paired_user_for(user_or_admin)
+    case user_or_admin
+    when User then user_or_admin
+    when Admin then safe_current_user || user_or_admin.matching_user
+    end
+  end
+
+  #
   # Safely resolve the current signed-in user, returning nil instead of raising
-  # if unavailable (e.g. no user session present). Used by #partial_cache_key to
+  # if unavailable (e.g. no user session present). Used by #paired_user_for to
   # determine the effective user paired with an Admin without duplicating the
   # rescue logic at each call site.
   def safe_current_user

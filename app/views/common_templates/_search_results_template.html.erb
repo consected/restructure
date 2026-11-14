@@ -38,7 +38,17 @@
    def_version = nil
   end
 
-  vdef_version = "v#{def_version}"
+  unless defined? state_only
+    state_only = false
+  end
+
+  historical_version = def_version.present? || def_record&.current_definition.present?
+  def_version ||= def_record&.def_version if historical_version
+  template_version_token ||= def_version || Dynamic::TemplateVersionTokens.resource_token(def_record)
+  template_version_token = template_version_token.to_i
+  vdef_version = "v#{template_version_token}"
+  # The monotonic order of live states, which v0 promotion compares (the token is only an identity)
+  live_order_js = (historical_version ? nil : Dynamic::TemplateVersionTokens.live_order(def_record)) || 'null'
 
   unless defined? caption
     caption = nil
@@ -299,18 +309,24 @@
   if implementation_class
     field_types = implementation_class.columns_hash.map { |k, v| [k, v.type.to_s] }.to_h
   end
+  promote_base_v0 = (full_name.underscore.to_s == name_with_option_type.underscore.to_s) ||
+                    option_type_config_name.blank? ||
+                    option_type_config_name.to_s == default_option_type_name.to_s
+  state_script_id = "fpa_state_config--#{name_with_option_type.underscore}--v#{template_version_token}"
+  state_script_id += '--form' if state_only
 %>
 
-<%= javascript_tag id: "fpa_state_config--#{name_with_option_type.underscore}--v#{def_version}", nonce: true do %>
+<%= javascript_tag id: state_script_id, nonce: true do %>
   _fpa.state.caption_before.<%=name_with_option_type.underscore%> = _fpa.state.caption_before.<%=name_with_option_type.underscore%> || {};
-  _fpa.state.caption_before.<%=name_with_option_type.underscore%>.v<%=def_version%> = <%= caption_before.to_json.html_safe %>;
+  _fpa.state.caption_before.<%=name_with_option_type.underscore%>.v<%=template_version_token%> = <%= caption_before.to_json.html_safe %>;
   _fpa.state.labels_<%=name_with_option_type.underscore%> = _fpa.state.labels_<%=name_with_option_type.underscore%> || {};
-  _fpa.state.labels_<%=name_with_option_type.underscore%>.v<%=def_version%> = <%= labels.to_json.html_safe %>;
+  _fpa.state.labels_<%=name_with_option_type.underscore%>.v<%=template_version_token%> = <%= labels.to_json.html_safe %>;
 
   _fpa.state.template_config.<%=name_with_option_type.underscore%> = _fpa.state.template_config.<%=name_with_option_type.underscore%> || {};
-  _fpa.state.template_config.<%=name_with_option_type.underscore%>.v<%=def_version%>  = {
+  _fpa.state.template_config.<%=name_with_option_type.underscore%>.v<%=template_version_token%>  = {
     def_version: <%= def_version || 'null' %>,
     vdef_version: '<%= vdef_version %>',
+    live_order: <%= live_order_js %>,
     name: '<%=name%>',
     full_name: '<%=full_name%>',
     name_with_option_type: '<%= name_with_option_type %>',
@@ -360,31 +376,52 @@
     <% if option_type_config_name %>option_type_config_name: '<%= option_type_config_name %>',
     use_option_type: true<% end %>
   }
-
 <% unless full_name.underscore.to_s == name_with_option_type.underscore.to_s %>
   _fpa.state.template_config.<%=full_name.underscore%> = _fpa.state.template_config.<%=full_name.underscore%> || {};
-  _fpa.state.template_config.<%=full_name.underscore%>.v<%=def_version%> = _fpa.state.template_config.<%=full_name.underscore%>.v<%=def_version%> || _fpa.state.template_config.<%=name_with_option_type.underscore%>.v<%=def_version%>;
+  _fpa.state.template_config.<%=full_name.underscore%>.v<%=template_version_token%> = _fpa.state.template_config.<%=full_name.underscore%>.v<%=template_version_token%> || _fpa.state.template_config.<%=name_with_option_type.underscore%>.v<%=template_version_token%>;
 <% end %>
-
 <% if resource_name && resource_name != name_with_option_type.underscore.to_s && resource_name != full_name.underscore.to_s %>
   _fpa.state.template_config.<%=resource_name%> = _fpa.state.template_config.<%=resource_name.underscore%> || {};
-  _fpa.state.template_config.<%=resource_name%>.v<%=def_version%> = _fpa.state.template_config.<%=name.underscore%>.v<%=def_version%>;
+  _fpa.state.template_config.<%=resource_name%>.v<%=template_version_token%> = _fpa.state.template_config.<%=name.underscore%>.v<%=template_version_token%>;
 <% end %>
-
   _fpa.show_if.forms['<%=name_with_option_type%>'] = _fpa.show_if.forms['<%=name_with_option_type%>'] || {};
   _fpa.show_if.forms['<%=name_with_option_type%>'].<%=vdef_version%> = <%= show_if.to_json.html_safe %>;
-
-  <% if full_name.to_s.end_with?('_primary') %>
+<% if full_name.to_s.end_with?('_primary') %>
   _fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'] = _fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'] || {};
   _fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'].<%=vdef_version%> = _fpa.show_if.forms['<%=name_with_option_type%>'].<%=vdef_version%>;
-  <% end %>
-
-  <% unless full_name.underscore.to_s == name_with_option_type.underscore.to_s %>
+<% end %>
+<% unless full_name.underscore.to_s == name_with_option_type.underscore.to_s %>
   _fpa.show_if.forms.<%=full_name.underscore%> = _fpa.show_if.forms.<%=full_name.underscore%> || {};
   _fpa.show_if.forms.<%=full_name.underscore%>.<%=vdef_version%> = _fpa.show_if.forms.<%=full_name.underscore%>.<%=vdef_version%> || _fpa.show_if.forms.<%=name_with_option_type.underscore%>.<%=vdef_version%>;
-  <% end %>
-
-  <% if full_name.to_s.start_with?('dynamic_model__') && option_type_config_name.to_s == default_option_type_name.to_s %>
+<% end %>
+<%# Historical versions are served from their own v<token> slot and never touch the v0 aliases. The
+    template_config promotion comes first: it only succeeds when no newer v0 is installed (a form served
+    with an older token, e.g. by a worker with stale definitions, must not replace a newer v0), and it
+    guards the remaining aliases. %>
+<% unless historical_version %>
+  if (_fpa.promote_template_state_v0(_fpa.state.template_config.<%=name_with_option_type.underscore%>, _fpa.state.template_config.<%=name_with_option_type.underscore%>.v<%=template_version_token%>, <%=live_order_js%>)) {
+    _fpa.promote_template_state_v0(_fpa.state.caption_before.<%=name_with_option_type.underscore%>, _fpa.state.caption_before.<%=name_with_option_type.underscore%>.v<%=template_version_token%>, <%=live_order_js%>);
+    _fpa.promote_template_state_v0(_fpa.state.labels_<%=name_with_option_type.underscore%>, _fpa.state.labels_<%=name_with_option_type.underscore%>.v<%=template_version_token%>, <%=live_order_js%>);
+<% if promote_base_v0 %>
+<% unless full_name.underscore.to_s == name_with_option_type.underscore.to_s %>
+    _fpa.promote_template_state_v0(_fpa.state.template_config.<%=full_name.underscore%>, _fpa.state.template_config.<%=name_with_option_type.underscore%>.v0, <%=live_order_js%>);
+<% end %>
+<% if resource_name && resource_name != name_with_option_type.underscore.to_s && resource_name != full_name.underscore.to_s %>
+    _fpa.promote_template_state_v0(_fpa.state.template_config.<%=resource_name%>, _fpa.state.template_config.<%=name.underscore%>.v0, <%=live_order_js%>);
+<% end %>
+<% end %>
+    _fpa.promote_template_state_v0(_fpa.show_if.forms['<%=name_with_option_type%>'], _fpa.show_if.forms['<%=name_with_option_type%>'].<%=vdef_version%>, <%=live_order_js%>);
+<% if promote_base_v0 %>
+<% if full_name.to_s.end_with?('_primary') %>
+    _fpa.promote_template_state_v0(_fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'], _fpa.show_if.forms['<%=name_with_option_type%>'].v0, <%=live_order_js%>);
+<% end %>
+<% unless full_name.underscore.to_s == name_with_option_type.underscore.to_s %>
+    _fpa.promote_template_state_v0(_fpa.show_if.forms.<%=full_name.underscore%>, _fpa.show_if.forms['<%=name_with_option_type%>'].v0, <%=live_order_js%>);
+<% end %>
+<% end %>
+  }
+<% end %>
+<% if full_name.to_s.start_with?('dynamic_model__') && option_type_config_name.to_s == default_option_type_name.to_s %>
   _fpa.state.caption_before.<%=name.underscore%> = _fpa.state.caption_before.<%=name_with_option_type.underscore%>;
   _fpa.state.labels_<%=name.underscore%> = _fpa.state.labels_<%=name_with_option_type.underscore%>;
   <%# Alias the dynamic model's template config under its alternative resource
@@ -397,18 +434,21 @@
       show mode (issue #1238). %>
   <% [resource_name, name.underscore.pluralize, name.underscore.sub('dynamic_model__', '')].uniq.each do |alias_name| %>
   _fpa.state.template_config.<%=alias_name%> = _fpa.state.template_config.<%=alias_name%> || _fpa.state.template_config.<%=name.underscore%>;
-  _fpa.state.template_config.<%=alias_name%>.v<%=def_version%> = _fpa.state.template_config.<%=alias_name%>.v<%=def_version%> || _fpa.state.template_config.<%=name.underscore%>.v<%=def_version%>;
+  _fpa.state.template_config.<%=alias_name%>.v<%=template_version_token%> = _fpa.state.template_config.<%=alias_name%>.v<%=template_version_token%> || _fpa.state.template_config.<%=name.underscore%>.v<%=template_version_token%>;
+<% if !historical_version && promote_base_v0 %>
+  _fpa.promote_template_state_v0(_fpa.state.template_config.<%=alias_name%>, _fpa.state.template_config.<%=name.underscore%>.v0, <%=live_order_js%>);
+<% end %>
   <% end %>
-  <% end %>
-  
+<% end %>
 <% end %>
 
 
+<% unless state_only %>
 <% 
-  # Do not reload the unversioned Handlebars templates if we are loading a previous definition version
-  # since the app will have loaded all of the unversioned templates originally
+  # Shared Handlebars templates are emitted for current definitions only.
+  # Historical definitions need versioned state but reuse the global templates.
   
-  unless def_version 
+  unless historical_version
 %>
 
 
@@ -468,11 +508,12 @@
 <% end %>
 
 <%= handlebars_template_tag("#{full_name.pluralize.hyphenate}-list-template") do %>
-  {{>common_template_list name='<%=name%>' list_data=this list_template_config=(fpa_state_item 'template_config' (underscore '<%=name%>') 'v')}}
+  {{>common_template_list name='<%=name%>' list_data=this list_template_config=(fpa_state_item 'template_config' (underscore '<%=name%>') 'v0')}}
 <% end %>
 
 <%= handlebars_template_tag("#{full_name.pluralize.hyphenate}-compact-list-template") do %>
-  {{>common_template_list name='<%=name%>' list_data=this list_template_config=(fpa_state_item 'template_config' (underscore '<%=name%>') 'v') compact=true prevent_create=true }}
+  {{>common_template_list name='<%=name%>' list_data=this list_template_config=(fpa_state_item 'template_config' (underscore '<%=name%>') 'v0') compact=true prevent_create=true }}
+<% end %>
 <% end %>
 
 <% end %>

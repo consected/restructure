@@ -141,14 +141,21 @@ RSpec.describe PagesController, type: :controller do
         expect(response).to have_http_status(:not_modified)
       end
 
-      it 'deletes the master fragment and returns non-cacheable content when rebuild is requested' do
-        fragment_key = controller.helpers.partial_cache_key(:master__search_results_template)
-        expect(Rails.cache).to receive(:delete).with(fragment_key).and_call_original
+      it 'evicts the cached skeleton and returns non-cacheable content when rebuild is requested' do
+        previous_caching = Rails.configuration.action_controller.perform_caching
+        Rails.configuration.action_controller.perform_caching = true
+        skeleton_key = controller.helpers.master_templates_skeleton_cache_key(force_user_or_admin: @user)
+        Rails.cache.write(skeleton_key, 'stale skeleton')
+        allow(Rails.cache).to receive(:delete).and_call_original
 
         get :template, params: { id: real_token, rebuild: 'true' }
 
         expect(response).to have_http_status(:ok)
         expect(response.headers['Cache-Control']).to include('no-store')
+        expect(Rails.cache).to have_received(:delete).with(skeleton_key)
+        expect(Rails.cache.read(skeleton_key)).not_to eq('stale skeleton')
+      ensure
+        Rails.configuration.action_controller.perform_caching = previous_caching
       end
     end
 
@@ -174,8 +181,8 @@ RSpec.describe PagesController, type: :controller do
       end
 
       it 'does not delete the master fragment when rebuild is requested with a stale token' do
-        fragment_key = controller.helpers.partial_cache_key(:master__search_results_template)
-        expect(Rails.cache).not_to receive(:delete).with(fragment_key)
+        skeleton_key = controller.helpers.master_templates_skeleton_cache_key(force_user_or_admin: @user)
+        expect(Rails.cache).not_to receive(:delete).with(skeleton_key)
 
         get :template, params: { id: stale_token, rebuild: 'true' }
 

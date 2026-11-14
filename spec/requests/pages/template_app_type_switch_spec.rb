@@ -29,6 +29,7 @@
 # Examples:
 #   - Token V_A + user still on app-type A → private, one-hour browser caching
 #   - Token V_A + user switched to app-type B → Cache-Control includes no-store
+#   - The template_config salt is stable within a session and differs between sessions
 
 require 'rails_helper'
 
@@ -60,6 +61,46 @@ RSpec.describe 'PagesController#template app-type-switch race (issue #1287)', ty
     match = response.body.match(/_fpa\.state\.template_version\s*=\s*'([a-f0-9]{64})'/)
     expect(match).to be_present, 'expected _fpa.state.template_version to be embedded in the page HTML'
     match[1]
+  end
+
+  def embedded_template_config_salt(body)
+    match = body.match(/_fpa\.state\.template_config_salt\s*=\s*["']([0-9a-f]{16})["']/)
+    expect(match).to be_present, 'expected _fpa.state.template_config_salt to be embedded in the page HTML'
+    match[1]
+  end
+
+  it 'embeds a stable salt for the current session and a different salt for another session' do
+    get '/masters/search'
+    expect(response).to have_http_status(:ok)
+    first_salt = embedded_template_config_salt(response.body)
+
+    get '/masters/search'
+    expect(response).to have_http_status(:ok)
+    expect(embedded_template_config_salt(response.body)).to eq(first_salt)
+
+    second_session_salt = nil
+    open_session do |other_session|
+      sign_in @user
+      other_session.get '/masters/search'
+      expect(other_session.response).to have_http_status(:ok)
+      second_session_salt = embedded_template_config_salt(other_session.response.body)
+    end
+
+    expect(second_session_salt).not_to eq(first_salt)
+  end
+
+  it 'embeds a salt on admin pages when only an admin is signed in' do
+    get '/masters/search'
+    expect(response).to have_http_status(:ok)
+
+    sign_out :user
+    sign_in @admin
+    get '/admin/manage_users'
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include('_fpa.state.current_admin =')
+    expect(response.body).not_to include('_fpa.state.current_user =')
+    expect(embedded_template_config_salt(response.body)).to match(/\A[0-9a-f]{16}\z/)
   end
 
   describe 'positive path (no switch)' do

@@ -68,6 +68,7 @@ class Admin::ConfigLibrary < Admin::AdminBase
     end
 
     dependants.map(&:first).map(&:class).uniq.each(&:reset_active_model_configurations!)
+    Dynamic::DefinitionCacheVersion.rotate! if dependants.any?
   end
 
   validates :name, presence: true
@@ -79,6 +80,10 @@ class Admin::ConfigLibrary < Admin::AdminBase
   after_save :mark_dependency_refresh_required
   after_commit :refresh_dependencies, if: :dependency_refresh_required?
   after_rollback :reset_dependency_refresh_required
+
+  def clear_rails_cache_on_save?
+    format.to_s != 'yaml'
+  end
 
   def self.content_named(category, name, format: nil)
     find_active_library!(category, name, format:).options

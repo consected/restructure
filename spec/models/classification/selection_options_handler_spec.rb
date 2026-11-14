@@ -2,6 +2,11 @@
 
 require 'rails_helper'
 
+# Purpose: verify selector option caches are refreshed across workers when a
+# dynamic definition changes, even when process-local cache-key tracking is lost,
+# and that tracking and clearing the cache keys is safe across threads (adding a key while
+# a definition save clears the tracked keys must not raise "can't add a new key into hash
+# during iteration").
 RSpec.describe Classification::SelectionOptionsHandler, type: :model do
   AlNameGenTestSo = 'Gen Test ELT SO'
   include ModelSupport
@@ -12,6 +17,7 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
   end
 
   before :example do
+    Classification::SelectionOptionsHandler::RequestCache.reset
     create_admin
     create_user
     setup_access :player_contacts
@@ -79,6 +85,107 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
 
     config2_sliced = config2.map { |c| c.slice :item_type, :value, :name, :create_with, :edit_if_set, :position, :lock }
     expect(config2_sliced).to eq results
+  end
+
+  it 'refreshes selector overrides after a dynamic definition edit in another worker' do
+    ActivityLog.define_models
+    definition = ActivityLog::PlayerContactPhone.definition
+    condition = { item_type: "cache-phase2-#{SecureRandom.hex(4)}" }
+    handler = Classification::SelectionOptionsHandler
+
+    allow(handler).to receive(:selector_with_config_overrides_processing).and_return([:stale])
+    expect(handler.selector_with_config_overrides(condition)).to eq [:stale]
+    handler.instance_variable_set(:@cache_keys_list, nil)
+
+    definition.current_admin = @admin
+    definition.update!(extra_log_types: "#{definition.extra_log_types}\n# cache invalidation #{SecureRandom.hex(4)}")
+    handler::RequestCache.reset
+
+    allow(handler).to receive(:selector_with_config_overrides_processing).and_return([:fresh])
+    expect(handler.selector_with_config_overrides(condition)).to eq [:fresh]
+  end
+
+  it 'reads one shared dynamic-definition version token per request for selector cache keys' do
+    handler = Classification::SelectionOptionsHandler
+    condition = { item_type: "shared-version-#{SecureRandom.hex(4)}" }
+    shared_key = "dynamic-definitions-cache-version-#{Application.version}"
+    handler.instance_variable_set(:@cache_keys_list, nil)
+    handler::RequestCache.reset
+    token_before_rotation = Dynamic::DefinitionCacheVersion.token
+    allow(handler).to receive(:selector_with_config_overrides_processing).and_return([])
+    allow(Rails.cache).to receive(:fetch).and_call_original
+
+    handler.selector_with_config_overrides(condition)
+    handler.selector_with_config_overrides(condition.merge(field_name: 'second_field'))
+
+    expect(Rails.cache).to have_received(:fetch).with(shared_key).once
+    Dynamic::DefinitionCacheVersion.rotate!
+
+    handler::RequestCache.reset
+    handler.selector_with_config_overrides(condition)
+    expect(handler::RequestCache.shared_definition_cache_version).not_to eq(token_before_rotation)
+    expect(Rails.cache).to have_received(:fetch).with(shared_key).twice
+  end
+
+  it 'bounds tracked selector cache keys and removes pruned entries' do
+    handler = Classification::SelectionOptionsHandler
+    handler.instance_variable_set(:@cache_keys_list, {})
+    allow(handler).to receive(:selector_with_config_overrides_processing).and_return([])
+
+    handler.selector_with_config_overrides(item_type: 'tracked-cache-key-0')
+    first_cache_key = handler.instance_variable_get(:@cache_keys_list).keys.first
+    (1..Classification::SelectionOptionsHandler::MaxTrackedCacheKeys).each do |index|
+      handler.selector_with_config_overrides(item_type: "tracked-cache-key-#{index}")
+    end
+
+    expect(handler.instance_variable_get(:@cache_keys_list).size)
+      .to eq(Classification::SelectionOptionsHandler::MaxTrackedCacheKeys)
+    expect(Rails.cache.read(first_cache_key)).to be_nil
+  end
+
+  describe 'tracked selector cache keys under concurrency' do
+    let(:handler) { Classification::SelectionOptionsHandler }
+
+    before do
+      handler.instance_variable_set(:@cache_keys_list, {})
+      allow(handler).to receive(:selector_with_config_overrides_processing).and_return([])
+    end
+
+    it 'allows a key to be tracked while the tracked keys are being cleared' do
+      handler.selector_with_config_overrides(item_type: 'tracked-before-clear')
+      added_during_clear = nil
+      allow(Rails.cache).to receive(:delete).and_wrap_original do |original, *args|
+        unless added_during_clear
+          added_during_clear = "tracked-during-clear-#{SecureRandom.hex(4)}"
+          handler.selector_with_config_overrides(item_type: added_during_clear)
+        end
+        original.call(*args)
+      end
+
+      expect { handler.reset! }.not_to raise_error
+
+      tracked = handler.instance_variable_get(:@cache_keys_list).keys
+      expect(tracked.length).to eq 1
+      expect(tracked.first).to include(added_during_clear)
+    end
+
+    it 'does not raise when requests add keys concurrently with definition saves clearing them' do
+      allow(Classification::GeneralSelection).to receive(:selector_cache_version_token).and_return('stable')
+      adders = Array.new(4) do |thread_index|
+        Thread.new do
+          200.times { |index| handler.selector_with_config_overrides(item_type: "concurrent-#{thread_index}-#{index}") }
+        end
+      end
+      clearer = Thread.new { 50.times { handler.reset! } }
+      threads = adders + [clearer]
+      threads.each { |thread| thread.report_on_exception = false }
+
+      # Joining re-raises any error from a thread
+      expect do
+        ActiveSupport::Dependencies.interlock.permit_concurrent_loads { threads.each { |thread| thread.join(60) } }
+      end.not_to raise_error
+      expect(threads.select(&:alive?)).to eq []
+    end
   end
 
   it 'substitutes labels into data attributes for dynamic defintions' do

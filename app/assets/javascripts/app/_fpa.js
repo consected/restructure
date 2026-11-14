@@ -6,7 +6,8 @@ _fpa = {
     caption_before: {},
     dialog_before: {},
     template_config: {},
-    template_config_versions: {},
+    template_config_requests: {},
+    template_config_v0_attempts: {},
   },
 
   preprocessors: {},
@@ -259,6 +260,161 @@ _fpa = {
     options.template_name = template_name;
   },
 
+  // Short key for the signed-in session and access context, added to template_config URLs so a
+  // browser-cached response is never reused after a new sign in, user, app type or role change.
+  template_config_session_key: function () {
+    var user = _fpa.state.current_user, admin = _fpa.state.current_admin;
+    var parts = [
+      user ? [user.id, user.current_sign_in_at, user.app_type_id, (_fpa.state.current_user_roles || []).slice().sort()] : null,
+      admin ? [admin.id, admin.current_sign_in_at] : null
+    ];
+    var text = JSON.stringify(parts), hash = 5381;
+    for (var i = 0; i < text.length; i++) hash = ((hash * 33) ^ text.charCodeAt(i)) >>> 0;
+
+    var session_hash = hash.toString(36), salt = _fpa.state.template_config_salt;
+    return typeof salt === 'string' && /^[0-9a-z]+$/.test(salt) ? salt + '.' + session_hash : session_hash;
+  },
+
+  // Points the v0 alias of a state container (template_config slot, labels, caption_before or show_if
+  // forms) at value, which is the slot for a live state with the given live_order. The slot token is
+  // only an identity (a hash when config libraries are used), so states are compared by live_order,
+  // which strictly increases with every change of the live definition. A newer v0 is never
+  // replaced: a form served for an older state, e.g. by a worker with stale definitions, must not
+  // win. Containers whose v0 carries no live_order (labels, caption_before, show_if forms) always
+  // accept the promotion. Returns whether v0 was assigned.
+  promote_template_state_v0: function (target, value, live_order) {
+    var installed = target.v0 && target.v0.live_order;
+    if (typeof installed === 'number' && typeof live_order === 'number' && installed > live_order) return false;
+
+    target.v0 = value;
+    return true;
+  },
+
+  // The versioned definition items (dynamic model, activity log, external identifier) embedded in a
+  // data item through embedded_item and embedded_items, as [{ item, type, version }].
+  template_config_dependencies: function (data_item) {
+    var embedded_items = [];
+    if (data_item.embedded_item) embedded_items.push(data_item.embedded_item);
+    if (Array.isArray(data_item.embedded_items)) embedded_items = embedded_items.concat(data_item.embedded_items);
+
+    return embedded_items.map(function (item) {
+      var type = item.item_type || item.resource_name || item.name_with_option_type || item.model_data_type;
+      var is_versioned = ['dynamic_model', 'activity_log', 'external_identifier']
+        .indexOf(String(item.model_data_type)) >= 0 ||
+        /^(dynamic_model|activity_log|external_identifier)__/.test(String(type || ''));
+
+      return is_versioned ? { item: item, type: type, version: item.vdef_version || 'v0' } : null;
+    }).filter(Boolean);
+  },
+
+  // The identity of the embedded dependencies, used so that requests sharing a root record and
+  // version are still separate when their embedded items are at different versions.
+  template_config_dependency_groups: function (dependencies) {
+    return dependencies.map(function (dependency) {
+      return JSON.stringify([
+        dependency.type,
+        dependency.item.name_with_option_type || dependency.item.option_type || dependency.type,
+        dependency.version
+      ]);
+    }).sort();
+  },
+
+  // A slot installed by a form for a live record can sit beside an older v0 alias, because
+  // forms only promote v0 from their own option type. The v0 alias is stale when the live slot for
+  // the requested version has a newer live_order; historical versions never use v0.
+  template_config_v0_alias_is_stale: function (data_item, template_config, version) {
+    if (data_item.def_version || version === 'v0') return false;
+
+    var v0_order = template_config.v0 && template_config.v0.live_order;
+    var slot_order = template_config[version] && template_config[version].live_order;
+    return typeof v0_order === 'number' && typeof slot_order === 'number' && v0_order < slot_order;
+  },
+
+  // The name of the state slot container for the option type of a record, which is the only one
+  // that holds the config the record renders with. Null when the record does not identify its
+  // option type, in which case any container for the item type may supply the slot.
+  template_config_option_slot_name: function (data_item) {
+    if (!data_item.item_type || !data_item.option_type) return null;
+
+    return (String(data_item.item_type) + '_' + String(data_item.option_type)).underscore();
+  },
+
+  // Reports whether the state slot for one item and version is present, and whether it sits
+  // beside a stale v0 alias. A record that identifies its option type needs the slot of that
+  // option type: a slot present only under the base type name (installed by a form of another option
+  // type) is not enough, and is reported as option_slot_missing.
+  template_config_slot_status: function (data_item, data_type, version) {
+    var status = { present: false, v0_stale: false };
+    var option_slot_name = _fpa.template_config_option_slot_name(data_item);
+    var other_container_has_slot = false;
+    var type_names = [
+      data_item.item_type,
+      data_item.model_data_type,
+      data_item.resource_name,
+      data_item.name_with_option_type,
+      data_type
+    ];
+    for (var type_index = 0; type_index < type_names.length; type_index++) {
+      if (!type_names[type_index]) continue;
+
+      var type_name = String(type_names[type_index]);
+      var type_parts = type_name.split('__');
+      var last_type_part = type_parts.pop();
+      var singular_type_name = type_parts.concat(last_type_part.singularize()).join('__');
+      var candidate_type_names = [type_name, singular_type_name];
+
+      for (var candidate_index = 0; candidate_index < candidate_type_names.length; candidate_index++) {
+        var template_config = _fpa.state.template_config[candidate_type_names[candidate_index]];
+        if (!template_config) continue;
+
+        if (Object.prototype.hasOwnProperty.call(template_config, version)) {
+          if (option_slot_name) {
+            other_container_has_slot = true;
+            continue;
+          }
+
+          status.present = true;
+          if (_fpa.template_config_v0_alias_is_stale(data_item, template_config, version)) status.v0_stale = true;
+        }
+      }
+    }
+
+    if (option_slot_name) {
+      var option_config = _fpa.state.template_config[option_slot_name];
+      if (option_config && Object.prototype.hasOwnProperty.call(option_config, version)) {
+        status.present = true;
+        status.v0_stale = _fpa.template_config_v0_alias_is_stale(data_item, option_config, version);
+      } else if (other_container_has_slot) {
+        status.option_slot_missing = true;
+      }
+    }
+
+    return status;
+  },
+
+  // Reports whether every required slot (the root and its versioned embedded items) is present,
+  // and whether any of them sits beside a stale v0 alias. option_slot_missing is set when the slot
+  // that is missing is present under another option type of the same item type.
+  template_config_slots_status: function (data_item, data_type, version, dependencies) {
+    var root_status = _fpa.template_config_slot_status(data_item, data_type, version);
+    var status = { present: root_status.present, v0_stale: root_status.v0_stale };
+    if (root_status.option_slot_missing) status.option_slot_missing = true;
+    if (!status.present) return status;
+
+    for (var dependency_index = 0; dependency_index < dependencies.length; dependency_index++) {
+      var dependency = dependencies[dependency_index];
+      var dependency_status = _fpa.template_config_slot_status(dependency.item, dependency.type, dependency.version);
+      if (!dependency_status.present) {
+        status.present = false;
+        if (dependency_status.option_slot_missing) status.option_slot_missing = true;
+        return status;
+      }
+      if (dependency_status.v0_stale) status.v0_stale = true;
+    }
+
+    return status;
+  },
+
   // A function that provides a promise.
   // Allow background loading of versioned definition template configs
   // that have not already been downloaded.
@@ -291,7 +447,9 @@ _fpa = {
         }
 
         var data_array = [data_for_data_type];
-        var url_data_type = item_type.split('__').join('/').pluralize();
+        var url_data_type = item_type.split('__').join('/');
+        // A key that is already plural (such as masters) is not pluralized again
+        if (item_type != data_type || !/s$/.test(item_type)) url_data_type = url_data_type.pluralize();
       } else {
         var data_array = data[data_type];
         var url_data_type = data_type.split('__').join('/');
@@ -299,6 +457,9 @@ _fpa = {
 
       var list_data_items = [];
       var list_data_item_state_ids = [];
+      var v0_attempt_keys = [];
+      var request_group_ids = Object.create(null);
+      var pending_requests = [];
 
       if (!url_data_type || _fpa.non_versioned_template_types.indexOf(url_data_type) >= 0) {
         console.debug(`nothing: ${!url_data_type} or no non versioned template types`)
@@ -313,26 +474,55 @@ _fpa = {
 
         var data_item = data_array[k];
         data_master_id = data_master_id || data && data.master_id || data_item && data_item.master_id;
-        // Prevent requesting the template for the same instance multiple times.
-        // Keep the instance id in the cache key because different records on the same
-        // page can share a definition version yet still resolve different template
-        // dependencies through their referenced runtime models.
-        // Include the definition version as well so the same record can fetch the
-        // correct historical template config when multiple definition versions are
-        // shown together or after the current definition changes.
         if (data_item) {
           var did = url_data_type + '/' + data_item.id;
           if (data_item.vdef_version) did += '/' + data_item.vdef_version;
-          if (_fpa.state.template_config_versions[did] || !data_item.id) continue;
+          var requested_version = data_item.vdef_version || 'v0';
+          var option_type = data_item.name_with_option_type || data_item.option_type ||
+            data_item.item_type || data_item.resource_name || data_type;
+          if (!data_item.id) continue;
 
-          _fpa.state.template_config_versions[did] = true;
-          list_data_item_state_ids.push(did);
-          list_data_items.push(data_item.id);
+          var dependencies = _fpa.template_config_dependencies(data_item);
+          var dependency_groups = _fpa.template_config_dependency_groups(dependencies);
+          var request_group_id = JSON.stringify([url_data_type, option_type, requested_version, dependency_groups]);
+          // Requests that share a root record and version still differ when their embedded
+          // items are at different versions, so the dependency identity is part of the key.
+          var pending_key = dependency_groups.length ? did + '|' + JSON.stringify(dependency_groups) : did;
+
+          var pending_request = _fpa.state.template_config_requests[pending_key];
+          if (pending_request) {
+            pending_requests.push(pending_request);
+            continue;
+          }
+
+          var slots_status = _fpa.template_config_slots_status(data_item, data_type, requested_version, dependencies);
+          if (slots_status.present) {
+            // Fetch once to reconcile a stale v0 alias; a worker that still answers with an older
+            // token must not cause a refetch on every render.
+            if (!slots_status.v0_stale || _fpa.state.template_config_v0_attempts[pending_key]) continue;
+
+            _fpa.state.template_config_v0_attempts[pending_key] = true;
+            v0_attempt_keys.push(pending_key);
+          } else if (slots_status.option_slot_missing) {
+            // The slot is present only for another option type of the item type, so the record's own
+            // option type slot is fetched, once, in case the response can't supply it.
+            var option_attempt_key = pending_key + '|option-slot';
+            if (_fpa.state.template_config_v0_attempts[option_attempt_key]) continue;
+
+            _fpa.state.template_config_v0_attempts[option_attempt_key] = true;
+            v0_attempt_keys.push(option_attempt_key);
+          }
+
+          if (list_data_item_state_ids.indexOf(pending_key) < 0) list_data_item_state_ids.push(pending_key);
+          if (!Object.prototype.hasOwnProperty.call(request_group_ids, request_group_id)) {
+            request_group_ids[request_group_id] = data_item.id;
+            list_data_items.push(data_item.id);
+          }
         }
       }
       if (list_data_items.length == 0 || !list_data_items[0]) {
         console.log('no template configs to get');
-        resolve();
+        Promise.all(pending_requests).then(resolve);
         return;
       }
 
@@ -341,7 +531,17 @@ _fpa = {
         url = '/masters/' + data_master_id;
       }
 
-      url = url + '/' + url_data_type + '/' + list_data_items.join(',') + '/template_config';
+      var request_cache_version = encodeURIComponent(JSON.stringify(Object.keys(request_group_ids).sort()));
+      url = url + '/' + url_data_type + '/' + list_data_items.join(',') + '/template_config?v=' + request_cache_version +
+        '&s=' + _fpa.template_config_session_key();
+
+      var resolve_request;
+      var request_promise = new Promise(function (request_resolve) {
+        resolve_request = request_resolve;
+      });
+      list_data_item_state_ids.forEach(function (did) {
+        _fpa.state.template_config_requests[did] = request_promise;
+      });
 
       $.ajax(url, {
         success: function (data) {
@@ -359,7 +559,10 @@ _fpa = {
             }
           });
           _fpa.compile_templates();
-          resolve();
+          list_data_item_state_ids.forEach(function (did) {
+            delete _fpa.state.template_config_requests[did];
+          });
+          resolve_request();
         },
         error: function (data) {
           // list_data_item_state_ids is an Array of cache keys. Iterate values
@@ -370,11 +573,17 @@ _fpa = {
           // permanently blocking retries after a transient failure.
           list_data_item_state_ids.forEach(function (did) {
             console.error(`Failed to get template ${did}`);
-            _fpa.state.template_config_versions[did] = false;
+            delete _fpa.state.template_config_requests[did];
           });
-          resolve();
+          v0_attempt_keys.forEach(function (key) {
+            delete _fpa.state.template_config_v0_attempts[key];
+          });
+          resolve_request();
         },
       });
+
+      pending_requests.push(request_promise);
+      Promise.all(pending_requests).then(resolve);
     });
   },
 

@@ -14,6 +14,10 @@
 #   user's app type genuinely changes
 # - #partial_cache_key (issue #1400 Phase 1): shared role/UAC timestamp lookups include
 #   global rows, item updates use the precompiler list, and current_sign_in_at remains active
+# - #master_templates_skeleton_cache_key (issue #1481): delegates to one
+#   MasterTemplates::SkeletonSignature per view context (signature inputs are covered in
+#   spec/models/master_templates/skeleton_signature_spec.rb)
+# - #paired_user_for: the effective user shared by the partial and skeleton cache keys
 
 require 'rails_helper'
 
@@ -197,11 +201,10 @@ describe '#partial_cache_key' do
     expect(after_key).not_to eq(before_key)
   end
 
-  # Report is deliberately absent from HandlebarsPrecompiler.item_update_classes (see
-  # 1362_final_stage_plan): that list also feeds HandlebarsPrecompiler.generation_key, so
-  # adding Report would rotate every compiled Handlebars generation - forcing a full
-  # node-CLI recompile of unrelated content - on every report config edit. This asserts the
-  # real (unstubbed) list, so it fails if Report is ever added back.
+  # Report is deliberately absent from HandlebarsPrecompiler.item_update_classes: the list
+  # feeds partial-cache and prewarm freshness keys, so adding Report would rotate those
+  # caches on every report config edit. This asserts the real (unstubbed) list, so it fails
+  # if Report is ever added back.
   it 'never includes Report in the item-update classes used for cache keys' do
     expect(HandlebarsPrecompiler.item_update_classes).not_to include(Report)
   end
@@ -221,12 +224,21 @@ describe '#partial_cache_key' do
     # masking the very bug this asserts (same reason as app_type_available_ids_cache_spec).
     allow_any_instance_of(Admin::UserAccessControl).to receive(:clear_rails_cache_on_save?).and_return(false)
 
-    # Cache-key timestamps interpolate at second granularity, so use an explicit future
-    # updated_at rather than Time.now to guarantee this write is seen as "newer".
-    Admin::UserAccessControl.create! app_type: nil, resource_type: :general,
-                                     resource_name: :app_type, access: :read,
-                                     user:, current_admin: @admin,
-                                     created_at: 1.hour.from_now, updated_at: 1.hour.from_now
+    previous_timestamp =
+      Admin::UserAccessControl.where(app_type_id: [user.app_type_id, nil]).maximum(:updated_at) ||
+      Time.current
+    updated_at = previous_timestamp + 3.seconds
+    access_control = Admin::UserAccessControl.create!(
+      app_type: nil,
+      resource_type: :general,
+      resource_name: :app_type,
+      access: :read,
+      user:,
+      current_admin: @admin,
+      created_at: updated_at,
+      updated_at:
+    )
+    access_control.update_column(:updated_at, updated_at)
 
     helper.instance_variable_set(:@partial_cache_key_access_control_timestamps, nil)
     after_key = helper.partial_cache_key(:loaded, force_user_or_admin: user)
@@ -243,8 +255,10 @@ describe '#partial_cache_key' do
 
     allow_any_instance_of(Admin::UserRole).to receive(:clear_rails_cache_on_save?).and_return(false)
 
+    previous_timestamp = Admin::UserRole.where(app_type_id: [user.app_type_id, nil]).maximum(:updated_at) || Time.current
+    updated_at = previous_timestamp + 3.seconds
     Admin::UserRole.create! current_admin: @admin, app_type: nil, role_name: 'global-role-1400',
-                            user:, created_at: 1.hour.from_now, updated_at: 1.hour.from_now
+                            user:, created_at: updated_at, updated_at:
 
     helper.instance_variable_set(:@partial_cache_key_access_control_timestamps, nil)
     after_key = helper.partial_cache_key(:loaded, force_user_or_admin: user)
@@ -364,5 +378,53 @@ describe '#partial_cache_key' do
                                '(current_user takes precedence over matching_user in admin_app_type), ' \
                                "but both keys were: #{before_key}"
     end
+  end
+end
+
+describe '#master_templates_skeleton_cache_key' do
+  include ModelSupport
+
+  before do
+    @admin, = create_admin
+    @user, = create_user
+  end
+
+  it 'delegates to one skeleton signature instance per view context' do
+    signature = instance_double(MasterTemplates::SkeletonSignature, cache_key: 'a-key')
+    allow(MasterTemplates::SkeletonSignature).to receive(:new).and_return(signature)
+
+    2.times { expect(helper.master_templates_skeleton_cache_key(force_user_or_admin: @user)).to eq('a-key') }
+
+    expect(MasterTemplates::SkeletonSignature).to have_received(:new).once
+    expect(signature).to have_received(:cache_key).with(user_or_admin: @user, paired_user: @user).twice
+  end
+
+  it 'builds a skeleton key when no user or admin is available' do
+    allow(helper).to receive(:current_user).and_return(nil)
+    allow(helper).to receive(:current_admin).and_return(nil)
+
+    expect(helper.master_templates_skeleton_cache_key).to match(/\A[a-f0-9]{64}\z/)
+  end
+end
+
+describe '#paired_user_for' do
+  include ModelSupport
+
+  before do
+    @admin, = create_admin
+    @user, = create_user
+  end
+
+  it 'pairs a user with itself and an admin with the signed-in user, falling back to its matching user' do
+    expect(helper.paired_user_for(@user)).to eq(@user)
+    expect(helper.paired_user_for(nil)).to be_nil
+
+    allow(helper).to receive(:current_user).and_return(@user)
+    expect(helper.paired_user_for(@admin)).to eq(@user)
+
+    matching_user = instance_double(User)
+    allow(helper).to receive(:current_user).and_raise(StandardError)
+    allow(@admin).to receive(:matching_user).and_return(matching_user)
+    expect(helper.paired_user_for(@admin)).to eq(matching_user)
   end
 end

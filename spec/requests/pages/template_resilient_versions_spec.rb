@@ -98,7 +98,7 @@ RSpec.describe 'Pages template config library version resolution', type: :reques
     # the chronological history ordering).
     lib.update_columns(options: new_options, updated_at: Time.now)
     # Clear the memoized version list so point-in-time lookups see the new history.
-    Admin::ConfigLibrary.all_versions_memo = {}
+    Admin::ConfigLibrary.clear_all_versions_memo
     lib
   end
 

@@ -39,7 +39,10 @@ module Prewarm
       # current value explicitly so the child agrees with it rather than independently
       # computing its own, which would land its warmed artifacts in a generation the
       # real web process never uses.
-      env = { 'PREWARM_SERVER_CACHE_VERSION' => Application.server_cache_version }
+      env = {
+        'PREWARM_SERVER_CACHE_VERSION' => Application.server_cache_version,
+        'PREWARM_HANDLEBARS_GENERATION_VERSION' => Application.handlebars_generation_version
+      }
       io = IO.popen(env, %w[bundle exec rake prewarm:templates], chdir: Rails.root.to_s, err: %i[child out])
       Process.detach(io.pid)
       Thread.new { drain(io) }

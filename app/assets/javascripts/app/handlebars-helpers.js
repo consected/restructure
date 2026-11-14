@@ -363,7 +363,12 @@
       }
     }
     if (res && sub_key && !sub_key.hash) {
+      var requested_slot_present = Object.prototype.hasOwnProperty.call(res, sub_key);
       res = res[sub_key];
+      if (!requested_slot_present && name === 'template_config' && sub_key !== 'v0' &&
+          this && this.def_version === null) {
+        res = _fpa.state.template_config[key] && _fpa.state.template_config[key].v0;
+      }
       if (!res) {
         console.debug(`fpa_state_item: could not find ${name} ${key} ${sub_key}`);
         return;

@@ -20,16 +20,26 @@ _fpa.show_if.methods = {
     if (!item_key) return;
 
     var form_key = data.full_option_type;
+    // An item is embedded when flagged by the caller, or when its data was read from an embedded form's own fields
+    embedded_item = embedded_item === true || data.embedded_form === true;
     var def_version = data.def_version
     if (!def_version) {
       // If the embedded_item flag is not specified, check if the block item class corresponds to the data.
       // If not, assume that this is an embedded item.
-      embedded_item = embedded_item || (block.attr('data-item-class') !== item_key)
-      var block_attr_name = embedded_item ? 'data-embedded-item-def-version' : 'data-def-version';
+      var block_embedded = embedded_item || (block.attr('data-item-class') !== item_key)
+      var block_attr_name = block_embedded ? 'data-embedded-item-def-version' : 'data-def-version';
       def_version = block.attr(block_attr_name);
     }
-    var vdef_version = 'v';
-    if (def_version) vdef_version = `v${def_version}`;
+    var vdef_version;
+    if (embedded_item) {
+      // An embedded item uses its own definition version, unrelated to the block's (parent's) version
+      vdef_version = data.vdef_version || `v${def_version || 0}`;
+    } else {
+      var versioned_form = block.is('form[data-vdef-version]') ? block : block.find('form[data-vdef-version]').first();
+      var block_vdef_version = versioned_form.attr('data-vdef-version') ||
+        block.attr('data-vdef-version') || block.find('[data-vdef-version]').first().attr('data-vdef-version');
+      vdef_version = block_vdef_version || data.vdef_version || `v${def_version || 0}`;
+    }
     if (!form_key && data.option_type && data.option_type != 'default') form_key = `${item_key}_${data.option_type}`;
     if (!form_key) form_key = item_key;
 

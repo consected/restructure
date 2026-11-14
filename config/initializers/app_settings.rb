@@ -29,21 +29,21 @@ class Settings
   HandlebarsLockWaitSeconds = (ENV['FPHS_HANDLEBARS_LOCK_WAIT'].presence || 2).to_f
 
   # How many previous compiled-Handlebars generations to retain on disk alongside the
-  # current one (issue #1362), so a process/request that has not yet observed a
-  # rotation can still find its generation's compiled files. Older generations are
-  # swept opportunistically.
+  # current one (issue #1362), so a process/request that has not yet observed a runtime
+  # memcached-eviction rotation can still find its compiled files. Older generations are
+  # swept opportunistically; retain this setting for the remaining mid-uptime rotation path.
   HandlebarsKeepGenerations = (ENV['FPHS_HANDLEBARS_KEEP_GENERATIONS'].presence || 2).to_i
 
   # A generation directory younger than this is never swept, regardless of
   # HandlebarsKeepGenerations, so one created moments ago can't be deleted out from
-  # under a concurrent writer (issue #1362).
+  # under a concurrent writer (issue #1362). Retained for runtime memcached-eviction
+  # rotations, the only way a new generation can appear before restart.
   HandlebarsGenerationSafetyWindowSeconds = (ENV['FPHS_HANDLEBARS_GENERATION_SAFETY_WINDOW'].presence || 60).to_i
 
   # HandlebarsPrecompiler::FileLock files older than this are swept opportunistically
-  # (issue #1362 S7 fix) - lock file names are per user/app_type/template-set, so without
-  # this they would accumulate without bound on a long-lived server. Generous relative to
-  # HandlebarsLockWaitSeconds, since a lock file's mtime is its CREATION time (re-opening
-  # an existing file for flock does not bump it), not its last-used time.
+  # (issue #1362 S7 fix) after runtime memcached-eviction rotations; boot cleanup also
+  # removes the lock directory. Generous relative to HandlebarsLockWaitSeconds, since a
+  # lock file's mtime is its CREATION time (re-opening it for flock does not bump it).
   HandlebarsLockFileMaxAgeSeconds = (ENV['FPHS_HANDLEBARS_LOCK_FILE_MAX_AGE'].presence || 300).to_i
 
   # Whether the server spawns a `prewarm:templates` pass on boot (issue #1362 Stage 2).
