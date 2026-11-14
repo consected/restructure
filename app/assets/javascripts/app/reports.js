@@ -47,11 +47,25 @@ _fpa.reports = {
   reset_window_scrolling: function () {
     $('html').off('wheel');
   },
-  report_position_buttons: function (to_loc) {
+  report_position_buttons: function (to_loc, should_scroll) {
+    should_scroll = should_scroll !== false;
     var sb = $('.show-results-btn');
     var rf = $('.back-to-search-form-btn');
+    var new_report_results = $('.report-results-block.report-type-report');
+    var new_report_show_buttons = new_report_results.find('.show-results-btn');
     if (sb.length == 0 && rf.length == 0) {
       return;
+    }
+
+    if (new_report_results.length > 0) {
+      var report_id = new_report_results.first().closest('.report-container').attr('data-report-id');
+      var report_forms = $('form.search_report[data-report-type="report"]');
+      if (report_id) {
+        report_forms = report_forms.filter(function () {
+          return $(this).attr('data-report-id') === report_id;
+        });
+      }
+      report_forms.attr('data-report-control-position', to_loc);
     }
 
     sb.not('.has-rsf-clicks').click(function (e) {
@@ -64,16 +78,22 @@ _fpa.reports = {
     }).addClass('has-rsf-clicks');
 
     if (to_loc == 'go-to-results') {
+      new_report_show_buttons.addClass('hidden');
       sb.hide();
       rf.show();
-      _fpa.reports.reset_window_scrolling();
-      $.scrollTo('.report-results-block', 200);
+      if (should_scroll) {
+        _fpa.reports.reset_window_scrolling();
+        $.scrollTo('.report-results-block', 200);
+      }
     }
     else if (to_loc == 'go-to-form') {
+      new_report_show_buttons.removeClass('hidden report-results__show-btn--hidden').show();
       sb.show();
       rf.hide();
-      _fpa.reports.window_scrolling();
-      $.scrollTo('#body-top', 200);
+      if (should_scroll) {
+        _fpa.reports.window_scrolling();
+        $.scrollTo('#body-top', 200);
+      }
     }
     // window.location.hash = '';
   },

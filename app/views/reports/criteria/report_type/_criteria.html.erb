@@ -1,0 +1,43 @@
+<div class="report-criteria-fields-block">
+  <%= form_tag report_path(@report.id),
+        method: :get,
+        class: 'form-formatted search_report',
+        id: 'report_query_form',
+        data: {
+          result_target: "##{@results_target}",
+          preprocessor: 'reports_result',
+          report_resource_name: @report.resource_name,
+          report_name: @report.name,
+          report_id: @report.id,
+          report_type: 'report',
+          auto_submit: 'false'
+        },
+        remote: true do
+  %>
+    <% if @report.uses_table_subs? %>
+      <%= hidden_field_tag :table_name, params[:table_name] %>
+      <%= hidden_field_tag :schema_name, params[:schema_name] %>
+      <%= hidden_field_tag :table_fields, params[:table_fields] %>
+    <% end %>
+    <%= render partial: 'reports/criteria/previous_filtering_block' %>
+    <div class="row report-criteria-fields">
+      <%= render partial: 'reports/criteria/fields' %>
+      <% if context == :search_panel %>
+        <%= render partial: 'reports/criteria/report_type/inline_buttons',
+                   locals: { button_resolution: } %>
+      <% end %>
+    </div>
+    <div class="form-group form-actions clearfix report-criteria__actions">
+      <%= hidden_field_tag "search_attrs[#{Reports::Runner::ReportIdAttribName}]", '' %>
+      <%= hidden_field_tag 'part', '', id: nil %>
+      <%= hidden_field_tag 'embed', context == :embedded, id: nil %>
+      <%= render partial: 'reports/criteria/report_type/action_buttons',
+                 locals: { context:, button_resolution:, button_class: } %>
+      <%= render partial: 'reports/criteria/report_type/count_block',
+                 locals: { button_resolution: } %>
+    </div>
+  <% end %>
+  <%= link_to 'get_filter_previous', report_path(id: @report.id, get_filter_previous: 'true', format: :html),
+              id: 'get_filter_previous', remote: true,
+              data: { result_target: '#filter_on_block' }, class: 'hidden' %>
+</div>
