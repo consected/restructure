@@ -1,3 +1,23 @@
+<% if @report.report_type_report? %>
+  <%
+    context = if @view_context == :search
+                :search_panel
+              elsif embedded_report
+                :embedded
+              else
+                :report_page
+              end
+    button_resolution = Reports::ButtonResolver.resolve(
+      report: @report,
+      context:,
+      options: @report.report_options,
+      force_run: @force_run
+    )
+    button_class = context == :search_panel ? 'btn btn-default btn-sm pull-right' : 'btn btn-primary'
+  %>
+  <%= render partial: 'reports/criteria/report_type/criteria',
+             locals: { context:, button_resolution:, button_class: } %>
+<% else %>
 <%
 @click_to_search = @report_page
 @btn_class = !@click_to_search && !embedded_report ? "btn btn-default btn-sm pull-right" : "btn btn-primary"
@@ -41,3 +61,5 @@
   <%end%>
   <%=link_to 'get_filter_previous', report_path(id: @report.id, get_filter_previous: 'true', format: :html), id: 'get_filter_previous', remote: true, data: {result_target: '#filter_on_block'}, class: 'hidden' %>
 </div>
+
+<% end %>

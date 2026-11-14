@@ -139,8 +139,41 @@ _fpa.postprocessors_reports = {
       var by_auto_search = (by_auto_search_btn.attr('data-submitted') == 'true');
       by_auto_search_btn.attr('data-submitted', null);
 
+      var report_type_results = block.is('.report-results-block.report-type-report')
+        ? block
+        : block.find('.report-results-block.report-type-report').first();
+      var is_report_type_result = report_type_results.length > 0;
+      var report_type_forms = $();
+      var by_report_type_auto_submit = false;
+      if (is_report_type_result) {
+        var report_type_id = report_type_results.closest('.report-container').attr('data-report-id');
+        report_type_forms = $('form.search_report[data-report-type="report"]');
+        if (report_type_id) {
+          report_type_forms = report_type_forms.filter(function () {
+            return $(this).attr('data-report-id') === report_type_id;
+          });
+        }
+        by_report_type_auto_submit = report_type_forms.first().attr('data-auto-submit') === 'true';
+        report_type_forms.attr('data-auto-submit', 'false');
+      }
+
       var table_cell_types = _fpa.postprocessors_reports.table_cell_types;
-      if (data.count && data.count.count != 0 && !by_auto_search) {
+      if (is_report_type_result) {
+        if (by_report_type_auto_submit) {
+          var control_position = report_type_forms.first().attr('data-report-control-position') || 'go-to-results';
+          _fpa.reports.report_position_buttons(control_position, false);
+        }
+        else if (!report_type_results.hasClass('no_results_scroll') && block.find('.count-only').length === 0) {
+          if (data.count && parseInt(data.count.count, 10) === 0) {
+            _fpa.reports.report_position_buttons('go-to-form');
+          }
+          else {
+            $('.postprocessed-scroll-here').removeClass('postprocessed-scroll-here').addClass('prevent-scroll');
+            _fpa.reports.report_position_buttons('go-to-results');
+          }
+        }
+      }
+      else if (data.count && data.count.count != 0 && !by_auto_search) {
         $('.postprocessed-scroll-here').removeClass('postprocessed-scroll-here').addClass('prevent-scroll');
         _fpa.reports.report_position_buttons('go-to-results');
       }

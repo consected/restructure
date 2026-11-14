@@ -1,0 +1,41 @@
+<% if context == :report_page %>
+  <% report_button = button_resolution.buttons[:report] %>
+  <% list_records_button = button_resolution.buttons[:list_records] %>
+  <% first_button, second_button = if report_button.hidden? && !list_records_button.hidden?
+                                     [list_records_button, report_button]
+                                   else
+                                     [report_button, list_records_button]
+                                   end %>
+  <%= button_tag first_button.label,
+                 name: 'commit',
+                 value: first_button.commit,
+                 type: 'submit',
+                 class: ([button_class] + first_button.classes).join(' '),
+                 id: first_button.key == :report ? 'report-form-submit-btn' : nil %>
+  <%= button_tag second_button.label,
+                 name: 'commit',
+                 value: second_button.commit,
+                 type: 'submit',
+                 class: ([button_class] + second_button.classes).join(' '),
+                 id: second_button.key == :report ? 'report-form-submit-btn' : nil %>
+  <% unless @report.editable_data? %>
+    <% count_button = button_resolution.buttons[:count] %>
+    <%= submit_tag count_button.label,
+                   name: 'commit',
+                   value: count_button.commit,
+                   class: ([button_class] + count_button.classes).join(' ') %>
+    <% unless button_resolution.hide_export_buttons? %>
+      <%= submit_tag 'csv', name: :format, value: 'csv', class: button_class if current_admin || current_user&.can?(:export_csv) %>
+      <%= submit_tag 'json', id: 'submit_query_to_json', name: :format, value: 'json',
+                     class: "#{button_class} target_new_window" if current_admin || current_user&.can?(:export_json) %>
+    <% end %>
+  <% end %>
+<% elsif context == :embedded %>
+  <% report_button = button_resolution.buttons[:report] %>
+  <%= button_tag report_button.label,
+                 name: 'commit',
+                 value: report_button.commit,
+                 type: 'submit',
+                 class: ([button_class] + report_button.classes).join(' '),
+                 id: 'report-form-submit-btn' %>
+<% end %>

@@ -1,97 +1,139 @@
-#
 # Report Options
+# New report type `report` ignores legacy options. Legacy report types keep their
+# current behavior and ignore the new options in these context-specific blocks.
 view_options:
+  # Shared view_options
   hide_table_names: false (default) | true
-  # hide table names that appear below field names
+  # Hide table names that appear below field names.
 
   humanize_column_names: false (default) | true
-  # make column names into a friendly human form
-  # (remove underscores and capitalize words)
+  # Make column names friendly by removing underscores and capitalizing words.
 
   hide_result_count: false (default) | true
-  # Don't show the record count below the search form when
-  # results are returned
-
-  hide_search_button: false (default) | true
-  # Don't show the report search button - the report will not be
-  # searchable unless it auto runs or is "searchable"
-
-  hide_master_results_list_search_button: false (default) | true
-  # Don't show the master search results search button - the report will not be
-  # searchable unless it auto runs or runs as a table
+  # For report type `report`, hide only the count text. For legacy types this
+  # retains its existing behavior, including hiding the count button.
 
   hide_export_buttons: false (default) | true
-  # Don't show the export (csv, json) buttons even if a
-  # user is authorized to export in those formats
+  # Hide CSV/JSON export buttons, even if the user may export those formats.
 
   hide_criteria_panel: false (default) | true
-  # Don't show the search criteria panel
-    
-  prevent_collapse_for_list: false (default) | true
-  # For search results showing full master records,
-  # prevent each item from collapsing
+  # Hide the criteria panel in the report page, search panel, or embedded form.
 
   hide_field_names_with_comments: false (default) | true
-  # Don't show field names if there is a comment on the field
+  # Do not show field names when a field has a comment.
 
   show_column_comments: true | <array>
-  # Show column comments:
-  #   true: for the whole set of results across
-  #   array of schema.table names: for specific tables in the results
-  #     formatted like this:
-  #     - schema.table
-  #     - schema.other_table
+  # Show column comments for all result tables (true) or selected schema.table names.
 
   corresponding_data_dic: <string>
-  # Force the use of a specific data dictionary for column labels
-  
+  # Force the use of a specific data dictionary for column labels.
+
   view_as: <string>
-  # View the results as one of:
-  #   table (default)
-  #   list
-  #   chart
-  #   calendar
-  #   transposed_table
-  #   tree
-
-  search_button_label: <string>
-  # Label to show on the search button
-
-  report_auto_submit_on_change: nil (default) | false  | true
-  # Auto submit a search on change of a criteria field.
-  # By default, other options can affect this. Setting `false` prevents this completely.
-
-  no_results_scroll: false (default) | true
-  # Prevent scrolling of the page directly to search results
-  # if a result is returned
+  # Render results as table (default), list, chart, calendar, transposed_table, or tree.
 
   show_all_booleans_as_checkboxed: false (default) | true
-  # Show all boolean type column cells as checkboxes
+  # Show all boolean result cells as checkboxes.
 
   hide_list_labels_for_empty_content: false (default) | true
-  # In results viewed as a list, hide column labels if the content is blank
-
-  force_show_search_button: false (default) | true
-  # Ensure the search button is shown, even for auto-run reports
+  # In list results, hide column labels when the content is blank.
 
   no_sorting: false (default) | true
-  # Prevent dynamic sorting being added to the results table
-  
+  # Prevent dynamic sorting from being added to the results table.
+
   result_handlers:
     - fn1
     - fn2
-  # A list of custom handler Javascript methods to call when results are shown
+  # JavaScript handler methods to call when results are shown.
 
   add_classes:
     - css-class-1
-  # A list of CSS classes to add to the result block, to enable custom CSS to be applied consistently
+  # CSS classes to add to the result block.
 
   prevent_adding_items: false (default) | true
-  # If the report is editable, prevent allowing a new item to be added
+  # If the report is editable, prevent adding a new item.
 
   use_plain_attribute_names: false (default) | true
-  # Use simple attributes if search_attrs[] is not present. Allows third-party apps to call reports using their own
-  # attribute names, rather than requiring the formatting imposed by search_attrs[].
+  # Allow plain URL attribute names when search_attrs[] is not specified.
+
+  # Report page view_options (report type `report` only)
+  hide_report_button: false (default) | true
+  # Hide the report button. The button remains available to auto-submit.
+
+  hide_count_button: false (default) | true
+  # Hide the count button; does not hide the report's count text.
+
+  show_list_records_button: false (default) | true
+  # Show the list records button (commit=search); hidden by default.
+
+  report_button_label: report (default) | <string>
+  # Label for the report button.
+
+  list_records_button_label: list records (default) | <string>
+  # Label for the list records button.
+
+  no_report_results_scroll: false (default) | true
+  # Prevent scrolling to results and remove the back-to-form / show-results controls.
+
+  auto_submit_on_load: false (default) | true
+  # Submit automatically when the report page loads. force_run=true also submits.
+
+  auto_submit_on_change: false (default) | true
+  # Submit automatically when a criteria value changes.
+
+  auto_submit_target: <string>
+  # Target button: report by default, or list_records when hide_report_button is true.
+  # Set to report or list_records to override the report-page target.
+
+search_panel_options:
+  search_records_button_label: search (default) | <string>
+  # Label for the list records button in a search panel.
+
+  hide_search_records_button: false (default) | true
+  # Hide the search records button. The button remains available to auto-submit.
+
+  prevent_collapse_for_search_panel_results: false (default) | true
+  # Keep each master record expanded in search panel results.
+
+  auto_submit_on_load: false (default) | true
+  # Submit automatically when a search panel loads.
+
+  auto_submit_on_change: false (default) | true
+  # Submit automatically when a search panel criteria value changes. Legacy panels
+  # auto-submit on change by default; set true when migrating to retain that behavior.
+
+embedded_options:
+  hide_report_button: false (default) | true
+  # Hide the report button in an embedded modal. It remains available to auto-submit.
+
+  report_button_label: report (default) | <string>
+  # Label for the embedded report button.
+
+  auto_submit_on_load: false (default) | true
+  # Submit automatically when an embedded report loads.
+
+  auto_submit_on_change: false (default) | true
+  # Submit automatically when an embedded report criteria value changes.
+
+# view_options (legacy)
+# For legacy report types only, put these options under view_options: in real
+# configurations. They are ignored for report type `report`.
+#   hide_search_button: false (default) | true
+#   hide_master_results_list_search_button: false (default) | true
+#   force_show_search_button: false (default) | true
+#   search_button_label: <string>
+#   report_auto_submit_on_change: nil (default) | false | true
+#   no_results_scroll: false (default) | true
+#   prevent_collapse_for_list: false (default) | true
+
+# Migration from legacy options for report type `report`:
+# | Legacy key | New option |
+# | hide_search_button | view_options.hide_report_button |
+# | hide_master_results_list_search_button | search_panel_options.hide_search_records_button |
+# | force_show_search_button | No direct equivalent; new buttons are not implicitly hidden by auto-run |
+# | search_button_label | view_options.report_button_label or search_panel_options.search_records_button_label |
+# | report_auto_submit_on_change | context-specific auto_submit_on_change |
+# | no_results_scroll | view_options.no_report_results_scroll |
+# | prevent_collapse_for_list | search_panel_options.prevent_collapse_for_search_panel_results |
 
 list_options:
   hide_in_list: false (default) | true

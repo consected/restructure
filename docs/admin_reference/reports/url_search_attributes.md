@@ -23,9 +23,10 @@ This would allow either the default format to be used, or if no `search_attrs[]`
 
 Add the following attributes and values for specific operations:
 
-- `force_run=true` - automatically run the report
+- `force_run=true` - automatically run the report. For the new `report` type, this triggers auto-submit on load in any context; legacy report types retain their existing behavior.
 - `commit=count` - return only a count (as if the *Count* button had been clicked)
-- `commit=search` - return a master result list (as if the *Search* button had been clicked)
+- `commit=table` - return report results (as if the *Report* button had been clicked)
+- `commit=search` - return a master records list (the new `report` type labels this button *list records*; legacy types retain their existing *Search* behavior). This works for any report type, including JSON responses and the `search_reports_` modal path.
 - `format=<format>` - returns results as specified format (`json`, `csv`, `text`)
 - `embed=true` - used to get just the results section of the report as HTML
 - `search_attrs[no_run]=true` - typically used with embedded reports

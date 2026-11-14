@@ -1,11 +1,30 @@
 <%
   result_tables = @runner.result_tables_by_index || []
   @outer_block_id = "report-container-#{SecureRandom.hex}"
-  no_results_scroll = embedded_report || @report.report_options.view_options.no_results_scroll
+  report_type_report = @report.report_type_report?
+  if report_type_report
+    context = if @view_context == :search
+                :search_panel
+              elsif embedded_report
+                :embedded
+              else
+                :report_page
+              end
+    button_resolution = Reports::ButtonResolver.resolve(
+      report: @report,
+      context:,
+      options: @report.report_options,
+      force_run: @force_run
+    )
+    no_results_scroll = button_resolution.no_report_results_scroll?
+  else
+    no_results_scroll = embedded_report || @report.report_options.view_options.no_results_scroll
+  end
   extra_classes = embedded_report ? 'report-is-embedded' : ''
   extra_classes += " report-rn--#{@report.alt_resource_name}"
+  extra_classes += ' report-type-report' if report_type_report
 %>
-<div class="data-results report-container <%=extra_classes%>" id="<%=@outer_block_id%>" data-report-id="<%=@report.id%>">
+<div class="data-results report-container <%=extra_classes%>" id="<%=@outer_block_id%>" data-report-id="<%=@report.id%>"<%= ' data-report-type="report"'.html_safe if report_type_report %>>
   <div class="<%= @runner.count_only ? 'count-only' : '' %>">
     <div id="report-edit-" data-preprocessor="report-edit-form" data-subscription="report-edit-form-" class="new-block new-below no-processed-scroll"></div>
     <% unless embedded_report %>
@@ -27,11 +46,11 @@
         <div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
       </div>
     </div>
-    <div id="<%=@outer_block_id%>-results-block" class="report-results-block <%= @runner.count_only ? 'hidden' : '' %> <%=no_results_scroll ? 'no_results_scroll' : ''%>">
-      <% unless no_results_scroll %>
+    <div id="<%=@outer_block_id%>-results-block" class="report-results-block<%= ' report-type-report' if report_type_report %> <%= @runner.count_only ? 'hidden' : '' %> <%=no_results_scroll ? 'no_results_scroll' : ''%>"<%= ' data-report-type="report"'.html_safe if report_type_report %>>
+      <% unless no_results_scroll || (report_type_report && @runner.count_only) %>
         <div class="text-center back-to-search-form">
           <a href="#body-top" class="btn btn-default small back-to-search-form-btn"><i class="caret up"></i> back to search form</a>
-          <a href="#<%=@outer_block_id%>-results-block" class="btn btn-default small show-results-btn report-results__show-btn--hidden"><i class="caret"></i> show all results</a>
+          <a href="#<%=@outer_block_id%>-results-block" class="btn btn-default small show-results-btn <%= 'hidden ' if report_type_report %>report-results__show-btn--hidden"><i class="caret"></i> show all results</a>
         </div>
       <% end %>
       <div class="report-results-inner">
