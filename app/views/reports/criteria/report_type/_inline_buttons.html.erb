@@ -1,0 +1,11 @@
+<% button = button_resolution.buttons[:list_records] %>
+<div class="col-md-2 col-lg-2 inline-search-button report-criteria__field-group">
+  <label>&nbsp;</label>
+  <div>
+    <%= button_tag button.label,
+                   name: 'commit',
+                   value: button.commit,
+                   type: 'submit',
+                   class: (['btn btn-default'] + button.classes).join(' ') %>
+  </div>
+</div>
