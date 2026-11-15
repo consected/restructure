@@ -153,3 +153,12 @@ For automated testing, instead use:
     app-scripts/jasmine-serve.sh headless
 
 This should run the tests, closing the browser window after use.
+
+## Testing email functionality
+
+To test IMAP functionality against a test server:
+
+    docker pull greenmail/standalone:2.0.1
+    docker run -t -i -p 3025:3025 -p 3110:3110 -p 3143:3143 -p 3465:3465 -p 3993:3993 -p 3995:3995 -p 8080:8080 greenmail/standalone:2.0.1
+
+This server can also be used to test SMTP requests against a local server, without risk that any emails will actually be sent. The Rspec test suite doesn't currently use this, but may be extended to do so in the future.

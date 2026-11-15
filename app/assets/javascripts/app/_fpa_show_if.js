@@ -132,7 +132,11 @@ _fpa.show_if.methods = {
       '.list-group-item.edit-field-container' + show_edit_field_class,
       '.list-group-item.caption-before' + show_edit_field_class,
       '.list-group-item.submit-action-container' + show_edit_field_class,
-      '.list-group-item.dialog-before' + show_edit_field_class
+      '.list-group-item.dialog-before' + show_edit_field_class,
+      // Show mode blocks for forms with option types are rendered with classes based on
+      // the base item type name, not the option type specific name, so match those too
+      '.list-group-item.result-field-container' + show_edit_field_class,
+      '.list-group-item.result-notes-container' + show_edit_field_class
       ];
       var sel = sels.join(', ');
       var els = block.find(sel);

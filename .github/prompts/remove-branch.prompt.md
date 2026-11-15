@@ -1,6 +1,5 @@
 name: remove-branch
 description: Remove a feature branch after merging a pull request
-model: Claude Opus 4.6 (copilot)
 ---
 ### Remove Feature Branch After Merging a Pull Request
 

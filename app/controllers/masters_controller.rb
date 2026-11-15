@@ -192,8 +192,11 @@ class MastersController < UserBaseController
   end
 
   def search_params
-    # Permit everything, since this is not used for assignment.
-    p = params.except(:utf8, :controller, :action).permit!.to_h
+    # Return a plain Hash for downstream search/WHERE-clause building only.
+    # Use to_unsafe_h rather than permit! so the params object itself is not
+    # marked as permitted, preserving guardrails against any accidental
+    # mass-assignment if these params are read elsewhere in the request.
+    p = params.except(:utf8, :controller, :action).to_unsafe_h
     p = params_nil_if_blank p
     p = params_downcase p
     logger.debug "Screened params: #{p.inspect}"

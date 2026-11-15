@@ -71,14 +71,9 @@ class ItemFlagsController < UserBaseController
 
       return not_found unless icn
 
-      item_class = icn.ns_constantize if icn
-      # if defined? icn.ns_constantize
-      #   begin
-      #     item_class = icn.ns_constantize
-      #   rescue
-      #     item_class = "DynamicModel::#{icn}".constantize rescue nil
-      #   end
-      # end
+      # Resolve via the Resources::Models registry rather than String#constantize so
+      # only registered (allow-listed) model classes can be loaded here.
+      item_class = Resources::Models.find_model(icn)
 
       raise "Failed to get #{item_class_name}" unless item_class
 

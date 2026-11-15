@@ -22,7 +22,7 @@ class User < ActiveRecord::Base
 
   devise(*supported_modules)
 
-  include StandardAuthenticationLegacyOtp
+  include StandardAuthenticationSafeOtp
 
   belongs_to :admin
   has_one :contact_info, class_name: 'Users::ContactInfo', foreign_key: :user_id
@@ -165,7 +165,8 @@ class User < ActiveRecord::Base
 
   # Standard Devise callback to allow accounts to be disabled or expired
   def active_for_authentication?
-    super && !disabled && !account_expired?
+    otp_secret # prime the corruption flag so the check is self-contained
+    super && !disabled && !account_expired? && !otp_secret_decryption_failed?
   end
 
   # Standard Devise callback to tell user that an account has been disabled or expired
@@ -174,6 +175,8 @@ class User < ActiveRecord::Base
       :account_has_been_disabled
     elsif account_expired?
       :account_expired
+    elsif otp_secret_decryption_failed?
+      :otp_secret_invalid
     else
       super
     end
@@ -305,6 +308,14 @@ class User < ActiveRecord::Base
   # Ensure that the app type being set for the user is valid and accessible to him
   def set_app_type
     self.app_type_id = nil if app_type_id && !app_type_valid?
+  end
+
+  # Devise trackable/lockable saves the user record on every sign-in and failed
+  # login attempt. Only clear the whole Rails cache when the disabled flag
+  # actually changes, to avoid destroying the shared template/fragment cache
+  # (and server_cache_version) on routine sign-ins.
+  def clear_rails_cache_on_save?
+    saved_change_to_disabled?
   end
 
   def password_required?

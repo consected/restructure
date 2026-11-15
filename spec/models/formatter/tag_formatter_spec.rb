@@ -294,6 +294,43 @@ RSpec.describe Formatter::TagFormatter, type: :model do
     run tests
   end
 
+  it 'parses JSON and YAML strings into objects' do
+    json_string = '{"key1":"value1","key2":["item1","item2"]}'
+    yaml_string = "key1: value1\nkey2:\n- item1\n- item2\n"
+    expected_hash = { 'key1' => 'value1', 'key2' => %w[item1 item2] }
+
+    tests = [
+      [:parse_json, json_string, expected_hash],
+      [:parse_yaml, yaml_string, expected_hash]
+    ]
+
+    run tests
+  end
+
+  it 'chains parse_json and parse_yaml with serialization formatters' do
+    json_string = '{"key1":"value1","key2":["item1","item2"]}'
+    yaml_string = "key1: value1\nkey2:\n- item1\n- item2\n"
+
+    # parse_json then serialize as yaml
+    parsed = Formatter::TagFormatter.format_with 'parse_json', json_string, json_string
+    yaml_result = Formatter::TagFormatter.format_with 'yaml', parsed, parsed
+    expect(yaml_result).to eq "key1: value1\nkey2:\n- item1\n- item2\n"
+
+    # parse_yaml then serialize as json
+    parsed = Formatter::TagFormatter.format_with 'parse_yaml', yaml_string, yaml_string
+    json_result = Formatter::TagFormatter.format_with 'json', parsed, parsed
+    expect(json_result).to eq "{\n  \"key1\": \"value1\",\n  \"key2\": [\n    \"item1\",\n    \"item2\"\n  ]\n}"
+  end
+
+  it 'returns nil for invalid JSON and YAML in parse operations' do
+    tests = [
+      [:parse_json, 'not valid json {{{', nil],
+      [:parse_yaml, "key: [\ninvalid", nil]
+    ]
+
+    run tests
+  end
+
   it 'handles numeric indexing for strings and arrays' do
     test_string = 'Hello World'
     test_array = ['first', 'second', 'third', 'fourth']

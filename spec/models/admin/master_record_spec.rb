@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Tests for Admin::MasterRecord presenter class (issue #930)
+# Tests for Admin::MasterRecord presenter class (issue #930, #1183)
 #
 # Admin::MasterRecord is a read-only presenter that wraps the masters table
 # and the standard Rails models associated with it (player_infos, pro_infos, etc.).
@@ -13,6 +13,9 @@
 # - #fields returns the column list from the underlying model class
 # - Master metadata methods (crosswalk_attrs, readonly_attrs, TemporaryMasterIds)
 #   are available for rendering the masters table details
+# - #full_item_type_name returns the singularized table name (issue #1183)
+#   so that the AdminApiDefinitionsHelper can render the API panel correctly
+#   without raising "undefined method 'full_item_type_name'"
 
 require 'rails_helper'
 
@@ -191,6 +194,31 @@ RSpec.describe Admin::MasterRecord, type: :model do
         count = record.est_record_count
         expect(count).to be_an Integer
         expect(count).to be >= 0
+      end
+    end
+  end
+
+  describe '#full_item_type_name' do
+    it 'returns the singularized table name for masters' do
+      record = Admin::MasterRecord.find(1)
+      expect(record.full_item_type_name).to eq 'master'
+    end
+
+    it 'returns the singularized table name for player_infos' do
+      record = Admin::MasterRecord.find(2)
+      expect(record.full_item_type_name).to eq Settings::DefaultSubjectInfoTableName.singularize
+    end
+
+    it 'returns the singularized table name for all standard models' do
+      Admin::MasterRecord.all.each do |record|
+        expect(record.full_item_type_name).to eq(record.table_name.singularize),
+          "Expected full_item_type_name for #{record.table_name} to be #{record.table_name.singularize}"
+      end
+    end
+
+    it 'does not include double-underscore separators (unlike dynamic model prefixed names)' do
+      Admin::MasterRecord.all.each do |record|
+        expect(record.full_item_type_name).not_to include('__')
       end
     end
   end

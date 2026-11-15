@@ -1,10 +1,13 @@
 <%
   # Any entry in BasicItemTypes not otherwise handled will be treated as a general selection drop down
-  gs = general_selection("#{general_selection_name}_#{field_name_sym}".to_sym, value: form_object_instance.send(field_name_sym), quiet_fail: true)
-  unless gs
-    raise FphsException.new "The general selection #{general_selection_name}_#{field_name_sym} has not been defined. Please inform the administrator of this error."
-  end
+  gs_item_type = "#{general_selection_name}_#{field_name_sym}"
+  gs = general_selection(gs_item_type.to_sym, value: form_object_instance.send(field_name_sym), quiet_fail: true)
+  gs_fallback = general_selection_missing_fallback?(gs, gs_item_type, form_object_instance)
 %>
 
 <%= edit_field_label(form, field_name_sym, labels) %>
+<% if gs_fallback %>
+<%= missing_general_selection_text_fallback(form, field_name_sym, form_object_instance, form_object_item_type_us, gs_item_type) %>
+<% else %>
 <%= form.select field_name_sym, gs, {}, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}}  %>
+<% end %>

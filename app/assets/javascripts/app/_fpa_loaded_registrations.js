@@ -1,5 +1,25 @@
 _fpa.loaded.registrations = () => {
 
+    const setupOtpForm = $('#form-validate-otp');
+    if (setupOtpForm.length > 0) {
+        const twoFactorTimeout = _fpa.loaded.two_factor_timeout;
+        const timeoutSecs = parseInt(setupOtpForm.data('otp-setup-idle-timeout'), 10) || 300;
+        const signInPath = setupOtpForm.data('sign-in-path');
+        const signOutPath = setupOtpForm.data('sign-out-path');
+        const csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+        const setupOtpTimer = twoFactorTimeout.create_timer(timeoutSecs, () => {
+            $('#otp_attempt').val('');
+            twoFactorTimeout.sign_out_and_redirect({ signInPath, signOutPath, csrfToken });
+        });
+
+        setupOtpTimer.start();
+
+        setupOtpForm.on('submit', () => {
+            setupOtpTimer.clear();
+        });
+    }
+
     /**
      see also, config/initializers/app_settings.rb GdprCountryCodes
 

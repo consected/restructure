@@ -447,6 +447,48 @@ RSpec.describe SaveTriggers::GenerateDocument, type: :model do
       trigger = SaveTriggers::GenerateDocument.new(config, @al)
       expect { trigger.perform }.to raise_error(FphsException, /content_template/)
     end
+
+    it 'raises an error when rendered document content contains dangerous HTML' do
+      config = {
+        content_template_text: '<p>{{extra_substitutions.payload}}</p>',
+        extra_substitutions: {
+          payload: '<img src="x" onerror="alert(1)">'
+        },
+        layout_template: 'test generate doc layout',
+        container: { from_this: 'model_reference' },
+        filename: 'xss-doc.html',
+        content_type: 'text/html',
+        store_as_user: @user.email
+      }
+
+      trigger = SaveTriggers::GenerateDocument.new(config, @al)
+
+      expect do
+        trigger.perform
+      end.to raise_error(FphsException, /disallowed tag or attribute/)
+
+      expect(@container.stored_files.find_by(file_name: 'xss-doc.html')).to be_nil
+    end
+  end
+
+  describe 'stored XSS protection' do
+    it 'raises an error when inline document content contains dangerous HTML without a layout' do
+      config = {
+        content_template_text: '<body onload="alert(1)">',
+        container: { from_this: 'model_reference' },
+        filename: 'xss-inline-doc.html',
+        content_type: 'text/html',
+        store_as_user: @user.email
+      }
+
+      trigger = SaveTriggers::GenerateDocument.new(config, @al)
+
+      expect do
+        trigger.perform
+      end.to raise_error(FphsException, /disallowed tag or attribute/)
+
+      expect(@container.stored_files.find_by(file_name: 'xss-inline-doc.html')).to be_nil
+    end
   end
 
   describe 'filename sanitization' do

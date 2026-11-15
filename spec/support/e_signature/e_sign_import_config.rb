@@ -31,6 +31,11 @@ module ESignImportConfig
     new_app_type = Admin::AppType.where(name: 'test esign').first
     new_app_type.update! disabled: false, current_admin: @admin if new_app_type.disabled?
 
+    enable_user_app_access new_app_type, User.batch_user
+    Admin::UserRole.find_or_create_by!(role_name: 'nfs_store group 600', user: User.batch_user, app_type: new_app_type) do |ur|
+      ur.current_admin = @admin
+    end
+
     cdir = File.join(NfsStore::Manage::Filesystem.nfs_store_directory, 'gid600', "app-type-#{new_app_type.id}", 'containers')
     FileUtils.rm_rf cdir
     FileUtils.mkdir_p cdir

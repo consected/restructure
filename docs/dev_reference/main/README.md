@@ -4,6 +4,7 @@
 
 - ["Forking" to a Private Repository](forking_to_a_private_repository.md)
 - [Running **rspec** tests](running_rspec_tests.md)
+- [Editing json/jsonb Columns as YAML Text](yaml-edit-json-column-storage.md)
 
 ## Testing
 

@@ -377,6 +377,52 @@ RSpec.describe Messaging::MessageNotification, type: :model do
     end
   end
 
+  describe 'stored XSS protection' do
+    before :example do
+      setup_messaging_test
+      mock_notification_mailer
+      Delayed::Job.delete_all
+    end
+
+    after :example do
+      unmock_notification_mailer
+    end
+
+    it 'raises when email notification generation renders dangerous HTML' do
+      master = @activity_log.master
+
+      mn = Messaging::MessageNotification.create! app_type: @user.app_type, user: @user,
+                                                  recipient_user_ids: [@rec_user],
+                                                  layout_template_name: @layout.name,
+                                                  content_template_text: '<p>{{payload}}</p>',
+                                                  item_type: @activity_log.class.name,
+                                                  item_id: @activity_log.id,
+                                                  master:,
+                                                  message_type: :email,
+                                                  data: { payload: '<img src="x" onerror="alert(1)">' }
+
+      expect do
+        mn.generate
+      end.to raise_error(FphsException, /disallowed tag or attribute/)
+    end
+
+    it 'allows SMS generation to include script-like plain text' do
+      master = @activity_log.master
+
+      mn = Messaging::MessageNotification.create! app_type: @user.app_type, user: @user,
+                                                  recipient_user_ids: [@rec_user],
+                                                  layout_template_name: @layout_sms.name,
+                                                  content_template_text: '<script>alert(1)</script>',
+                                                  item_type: @activity_log.class.name,
+                                                  item_id: @activity_log.id,
+                                                  master:,
+                                                  message_type: :sms
+
+      expect { mn.generate }.not_to raise_error
+      expect(mn.generated_text).to include '<script>alert(1)</script>'
+    end
+  end
+
   # Shared calendar invite test data for issue #953 specs
   let(:calendar_invite_data) do
     {

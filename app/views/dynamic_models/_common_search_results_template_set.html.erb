@@ -58,11 +58,11 @@ done_templates = []
     next unless mrto.respond_to? :versioned_definition
     mrtovd = mrto.versioned_definition
     mrto_view_type = mrto.model_data_type.to_s.pluralize
-    
+
     # Ensure we only do this version once for this type of template
     done_id = "#{mrto_view_type}/#{mrtovd.def_version}"
     next if done_templates.include? done_id
-    
+
     done_templates << done_id
 
     mrtovd.option_configs.each do |mrtoetc|

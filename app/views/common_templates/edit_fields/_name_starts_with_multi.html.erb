@@ -3,27 +3,27 @@ fopt = field_options_for(form_object_instance, field_name_sym)
 
 alt_options = fopt.dig(:edit_as, :alt_options)
 opt = {}
+gs_fallback = false
 
 unless alt_options
   alt_gs_name = (fopt.dig(:edit_as, :general_selection) || "#{general_selection_name}_#{field_name_sym}").to_sym
 
   gs = general_selection(alt_gs_name, return_all: true) rescue nil
-  unless gs
-    raise FphsException.new "The general selection #{alt_gs_name} has not been defined. Please inform the administrator of this error."
-  end
-  desc = gs.reduce(false){|r,i| r || !i[6].blank?}
+  gs_fallback = general_selection_missing_fallback?(gs, alt_gs_name, form_object_instance)
 
-  v = form_object_instance.send(field_name_sym)
-  if desc.blank?
-  else
-    idesc = alt_gs_name
-    opt = {'data-add-icon' => 'question-sign', 'data-show-modal' => general_selection_block_id(idesc), title: "#{field_name.humanize} options"}
-    select_desc[alt_gs_name] = v
-  end
+  unless gs_fallback
+    desc = gs.reduce(false){|r,i| r || !i[6].blank?}
 
-  gs = general_selection(alt_gs_name, value: v) rescue nil
-  unless gs
-  raise FphsException.new "The general selection #{alt_gs_name} has not been defined. Please inform the administrator of this error."
+    v = form_object_instance.send(field_name_sym)
+    if desc.blank?
+    else
+      idesc = alt_gs_name
+      opt = {'data-add-icon' => 'question-sign', 'data-show-modal' => general_selection_block_id(idesc), title: "#{field_name.humanize} options"}
+      select_desc[alt_gs_name] = v
+    end
+
+    gs = general_selection(alt_gs_name, value: v) rescue nil
+    gs_fallback = general_selection_missing_fallback?(gs, alt_gs_name, form_object_instance)
   end
 
 else
@@ -38,4 +38,8 @@ html_options = {
 }
 %>
 <%= edit_field_label(form, field_name_sym, labels, opt) %>
+<% if gs_fallback %>
+<%= missing_general_selection_text_fallback(form, field_name_sym, form_object_instance, form_object_item_type_us, alt_gs_name) %>
+<% else %>
 <%= form.select field_name_sym, gs, options, html_options %>
+<% end %>

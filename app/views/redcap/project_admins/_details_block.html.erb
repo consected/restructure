@@ -195,6 +195,11 @@ if req&.result
                 remote: true, 
                 class: 'btn btn-warning btn-sm' %></p>
         <% end %>
+        <p><%= link_to 'retrieve & verify files', request_records_redcap_project_admin_path(id: object_instance.id, retrieve_all: true, ignore_cache: true, verify_file_fields: true), 
+              method: :post, 
+              remote: true, 
+              title: 'Retrieve all records and re-capture any file field whose stored file is missing from the filestore container',
+              class: 'btn btn-warning btn-sm' %></p>
         <p><strong>retrieve configurations</strong></p>
         <p><%= link_to 'retrieve latest redcap configuration', request_latest_rc_configs_redcap_project_admin_path(id: object_instance.id), 
               method: :post, 

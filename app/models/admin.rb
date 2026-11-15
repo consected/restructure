@@ -14,7 +14,7 @@ class Admin < ActiveRecord::Base
     devise :trackable, :timeoutable, :lockable, :validatable, :two_factor_authenticatable
   end
 
-  include StandardAuthenticationLegacyOtp
+  include StandardAuthenticationSafeOtp
 
   before_save :restrict_capabilities
   before_validation :prevent_email_change, on: :update
@@ -32,9 +32,18 @@ class Admin < ActiveRecord::Base
     Settings::AdminTimeout
   end
 
+  # Devise trackable/lockable saves the admin record on every sign-in and failed
+  # login attempt. Only clear the whole Rails cache when the disabled flag
+  # actually changes, to avoid destroying the shared template/fragment cache
+  # (and server_cache_version) on routine sign-ins.
+  def clear_rails_cache_on_save?
+    saved_change_to_disabled?
+  end
+
   # Standard Devise callback to allow accounts to be disabled or expired
   def active_for_authentication?
-    super && !disabled && !account_expired?
+    otp_secret # prime the corruption flag so the check is self-contained
+    super && !disabled && !account_expired? && !otp_secret_decryption_failed?
   end
 
   # Standard Devise callback to tell user that an account has been disabled or expired
@@ -43,6 +52,8 @@ class Admin < ActiveRecord::Base
       :account_has_been_disabled
     elsif account_expired?
       :account_expired
+    elsif otp_secret_decryption_failed?
+      :otp_secret_invalid
     else
       super
     end

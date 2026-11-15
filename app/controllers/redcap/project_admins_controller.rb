@@ -36,8 +36,12 @@ class Redcap::ProjectAdminsController < AdminController
 
     ignore_cache = params[:ignore_cache].to_s == 'true'
     retrieve_all = params[:retrieve_all].to_s == 'true'
+    verify_file_fields = params[:verify_file_fields].to_s == 'true'
 
-    @redcap__project_admin.dynamic_storage.request_records(ignore_cache:, retrieve_all:)
+    @redcap__project_admin.dynamic_storage.request_records(ignore_cache:,
+                                                           retrieve_all:,
+                                                           verify_file_fields:,
+                                                           request_source: :admin_ui)
 
     msg = "Records requested at #{DateTime.now}"
     render json: { message: msg }, status: 200
@@ -102,6 +106,20 @@ class Redcap::ProjectAdminsController < AdminController
     @redcap__project_admin.update_dynamic_model
 
     msg = "Reconfiguration requested at #{DateTime.now} - wait a few seconds then click the *refresh* button to review the changes"
+    render json: { message: msg }, status: 200
+  end
+
+  def remove_user
+    set_instance_from_id
+    check_transfer_mode_not_none
+
+    username = params[:username].to_s
+    raise FphsException, 'username is required to remove a project user' if username.blank?
+
+    @redcap__project_admin.current_admin ||= current_admin
+    @redcap__project_admin.remove_project_user(username)
+
+    msg = "Removal of user #{username} requested at #{DateTime.now} - wait a few seconds then click the *refresh* button to review the changes"
     render json: { message: msg }, status: 200
   end
 

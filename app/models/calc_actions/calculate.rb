@@ -32,7 +32,7 @@ module CalcActions
     # We won't use a query join when referring to tables based on these keys
     NonJoinTableNames = %i[this parent embedded_item referring_record top_referring_record this_references parent_references
                            parent_or_this_references user master condition value hide_error invalid_error_message
-                           role_name reference ids_referencing and_latest_matches].freeze
+                           role_name reference ids_referencing and_latest_matches lookup].freeze
 
     ReturnTypes = %w[return_value return_value_list return_result return_all_results].freeze
 
@@ -321,7 +321,7 @@ module CalcActions
         from_items = ca.get_this_val
         unless from_items.present?
           raise FphsException,
-                'ids_referencing from items was not found - '\
+                'ids_referencing from items was not found - ' \
                 'ensure return: return_all_results is specified and at least one result is returned'
         end
 
@@ -331,6 +331,8 @@ module CalcActions
           ModelReference.find_references(item, to_record_type:, filter_by:, active: true).pluck(:from_record_id)
         end
         val = refs.flatten.compact
+      elsif val_item_key == :lookup
+        val = generate_lookup_condition(val_item_value)
       elsif val_item_key.in? %i[this_references parent_references parent_or_this_references]
         val = references_values(val_item_key, val_item_value, ref_table_name)
       elsif val_item_key == :user
@@ -438,7 +440,6 @@ module CalcActions
                              "#{@current_instance.class.name} #{@current_instance.id}"
       else
         # Now go ahead and get the possible values to use in the condition
-        val = []
         # Ensure we only get results from an active (not disabled) model reference, and don't recalculate
         # showable filter since this might recurse infinitely
         model_refs = from_instance.model_references(active_only: true, showable_only: false)
@@ -560,7 +561,40 @@ module CalcActions
               "calc_action condition '#{condition}' for #{table_name} and #{field_name} is not recognized"
       end
 
+      apply_condition_return_flags(val, table_name, field_name)
       condition
+    end
+
+    def apply_condition_return_flags(val, table_name, field_name)
+      present_flags = ReturnTypes.map(&:to_sym).select { |f| val[f] }
+      if present_flags.length > 1
+        raise FphsException,
+              'condition: hash may specify at most one return flag (return_value, return_value_list, ' \
+              "return_result, return_all_results) - found: #{present_flags.join(', ')}"
+      end
+
+      generate_returns_config([present_flags.first.to_s], table_name, field_name) if present_flags.length == 1
+    end
+
+    # lookup sub-queries are intended only to provide query comparison values for the outer field.
+    # Supported lookup return modes are return_value and return_value_list.
+    # Missing or unsupported return modes raise a FphsException.
+    def generate_lookup_condition(sub_conf)
+      sub_ca = ConditionalActions.new(sub_conf, @current_instance)
+      result = sub_ca.get_this_val
+      return_mode = sub_ca.this_val_mode
+
+      unless return_mode&.in?(%w[return_value return_value_list])
+        raise FphsException,
+              "calc_action lookup sub-query must use return_value or return_value_list (got: #{return_mode})"
+      end
+
+      unless sub_ca.this_val_set?
+        raise FphsException,
+              "calc_action lookup sub-query did not set a value despite specifying #{return_mode}"
+      end
+
+      result
     end
 
     # If we are expecting values or results to be returned, handle the setup for this here
@@ -582,6 +616,7 @@ module CalcActions
       # If a return mode was specified, set this up to be used in the query
       return unless mode
 
+      self.this_val_mode = mode
       @this_val_where = {
         assoc: join_table_name,
         field_name:,
@@ -723,8 +758,7 @@ module CalcActions
     def setup_no_masters
       # Specify `no_masters: {}` at the top level to directly query the record, rather than doing
       # an inner join on the masters table
-      return unless @condition_config.respond_to?(:key?) &&
-                    @condition_config.key?(:no_masters) ||
+      return unless (@condition_config.respond_to?(:key?) && @condition_config.key?(:no_masters)) ||
                     @condition_config.map(&:first).include?(:no_masters)
 
       # Use the first specified table as the base, not joining on masters table
@@ -744,7 +778,7 @@ module CalcActions
     # set of masters specified. `{}` indicates any master, or use standard conditions to specify a list of ids,
     # such as { id: [1,2,3] }
     def limit_to_masters
-      if @condition_config.respond_to?(:key?) && @condition_config.key?(:masters) ||
+      if (@condition_config.respond_to?(:key?) && @condition_config.key?(:masters)) ||
          @condition_config.map(&:first).include?(:masters)
         # Use the full masters table as the base, allowing the configuration to limit the masters records if needed
         @base_query = Master.all
@@ -984,15 +1018,19 @@ module CalcActions
       when :has_created_activity
         condition_type = :all_completed_activity
         condition_config_array = [
-          definition_resources: {
-            extra_log_type: condition_config_array
+          {
+            definition_resources: {
+              extra_log_type: condition_config_array
+            }
           }
         ]
       when :has_not_created_activity
         condition_type = :not_any_completed_activity
         condition_config_array = [
-          definition_resources: {
-            extra_log_type: condition_config_array
+          {
+            definition_resources: {
+              extra_log_type: condition_config_array
+            }
           }
         ]
       else
@@ -1025,8 +1063,8 @@ module CalcActions
         if @current_instance.respond_to?(:extra_log_type)
           details << "extra log type: #{@current_instance.extra_log_type}"
         end
-        details << "@condition_type: #{@condition_type} - @loop_res: #{@loop_res} - @cond_res: #{@cond_res}" \
-                           " - @orig_loop_res: #{@orig_loop_res}"
+        details << "@condition_type: #{@condition_type} - @loop_res: #{@loop_res} - @cond_res: #{@cond_res} " \
+                   "- @orig_loop_res: #{@orig_loop_res}"
         details << "current user: #{current_user&.email} - " \
                    "in app type: #{current_user&.app_type&.name}"
         details << 'condition_config:'
@@ -1056,8 +1094,8 @@ module CalcActions
         details << '*******************************************************************************************'
         Rails.logger.send log_level, details.join("\n") if log_level
       rescue StandardError => e
-        details << "@condition_type: #{@condition_type} - @loop_res: #{@loop_res} - @cond_res: #{@cond_res}" \
-                          " - @orig_loop_res: #{@orig_loop_res}"
+        details << "@condition_type: #{@condition_type} - @loop_res: #{@loop_res} - @cond_res: #{@cond_res} " \
+                   "- @orig_loop_res: #{@orig_loop_res}"
         details << @condition_config
         details << @join_tables
         details << JSON.pretty_generate(@action_conf)

@@ -91,3 +91,26 @@ These view options are used by standalone page layouts:
                                           # (crosswalk or external id) 
                                           # to search for the master record
                                           # with for standalone pages
+
+## Linking to Expand Tabs
+
+You can create HTML links within your configuration (such as in `caption_before` texts) that automatically expand specific panels when clicked. This is useful for guiding users to the next steps in a workflow within the same master record.
+
+To do this, use a URL hash formatted with `#click-target-[tab-id]`.
+
+- **For standard Activity Log tabs:**
+  Use `#click-target-tab-activity-log--[item-type]` where the item type is singular.
+  *(Example: `[Open Data Requests](#click-target-tab-activity-log--data-request)`)*
+
+- **For configured `contains.resources` panels (including multi-resource panels):**
+  Use `#click-target-tab-resources-[panel-name]` where the panel name is hyphenated with spaces replaced by hyphens.
+  *(Example: for a panel named "My Custom Panel", use `[Open Custom Panel](#click-target-tab-resources-my-custom-panel)`)*
+  
+*Note: For `contains.resources` panels containing only a single resource, the older `#click-target-tab-[resource-name-hyphenated]` format acts as an alias (e.g. `#click-target-tab-activity-log--case-reviews`), but the `tab-resources-[panel-name]` format is preferred.*
+
+## Activity Log Perspectives
+
+Filter buttons can be added above an activity log content block to let users switch between
+server-side filtered views of the list.
+
+See [perspectives.md](perspectives.md) for the full configuration reference.

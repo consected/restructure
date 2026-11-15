@@ -16,10 +16,12 @@
           <th class="no-sort"></th>
           <th class="no-sort"></th>
           <th class="no-sort"></th>
+          <th class="no-sort"></th>
           <th>User</th>
           <th>First Name</th>
           <th>Last Name</th>
           <th>Apps</th>
+          <th>Current App</th>
           <th>Password expires in (days)</th>
           <th>Account Expiration</th>
           <th>Signed in at</th>
@@ -38,6 +40,7 @@
             <td><%= admin_edit_btn list_item.id%> &nbsp; <%= admin_edit_btn list_item.id, copy: list_item%> </td>
             <td><%= link_to "contact", users_contact_infos_path(filter: {user_id: list_item.id})  %></td>
             <td><%= link_to "roles", admin_user_roles_path(filter: {user_id: list_item.id}) %></td>
+            <td><%= user_access_overview_link 'access overview', :by_role, search_attrs: { user: list_item.id }, required: %i[user] %></td>
             <td><%= list_item.email %></td>
             <td><%= list_item.first_name %></td>
             <td><%= list_item.last_name %></td>
@@ -45,6 +48,7 @@
                 <p><span><%= a&.label %></span></p>
               <% end %>
             </td>
+            <td><%= index_list_item_boolean_field(list_item.accessible_app_type_ids.include?(admin_app_type&.id)) %></td>
             <td><%= list_item.expires_in == 0 ? '<i class="password-expired">expired</i>'.html_safe : list_item.expires_in %></td>
             <td><%= list_item.expire_datetime&.strftime('%Y-%m-%d %H:%M') %></td>
             <td><%= list_item.current_sign_in_at %></td>

@@ -72,18 +72,26 @@ module AdminHelper
                 data: { filter_on: filter_on.to_s, nothing_selected_text: 'select filter' })
   end
 
+  #
+  # Returns filters merged with an auto-detected name filter when the context
+  # provides a primary_model with a 'name' column and no explicit name filter
+  # is defined. Falls back gracefully when helper-only context lacks filter_values_for.
+  # @return [Hash]
+
   def show_filters
     return if view_embedded?
     return unless respond_to?(:filters) && filters
 
     show_disabled_filter = !respond_to?(:filters_prevent_disabled) || !filters_prevent_disabled
 
-    these_filters = filters.dup
+    these_filters = respond_to?(:effective_filters) ? effective_filters : filters.dup
 
-    fo = if filters_on.is_a? Symbol
-           [filters_on]
+    raw_filters_on = respond_to?(:effective_filters_on) ? effective_filters_on : filters_on
+
+    fo = if raw_filters_on.is_a? Symbol
+           [raw_filters_on]
          else
-           filters_on
+           raw_filters_on.dup
          end
 
     these_filters = { filters_on => these_filters } if these_filters.is_a? Array

@@ -1,13 +1,12 @@
 <%
-   gs = general_selection("#{general_selection_name}_source".to_sym, value: form_object_instance.source, quiet_fail: true) rescue nil
-   unless gs
-     raise FphsException.new "The general selection #{general_selection_name}_source has not been defined. Please inform the administrator of this error."
-   end
+   gs_item_type = "#{general_selection_name}_source"
+   gs = general_selection(gs_item_type.to_sym, value: form_object_instance.source, quiet_fail: true) rescue nil
+   gs_fallback = general_selection_missing_fallback?(gs, gs_item_type, form_object_instance)
 %>
 <%= edit_field_label(form, field_name_sym, labels, 'data-add-icon' => 'question-sign', 'data-show-modal' => general_selection_block_id("#{general_selection_name}_source".to_sym), title: 'original sources of data') %>
-<% if gs %>
+<% if gs_fallback %>
+  <%= missing_general_selection_text_fallback(form, :source, form_object_instance, form_object_item_type_us, gs_item_type) %>
+<% else %>
   <%= form.select :source, gs, {}, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}} %>
   <% @has_source = true %>
-<% else %>
-  <%= form.text_field :source, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}} %>
 <% end %>

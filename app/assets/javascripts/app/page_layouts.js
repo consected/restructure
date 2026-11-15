@@ -1,5 +1,6 @@
 _fpa.loaded.page_layouts = function () {
   _fpa.page_layouts.load_columns()
+  _fpa.page_layouts.setup_perspective_buttons($(document))
 
   // Update page title with the page layout label
   var $page = $('#standalone-page');
@@ -77,6 +78,38 @@ _fpa.page_layouts = class {
       }, 600);
 
     }
+  }
+
+  // Bind a delegated click handler to perspective buttons (.activity-log-perspectives__btn).
+  // When a button is clicked it is marked active (siblings deactivated) and the standard
+  // data-remote Rails UJS flow handles fetching and rendering the filtered list.
+  // Uses event delegation so it works for buttons rendered dynamically from Handlebars templates.
+  //
+  // @param {jQuery} container - scope to bind within; call once with $(document).
+  static setup_perspective_buttons(container) {
+    if (container.data('perspectives-delegated')) return;
+    container.data('perspectives-delegated', true);
+
+    container.on('click', '.activity-log-perspectives__btn', function () {
+      var $btn = $(this);
+      var activePersp = $btn.data('perspective');
+
+      // Update the injected clone immediately for visual feedback.
+      $btn.closest('.activity-log-perspectives').find('.activity-log-perspectives__btn').removeClass('active');
+      $btn.addClass('active');
+
+      // Write the active perspective slug to the --source div so that when AJAX completes
+      // and setup_sub_lists re-clones from --source, it can restore the correct active button.
+      var $resourceBlock = $btn.closest('[data-sub-for-root]');
+      if ($resourceBlock.length) {
+        var $source = $resourceBlock.prevAll('.activity-log-perspectives--source').first();
+        if ($source.length) {
+          $source.attr('data-active-perspective', activePersp);
+        }
+      }
+
+      // data-remote / Rails UJS handles the AJAX request automatically.
+    });
   }
 
 }

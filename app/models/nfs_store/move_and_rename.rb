@@ -34,7 +34,8 @@ module NfsStore
       top_paths = all_paths.map { |f| f && f.split('/').compact.first }.uniq
 
       if top_paths.length > 1
-        raise FsException::Action, "Files and folders to move must all be in the same base path. Specified base paths are #{top_paths.join(', ')}"
+        raise FsException::Action,
+              "Files and folders to move must all be in the same base path. Specified base paths are #{top_paths.join(', ')}"
       end
 
       # If we have multiple paths and more than one of the initial ones is at the same depth
@@ -49,9 +50,10 @@ module NfsStore
         rf = item[:retrieved_file]
         # Replace the top path with the new path, allowing relative moves of sub directories
         # Handle blank top paths carefully
-        rf.path = "/#{rf.path}" if top_path.blank?
-        rf.path = "#{rf.path}/"
-        new_item_path = rf.path.sub(%r{^#{top_path}/}, "#{new_path}/").gsub(%r{(^/+|/+$)}, '')
+        item_path = rf.path.to_s
+        item_path = "/#{item_path}" if top_path.blank?
+        item_path = "#{item_path}/"
+        new_item_path = item_path.sub(%r{^#{top_path}/}, "#{new_path}/").gsub(%r{(^/+|/+$)}, '')
         rf.move_to new_item_path
       end
 
@@ -72,13 +74,18 @@ module NfsStore
     def rename_file(selected_items, new_name)
       raise FsException::Action, 'New name is not specified' if new_name.blank?
 
+      # Entry-point guard: enforce single-segment filename contract before
+      # setup_items mutates state.
+      Manage::Filesystem.validate_file_name!(new_name)
+
       setup_items selected_items, :move_files
 
       all_action_items.each do |item|
         f = item[:retrieved_file]
         archive_file = f.archive_file if f.respond_to? :archive_file
         unless filters_allow_rename?(archive_file, f.path, new_name)
-          raise FsException::Action, "New name is not allowed. Check it meets the requirements of the 'valid upload files' list"
+          raise FsException::Action,
+                "New name is not allowed. Check it meets the requirements of the 'valid upload files' list"
         end
 
         f.move_to nil, new_name

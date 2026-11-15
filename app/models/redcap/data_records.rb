@@ -17,14 +17,17 @@ module Redcap
     attr_accessor :project_admin, :records, :class_name, :errors,
                   :created_ids, :updated_ids, :unchanged_ids, :disabled_ids, :storage_stage,
                   :current_admin, :retrieved_files, :upserted_records, :imported_files, :failed_files,
+                  :skipped_files,
                   :step_count, :job, :done,
                   :integer_survey_identifier_field_name, :survey_identifier_field_name, :set_master_id_using_association,
                   :skip_store_if_no_survey_identifier, :skipped_ids,
                   :external_id_fkey_name,
                   :retrieved_from_cache, :using_date_range_filter, :is_manual_pull,
-                  :date_range_begin
+                  :date_range_begin,
+                  :request_source,
+                  :ignore_cache, :retrieve_all, :verify_file_fields
 
-    def initialize(project_admin, class_name, is_manual_pull: false)
+    def initialize(project_admin, class_name, is_manual_pull: false, request_source: nil, verify_file_fields: false)
       super()
       self.project_admin = project_admin
       self.class_name = class_name
@@ -41,6 +44,7 @@ module Redcap
       self.upserted_records = []
       self.imported_files = []
       self.failed_files = []
+      self.skipped_files = []
       self.step_count = UpdateJobRequestEvery
       self.survey_identifier_field_name = project_admin.survey_identifier_field.to_sym
       self.integer_survey_identifier_field_name = project_admin.integer_survey_identifier_field.to_sym
@@ -50,6 +54,10 @@ module Redcap
       self.retrieved_from_cache = false
       self.using_date_range_filter = false
       self.is_manual_pull = is_manual_pull
+      self.request_source = request_source
+      # Only honour file-field verification on manual (admin-initiated) pulls so
+      # scheduled pulls remain fast. On scheduled pulls the option is forced off.
+      self.verify_file_fields = is_manual_pull && verify_file_fields
     end
 
     #
@@ -57,15 +65,34 @@ module Redcap
     # @see Redcap::CaptureRecordsJob#perform_later
     # @param [Boolean] ignore_cache - force pull from REDCap, bypassing cache
     # @param [Boolean] retrieve_all - ignore export_only_updated_records setting and retrieve all records
-    def request_records(ignore_cache: false, retrieve_all: false)
+    # @param [Boolean] verify_file_fields - on manual pulls, treat records as changed when a file
+    #                                       field's underlying stored file is missing.
+    def request_records(ignore_cache: false, retrieve_all: false, verify_file_fields: false)
       jobclass = Redcap::CaptureRecordsJob
       jobs = ProjectAdmin.existing_jobs(jobclass, project_admin)
-      return if jobs.count > 0
+      return if jobs.any?
 
-      self.job = Redcap::CaptureRecordsJob.perform_later(project_admin, class_name, ignore_cache:, retrieve_all:)
+      # Remember the requested options so they can be recorded in the job request,
+      # giving admins visibility into what was actually requested. Note that
+      # self.verify_file_fields may have been clamped to false by #initialize when
+      # is_manual_pull is false, so we explicitly record the value passed here.
+      self.ignore_cache = ignore_cache
+      self.retrieve_all = retrieve_all
+      self.verify_file_fields = verify_file_fields
+
+      self.job = Redcap::CaptureRecordsJob.perform_later(project_admin, class_name,
+                                                         ignore_cache:,
+                                                         retrieve_all:,
+                                                         verify_file_fields:)
       return if Rails.application.config.active_job.queue_adapter == :inline
 
-      project_admin.record_job_request('setup job: store records', result: { requested: true, job: job&.job_id })
+      source_result = request_source ? { request_source => true } : {}
+      project_admin.record_job_request(
+        'setup job: store records',
+        result: { requested: true,
+                  job: job&.job_id,
+                  requested_options: requested_options }.merge(source_result)
+      )
     end
 
     #
@@ -78,6 +105,10 @@ module Redcap
     # @param [Boolean] ignore_cache - force pull from REDCap, bypassing cache
     # @param [Boolean] retrieve_all - ignore export_only_updated_records setting and retrieve all records
     def retrieve_validate_store(ignore_cache: false, retrieve_all: false)
+      # Capture the effective options on the instance so they can be recorded in
+      # the job request result alongside verify_file_fields (set in #initialize).
+      self.ignore_cache = ignore_cache
+      self.retrieve_all = retrieve_all
       self.storage_stage = 'retrieve_validate_store'
       # Calculate date_range_begin BEFORE creating new job request record,
       # so we get the timestamp from the previous successful run
@@ -100,7 +131,7 @@ module Redcap
       store
     rescue StandardError => e
       self.errors ||= []
-      self.errors << { error: e.to_s, backtrace: e.short_string_backtrace }
+      errors << { error: e.to_s, backtrace: e.short_string_backtrace }
       # Append failure indicator to preserve which stage failed
       self.storage_stage = "#{storage_stage} (failed)"
       update_job_request
@@ -182,7 +213,7 @@ module Redcap
       si_name = survey_identifier_field_name
       integer_si_name = integer_survey_identifier_field_name
 
-      return unless records.first.has_key?(si_name)
+      return unless records.first.key?(si_name)
 
       records.each do |rec|
         val = rec[si_name]
@@ -333,7 +364,7 @@ module Redcap
       return @retrieved_rec_ids if @retrieved_rec_ids
 
       @retrieved_rec_ids = records.map do |r|
-        record_identifier_fields.map { |f| [f, r[f].to_s] }.to_h
+        record_identifier_fields.to_h { |f| [f, r[f].to_s] }
       end
     end
 
@@ -521,6 +552,7 @@ module Redcap
     # @return [Integer | false | nil]
     def create_or_update(retrieved_record, keep_results: true)
       rec_ids = record_identifiers(retrieved_record)
+      attrs_for_persistence = retrieved_record.dup
       existing_record = model.where(rec_ids).first
       if existing_record
         existing_record.no_track = true if existing_record.respond_to? :no_track
@@ -543,8 +575,19 @@ module Redcap
           return
         end
 
+        # Defer file field values until the actual file has been captured.
+        # Persisting the filename string before capture_files runs leaves the
+        # row inconsistent (filename present, no stored file) if anything
+        # between the commit and capture_files raises - notably the
+        # after_commit save trigger handlers. By nulling the field here and
+        # writing the filename back via update_columns only after a successful
+        # file import, a failed pull leaves the field NULL so the next pull
+        # detects the mismatch and retries.
+        pending_file_field_values = extract_and_null_file_fields(attrs_for_persistence)
+
         existing_record.force_save!
-        if existing_record.update(retrieved_record)
+        if existing_record.update(attrs_for_persistence)
+          stash_pending_file_fields(existing_record, pending_file_field_values)
           if keep_results
             updated_ids << rec_ids
             upserted_records << existing_record
@@ -554,7 +597,11 @@ module Redcap
           errors << { id: rec_ids, errors: existing_record.errors, action: :update }
         end
       else
-        new_record = model.new(retrieved_record)
+        # See comment above on deferring file field values until capture_files
+        # has actually stored the file.
+        pending_file_field_values = extract_and_null_file_fields(attrs_for_persistence)
+
+        new_record = model.new(attrs_for_persistence)
         new_record.no_track = true if new_record.respond_to? :no_track
         if new_record.respond_to? :current_user=
           new_record.current_user = current_user
@@ -570,6 +617,7 @@ module Redcap
 
         new_record.force_save!
         if new_record.save
+          stash_pending_file_fields(new_record, pending_file_field_values)
           if keep_results
             created_ids << rec_ids
             upserted_records << new_record
@@ -583,6 +631,32 @@ module Redcap
       nil
     end
 
+    # Remove file field values from the retrieved record hash so the row is
+    # persisted without filename strings for fields whose underlying files have
+    # not yet been captured. Returns the removed { field_name => value } hash
+    # to be replayed by #capture_files once the file is stored.
+    # @param [Hash] retrieved_record - mutated in place
+    # @return [Hash{Symbol => String}]
+    def extract_and_null_file_fields(retrieved_record)
+      pending = {}
+      file_fields.each do |field_name|
+        value = retrieved_record[field_name]
+        next if value.blank?
+
+        pending[field_name] = value
+        retrieved_record[field_name] = nil
+      end
+      pending
+    end
+
+    # Attach the deferred file field values to the persisted AR record so
+    # #capture_files can replay them after a successful file import.
+    # @param [UserBase] record
+    # @param [Hash{Symbol => String}] pending_file_field_values
+    def stash_pending_file_fields(record, pending_file_field_values)
+      record.instance_variable_set(:@_redcap_pending_file_fields, pending_file_field_values)
+    end
+
     #
     # Capture files from file fields in the requested record, which typically represents
     # an updated or created dynamic model instance.
@@ -594,8 +668,15 @@ module Redcap
     # @param [UserBase] record - the record to capture the file fields from
     def capture_files(record)
       self.done = 0
+      pending_file_field_values = record.instance_variable_get(:@_redcap_pending_file_fields) || {}
+
       file_fields.each do |field_name|
-        next if record[field_name].blank?
+        # Source the filename from the deferred values stashed before persistence,
+        # falling back to the AR attribute (e.g. for retried/legacy rows where
+        # the field already holds the filename string).
+        filename_value = pending_file_field_values[field_name]
+        filename_value = record[field_name] if filename_value.blank?
+        next if filename_value.blank?
 
         self.done += 1
         update_job_request if done % step_count == 0
@@ -620,7 +701,34 @@ module Redcap
                                              current_user,
                                              path:,
                                              replace: true)
-          imported_files << res if res
+          if res
+            imported_files << res
+          else
+            # import_file returned nil: the file was skipped (e.g. an identical
+            # stored_file row already existed, or skip_existing matched).
+            # This can mask a missing-on-disk file when a stored_files row exists
+            # but the underlying file is not actually present, so log everything
+            # passed to import_file for diagnosis.
+            skipped_files << { record_id:, field_name:, file_name: filename, path: }
+            Rails.logger.warn(
+              'Redcap capture_files: NfsStore::Import.import_file returned nil (file skipped). ' \
+              "container_id: #{container.id}, file_name: #{filename}, " \
+              "file_path: #{temp_file.path}, user: #{current_user&.email}, " \
+              "path: #{path}, replace: true, record_id: #{record_id}, " \
+              "project_admin: #{project_admin.id}"
+            )
+          end
+
+          # Now that the file is stored (or was already stored and skipped), write the deferred
+          # filename back to the dynamic-model row. Use update_columns to skip validations and
+          # callbacks so this does not re-fire after_commit save triggers.
+          # Skip when record is not an AR instance (e.g. when capture_files
+          # is called directly with a retrieved hash in tests).
+          if record.respond_to?(:update_columns)
+            record.update_columns(field_name => filename_value)
+          else
+            record[field_name] = filename_value
+          end
         rescue Exception => e
           # We rescue Exception rather than StandardError, since file errors inherit from Exception
           msg = "Failed to retrieve or import REDCap file for record: #{record_id} - field name: #{field_name} - with user: #{current_user.email}.\n#{e}"
@@ -674,7 +782,54 @@ module Redcap
       # This will allow the lookup of the master to run by treating it as having changed.
       res[:master_id] = true if set_master_id_using_association && existing_record['master_id'].nil?
 
+      # Optionally verify that each file field's underlying stored file is
+      # actually present in the project's filestore container. When a file is
+      # missing on disk (no nfs_store_stored_files row at the expected path /
+      # file_name) we treat the record as changed, so capture_files retries.
+      # This is only enabled when explicitly requested for a manual pull, since
+      # it adds overhead to record comparison.
+      if verify_file_fields && res.empty?
+        missing = file_fields.find do |field_name|
+          existing_value = existing_attrs[field_name]
+          next false if existing_value.blank? || existing_value == FailedFileFieldMarker
+
+          !stored_file_exists?(existing_record, field_name)
+        end
+        res[missing] = :stored_file_missing if missing
+      end
+
       res.empty?
+    end
+
+    # Check whether a stored_files row exists in the project's filestore
+    # container for the given record + file field, using a per-run memoized
+    # index to keep this O(1).
+    # @param [Dynamic::DynamicModelBase] existing_record
+    # @param [Symbol] field_name
+    # @return [Boolean]
+    def stored_file_exists?(existing_record, field_name)
+      record_id = existing_record[record_id_field]
+      return false if record_id.blank?
+
+      key = "#{project_admin.dynamic_model_table}/file-fields/#{record_id}/#{field_name}"
+      stored_file_index.include?(key)
+    end
+
+    # Memoized Set of "<path>/<file_name>" entries for every stored_files row in
+    # the project's filestore container, restricted to the file-fields path
+    # prefix used by capture_files.
+    # @return [Set<String>]
+    def stored_file_index
+      @stored_file_index ||= begin
+        container = project_admin.file_store
+        path_prefix = "#{project_admin.dynamic_model_table}/file-fields/"
+        Set.new(
+          container.stored_files
+                   .where('path LIKE ?', "#{ActiveRecord::Base.sanitize_sql_like(path_prefix)}%")
+                   .pluck(:path, :file_name)
+                   .map { |path, file_name| "#{path}/#{file_name}" }
+        )
+      end
     end
 
     #
@@ -682,6 +837,19 @@ module Redcap
     # @return [User]
     def current_user
       @current_user ||= project_admin.current_user
+    end
+
+    #
+    # Hash describing the options that were requested for this pull, suitable
+    # for recording on the project admin job request so admins can see exactly
+    # what was asked for (including options threaded through to background jobs).
+    # @return [Hash]
+    def requested_options
+      {
+        ignore_cache: ignore_cache || false,
+        retrieve_all: retrieve_all || false,
+        verify_file_fields: verify_file_fields || false
+      }
     end
 
     #
@@ -701,11 +869,14 @@ module Redcap
         errors:,
         imported_files_count: imported_files&.length,
         failed_files_count: failed_files&.length,
+        skipped_files_count: skipped_files&.length,
         job: job&.id,
         retrieved_from_cache:,
         using_date_range_filter:,
-        date_range_begin: (date_range_begin if using_date_range_filter)
+        date_range_begin: (date_range_begin if using_date_range_filter),
+        requested_options: requested_options
       }
+      result[request_source] = true if request_source
 
       if create
         project_admin.record_job_request('store records', result:)

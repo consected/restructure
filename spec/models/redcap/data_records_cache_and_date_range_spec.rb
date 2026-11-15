@@ -954,15 +954,6 @@ RSpec.describe 'Redcap::DataRecords cache and date range', type: :model do
   end
 
   describe 'failed file field handling for export_only_updated_records' do
-    before :all do
-      @bad_admin, = create_admin
-      @bad_admin.update! disabled: true
-      create_admin
-      @projects = setup_redcap_project_admin_configs
-      @project = @projects.first
-      setup_file_fields
-    end
-
     before :example do
       @bad_admin, = create_admin
       @bad_admin.update! disabled: true
@@ -971,6 +962,7 @@ RSpec.describe 'Redcap::DataRecords cache and date range', type: :model do
       setup_file_store
       @projects = setup_redcap_project_admin_configs
       @project = @projects.first
+      setup_file_fields
       reset_mocks
     end
 
@@ -1189,14 +1181,21 @@ RSpec.describe 'Redcap::DataRecords cache and date range', type: :model do
         dr.retrieve
         expect(dr.records.length).to be > 0
 
+        retrieved_with_file = dr.records.find { |r| r[:file1].present? }
+        expect(retrieved_with_file).to be_present
+        target_record_id = retrieved_with_file[dr.send(:record_id_field)]
+
         # Create/update records first
         dr.records.each do |record|
           dr.send(:create_or_update, record)
         end
 
-        # Find a record with file fields
-        model_record = dr.upserted_records.find { |r| r[:file1].present? }
+        # The filename is deferred until capture_files succeeds, so locate the
+        # persisted record by record id and confirm the pending file stash.
+        model_record = dr.upserted_records.find { |r| r[dr.send(:record_id_field)] == target_record_id }
         expect(model_record).to be_present
+        pending = model_record.instance_variable_get(:@_redcap_pending_file_fields)
+        expect(pending[:file1]).to be_present
 
         dr.send(:capture_files, model_record)
 

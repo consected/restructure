@@ -208,6 +208,9 @@ module NfsStore
       def move_to(new_path, new_file_name = nil)
         res = false
         new_file_name ||= file_name
+        # Reject any new_file_name that is not a safe single-segment
+        # filename at the entry point, before any filesystem operation.
+        Filesystem.validate_file_name!(new_file_name)
         current_user_role_names.each do |role_name|
           curr_path = file_path_for(role_name:)
           next unless File.exist?(curr_path)

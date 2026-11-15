@@ -467,18 +467,20 @@ class ReportsController < UserBaseController
       return
     end
 
-    params[:search_attrs] = params.permit!.to_h.except(*ControlParams)
+    params[:search_attrs] = params.to_unsafe_h.except(*ControlParams)
   end
 
   #
-  # Permit everything, since this is not used for assignment.
+  # Return the search_attrs as a plain Hash for query parameter binding only.
+  # Uses to_unsafe_h rather than permit! so the params object retains its
+  # unpermitted state and cannot be accidentally mass-assigned downstream.
   # If the search_attrs param is a string, just return it
   def search_attrs_params_hash
     @search_attrs_params_hash ||= if params[:search_attrs].blank? || params[:search_attrs] == '_use_defaults_'
                                     @runner.using_defaults = true
                                     { _use_defaults_: '_use_defaults_' }
                                   else
-                                    params.require(:search_attrs).permit!.to_h.dup
+                                    params.require(:search_attrs).to_unsafe_h.dup
                                   end
   end
 
@@ -545,7 +547,7 @@ class ReportsController < UserBaseController
       end
     end
 
-    send_data res_a.join(''), filename: 'report.csv'
+    send_data res_a.join, filename: 'report.csv'
   end
 
   def render_json(show_as: nil)
@@ -555,21 +557,22 @@ class ReportsController < UserBaseController
     template = pto.template
     key_column = pto.key_column
 
-    show_results = if show_as == 'results_and_attributes'
+    show_results = case show_as
+                   when 'results_and_attributes'
                      {
                        results: @results,
                        search_attributes: @runner.search_attr_values
                      }
-                   elsif show_as == 'results_only'
+                   when 'results_only'
                      @results
-                   elsif show_as == 'row_template'
+                   when 'row_template'
                      @results.map do |r|
                        Formatter::Substitution.substitute_into_template(template, r.to_h)
                      end
-                   elsif show_as == 'key_template'
-                     @results.map do |r|
+                   when 'key_template'
+                     @results.to_h do |r|
                        [r[key_column], Formatter::Substitution.substitute_into_template(template, r.to_h)]
-                     end.to_h
+                     end
                    end
 
     show_results = show_results.first if single_res && show_results.is_a?(Array) && show_results.length <= 1

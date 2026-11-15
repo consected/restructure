@@ -11,6 +11,8 @@
 6. **Never commit directly to `up-develop` or `develop` branches** - always create feature branches and pull requests
 7. **Focus on configuration over code** - most features should be achievable through admin panel settings rather than new Ruby code
 8. **Create new files and edit directly in the editor**; avoid using command line file operations to generate source code
+9. **Never update CHANGELOG.md directly** - the release process will handle this based on commit messages and pull request titles
+10. **You have permission to use interactive debugging tools** (e.g., `interactive_debug_session`, `debugger`) to pause execution and inspect state, either in Rspec tests or if we are collaborating on a development server.
 
 
 ### Critical Rules for Running Terminal Commands
@@ -50,6 +52,7 @@ For all Ruby on Rails code you write, follow these conventions: [Ruby on Rails C
 - Use BEM (Block, Element, Modifier) naming conventions for CSS classes.
 - If JavaScript is needed for UI behavior, preferably use appropriate postprocessors rather than inline scripts.
 - If inline `<script>` or `<style>` tags are necessary, use Rails `javascript_tag` or `style_tag` helpers with a nonce for CSP compliance.
+- When creating links to admin resources, never use the `edit` path directly. Instead, use the `filter[id]=<id>` and `perform_action=edit` parameters to link to the resource in a way that is compatible with the admin panel's search and edit functionality.
 
 ### Database Conventions
 - Use migrations for all schema changes; avoid direct DB modifications for implementation.
@@ -69,9 +72,8 @@ For Rspec System Specs Refer to: [Rspec System Specs project coding standards](i
 - Create a directory `./tmp/agent-tmp` in the workspace root
 - Use `./tmp/agent-tmp` for all temporary files and logs
 - DO NOT set environment variables or prefix commands with `VAR=VALUE`; use the appropriate app-scripts instead or `export VAR=value` in the terminal before running commands
-- DO NOT run commands that redirect output to `/dev/null` or `/tmp/`
-- DO NOT run commands in the background using `&` or `nohup` unless absolutely necessary, and if so, ensure output is redirected to a file in `./tmp/agent-tmp` for later analysis
-- DO NOT run commands with `timeout` unless absolutely necessary
+- DO NOT run commands in the background using `&` or `nohup` unless absolutely necessary, and if so, ensure output is redirected to a file in `./tmp/agent-tmp` or '/tmp' for later analysis
+- DO NOT run commands with `timeout` unless absolutely necessary OR if using `interactive_debug_session` or `debugger` to pause execution for analysis
 
 ```bash
 # Let test output stream, then analyze the saved log

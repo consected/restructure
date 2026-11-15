@@ -5,6 +5,8 @@
     <p>Using this definition will fail</p>
   <% end %>
 
+  <%= render partial: 'admin/dynamic_models/config_errors', locals: { object_instance: } %>
+
   <label>item type name</label>
   <p class="al-item-type">
   <code><%= object_instance.full_item_type_name %></code>
@@ -38,14 +40,6 @@
 
   <%= render partial: 'admin/dynamic_models/est_record_count' %>
   <%= render partial: 'admin/dynamic_models/check_tracker_updates' %>
-
-  <%= render partial: 'admin/common_templates/def_uac_summary', 
-             locals: { 
-               object_instance:, 
-               current_app_type_id: current_admin.matching_user&.app_type_id,
-               current_user: current_admin.matching_user
-             } %>
-
   <% unless object_instance.table_or_view_ready?%>
   <div class="help-block">
   <p>Typically the database table or view associated with an activity log is created when the definition is first created (or prior to this if handled manually.)</p>
@@ -55,123 +49,282 @@
   </div>
   <% end %>
 </div>
-<%= render partial: 'admin/dynamic_models/config_errors', locals: { object_instance: } %>
-<div class="activity-list-section">
-  <label>activities</label>
-  <p>Add a new <code>[activity_name]:</code> underscored activity name without indentation.</p>
-  <p>Click an activity name from the list below to jump to its definition. Each activity shown lists the fields defined for it.<br/>&nbsp;</p>
-  <ul class="activity-list">
-  <% object_instance.option_configs_names&.each do |name| 
-       conf = object_instance.option_type_config_for(name)
 
-       next if name.in?([:primary, :blank_log]) && !conf&.fields&.present?
-  %>
-    <li class="activity-list-name" data-al-elt-block="#al_ib_<%=name%>"><span class="activity-list-name"><%=name%></span> <% unless conf %>(invalid)<% end %>
-    <% if conf&.label&.present?  %><span class="activity-list-activity-label"><%= conf.label %></span><% end %>
-    </li>
-    <div class="activity-list-item-block collapse" id="al_ib_<%=name%>">  
-      <% if conf&.fields&.present?  %>
-      <ul class="activity-list-activity-fields">
-        <li><%= conf.fields.join("</li> <li>").html_safe %></li>
-      </ul>
-      <% end %>
-      <% ref_def = conf&.embed
-         if ref_def&.present?  
-            got = ref_def.dig(:resource_model_def, :resource_item_name)
-      %>
-      <ul class="activity-list-activity-embed">
-        <%= render partial: 'admin/activity_logs/def_embed_info', locals: {resource_item_name: got, ref_def:} %>
-      </ul>
-      <% end %>
-      <% act_refs = conf&.references
-         if act_refs&.present?  
-         %>
-           <ul class="activity-list-activity-references">
-         <%
-              object_instance.referenced_table_def(act_refs)&.each do |ref_def|
-                full_ref_name = ref_def[:full_ref_name]
-         %>
-          <%= render partial: 'admin/activity_logs/def_references_info', locals: {full_ref_name: full_ref_name, ref_def:} %>
-              <% end %>
-          </ul>
-      <% end %>
-      <ul class="common-def-panel--uacs">
-        <%= render partial: 'admin/activity_logs/def_activity_uac_info', locals: {app_type_id: current_admin.matching_user&.app_type_id, resource_name: conf.resource_name} %>
-      </ul>
-    </div>
-  <% end %>
-  </ul>
-  <div id="activity-list-detail" class="activity-list-detail"></div>
-</div>
-
-<div class="activity-list-all-fields">
-  <label>all fields</label>
-  <p>Set of all fields aggregated from all activities.</p>
-  <p class="al-field-list">
-  <ul class="activity-list">
-    <li><%= object_instance.all_implementation_fields
-              .reject{|f| f.index(/^placeholder_|^embedded_report_/)}
-              .join("</li> <li>")
-              .html_safe %></li>
-  </ul>
-  </p>
-</div>
-
-<%= render partial: 'admin/common_templates/def_details_libraries', locals: {object_instance: object_instance} %>
-<%= render partial: 'admin/common_templates/def_details_dialogs', locals: {object_instance: object_instance} %>
-
-<div class="activity-list-embeds">
-  <label>embeds</label>
-  <p>Add <code>embed:</code> configurations to directly embed another dynamic definition. This uses database joins, 
-  rather than an intermediate model references to access embedded records.</p>
-  <ul class="al-reference-list al-embed-list">
-  <% shown_refs = []
-     object_instance.all_direct_embed_tables.each do |ref_def| 
-  
-      got = ref_def.dig(:resource_model_def, :resource_item_name)
-      unless shown_refs.include?(got)
-        shown_refs << got
-    %>
-    <%= render partial: 'admin/activity_logs/def_embed_info', locals: {resource_item_name: got, ref_def:, show_table: true} %>
-    <%  end %>
-  <% end %>
-  </ul>
-</div>
-
-<div class="activity-list-references">
-  <label>references</label>
-  <p>Add <code>references:</code> configurations to connect to other dynamic definitions. This connects through
-  an intermediate `model_references` database table, allowing arbitrary connections to be made between records.</p>
-  
-  <ul class="al-reference-list">
-  <% shown_refs = []
-     object_instance.all_referenced_tables.each do |ref_def| 
-  %>
-  <%  full_ref_name = ref_def[:full_ref_name]
-      unless shown_refs.include?(full_ref_name)
-        shown_refs << full_ref_name
-  %>
-    <%= render partial: 'admin/activity_logs/def_references_info', locals: {full_ref_name: full_ref_name, ref_def:, show_table: true} %>
-    <%  end %>
-  <% end %>
-  </ul>
-</div>
-
-<div class="activity-list-file-filters">
-  <label>file filters</label>
-  <p>File containers use file filters to define which filenames can be viewed for a specific activity or default configuration.</p>
-  <p>
-  <%= link_to(link_label_open_in_new("edit"),
-        admin_nfs_store_filter_filters_path(filter: {resource_name: "#{object_instance.full_item_type_name}__%"}),
-        target: '_blank'
+<%
+  current_app_type_id = current_admin.matching_user&.app_type_id
+  current_user = current_admin.matching_user
+  al_accordion_id = "al-details-accordion-#{object_instance.id || 'new'}"
+  al_uac_needs_attention = def_uac_needs_attention?(
+    object_instance:,
+    current_user:,
+    current_app_type_id:
   )
-  %>
-  </p>
+%>
+<div class="panel-group al-details-accordion" id="<%= al_accordion_id %>" role="tablist">
+
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="<%= al_accordion_id %>-uac-heading">
+      <h4 class="panel-title">
+        <a class="<%= al_uac_needs_attention ? '' : 'collapsed' %>" role="button" data-toggle="collapse" data-parent="#<%= al_accordion_id %>"
+           href="#<%= al_accordion_id %>-uac-collapse"
+           aria-expanded="<%= al_uac_needs_attention %>" aria-controls="<%= al_accordion_id %>-uac-collapse">
+          user access controls
+        </a>
+      </h4>
+    </div>
+    <div id="<%= al_accordion_id %>-uac-collapse" class="panel-collapse collapse <%= al_uac_needs_attention ? 'in' : '' %>"
+         role="tabpanel" aria-labelledby="<%= al_accordion_id %>-uac-heading">
+      <div class="panel-body">
+        <%= render partial: 'admin/common_templates/def_uac_summary',
+                   locals: {
+                     object_instance:,
+                     current_app_type_id:,
+                     current_user:
+                   } %>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="<%= al_accordion_id %>-activities-heading">
+      <h4 class="panel-title">
+        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#<%= al_accordion_id %>"
+           href="#<%= al_accordion_id %>-activities-collapse"
+           aria-expanded="false" aria-controls="<%= al_accordion_id %>-activities-collapse">
+          activities
+        </a>
+      </h4>
+    </div>
+    <div id="<%= al_accordion_id %>-activities-collapse" class="panel-collapse collapse"
+         role="tabpanel" aria-labelledby="<%= al_accordion_id %>-activities-heading">
+      <div class="panel-body">
+        <div class="activity-list-section">
+          <p>Add a new <code>[activity_name]:</code> underscored activity name without indentation.</p>
+          <p>Click an activity name from the list below to jump to its definition. Each activity shown lists the fields defined for it.<br/>&nbsp;</p>
+          <ul class="activity-list">
+          <% object_instance.option_configs_names&.each do |name|
+               conf = object_instance.option_type_config_for(name)
+
+               next if name.in?([:primary, :blank_log]) && !conf&.fields&.present?
+          %>
+            <li class="activity-list-name" data-al-elt-block="#al_ib_<%=name%>"><span class="activity-list-name"><%=name%></span> <% unless conf %>(invalid)<% end %>
+            <% if conf&.label&.present? %><span class="activity-list-activity-label"><%= conf.label %></span><% end %>
+            </li>
+            <div class="activity-list-item-block collapse" id="al_ib_<%=name%>">
+              <% if conf&.fields&.present? %>
+              <ul class="activity-list-activity-fields">
+                <li><%= conf.fields.join("</li> <li>").html_safe %></li>
+              </ul>
+              <% end %>
+              <% ref_def = conf&.embed
+                 if ref_def&.present?
+                    got = ref_def.dig(:resource_model_def, :resource_item_name)
+              %>
+              <ul class="activity-list-activity-embed">
+                <%= render partial: 'admin/activity_logs/def_embed_info', locals: {resource_item_name: got, ref_def:} %>
+              </ul>
+              <% end %>
+              <% act_refs = conf&.references
+                 if act_refs&.present?
+                 %>
+                   <ul class="activity-list-activity-references">
+                 <%
+                      object_instance.referenced_table_def(act_refs)&.each do |ref_def|
+                        full_ref_name = ref_def[:full_ref_name]
+                 %>
+                  <%= render partial: 'admin/activity_logs/def_references_info', locals: {full_ref_name: full_ref_name, ref_def:} %>
+                      <% end %>
+                  </ul>
+              <% end %>
+              <ul class="common-def-panel--uacs">
+                <%= render partial: 'admin/activity_logs/def_activity_uac_info', locals: {app_type_id: current_admin.matching_user&.app_type_id, resource_name: conf.resource_name} %>
+              </ul>
+            </div>
+          <% end %>
+          </ul>
+          <div id="activity-list-detail" class="activity-list-detail"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="<%= al_accordion_id %>-all-fields-heading">
+      <h4 class="panel-title">
+        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#<%= al_accordion_id %>"
+           href="#<%= al_accordion_id %>-all-fields-collapse"
+           aria-expanded="false" aria-controls="<%= al_accordion_id %>-all-fields-collapse">
+          all fields
+        </a>
+      </h4>
+    </div>
+    <div id="<%= al_accordion_id %>-all-fields-collapse" class="panel-collapse collapse"
+         role="tabpanel" aria-labelledby="<%= al_accordion_id %>-all-fields-heading">
+      <div class="panel-body">
+        <div class="activity-list-all-fields">
+          <p>Set of all fields aggregated from all activities.</p>
+          <p class="al-field-list">
+          <ul class="activity-list">
+            <li><%= object_instance.all_implementation_fields
+                      .reject{|f| f.index(/^placeholder_|^embedded_report_/)}
+                      .join("</li> <li>")
+                      .html_safe %></li>
+          </ul>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="<%= al_accordion_id %>-libraries-heading">
+      <h4 class="panel-title">
+        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#<%= al_accordion_id %>"
+           href="#<%= al_accordion_id %>-libraries-collapse"
+           aria-expanded="false" aria-controls="<%= al_accordion_id %>-libraries-collapse">
+          libraries
+        </a>
+      </h4>
+    </div>
+    <div id="<%= al_accordion_id %>-libraries-collapse" class="panel-collapse collapse"
+         role="tabpanel" aria-labelledby="<%= al_accordion_id %>-libraries-heading">
+      <div class="panel-body">
+        <%= render partial: 'admin/common_templates/def_details_libraries', locals: {object_instance: object_instance} %>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="<%= al_accordion_id %>-embeds-heading">
+      <h4 class="panel-title">
+        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#<%= al_accordion_id %>"
+           href="#<%= al_accordion_id %>-embeds-collapse"
+           aria-expanded="false" aria-controls="<%= al_accordion_id %>-embeds-collapse">
+          embeds
+        </a>
+      </h4>
+    </div>
+    <div id="<%= al_accordion_id %>-embeds-collapse" class="panel-collapse collapse"
+         role="tabpanel" aria-labelledby="<%= al_accordion_id %>-embeds-heading">
+      <div class="panel-body">
+        <div class="activity-list-embeds">
+          <p>Add <code>embed:</code> configurations to directly embed another dynamic definition. This uses database joins,
+          rather than an intermediate model references to access embedded records.</p>
+          <ul class="al-reference-list al-embed-list">
+          <% shown_refs = []
+             object_instance.all_direct_embed_tables.each do |ref_def|
+
+              got = ref_def.dig(:resource_model_def, :resource_item_name)
+              unless shown_refs.include?(got)
+                shown_refs << got
+            %>
+            <%= render partial: 'admin/activity_logs/def_embed_info', locals: {resource_item_name: got, ref_def:, show_table: true} %>
+            <% end %>
+          <% end %>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="<%= al_accordion_id %>-references-heading">
+      <h4 class="panel-title">
+        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#<%= al_accordion_id %>"
+           href="#<%= al_accordion_id %>-references-collapse"
+           aria-expanded="false" aria-controls="<%= al_accordion_id %>-references-collapse">
+          references
+        </a>
+      </h4>
+    </div>
+    <div id="<%= al_accordion_id %>-references-collapse" class="panel-collapse collapse"
+         role="tabpanel" aria-labelledby="<%= al_accordion_id %>-references-heading">
+      <div class="panel-body">
+        <div class="activity-list-references">
+          <p>Add <code>references:</code> configurations to connect to other dynamic definitions. This connects through
+          an intermediate `model_references` database table, allowing arbitrary connections to be made between records.</p>
+
+          <ul class="al-reference-list">
+          <% shown_refs = []
+             object_instance.all_referenced_tables.each do |ref_def|
+          %>
+          <% full_ref_name = ref_def[:full_ref_name]
+             unless shown_refs.include?(full_ref_name)
+               shown_refs << full_ref_name
+          %>
+            <%= render partial: 'admin/activity_logs/def_references_info', locals: {full_ref_name: full_ref_name, ref_def:, show_table: true} %>
+            <% end %>
+          <% end %>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="<%= al_accordion_id %>-file-filters-heading">
+      <h4 class="panel-title">
+        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#<%= al_accordion_id %>"
+           href="#<%= al_accordion_id %>-file-filters-collapse"
+           aria-expanded="false" aria-controls="<%= al_accordion_id %>-file-filters-collapse">
+          file filters
+        </a>
+      </h4>
+    </div>
+    <div id="<%= al_accordion_id %>-file-filters-collapse" class="panel-collapse collapse"
+         role="tabpanel" aria-labelledby="<%= al_accordion_id %>-file-filters-heading">
+      <div class="panel-body">
+        <div class="activity-list-file-filters">
+          <p>File containers use file filters to define which filenames can be viewed for a specific activity or default configuration.</p>
+          <p>
+          <%= link_to(link_label_open_in_new("edit"),
+                admin_nfs_store_filter_filters_path(filter: {resource_name: "#{object_instance.full_item_type_name}__%"}),
+                target: '_blank'
+          )
+          %>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="<%= al_accordion_id %>-view-refs-heading">
+      <h4 class="panel-title">
+        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#<%= al_accordion_id %>"
+           href="#<%= al_accordion_id %>-view-refs-collapse"
+           aria-expanded="false" aria-controls="<%= al_accordion_id %>-view-refs-collapse">
+          views referencing database table
+        </a>
+      </h4>
+    </div>
+    <div id="<%= al_accordion_id %>-view-refs-collapse" class="panel-collapse collapse"
+         role="tabpanel" aria-labelledby="<%= al_accordion_id %>-view-refs-heading">
+      <div class="panel-body">
+        <%= render partial: 'admin/common_templates/def_details_view_refs', locals: {object_instance: object_instance} %>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="<%= al_accordion_id %>-field-configs-heading">
+      <h4 class="panel-title">
+        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#<%= al_accordion_id %>"
+           href="#<%= al_accordion_id %>-field-configs-collapse"
+           aria-expanded="false" aria-controls="<%= al_accordion_id %>-field-configs-collapse">
+          field configs
+        </a>
+      </h4>
+    </div>
+    <div id="<%= al_accordion_id %>-field-configs-collapse" class="panel-collapse collapse"
+         role="tabpanel" aria-labelledby="<%= al_accordion_id %>-field-configs-heading">
+      <div class="panel-body">
+        <%= render partial: 'admin/common_templates/def_details_field_configs', locals: {object_instance: object_instance} %>
+      </div>
+    </div>
+  </div>
+
 </div>
-
-<%= render partial: 'admin/common_templates/def_details_view_refs', locals: {object_instance: object_instance} %>
-
-<%= render partial: 'admin/common_templates/def_details_field_configs', locals: {object_instance: object_instance} %>
 
 <% else %>
   <label>not yet saved</label>

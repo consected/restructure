@@ -2,6 +2,7 @@
 
 module DelayedJobExtras
   extend ActiveSupport::Concern
+
   class_methods do
     #
     # Find a job in the specified queue(s) by job_id. Returns nil if nothing matches
@@ -25,33 +26,25 @@ module DelayedJobExtras
     # @return [ActiveRecord::Relation]
     def lookup_jobs_by(class_name: nil, queue: nil, locked: nil, failed: nil, job_class: nil, ref_record: nil,
                        job_id: nil)
-      like_string = "--- !ruby/object:#{class_name}%"
+      res = Delayed::Job.where(['handler LIKE ?', "--- !ruby/object:#{class_name}%"]) if class_name
+      res ||= Delayed::Job.all
 
-      if job_id
-        like_string = <<~END_TEXT
-          #{like_string}
-            job_id: #{job_id}
-          %
-        END_TEXT
-      end
-
-      if job_class
-        like_string = <<~END_TEXT
-          #{like_string}
-            job_class: #{job_class}
-          %
-        END_TEXT
-      end
+      # Each of the following attributes is matched independently, rather than
+      # requiring all of them to appear consecutively in a single fixed order.
+      # This avoids depending on the exact order that keys are serialized in
+      # the handler YAML, and on the exact indentation/nesting used, both of
+      # which are implementation details of ActiveJob/Psych serialization that
+      # can change between versions (see issue #1232).
+      res = res.where(['handler LIKE ?', "%job_id: #{job_id}%"]) if job_id
+      res = res.where(['handler LIKE ?', "%job_class: #{job_class}%"]) if job_class
 
       if ref_record
-        like_string = <<~END_TEXT
-          #{like_string}
-            - _aj_globalid: gid://#{Settings::GlobalIdPrefix}/#{ref_record.class}/#{ref_record.id}
-          %
-        END_TEXT
+        # Prefix with '- ' (the YAML list-item marker that always precedes _aj_globalid)
+        # to avoid the leading underscore being treated as a SQL LIKE single-character wildcard.
+        res = res.where(['handler LIKE ?',
+                         "%- _aj_globalid: gid://#{Settings::GlobalIdPrefix}/#{ref_record.class}/#{ref_record.id}%"])
       end
 
-      res = Delayed::Job.where(['handler LIKE ?', "#{like_string}%"])
       res = res.where(queue: queue) if queue
       res = res.where('locked_at IS NOT NULL') if locked
       res = res.where('locked_at IS NULL') if locked == false

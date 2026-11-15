@@ -140,6 +140,15 @@ class Admin::MasterRecord
     'master_id'
   end
 
+  # Returns the singularized table name for use in API helper methods such as
+  # AdminApiDefinitionsHelper#api_params_key. Dynamic definitions provide this
+  # via Dynamic::DefHandler; Admin::MasterRecord must implement it directly so
+  # that the generic admin/common/_api_panel partial works without error (#1183).
+  # @return [String] e.g. "player_info" for the "player_infos" table
+  def full_item_type_name
+    table_name.singularize
+  end
+
   # Get an estimated record count for this model.
   # @return [Integer, nil]
   def est_record_count

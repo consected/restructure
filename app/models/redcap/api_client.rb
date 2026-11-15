@@ -51,9 +51,43 @@ module Redcap
 
     #
     # Get the project users
+    # @param [Boolean] force_reload - forces reload of the cached user list from the REDCap API
     # @return [Hash] hash with symbolized keys
-    def project_users
-      request :user
+    def project_users(force_reload: false)
+      request :user, force_reload:
+    end
+
+    #
+    # Create or update a project user
+    # @param [Hash] user_data - user data fields (e.g. username:, expiration:, record_delete:)
+    # @return [Integer] count of users added or updated, as returned by the REDCap API
+    def import_project_user(**user_data)
+      # The REDCap API expects user fields JSON-encoded as an array in the 'data' parameter.
+      # This request mutates data on the REDCap server, so never cache the result.
+      request :user, request_options: { data: [user_data].to_json }, cache_expires_in: nil
+    end
+
+    #
+    # Remove a user's access from the project.
+    # NOTE: the REDCap API user used to make this request requires the following privileges
+    # in the project: "API Import/Update", "User Rights" (Full Access), "Delete Records".
+    # This does NOT automatically refresh the cached #project_users list. To do so,
+    # configure an on_complete hook to call #project_users with force_reload: true
+    # (see the redcap_request save_trigger documentation).
+    # @param [String] username - a single REDCap username to remove
+    # @param [Array{String}] usernames - multiple REDCap usernames to remove, instead of username
+    # @return [Integer] the number of users removed, as returned by the REDCap API
+    def remove_project_user(username: nil, usernames: nil)
+      usernames = Array.wrap(usernames.presence || username).map(&:to_s).select(&:present?)
+      raise FphsException, 'remove_project_user requires a username or usernames to be specified' if usernames.blank?
+
+      request_options = { action: :delete }
+      usernames.each_with_index do |name, index|
+        request_options["users[#{index}]"] = name
+      end
+
+      # This request mutates data on the REDCap server, so never cache the result
+      request :user, request_options: request_options, cache_expires_in: nil
     end
 
     #
@@ -341,7 +375,9 @@ module Redcap
         end
 
         self.last_result_from_cache = (retrieved_from == 'cache')
-        project_admin.record_job_request action, result: { retrieved_from:, count: res&.length }
+        api_action = request_options && (request_options[:action] || request_options['action'])
+        count = res.respond_to?(:length) ? res.length : res
+        project_admin.record_job_request action, result: { retrieved_from:, count:, api_action: }
       end
       res
     rescue StandardError => e

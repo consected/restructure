@@ -516,23 +516,31 @@ class DynamicModel < ActiveRecord::Base
   end
 
   #
-  # Add the hash to the start of the options text
-  # This really needs to be replaced with real configuration
-  # handling, but it works effectively when the configuration is new.
+  # Add the hash to the start of the options text, replacing any existing section
+  # with the same key. The existing section boundary is found by scanning lines
+  # forward from the key until the first line that starts with a non-whitespace
+  # character (the next top-level key, comment, or other column-0 content).
   def prepend_to_options(hash)
     hash.deep_stringify_keys!
     key = hash.keys.first
     new_options = String.yaml_dump(hash)
     self.options ||= ''
-    self.options = if self.options.index(/^#{key}:/)
-                     self.options = self.options.gsub(/^(#{key}:(.+?))(\n[^\s]|\z)/m) do
-                       "#{new_options}\n\n#{Regexp.last_match(3)}"
+    lines = options.lines
+    start_idx = lines.index { |l| l.match?(/\A#{Regexp.escape(key)}:/) }
+
+    self.options = if start_idx
+                     end_offset = lines[(start_idx + 1)..].find_index do |l|
+                       l.match?(/\A\S/)
                      end
+                     abs_end_idx = end_offset ? start_idx + 1 + end_offset : lines.length
+                     before = lines[0...start_idx].join
+                     after = lines[abs_end_idx..].join
+                     "#{before}#{new_options}\n\n#{after}"
                    else
-                     "#{new_options}\n\n#{self.options}"
+                     "#{new_options}\n\n#{options}"
                    end
 
-    self.options = self.options.gsub(/^---.*\n/, '')
+    self.options = options.gsub(/^---.*\n/, '')
   end
 
   #

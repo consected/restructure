@@ -89,7 +89,9 @@ _fpa.tag_formatter = class {
       "ignore_missing",
       "last",
       "no_html_tag",
-      "general_selection_label"
+      "general_selection_label",
+      "parse_json",
+      "parse_yaml"
     ]
   }
 
@@ -524,6 +526,22 @@ _fpa.tag_formatter = class {
     if (!data || !data._general_selections) return res;
 
     return data._general_selections[tag_name] && data._general_selections[tag_name][res] && data._general_selections[tag_name][res].name || res
+  }
+
+  parse_json(res, _orig_val) {
+    try {
+      return JSON.parse(res);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  parse_yaml(res, _orig_val) {
+    try {
+      return jsyaml.load(res);
+    } catch (e) {
+      return null;
+    }
   }
 
 }

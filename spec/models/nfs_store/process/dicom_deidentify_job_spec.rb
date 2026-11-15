@@ -255,20 +255,28 @@ RSpec.describe NfsStore::Process::DicomDeidentifyJob, type: :model do
 
     sf = reload_stored_file(sf)
 
-    # Track app_type_id changes during processing
+    # Track app_type_id changes during processing.
+    # Since app_type_id is now switched in-memory only (no DB write), we capture it from the
+    # c_user yielded by setup_container_file_current_user rather than via @user.reload (which
+    # would read the unchanged DB value).
     app_type_id_during_processing = nil
-    allow(NfsStore::Dicom::DeidentifyHandler).to receive(:deidentify_file).and_wrap_original do |method, *args|
-      app_type_id_during_processing = @user.reload.app_type_id
-      method.call(*args)
+    dij = NfsStore::Process::DicomDeidentifyJob.new
+    allow(dij).to receive(:setup_container_file_current_user).and_wrap_original do |method, *args, &block|
+      method.call(*args) do |c_user|
+        app_type_id_during_processing = c_user.app_type_id
+        block.call(c_user)
+      end
     end
 
     # Perform job with non-default app_type_id
-    dij = NfsStore::Process::DicomDeidentifyJob.new
     dij.perform(sf, app_type_2.id)
 
-    # Verify transactional app_type_id behavior
+    # Verify transactional app_type_id behavior:
+    # - during processing the user context is normalised to the default app type (in memory only)
+    # - after processing the in-memory value is restored (no DB write occurred at any point)
     expect(app_type_id_during_processing).to eq(Settings.nfs_store_default_app_type_id)
-    expect(@user.reload.app_type_id).to eq(app_type_2.id)
+    expect(@user.app_type_id).to eq(app_type_2.id)       # in-memory restore happened
+    expect(@user.reload.app_type_id).to eq(app_type_2.id) # DB was never touched
 
     # Reset user to original app_type_id for file verification
     @user.update!(app_type_id: original_app_type_id, current_admin: @admin)

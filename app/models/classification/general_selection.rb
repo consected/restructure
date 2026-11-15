@@ -7,6 +7,7 @@ class Classification::GeneralSelection < ActiveRecord::Base
 
   include AdminHandler
   include SelectorCache
+
   BasicItemTypes = %i[player_infos_source
                       player_contacts_type player_contacts_source player_contacts_rank
                       addresses_type addresses_source addresses_rank].freeze
@@ -76,7 +77,7 @@ class Classification::GeneralSelection < ActiveRecord::Base
   # @param field_name [String | Symbol] field name to check
   # @return [Boolean]
   def self.exists_for?(record, field_name)
-    item_types.include?("#{prefix_name(record)}_#{field_name}".to_sym)
+    item_types.include?(:"#{prefix_name(record)}_#{field_name}")
   end
 
   #

@@ -76,6 +76,9 @@ _fpa.substitution = class {
       else if (typeof iter_data == 'string' && next_tag === 'json_parse') {
         got = JSON.parse(iter_data)
       }
+      else if (typeof iter_data == 'string' && next_tag === 'yaml_parse') {
+        got = jsyaml.load(iter_data)
+      }
       else if (iter_data.hasOwnProperty(next_tag)) {
         got = iter_data[next_tag];
       }

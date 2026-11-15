@@ -63,7 +63,6 @@ RSpec.describe Admin::JobReviewsController, type: :controller do
 
     it 'handles URL-encoded GlobalIDs in handler filter' do
       gid = 'gid://fpa1/DynamicModel/789'
-      encoded_gid = CGI.escape(gid)
 
       job = Delayed::Job.create!(
         handler: "--- !ruby/object:RecurringBatchTask\nrecurring_job_data:\n  dynamic_def: #{gid}\n",
@@ -78,6 +77,53 @@ RSpec.describe Admin::JobReviewsController, type: :controller do
 
       filtered = @controller.send(:filtered_primary_model)
       expect(filtered.pluck(:id)).to include(job.id)
+    end
+  end
+
+  describe 'GET #index with filter[job_id] param' do
+    before_each_login_admin
+
+    it 'returns only the matching job when filter[job_id] is the ActiveJob UUID (mirrors failure notification link)' do
+      job_id = SecureRandom.uuid
+      other_job_id = SecureRandom.uuid
+
+      matched_handler = <<~YAML
+        --- !ruby/object:ActiveJob::QueueAdapters::DelayedJobAdapter::JobWrapper
+        job_data:
+          job_class: SomeBackgroundJob
+          job_id: #{job_id}
+          queue_name: default
+          arguments: []
+          executions: 0
+      YAML
+      other_handler = <<~YAML
+        --- !ruby/object:ActiveJob::QueueAdapters::DelayedJobAdapter::JobWrapper
+        job_data:
+          job_class: SomeBackgroundJob
+          job_id: #{other_job_id}
+          queue_name: default
+          arguments: []
+          executions: 0
+      YAML
+
+      matched_job = Delayed::Job.create!(handler: matched_handler, run_at: 1.hour.from_now, failed_at: Time.now)
+      other_job = Delayed::Job.create!(handler: other_handler, run_at: 1.hour.from_now, failed_at: Time.now)
+
+      # This mirrors the URL embedded in job failure notification emails:
+      # /admin/job_reviews?filter[job_id]=<uuid>
+      get :index, params: { filter: { job_id: job_id } }
+
+      expect(response).to be_successful
+      ids = assigns(:messaging__job_reviews).map(&:id)
+      expect(ids).to include(matched_job.id)
+      expect(ids).not_to include(other_job.id)
+    end
+
+    it 'returns an empty list when filter[job_id] does not match any job' do
+      get :index, params: { filter: { job_id: SecureRandom.uuid } }
+
+      expect(response).to be_successful
+      expect(assigns(:messaging__job_reviews).to_a).to be_empty
     end
   end
 end

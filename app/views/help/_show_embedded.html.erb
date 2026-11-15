@@ -2,6 +2,7 @@
   <div class="help-view-doc" data-result="help-doc-content-result" data-help-path="<%= request.path.sub(/\.md$/, '') %>">
     <div class="help-doc-header">
       <%= render partial: 'help/home_link' %>
+      <%= render partial: 'help/in_new_tab_link' %>
     </div>
     <div class="help-embedded-content">
       <%= @view_doc %>            

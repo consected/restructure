@@ -4,15 +4,14 @@
 <% elsif form_object_item_type_us == 'master' %>
   <span></span>
 <% else
+     gs_item_type = "#{form_object_item_type_us}_rank"
      gs = general_selection("#{general_selection_name}_rank".to_sym, present: :hyphenate_name_val, order: :value_number_desc, value: form_object_instance.rank, quiet_fail: true)
-     unless gs 
-       raise FphsException.new "The general selection #{form_object_item_type_us}_rank has not been defined. Please inform the administrator of this error."
-     end
+     gs_fallback = general_selection_missing_fallback?(gs, gs_item_type, form_object_instance)
 %>
   <%= edit_field_label(form, field_name_sym, labels) %>
-  <% if gs %>
-  <%= form.select :rank, gs, {}, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}} %>
+  <% if gs_fallback %>
+  <%= missing_general_selection_text_fallback(form, :rank, form_object_instance, form_object_item_type_us, gs_item_type) %>
   <% else %>
-  <%= form.text_field :rank, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}} %>
+  <%= form.select :rank, gs, {}, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}} %>
   <% end %>
 <% end %>

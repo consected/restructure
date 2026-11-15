@@ -38,7 +38,7 @@ gem 'pg', '~> 1.4', '>= 1.4.3'
 # is lower or has different dependencies.
 # For this to work, Procfile must call puma with `bundle exec`
 gem 'minitest', '~> 5.1' # minitest 6 is incompatible with rails 7.2.x
-gem 'puma', '~> 6.0'
+gem 'puma', '~> 7.2.1'
 
 gem 'rails', '~> 7.0', '<7.3'
 

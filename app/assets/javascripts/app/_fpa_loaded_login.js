@@ -15,11 +15,28 @@ _fpa.loaded.login = function () {
 
   if (!el_mfa_form || $('.login-block').length === 0) return;
 
+  // Expose OTP idle timeout from settings to client-side state
+  _fpa.loaded.login_state = {
+    otp_idle_timeout: parseInt($(el_mfa_form).data('otp-idle-timeout')) || 300
+  };
+
+  const otp_idle_timer = _fpa.loaded.two_factor_timeout.create_timer(
+    _fpa.loaded.login_state.otp_idle_timeout,
+    function () {
+      allow_submit = false;
+      $('#user_password, #admin_password').val('');
+      $('#user_otp_attempt, #admin_otp_attempt').val('');
+      $('.login-2fa-block').hide();
+      $('.login-user-password-block').show();
+      $('#user_otp_attempt, #admin_otp_attempt').removeAttr('required');
+    }
+  );
+
   const $form = $('form#new_user, form#new_admin');
   const $btn_final = $('input[type="submit"]');
   const orig_final_caption = $btn_final.attr('data-orig-value');
 
-  el_mfa_form.app_callback = function (block, data) {
+  function handle_step1_response(responseData) {
     window.setTimeout(function () {
 
       allow_submit = true;
@@ -29,19 +46,32 @@ _fpa.loaded.login = function () {
       // Reset the caption on the submit button
       $btn_final.attr('disabled', null).val(orig_final_caption);
 
-      if (data.need_2fa) {
+      if (responseData.need_2fa) {
         $('.login-user-password-block').hide();
         $('.login-2fa-block').show();
         $('#user_otp_attempt, #admin_otp_attempt').attr('required', true).focus();
+
+        // Start idle timeout: reset to step 1 if OTP not submitted in time
+        otp_idle_timer.start();
       }
       else {
         $('form#new_user, form#new_admin').submit();
       }
-    }, 300)
-  };
+    }, 300);
+  }
+
+  // Bind ajax:success directly on #mfa-step1 so step1 responses are handled
+  // on every submission (not just the first, unlike app_callback which is one-shot).
+  $(el_mfa_form).on('ajax:success', function (e, data, status, xhr) {
+    handle_step1_response(xhr.responseJSON || {});
+  });
 
   $form.on('submit', function (ev) {
-    if (allow_submit) return;
+    if (allow_submit) {
+      // User is submitting the OTP - clear the idle timeout timer
+      otp_idle_timer.clear();
+      return;
+    }
 
     ev.preventDefault();
     // Force email usernames to lowercase in the form

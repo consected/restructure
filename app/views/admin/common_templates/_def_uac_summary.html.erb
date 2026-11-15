@@ -21,29 +21,23 @@
   resource_type = local_assigns[:resource_type] || 'table'
   return unless resource_name.present?
 
-  uacs = Admin::UserAccessControl.active_for(resource_name:).not_template_role
-  no_non_template_uacs = uacs.empty? 
-  
-  # Check if current user has access to this resource
-  current_user_has_access = false
-  if current_user && current_app_type_id
-    current_user_has_access = Admin::UserAccessControl.access_for?(
-      current_user,
-      :access,
-      resource_type.to_sym,
-      resource_name,
-      alt_app_type_id: current_app_type_id
-    ).present?
-  end
-  
-  # Check if there are any UACs for the current app type
-  current_app_uacs = uacs.select { |uac| uac.app_type_id == current_app_type_id }
+  uac_data = def_uac_summary_data(
+    object_instance:,
+    current_user:,
+    current_app_type_id:,
+    resource_name:,
+    resource_type:
+  )
+
+  uacs = uac_data[:uacs]
+  no_non_template_uacs = uac_data[:no_non_template_uacs]
+  current_user_has_access = uac_data[:current_user_has_access]
+  current_app_uacs = uac_data[:current_app_uacs]
   
   prev_access = :not_set
 %>
 
-<label>user access controls</label>
-<%= link_to link_label_open_in_new("view all"), 
+<%= link_to link_label_open_in_new("view all #{resource_type&.humanize&.underscore} user access controls"), 
             admin_user_access_controls_path(filter: { resource_name:, resource_type:, app_type_id: '' }), 
             target: '_blank' %>
 
@@ -68,18 +62,21 @@
   </p>
 <% end %>
 
-<ul class="common-def-panel--uacs">
 <% uacs.each do |uac|
      access_changed = prev_access != uac.access
-     prev_access = uac.access
 %>
-<% if access_changed %><span class="common-def-panel--access-type"><%= uac.access.presence || 'no access' %></span><% end %>
+<% if access_changed %>
+<% if prev_access %></ul><% end %>
+<p class="common-def-panel--access-type"><%= uac.access.presence || 'no access' %></p>
+<ul class="common-def-panel--uacs">
+<% end %>
 <li>
   <%= uac.user&.email.presence || '' %> 
-  <%= uac.role_name.nil? ? '' : link_to(uac.role_name, admin_user_roles_url(filter: { role_name: uac.role_name }), target: '_blank') %>
+  <%= uac.role_name.nil? ? '' : link_to(uac.role_name, admin_user_roles_url(filter: { role_name: uac.role_name }), target: '_blank', title: 'view users assigned to this role') %>
   <% if uac.app_type_id %>
     <small class="text-muted">(<%= uac.app_type&.name || "app #{uac.app_type_id}" %>)</small>
   <% end %>
 </li>
+<% prev_access = uac.access %>
 <% end %>
 </ul>

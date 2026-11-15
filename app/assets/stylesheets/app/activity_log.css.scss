@@ -1,5 +1,75 @@
+@use "../app_vars" as *;
+
 .activity-logs-item-block {
   padding: 0em;
+}
+
+// Perspective filter buttons injected into .sublist-controls alongside the filter selectors.
+// Uses BEM: block = .activity-log-perspectives, element = __btn, modifier = --active (via Bootstrap .active)
+
+// Source div hidden in its original DOM position; only the JS-injected clone is shown.
+.activity-log-perspectives--source {
+  display: none !important;
+}
+
+.activity-log-perspectives {
+  display: inline;
+  padding-right: 10px;
+
+  &__btn {
+    box-shadow: none;
+    background: $switch_bg_off;
+    color: rgb(255, 255, 255);
+    text-shadow: none;
+    border-radius: 30px;
+    padding: 3px 5px;
+    font-size: 90%;
+    font-weight: normal;
+    margin-right: 2px;
+    border: 1px solid transparent;
+
+    &.active {
+      background-color: $switch_bg_on;
+      box-shadow: none;
+      color: rgb(127, 90, 9);
+      border-color: rgb(199, 181, 142);
+
+      &:hover {
+        background: $switch_bg_on;
+      }
+    }
+
+    &:hover {
+      background-position: 0;
+      border-color: rgb(204, 204, 204);
+      outline: none !important;
+      text-shadow: none;
+      background: $switch_bg_off;
+      color: white;
+    }
+  }
+}
+
+// Allow filter selectors to flow inline alongside toggle and perspectives buttons.
+// Uses !important to override search_results.scss which is loaded later (alphabetically).
+.sublist-controls .sublist-filter-selectors {
+  width: auto !important;
+  line-height: normal !important;
+}
+
+// Match the responsive size increase applied to .filter-switch at wider breakpoints.
+@media only screen and (min-width: 1400px) {
+  .activity-log-list .sublist-controls .activity-log-perspectives__btn {
+    font-size: 12px;
+    padding: 5px 10px;
+  }
+}
+
+@media only screen and (min-width: 1600px) {
+  .sublist-controls .activity-log-perspectives__btn {
+    font-size: 12px;
+    padding: 5px 10px;
+  }
 }
 
 .activity-logs-generic-block {

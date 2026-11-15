@@ -52,14 +52,35 @@ module HandlebarsPrecompilerHelper
     "#{HandlebarsPrecompiler::URL_RELATIVE_PATH}#{subdir}/"
   end
 
-  # Generate a cache key common to all users.
-  # Uses server_cache_version and item_updates from dynamic definitions.
+  # Generate a cache key scoped to the current user context.
+  # Uses server_cache_version, item_updates from dynamic definitions,
+  # the current user/admin type and id, and per-app_type access control
+  # timestamps (UserRole, UserAccessControl).
+  #
+  # The user id is included because some cached partials (e.g. master_tabs) render
+  # differently per user based on individual role/access-control grants, not just
+  # app_type — so app_type alone is not sufficient to prevent cross-user cache
+  # poisoning of the shared on-disk compiled file. The user/admin class name is
+  # included alongside the id so a User and an Admin that happen to share the same
+  # id can never collide. current_sign_in_at is deliberately NOT included, as that
+  # would bust the cache on every login; role/access-control and config changes are
+  # already captured via their respective updated_at timestamps.
   # @return [String] 13-character hex string (truncated SHA256)
   def handlebars_cache_key
     @handlebars_cache_key ||= begin
       ver = Application.server_cache_version
       items = handlebars_item_updates_key
-      Digest::SHA256.hexdigest("#{ver}-#{items}")[0..12]
+      u = current_user_or_admin
+      user_type = u&.class&.name
+      user_id = u&.id
+      app_type_id = u&.app_type_id if u.respond_to?(:app_type_id)
+      userrole, uac = app_type_access_control_timestamps(app_type_id)
+
+      # app_type_id is included directly (not just via the userrole/uac timestamps) so that
+      # two different app_type contexts can never collide even if neither has any
+      # UserRole/UserAccessControl rows yet (e.g. both would otherwise derive identical
+      # nil-derived timestamps).
+      Digest::SHA256.hexdigest("#{ver}-#{items}-#{app_type_id}-#{user_type}-#{user_id}-#{userrole}-#{uac}")[0..12]
     end
   end
 
@@ -177,20 +198,7 @@ module HandlebarsPrecompilerHelper
   # @return [String] 13-character hex string (truncated SHA256)
   def access_control_version
     @access_control_version ||= begin
-      u = current_user || current_admin
-      app_type_id = u&.app_type_id if u.respond_to?(:app_type_id)
-
-      userrole = Admin::UserRole.where(app_type_id: app_type_id)
-                                .reorder(updated_at: :desc)
-                                .limit(1)
-                                .pluck(:updated_at)
-                                &.first.to_i.to_s
-
-      uac = Admin::UserAccessControl.where(app_type_id: app_type_id)
-                                    .reorder(updated_at: :desc)
-                                    .limit(1)
-                                    .pluck(:updated_at)
-                                    &.first.to_i.to_s
+      userrole, uac = app_type_access_control_timestamps(current_user_or_admin_app_type_id)
 
       Digest::SHA256.hexdigest("#{userrole}-#{uac}-#{handlebars_cache_key}")[0..12]
     end
@@ -213,7 +221,7 @@ module HandlebarsPrecompilerHelper
       end
     end
 
-    u = current_user || current_admin
+    u = current_user_or_admin
     app_type_id = u&.app_type_id if u.respond_to? :app_type_id
     req_digest = Digest::SHA256.hexdigest([handlebars_template_ids, handlebars_partial_ids].join(','))
     filename = "requested-templates-#{u&.id}-#{app_type_id}-#{req_digest}-#{access_control_version}.js"
@@ -252,6 +260,49 @@ module HandlebarsPrecompilerHelper
   end
 
   private
+
+  # Resolve the current user or admin, if any.
+  # Safe to call outside a request/session context (e.g. rake tasks, console,
+  # or specs without a Warden session) — returns nil instead of raising.
+  # @return [User, Admin, nil] the current_user/current_admin, or nil
+  def current_user_or_admin
+    current_user || current_admin
+  rescue Devise::MissingWarden
+    nil
+  end
+
+  # Resolve the app_type_id of the current user or admin, if any.
+  # @return [Integer, nil] the app_type_id of the current_user/current_admin, or nil
+  def current_user_or_admin_app_type_id
+    u = current_user_or_admin
+    u&.app_type_id if u.respond_to?(:app_type_id)
+  end
+
+  # Look up the latest updated_at timestamps for Admin::UserRole and
+  # Admin::UserAccessControl scoped to a given app_type_id. Used to derive
+  # cache keys that must change whenever access control for that app_type changes.
+  # Includes app_type_id: nil rows too (global/shared roles and access controls that
+  # apply across all app types via role_name matching), matching the scoping pattern
+  # used elsewhere for this purpose (see UserAndRoles#where_user_and_role and
+  # PageLayoutsHelper#page_layout_panels) — otherwise a change to a global role/access
+  # control would not be reflected in any app_type-scoped cache key.
+  # @param app_type_id [Integer, nil] the app_type to scope the queries to
+  # @return [Array(String, String)] [userrole_timestamp, uac_timestamp] as epoch-integer strings
+  def app_type_access_control_timestamps(app_type_id)
+    userrole = Admin::UserRole.where(app_type_id: [app_type_id, nil])
+                              .reorder(updated_at: :desc)
+                              .limit(1)
+                              .pluck(:updated_at)
+                              &.first.to_i.to_s
+
+    uac = Admin::UserAccessControl.where(app_type_id: [app_type_id, nil])
+                                  .reorder(updated_at: :desc)
+                                  .limit(1)
+                                  .pluck(:updated_at)
+                                  &.first.to_i.to_s
+
+    [userrole, uac]
+  end
 
   # Compile templates or partials from their respective temp directory.
   # Uses request-specific temp directory to prevent race conditions.

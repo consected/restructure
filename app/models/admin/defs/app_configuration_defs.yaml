@@ -51,6 +51,23 @@ hide search form searchable reports: |
   Don't show reports marked as "searchable" as search forms. Value "true" hides them
 hide tracker panel: |
   The Tracker panel in a master record can be hidden. Value "true" hides it
+tracker history initial filters: |
+  YAML defining initial filter values for the tracker history panel. The keys
+  `protocols`, `sub_processes` and `protocol_events` are regular expressions
+  matched against display names (not IDs) to preselect multi-select tags.
+  The optional key `notes` is a literal initial value for the notes free-text
+  filter (used as-is, not interpreted as a regex). Invalid regex patterns are
+  ignored with a logged warning, and the affected filter group remains
+  unselected.
+
+  Example:
+
+  ```yaml
+  protocols: '^Study'
+  sub_processes: 'consented'
+  protocol_events: 'visit_[0-9]+'
+  notes: 'follow-up'
+  ```
 filestore directory id: |
   If the server setting for use_parent_sub_dir is set, this value is the external ID resource name to get 
   the identifier from. By default it uses master ID
@@ -104,8 +121,10 @@ open panels: |
       \{\{else is activity_log__project_assignments.last.status '!==' "analysis plan proposal submitted"}}activity_log__project_assignments
       \{\{/is}}
 
-  NOTE: this option will override a master panel's `view_options.initial_show` in page layouts 
-  if they have value nil, true or false
+  NOTE: this option will control auto-expanding panels unless `view_options.initial_show` is `true`.
+  If a panel has `initial_show: true`, it will always auto-expand regardless of this setting.
+  To allow `open panels` to control which panel opens, ensure the panel does not have
+  `initial_show: true` set in its page layout view_options (leave it unset, or set to false).
 prevent reload master list: |
   If the user refreshes a page showing master records from a search, the list of previous master records 
   will be reloaded. This can be prevented, to avoid confusing results, by setting the value to any value
@@ -161,4 +180,22 @@ default options dynamic model: |
       options: |
         _configurations:
           use_current_version: true
-          
+default activity log perspective: |
+  Default perspective to activate for each activity log panel, keyed by resource name.
+  When set, the named perspective will be selected automatically when the panel first loads,
+  overriding the panel-level default_perspective setting in page_layout view_options.
+  Provide a YAML hash where each key is the activity log resource name and the value is the
+  perspective slug to activate. The value may use \{\{#if}} and \{\{#is}} substitutions to
+  conditionally set the default perspective based on the current context. For example:
+
+      activity_log__case_reviews: recent_active
+      activity_log__data_requests: my_open
+
+  With conditional substitutions (values evaluated against the current user):
+
+      activity_log__case_reviews: |
+        \{\{#is role_name '===' 'coordinator'}}
+          coordinator_view
+        \{\{else is role_name '===' 'reviewer'}}
+          reviewer_view
+        \{\{/is}}

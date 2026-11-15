@@ -77,7 +77,32 @@
 
 
 <%= handlebars_template_tag('tracker_chron_results-partial', css_class: 'hidden handlebars-partial') do %>
-  <table class="table tablesorter tracker-chron-results">
+  <div class="tracker-chron-results-wrap" data-master-id="{{master_id}}">
+    <div class="tracker-history-filters" data-tracker-history-filters="1">
+      <div class="tracker-history-filters__clear-cell">
+        <a href="#" class="tracker-history-filters__clear glyphicon glyphicon-remove-circle" title="clear filters"></a>
+      </div>
+      <div class="tracker-history-filters__cell">
+        <select multiple id="tracker_history_filter_protocols_{{master_id}}" name="tracker_history_filter_protocols[]" data-attr-name="tracker_history_filter_protocols" class="tracker-history-filter use-chosen" data-filter-key="protocols" data-placeholder="filter protocol" data-nothing-selected-text="filter protocol"></select>
+      </div>
+      <div class="tracker-history-filters__cell">
+        <select multiple id="tracker_history_filter_sub_processes_{{master_id}}" name="tracker_history_filter_sub_processes[]" data-attr-name="tracker_history_filter_sub_processes" class="tracker-history-filter use-chosen" data-filter-key="sub_processes" data-placeholder="filter status" data-nothing-selected-text="filter status"></select>
+      </div>
+      <div class="tracker-history-filters__cell">
+        <select multiple id="tracker_history_filter_protocol_events_{{master_id}}" name="tracker_history_filter_protocol_events[]" data-attr-name="tracker_history_filter_protocol_events" class="tracker-history-filter use-chosen" data-filter-key="protocol_events" data-placeholder="filter method" data-nothing-selected-text="filter method"></select>
+      </div>
+      <div class="tracker-history-filters__cell tracker-history-filters__date-cell">
+        <input type="date" class="form-control tracker-history-filter-date-from" data-attr-name="tracker_history_filter_date_from" title="from date" aria-label="filter date from" />
+        <input type="date" class="form-control tracker-history-filter-date-to" data-attr-name="tracker_history_filter_date_to" title="to date" aria-label="filter date to" />
+      </div>
+      <div class="tracker-history-filters__cell tracker-history-filters__notes-cell">
+        <span class="tracker-history-filters__notes-wrap">
+          <span class="glyphicon glyphicon-search tracker-history-filters__notes-icon" aria-hidden="true"></span>
+          <input type="text" class="form-control tracker-history-filter-notes" data-attr-name="tracker_history_filter_notes" placeholder="filter notes" aria-label="filter notes" />
+        </span>
+      </div>
+    </div>
+  <table class="table tablesorter tracker-chron-results" data-master-id="{{master_id}}">
     <thead><tr>
       <th class="no-sort"><a href="/masters/{{master_id}}/trackers" data-remote="true" data-result-target="#trackers-{{master_id}}-inner" data-template="tracker-tree-result-template" title="view as events"  class="glyphicon glyphicon-list"></a></th>
       <th>protocol</th><th>status</th><th>method</th><th>date</th><th>notes</th><th><a href="/masters/{{master_id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right hidden add-tracker-record" title="add tracker record"><span class="glyphicon glyphicon-plus"></span> Tracker record</a> </th>
@@ -89,10 +114,10 @@
     </tr>
     </tbody>
 
-    <tbody>
+    <tbody class="tracker-history-rows">
     {{#each this}}
       {{#if id}}
-      <tr class="index-{{@index}}" data-tracker-protocol="{{underscore protocol_name}}" data-tracker-protocol="{{underscore protocol_name}}" id="tracker-{{master_id}}-{{id}}" data-subscription="tracker-edit-form-{{master_id}}-{{id}}">
+      <tr class="index-{{@index}} tracker-history-row" data-tracker-protocol="{{underscore protocol_name}}" data-protocol-name="{{protocol_name}}" data-sub-process-name="{{sub_process_name}}" data-event-name="{{event_name}}" data-event-date="{{event_date}}" data-notes="{{notes}}" id="tracker-{{master_id}}-{{id}}" data-subscription="tracker-edit-form-{{master_id}}-{{id}}">
         {{#with this}}
           {{>tracker_history_result}}
 
@@ -102,6 +127,7 @@
     {{/each}}
     </tbody>
   </table>
+  </div>
 
 <% end %>
 

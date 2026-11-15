@@ -3,6 +3,21 @@
 #
 # Perform mailing to valid users and non-user email addresses
 class NotificationMailer < ActionMailer::Base
+  MIME_EXT_MAP = {
+    'image/png' => 'png',
+    'image/jpeg' => 'jpg',
+    'image/gif' => 'gif',
+    'image/svg+xml' => 'svg',
+    'image/webp' => 'webp',
+    'image/tiff' => 'tiff',
+    'image/bmp' => 'bmp'
+  }.freeze
+
+  DATA_URI_IMG_REGEX = /(<img\b[^>]*?\s)src=(['"])(data:(image\/[^;'"]+);base64,([A-Za-z0-9+\/=\s]+?))\2([^>]*?>)/im.freeze
+
+  # Maximum decoded size (bytes) for an inline data-URI image. Images exceeding this
+  # limit are skipped and left as-is to prevent memory exhaustion.
+  MAX_DATA_URI_IMAGE_BYTES = (10 * 1024 * 1024).freeze
   #
   # Send a message notification
   # Filter out any emails that are either invalid (no fully qualified domain name specified)
@@ -72,8 +87,10 @@ class NotificationMailer < ActionMailer::Base
       }
     end
 
+    html = Settings::ProcessInlineDataUriImages ? embed_inline_data_uri_images(notify.generated_text) : notify.generated_text
+
     mail(options) do |format|
-      format.html { render html: notify.generated_text.html_safe }
+      format.html { render html: html.html_safe }
     end
   end
 
@@ -86,5 +103,45 @@ class NotificationMailer < ActionMailer::Base
   def fully_qualified_domain_name?(email)
     domain = email.split('@', 2)
     domain.last&.include?('.')
+  end
+
+  private
+
+  #
+  # Replace <img src="data:<mime>;base64,..."> tags with MIME inline attachments.
+  # Each matching data URI is decoded, attached as a MIME inline part, and the src
+  # attribute is rewritten to the corresponding cid: reference.
+  # Images larger than MAX_DATA_URI_IMAGE_BYTES (decoded) are skipped with a warning.
+  # @param [String] html
+  # @return [String]
+  def embed_inline_data_uri_images(html)
+    return html unless Settings::ProcessInlineDataUriImages
+
+    n = 0
+    html.gsub(DATA_URI_IMG_REGEX) do
+      leading_attrs = Regexp.last_match(1)
+      quote = Regexp.last_match(2)
+      mime_type = Regexp.last_match(4)
+      payload = Regexp.last_match(5)
+      trailing_attrs = Regexp.last_match(6)
+
+      begin
+        decoded_bytes = Base64.strict_decode64(payload.gsub(/\s/, ''))
+
+        if decoded_bytes.bytesize > MAX_DATA_URI_IMAGE_BYTES
+          Rails.logger.warn "embed_inline_data_uri_images: skipping oversized image for #{mime_type} (#{decoded_bytes.bytesize} bytes)"
+          next Regexp.last_match(0)
+        end
+
+        ext = MIME_EXT_MAP.fetch(mime_type, 'bin')
+        n += 1
+        filename = "inline-#{n}-#{SecureRandom.hex(4)}.#{ext}"
+        attachments.inline[filename] = { mime_type: mime_type, content: decoded_bytes }
+        "#{leading_attrs}src=#{quote}#{attachments[filename].url}#{quote}#{trailing_attrs}"
+      rescue ArgumentError => e
+        Rails.logger.warn "embed_inline_data_uri_images: skipping malformed base64 for #{mime_type}: #{e.message}"
+        Regexp.last_match(0)
+      end
+    end
   end
 end

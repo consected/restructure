@@ -29,6 +29,12 @@
 #   - Runs single CLI call per type (templates and partials)
 #   - Splits combined output into individual JS files
 #   - Creates compiled files in public directory
+#
+# - Issue #1279 follow-up (per-user scoping): handlebars_cache_key must incorporate the
+#   current user/admin id, not just app_type_id, because partials such as master_tabs
+#   render differently per user (individual role/access-control grants), so two users in
+#   the same app_type must never share a compiled file. The resolved user/admin's class
+#   name is also folded in so a User and an Admin sharing the same id can never collide.
 
 require 'rails_helper'
 
@@ -447,7 +453,7 @@ RSpec.describe HandlebarsPrecompilerHelper, type: :helper do
 
     before do
       allow(helper).to receive(:handlebars_cache_key).and_return(cache_key)
-      allow(helper).to receive(:current_user).and_return(Struct.new(:id, :current_sign_in_at, :app_type_id).new(1, Time.at(1000000), 2))
+      allow(helper).to receive(:current_user).and_return(Struct.new(:id, :current_sign_in_at, :app_type_id).new(1, Time.at(1_000_000), 2))
       allow(helper).to receive(:current_admin).and_return(nil)
 
       HandlebarsPrecompiler.setup_directories
@@ -587,7 +593,7 @@ RSpec.describe HandlebarsPrecompilerHelper, type: :helper do
         # Last segment should be a hex hash (access_control_version)
         last_segment = parts.last
         expect(last_segment).to match(/\A[a-f0-9]{13}\z/),
-                                     "Expected last filename segment '#{last_segment}' to be a 13-char hex access_control_version"
+                                "Expected last filename segment '#{last_segment}' to be a 13-char hex access_control_version"
       end
     end
 
@@ -652,6 +658,470 @@ RSpec.describe HandlebarsPrecompilerHelper, type: :helper do
 
         expect(File.basename(url_after)).not_to eq(File.basename(url_before))
       end
+    end
+  end
+
+  # Issue #1279 - handlebars_cache_key / handlebars_compiled_filename not app_type-aware
+  #
+  # Proves that the single-template cache path (write_handlebars_template) uses a cache key
+  # that does NOT incorporate app_type_id or per-app_type access control timestamps.
+  # This causes cross-app_type cache poisoning: the first app_type context to compile a
+  # template permanently "poisons" the on-disk file for all other app_type contexts.
+  #
+  # These tests fail against the CURRENT code (demonstrating the bug) and will pass
+  # once handlebars_cache_key/handlebars_compiled_filename become app_type-aware,
+  # mirroring the access_control_version pattern already used by write_multiple_handlebars_templates.
+  describe '#handlebars_cache_key app_type scope (issue #1279)' do
+    let(:user_app_type_1) do
+      Struct.new(:id, :app_type_id, :current_sign_in_at).new(10, 1, Time.current)
+    end
+    let(:user_app_type_2) do
+      Struct.new(:id, :app_type_id, :current_sign_in_at).new(20, 2, Time.current)
+    end
+
+    before do
+      # Ensure distinct access control timestamps exist per app_type so the
+      # cache key SHOULD differ between app_type contexts
+      allow(Admin::UserRole).to receive(:where).and_call_original
+      allow(Admin::UserAccessControl).to receive(:where).and_call_original
+
+      role_rel_app1 = double('role_rel_app1')
+      allow(role_rel_app1).to receive(:reorder).and_return(role_rel_app1)
+      allow(role_rel_app1).to receive(:limit).and_return(role_rel_app1)
+      allow(role_rel_app1).to receive(:pluck).and_return([Time.at(1_000_000)])
+
+      role_rel_app2 = double('role_rel_app2')
+      allow(role_rel_app2).to receive(:reorder).and_return(role_rel_app2)
+      allow(role_rel_app2).to receive(:limit).and_return(role_rel_app2)
+      allow(role_rel_app2).to receive(:pluck).and_return([Time.at(2_000_000)])
+
+      uac_rel_app1 = double('uac_rel_app1')
+      allow(uac_rel_app1).to receive(:reorder).and_return(uac_rel_app1)
+      allow(uac_rel_app1).to receive(:limit).and_return(uac_rel_app1)
+      allow(uac_rel_app1).to receive(:pluck).and_return([Time.at(3_000_000)])
+
+      uac_rel_app2 = double('uac_rel_app2')
+      allow(uac_rel_app2).to receive(:reorder).and_return(uac_rel_app2)
+      allow(uac_rel_app2).to receive(:limit).and_return(uac_rel_app2)
+      allow(uac_rel_app2).to receive(:pluck).and_return([Time.at(4_000_000)])
+
+      allow(Admin::UserRole).to receive(:where).with(app_type_id: [1, nil]).and_return(role_rel_app1)
+      allow(Admin::UserRole).to receive(:where).with(app_type_id: [2, nil]).and_return(role_rel_app2)
+      allow(Admin::UserAccessControl).to receive(:where).with(app_type_id: [1, nil]).and_return(uac_rel_app1)
+      allow(Admin::UserAccessControl).to receive(:where).with(app_type_id: [2, nil]).and_return(uac_rel_app2)
+    end
+
+    it 'produces different cache keys for different app_type contexts' do
+      # Simulate first user context (app_type 1)
+      allow(helper).to receive(:current_user).and_return(user_app_type_1)
+      allow(helper).to receive(:current_admin).and_return(nil)
+      key_app1 = helper.handlebars_cache_key
+
+      # Clear memoization to simulate a separate request context
+      helper.instance_variable_set(:@handlebars_cache_key, nil)
+      helper.instance_variable_set(:@handlebars_item_updates_key, nil)
+
+      # Simulate second user context (app_type 2)
+      allow(helper).to receive(:current_user).and_return(user_app_type_2)
+      key_app2 = helper.handlebars_cache_key
+
+      # BUG: Currently both keys are identical because handlebars_cache_key
+      # does not incorporate app_type_id or per-app_type access control timestamps.
+      # This expectation will FAIL against current code, proving the bug.
+      expect(key_app1).not_to eq(key_app2),
+                              'Expected handlebars_cache_key to differ between app_type 1 and app_type 2, ' \
+                              "but both returned '#{key_app1}'. The cache key is not app_type-aware (issue #1279)."
+    end
+
+    it 'produces different compiled filenames for different app_type contexts' do
+      template_id = 'master_tabs'
+
+      allow(helper).to receive(:current_user).and_return(user_app_type_1)
+      allow(helper).to receive(:current_admin).and_return(nil)
+      filename_app1 = helper.handlebars_compiled_filename(template_id)
+
+      # Clear memoization
+      helper.instance_variable_set(:@handlebars_cache_key, nil)
+      helper.instance_variable_set(:@handlebars_item_updates_key, nil)
+
+      allow(helper).to receive(:current_user).and_return(user_app_type_2)
+      filename_app2 = helper.handlebars_compiled_filename(template_id)
+
+      # BUG: Currently both filenames are identical.
+      # This expectation will FAIL against current code, proving the bug.
+      expect(filename_app1).not_to eq(filename_app2),
+                                   "Expected handlebars_compiled_filename('#{template_id}') to differ between " \
+                                   "app_type 1 and app_type 2, but both returned '#{filename_app1}'. " \
+                                   'The compiled filename is not app_type-aware (issue #1279).'
+    end
+  end
+
+  # Issue #1279 follow-up - app_type_id must be embedded directly in the digest
+  #
+  # handlebars_cache_key must never collide between app_type contexts, even when their
+  # UserRole/UserAccessControl timestamps happen to be identical (e.g. both empty/nil,
+  # such as for two brand new app types with no role/access-control rows yet). Relying
+  # solely on the derived timestamps is not sufficient on its own.
+  describe '#handlebars_cache_key app_type_id collision safety (issue #1279 follow-up)' do
+    let(:user_app_type_1) do
+      Struct.new(:id, :app_type_id, :current_sign_in_at).new(10, 1, Time.current)
+    end
+    let(:user_app_type_2) do
+      Struct.new(:id, :app_type_id, :current_sign_in_at).new(20, 2, Time.current)
+    end
+
+    it 'differs between app_type contexts even when role/access-control timestamps are identical' do
+      empty_rel = double('empty_rel')
+      allow(empty_rel).to receive(:reorder).and_return(empty_rel)
+      allow(empty_rel).to receive(:limit).and_return(empty_rel)
+      allow(empty_rel).to receive(:pluck).and_return([])
+
+      allow(Admin::UserRole).to receive(:where).with(app_type_id: [1, nil]).and_return(empty_rel)
+      allow(Admin::UserRole).to receive(:where).with(app_type_id: [2, nil]).and_return(empty_rel)
+      allow(Admin::UserAccessControl).to receive(:where).with(app_type_id: [1, nil]).and_return(empty_rel)
+      allow(Admin::UserAccessControl).to receive(:where).with(app_type_id: [2, nil]).and_return(empty_rel)
+
+      allow(helper).to receive(:current_user).and_return(user_app_type_1)
+      allow(helper).to receive(:current_admin).and_return(nil)
+      key_app1 = helper.handlebars_cache_key
+
+      helper.instance_variable_set(:@handlebars_cache_key, nil)
+      helper.instance_variable_set(:@handlebars_item_updates_key, nil)
+
+      allow(helper).to receive(:current_user).and_return(user_app_type_2)
+      key_app2 = helper.handlebars_cache_key
+
+      expect(key_app1).not_to eq(key_app2),
+                              'Expected handlebars_cache_key to differ between app_type 1 and app_type 2 even ' \
+                              'when their role/access-control timestamps are identical (both empty), but both ' \
+                              "returned '#{key_app1}'. app_type_id itself must be part of the digest (issue #1279)."
+    end
+
+    it 'differs between app_type contexts for the SAME user id, isolating the app_type_id contribution' do
+      # user_app_type_1 and user_app_type_2 above vary both id and app_type_id together, which would
+      # mask a regression that dropped app_type_id from the digest once user_id was added (issue #1279
+      # follow-up: per-user scoping). This test holds the user id constant and only varies app_type_id.
+      same_id_app_type_1 = Struct.new(:id, :app_type_id, :current_sign_in_at).new(99, 1, Time.current)
+      same_id_app_type_2 = Struct.new(:id, :app_type_id, :current_sign_in_at).new(99, 2, Time.current)
+
+      empty_rel = double('empty_rel')
+      allow(empty_rel).to receive(:reorder).and_return(empty_rel)
+      allow(empty_rel).to receive(:limit).and_return(empty_rel)
+      allow(empty_rel).to receive(:pluck).and_return([])
+
+      allow(Admin::UserRole).to receive(:where).with(app_type_id: [1, nil]).and_return(empty_rel)
+      allow(Admin::UserRole).to receive(:where).with(app_type_id: [2, nil]).and_return(empty_rel)
+      allow(Admin::UserAccessControl).to receive(:where).with(app_type_id: [1, nil]).and_return(empty_rel)
+      allow(Admin::UserAccessControl).to receive(:where).with(app_type_id: [2, nil]).and_return(empty_rel)
+
+      allow(helper).to receive(:current_user).and_return(same_id_app_type_1)
+      allow(helper).to receive(:current_admin).and_return(nil)
+      key_app1 = helper.handlebars_cache_key
+
+      helper.instance_variable_set(:@handlebars_cache_key, nil)
+      helper.instance_variable_set(:@handlebars_item_updates_key, nil)
+
+      allow(helper).to receive(:current_user).and_return(same_id_app_type_2)
+      key_app2 = helper.handlebars_cache_key
+
+      expect(key_app1).not_to eq(key_app2),
+                              'Expected handlebars_cache_key to differ between app_type 1 and app_type 2 for the ' \
+                              "same user id (99), but both returned '#{key_app1}'. app_type_id must remain part " \
+                              'of the digest even now that user id is also included (issue #1279 follow-up).'
+    end
+  end
+
+  # Issue #1279 follow-up - per-user scoping
+  #
+  # Proves that handlebars_cache_key / handlebars_compiled_filename incorporate the current
+  # user/admin id, so two different users within the SAME app_type never share a compiled
+  # file. This matters because partials such as master_tabs render differently per user
+  # based on individual role/access-control grants (see master_viewables, has_access_to?),
+  # not just app_type. Without user scoping, the first user to compile the partial
+  # permanently "poisons" the shared on-disk file for every other user in that app_type.
+  describe '#handlebars_cache_key user scope (issue #1279 follow-up - per-user)' do
+    let(:user_one) do
+      Struct.new(:id, :app_type_id, :current_sign_in_at).new(11, 1, Time.current)
+    end
+    let(:user_two) do
+      Struct.new(:id, :app_type_id, :current_sign_in_at).new(12, 1, Time.current)
+    end
+
+    before do
+      allow(helper).to receive(:current_admin).and_return(nil)
+    end
+
+    it 'produces different cache keys for different users within the same app_type' do
+      allow(helper).to receive(:current_user).and_return(user_one)
+      key_user_one = helper.handlebars_cache_key
+
+      helper.instance_variable_set(:@handlebars_cache_key, nil)
+      helper.instance_variable_set(:@handlebars_item_updates_key, nil)
+
+      allow(helper).to receive(:current_user).and_return(user_two)
+      key_user_two = helper.handlebars_cache_key
+
+      expect(key_user_one).not_to eq(key_user_two),
+                                  'Expected handlebars_cache_key to differ between user 11 and user 12, both in ' \
+                                  "app_type 1, but both returned '#{key_user_one}'. The cache key is not " \
+                                  'per-user (issue #1279 follow-up).'
+    end
+
+    it 'produces different compiled filenames for different users within the same app_type' do
+      template_id = 'master_tabs'
+
+      allow(helper).to receive(:current_user).and_return(user_one)
+      filename_user_one = helper.handlebars_compiled_filename(template_id)
+
+      helper.instance_variable_set(:@handlebars_cache_key, nil)
+      helper.instance_variable_set(:@handlebars_item_updates_key, nil)
+
+      allow(helper).to receive(:current_user).and_return(user_two)
+      filename_user_two = helper.handlebars_compiled_filename(template_id)
+
+      expect(filename_user_one).not_to eq(filename_user_two),
+                                       "Expected handlebars_compiled_filename('#{template_id}') to differ " \
+                                       "between user 11 and user 12, but both returned '#{filename_user_one}'. " \
+                                       'The compiled filename is not per-user (issue #1279 follow-up).'
+    end
+
+    it 'produces a stable cache key for the same user across separate request-like calls' do
+      allow(helper).to receive(:current_user).and_return(user_one)
+      key_first_call = helper.handlebars_cache_key
+
+      helper.instance_variable_set(:@handlebars_cache_key, nil)
+      helper.instance_variable_set(:@handlebars_item_updates_key, nil)
+
+      key_second_call = helper.handlebars_cache_key
+
+      expect(key_second_call).to eq(key_first_call),
+                                 'Expected handlebars_cache_key to be stable for the same user across separate ' \
+                                 "calls, but got '#{key_first_call}' then '#{key_second_call}'."
+    end
+  end
+
+  # Issue #1279 follow-up - User/Admin id collision safety
+  #
+  # current_user_or_admin&.id alone can't distinguish a User with id N from an Admin with
+  # id N. If both happened to resolve to the same app_type_id (Admin has no app_type_id
+  # column at all, so it is always nil; a User with app_type_id: nil would match), the
+  # digest would collide even though they are different accounts. handlebars_cache_key
+  # must also fold in the resolved object's class name to eliminate this collision.
+  # Uses real (unsaved) User/Admin instances rather than doubles so `.class.name` reflects
+  # actual model class names.
+  describe '#handlebars_cache_key User/Admin id collision safety (issue #1279 follow-up)' do
+    it 'differs between a User and an Admin that share the same id and app_type_id' do
+      user = User.new(id: 42, app_type_id: nil)
+      admin = Admin.new(id: 42)
+
+      allow(helper).to receive(:current_user).and_return(user)
+      allow(helper).to receive(:current_admin).and_return(nil)
+      key_for_user = helper.handlebars_cache_key
+
+      helper.instance_variable_set(:@handlebars_cache_key, nil)
+      helper.instance_variable_set(:@handlebars_item_updates_key, nil)
+
+      allow(helper).to receive(:current_user).and_return(nil)
+      allow(helper).to receive(:current_admin).and_return(admin)
+      key_for_admin = helper.handlebars_cache_key
+
+      expect(key_for_user).not_to eq(key_for_admin),
+                                  'Expected handlebars_cache_key to differ between a User(id: 42) and an ' \
+                                  "Admin(id: 42), but both returned '#{key_for_user}'. The user/admin class " \
+                                  'name must be part of the digest to prevent id collisions (issue #1279 ' \
+                                  'follow-up).'
+    end
+  end
+
+  # Issue #1279 follow-up - write_handlebars_template cross-user cache poisoning within
+  # the same app_type
+  #
+  # Mirrors the cross-app_type poisoning tests above, but holds app_type_id constant and
+  # varies only the user, proving that two different users in the same app_type no longer
+  # share (and poison) a single compiled file.
+  describe '#write_handlebars_template cross-user cache poisoning within same app_type (issue #1279 follow-up)' do
+    let(:user_one) do
+      Struct.new(:id, :app_type_id, :current_sign_in_at).new(11, 1, Time.current)
+    end
+    let(:user_two) do
+      Struct.new(:id, :app_type_id, :current_sign_in_at).new(12, 1, Time.current)
+    end
+    let(:template_id) { 'master_tabs' }
+    let(:content_user_one) { '<div class="panel-user1">{{panel_one}}</div>' }
+    let(:content_user_two) { '<div class="panel-user2">{{panel_two}}{{panel_three}}</div>' }
+
+    before do
+      allow(helper).to receive(:current_admin).and_return(nil)
+      HandlebarsPrecompiler.setup_directories
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::TEMPLATES_TMP_DIR.join('*')))
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::PARTIALS_TMP_DIR.join('*')))
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::PUBLIC_DIR.join('*')))
+    end
+
+    it 'writes separate compiled files for different users with the same template_id and app_type' do
+      allow(helper).to receive(:current_user).and_return(user_one)
+      path_user_one = helper.write_handlebars_template(template_id, content_user_one, is_partial: true)
+
+      helper.instance_variable_set(:@handlebars_cache_key, nil)
+      helper.instance_variable_set(:@handlebars_item_updates_key, nil)
+      helper.instance_variable_set(:@handlebars_request_id, nil)
+
+      allow(helper).to receive(:current_user).and_return(user_two)
+      path_user_two = helper.write_handlebars_template(template_id, content_user_two, is_partial: true)
+
+      expect(path_user_one).not_to eq(path_user_two),
+                                   'Expected write_handlebars_template to produce different compiled file paths ' \
+                                   'for different users (11 vs 12) in the same app_type, but both returned ' \
+                                   "'#{path_user_one}'. Cross-user cache poisoning within an app_type " \
+                                   '(issue #1279 follow-up).'
+    end
+
+    it 'does not skip writing when a compiled file exists from a different user in the same app_type' do
+      allow(helper).to receive(:current_user).and_return(user_one)
+      compiled_filename = helper.handlebars_compiled_filename(template_id)
+      public_dir = helper.handlebars_public_dir(is_partial: true)
+      FileUtils.mkdir_p(public_dir)
+      compiled_file = public_dir.join(compiled_filename)
+      File.write(compiled_file, "// compiled for user 11: #{content_user_one}")
+
+      helper.instance_variable_set(:@handlebars_cache_key, nil)
+      helper.instance_variable_set(:@handlebars_item_updates_key, nil)
+      helper.instance_variable_set(:@handlebars_request_id, nil)
+
+      allow(helper).to receive(:current_user).and_return(user_two)
+      helper.write_handlebars_template(template_id, content_user_two, is_partial: true)
+
+      request_dir = helper.handlebars_temp_dir(is_partial: true)
+      temp_file = request_dir.join("#{template_id}.handlebars")
+
+      expect(File.exist?(temp_file)).to be(true),
+                                        'Expected write_handlebars_template to write a temp file for user 12, ' \
+                                        'but it skipped because a compiled file from user 11 already exists at ' \
+                                        "'#{compiled_file}'. Cross-user cache poisoning (issue #1279 follow-up)."
+    end
+  end
+
+  # Issue #1279 follow-up - global (app_type_id: nil) role/access-control changes must
+  # invalidate the cache key too.
+  #
+  # Admin::UserRole/Admin::UserAccessControl rows with app_type_id: nil apply across ALL
+  # app types (matched by role_name, see UserAndRoles#where_user_and_role). If the cache
+  # key query only matched the exact app_type_id, a change to a global/shared role or
+  # access control would never be reflected in any app_type's cache key, serving stale
+  # compiled content.
+  describe '#handlebars_cache_key global (app_type_id: nil) scope (issue #1279 follow-up)' do
+    let(:user_app_type_1) do
+      Struct.new(:id, :app_type_id, :current_sign_in_at).new(10, 1, Time.current)
+    end
+
+    it 'changes when a global (app_type_id: nil) UserRole updated_at changes' do
+      allow(helper).to receive(:current_user).and_return(user_app_type_1)
+      allow(helper).to receive(:current_admin).and_return(nil)
+
+      rel_before = double('rel_before')
+      allow(rel_before).to receive(:reorder).and_return(rel_before)
+      allow(rel_before).to receive(:limit).and_return(rel_before)
+      allow(rel_before).to receive(:pluck).and_return([Time.at(1_000_000)])
+      allow(Admin::UserRole).to receive(:where).with(app_type_id: [1, nil]).and_return(rel_before)
+      allow(Admin::UserAccessControl).to receive(:where).and_call_original
+
+      key_before = helper.handlebars_cache_key
+
+      helper.instance_variable_set(:@handlebars_cache_key, nil)
+      helper.instance_variable_set(:@handlebars_item_updates_key, nil)
+
+      rel_after = double('rel_after')
+      allow(rel_after).to receive(:reorder).and_return(rel_after)
+      allow(rel_after).to receive(:limit).and_return(rel_after)
+      allow(rel_after).to receive(:pluck).and_return([Time.at(2_000_000)])
+      allow(Admin::UserRole).to receive(:where).with(app_type_id: [1, nil]).and_return(rel_after)
+
+      key_after = helper.handlebars_cache_key
+
+      expect(key_after).not_to eq(key_before),
+                               'Expected handlebars_cache_key to change when the global-scoped UserRole updated_at ' \
+                               'timestamp changes (issue #1279 follow-up).'
+    end
+  end
+
+  # Issue #1279 - write_handlebars_template cross-context cache poisoning
+  #
+  # Proves that write_handlebars_template, when called with the same template_id
+  # but different current_user app_type contexts whose template content differs,
+  # writes/reuses a SINGLE compiled file for both contexts. The first context to
+  # compile "poisons" the cache for subsequent contexts.
+  describe '#write_handlebars_template cross-context cache poisoning (issue #1279)' do
+    let(:user_app_type_1) do
+      Struct.new(:id, :app_type_id, :current_sign_in_at).new(10, 1, Time.current)
+    end
+    let(:user_app_type_2) do
+      Struct.new(:id, :app_type_id, :current_sign_in_at).new(20, 2, Time.current)
+    end
+    let(:template_id) { 'master_tabs' }
+    let(:content_app1) { '<div class="panel-app1">{{panel_one}}</div>' }
+    let(:content_app2) { '<div class="panel-app2">{{panel_two}}{{panel_three}}</div>' }
+
+    before do
+      allow(helper).to receive(:current_admin).and_return(nil)
+      HandlebarsPrecompiler.setup_directories
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::TEMPLATES_TMP_DIR.join('*')))
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::PARTIALS_TMP_DIR.join('*')))
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::PUBLIC_DIR.join('*')))
+    end
+
+    it 'writes separate temp files for different app_type contexts with the same template_id' do
+      # First request: app_type 1 writes the template
+      allow(helper).to receive(:current_user).and_return(user_app_type_1)
+      path_app1 = helper.write_handlebars_template(template_id, content_app1, is_partial: true)
+
+      # Clear memoization to simulate separate request from different app_type
+      helper.instance_variable_set(:@handlebars_cache_key, nil)
+      helper.instance_variable_set(:@handlebars_item_updates_key, nil)
+      helper.instance_variable_set(:@handlebars_request_id, nil)
+
+      # Second request: app_type 2 writes DIFFERENT content for the same template_id
+      allow(helper).to receive(:current_user).and_return(user_app_type_2)
+      path_app2 = helper.write_handlebars_template(template_id, content_app2, is_partial: true)
+
+      # BUG: Currently both paths are identical because the compiled filename
+      # does not vary by app_type. The second call would short-circuit if the
+      # first call's compiled file already exists, "poisoning" the result.
+      # This expectation will FAIL against current code, proving the bug.
+      expect(path_app1).not_to eq(path_app2),
+                               'Expected write_handlebars_template to produce different compiled file paths for ' \
+                               "different app_type contexts (app_type 1 vs 2), but both returned '#{path_app1}'. " \
+                               'Cross-context cache poisoning: first app_type to compile wins (issue #1279).'
+    end
+
+    it 'does not skip writing when a compiled file exists from a different app_type context' do
+      # Simulate app_type 1 having already compiled the template
+      allow(helper).to receive(:current_user).and_return(user_app_type_1)
+      compiled_filename = helper.handlebars_compiled_filename(template_id)
+      public_dir = helper.handlebars_public_dir(is_partial: true)
+      FileUtils.mkdir_p(public_dir)
+      compiled_file = public_dir.join(compiled_filename)
+      File.write(compiled_file, "// compiled for app_type 1: #{content_app1}")
+
+      # Clear memoization to simulate separate request from different app_type
+      helper.instance_variable_set(:@handlebars_cache_key, nil)
+      helper.instance_variable_set(:@handlebars_item_updates_key, nil)
+      helper.instance_variable_set(:@handlebars_request_id, nil)
+
+      # Now app_type 2 calls write_handlebars_template with DIFFERENT content
+      allow(helper).to receive(:current_user).and_return(user_app_type_2)
+      helper.write_handlebars_template(template_id, content_app2, is_partial: true)
+
+      # Check that the temp file was written (i.e. the template was NOT skipped)
+      request_dir = helper.handlebars_temp_dir(is_partial: true)
+      temp_file = request_dir.join("#{template_id}.handlebars")
+
+      # BUG: Currently the method returns early because it finds the compiled file
+      # from app_type 1 (same filename), so the temp file is never written.
+      # This expectation will FAIL against current code, proving the bug.
+      expect(File.exist?(temp_file)).to be(true),
+                                        'Expected write_handlebars_template to write a temp file for app_type 2, ' \
+                                        'but it skipped because a compiled file from app_type 1 already exists at ' \
+                                        "'#{compiled_file}'. Cross-context cache poisoning (issue #1279)."
     end
   end
 end

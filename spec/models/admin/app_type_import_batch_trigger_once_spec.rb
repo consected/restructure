@@ -218,4 +218,99 @@ RSpec.describe 'Import app configuration with batch_trigger frequency once', typ
     expect(@dm.task_schedule).not_to be_nil,
                                      'Expected batch trigger job to be scheduled after saving post-import'
   end
+
+  # Tests for GitHub issue #1090: Allow admin to specify run_at time for frequency: 'once' batch triggers.
+  #
+  # handle_batch_schedule currently hardcodes run_at: DateTime.now + 10.seconds for the 'once' branch,
+  # ignoring any run_at value present in _configurations.batch_trigger. The fix should read run_at
+  # from config (when present) and only fall back to DateTime.now + 10.seconds when it is absent.
+  describe 'run_at configuration for frequency once - issue #1090' do
+    it 'schedules the batch trigger job at the configured run_at time when frequency is once and run_at is specified' do
+      # Given: a future datetime specified explicitly in the batch_trigger configuration
+      specified_time = 2.hours.from_now.change(usec: 0)
+      run_at_string = specified_time.strftime('%Y-%m-%d %H:%M:%S')
+
+      dm = DynamicModel.find(@dm_id)
+      dm.options = <<~YAML
+        _configurations:
+          batch_trigger:
+            frequency: 'once'
+            run_at: '#{run_at_string}'
+            label: test once batch
+            user: batch_test@example.com
+
+        default:
+          label: Default
+          fields:
+            - test_field
+          batch_trigger:
+            on_record:
+              update_this:
+                one:
+                  with:
+                    test_field: processed
+      YAML
+
+      # When: the dynamic model is saved, capture the run_at argument passed to schedule_task
+      captured_run_at = nil
+      allow(RecurringBatchTask).to receive(:schedule_task) do |_owner, _data, **kwargs|
+        captured_run_at = kwargs[:run_at]
+      end
+
+      dm.current_admin = @admin
+      dm.save!
+
+      # Then: schedule_task must have been called with the configured time, NOT DateTime.now + 10s
+      # This test FAILS until the fix is applied because the current implementation always passes
+      # DateTime.now + 10.seconds and ignores the configured run_at value.
+      expect(captured_run_at).not_to be_nil,
+                                     'Expected RecurringBatchTask.schedule_task to have been called with a run_at argument'
+      # Compare as unix timestamps to avoid DateTime vs TimeWithZone type errors
+      expect(captured_run_at.to_time.to_i).to be_within(60).of(specified_time.to_i),
+                                             "Expected run_at to be near #{specified_time} (from config), " \
+                                             "but got #{captured_run_at} — the implementation is ignoring the configured run_at"
+    end
+
+    it 'schedules the batch trigger job approximately 10 seconds from now when frequency is once and run_at is not specified' do
+      # Given: a batch_trigger with frequency: once but NO run_at configured (existing default behaviour)
+      dm = DynamicModel.find(@dm_id)
+      dm.options = <<~YAML
+        _configurations:
+          batch_trigger:
+            frequency: 'once'
+            label: test once batch
+            user: batch_test@example.com
+
+        default:
+          label: Default
+          fields:
+            - test_field
+          batch_trigger:
+            on_record:
+              update_this:
+                one:
+                  with:
+                    test_field: processed
+      YAML
+
+      # When: the dynamic model is saved, capture the run_at argument passed to schedule_task
+      captured_run_at = nil
+      before_save = DateTime.now
+      allow(RecurringBatchTask).to receive(:schedule_task) do |_owner, _data, **kwargs|
+        captured_run_at = kwargs[:run_at]
+      end
+
+      dm.current_admin = @admin
+      dm.save!
+
+      # Then: schedule_task must have been called with approximately DateTime.now + 10 seconds
+      # This preserves the existing default behaviour when no run_at is configured.
+      expect(captured_run_at).not_to be_nil,
+                                     'Expected RecurringBatchTask.schedule_task to have been called with a run_at argument'
+      # Compare as unix timestamps to avoid DateTime vs TimeWithZone type errors
+      expect(captured_run_at.to_time.to_i).to be_within(5).of((before_save + 10.seconds).to_time.to_i),
+                                             "Expected run_at to be approximately #{before_save + 10.seconds} " \
+                                             "(DateTime.now + 10s), but got #{captured_run_at}"
+    end
+  end
 end

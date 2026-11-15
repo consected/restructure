@@ -43,6 +43,10 @@ class Admin::DynamicModelsController < AdminController
     limit = bt[:limit]
     user = object_instance.class.user_for_conf_snippet(bt)
 
+    if bt[:user].present? && user.nil?
+      raise FphsException, "Batch trigger user '#{bt[:user]}' not found or is not active"
+    end
+
     # Run batch processing immediately (not as a background job)
     # Get the implementation class and ensure its definition cache is up-to-date
     # This is necessary because the implementation class may have a stale definition_id

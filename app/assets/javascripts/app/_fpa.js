@@ -278,9 +278,13 @@ _fpa = {
 
         data_for_data_type = data[data_type];
 
-        // Model references have an item type attribute
+        // Model references have an item type attribute.
+        // Do NOT default vdef_version to a placeholder value here. Defaulting to a
+        // literal like 'v' would diverge from the multi-results path (which leaves
+        // it undefined when the record is unversioned) and produce a different
+        // template_config_versions cache key for the same record, causing
+        // duplicate template-config requests for unversioned records.
         if (data_for_data_type) {
-          data_for_data_type.vdef_version = data_for_data_type.vdef_version || 'v'
           var item_type = data_for_data_type.item_type || data_type;
         } else {
           var item_type = data_type;
@@ -309,12 +313,16 @@ _fpa = {
 
         var data_item = data_array[k];
         data_master_id = data_master_id || data && data.master_id || data_item && data_item.master_id;
-        // Prevent requesting the template for the same instance multiple times
-        // We don't use the definition version here, since it is possible for different
-        // instances with the same definition version to return different results
-        // due to runtime model references returning results with different template versions
+        // Prevent requesting the template for the same instance multiple times.
+        // Keep the instance id in the cache key because different records on the same
+        // page can share a definition version yet still resolve different template
+        // dependencies through their referenced runtime models.
+        // Include the definition version as well so the same record can fetch the
+        // correct historical template config when multiple definition versions are
+        // shown together or after the current definition changes.
         if (data_item) {
           var did = url_data_type + '/' + data_item.id;
+          if (data_item.vdef_version) did += '/' + data_item.vdef_version;
           if (_fpa.state.template_config_versions[did] || !data_item.id) continue;
 
           _fpa.state.template_config_versions[did] = true;
@@ -337,24 +345,33 @@ _fpa = {
 
       $.ajax(url, {
         success: function (data) {
-          var temploc = $('#master-main-template').first();
           // Iterate all the returned scripts and only add them to the DOM if a script with the same id
-          // doesn't already exist. This prevents accidental bloating of the DOM with duplicates
+          // doesn't already exist. This prevents accidental bloating of the DOM with duplicates.
+          // Append to <head> so that injected config scripts (which set up _fpa.state.template_config
+          // version keys) are always inserted into a live DOM node and evaluated by the browser.
+          // (The previous insertion point #master-main-template no longer exists in the DOM after
+          // the Handlebars precompilation refactoring, so temploc.after() was silently a no-op.)
           $(data).each(function () {
             var templateid = $(this).attr('id');
             console.debug(`got template ${templateid}`)
             if (!$('#' + templateid).length) {
-              temploc.after($(this));
+              $('head').append($(this));
             }
           });
           _fpa.compile_templates();
           resolve();
         },
         error: function (data) {
-          for (var did in list_data_item_state_ids) {
-            console.error(`Failed to get template ${did}`)
+          // list_data_item_state_ids is an Array of cache keys. Iterate values
+          // (not numeric indices) so that we actually clear the failed cache
+          // entries and a subsequent call can retry the fetch. Previously this
+          // used `for ... in`, which iterates indices on arrays and so wrote
+          // junk numeric keys while leaving the real cache entries marked true,
+          // permanently blocking retries after a transient failure.
+          list_data_item_state_ids.forEach(function (did) {
+            console.error(`Failed to get template ${did}`);
             _fpa.state.template_config_versions[did] = false;
-          }
+          });
           resolve();
         },
       });
@@ -1495,6 +1512,14 @@ _fpa = {
     if (current_user || current_admin) {
 
       if (current_user && current_user.app_type_id && !(controller_name == 'app_types' && action_name == 'upload')) {
+        // On admin pages the main template can be very large and slow to
+        // compile, but the admin UI does not actually depend on it. Load it
+        // in the background and immediately mark templates as loaded so the
+        // "loading..." splash guard is removed as soon as the HTML is ready.
+        // See issue #1181.
+        if (_fpa.state.is_admin_page) {
+          _fpa.status.loaded_templates = true;
+        }
         _fpa.load_template_version(_fpa.state.template_version, _fpa.state.rails_env);
 
 

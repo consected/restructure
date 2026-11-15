@@ -7,6 +7,7 @@
   <th>Username</th>
   <th>Email</th>
   <th>Expiration</th>
+  <th></th>
   </tr></thead>
   <tbody>
     <% object_instance.redcap_project_users.each do |list_item| %>
@@ -14,6 +15,24 @@
       <td><%= list_item.username %></td>
       <td><%= list_item.email %></td>
       <td><%= list_item.expiration %></td>
+      <td>
+        <% unless list_item.disabled %>
+          <a class="btn btn-danger btn-xs show-in-modal remove-redcap-user glyphicon glyphicon-trash"
+             title="remove user"
+             data-content-el="#remove-redcap-user-<%=object_instance.id%>-<%=list_item.id%>"
+             data-title="Remove REDCap user"></a>
+          <div id="remove-redcap-user-<%=object_instance.id%>-<%=list_item.id%>" class="hidden">
+            <h2>This action may have side-effects</h2>
+            <p>Remove <%= list_item.username %> from this REDCap project? Click to continue if you are sure</p>
+            <p>
+              <%= link_to 'remove user', remove_user_redcap_project_admin_path(object_instance, username: list_item.username),
+              remote: true,
+              class: 'btn btn-danger btn-sm',
+              method: :post %>
+            </p>
+          </div>
+        <% end %>
+      </td>
       </tr>
     <% end %>
   </tbody>

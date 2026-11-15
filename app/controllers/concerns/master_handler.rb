@@ -204,7 +204,9 @@ module MasterHandler
     end
     upd_ver = Digest::SHA256.hexdigest upd_all.join('>')
 
-    res = params.permit!.to_h
+    # Hash is used only for SHA256 digest into a cache key, never for assignment.
+    # Using to_unsafe_h avoids marking the params object as permitted.
+    res = params.to_unsafe_h
     res[:_upd_ver] = upd_ver
     @index_cache_key = Digest::SHA256.hexdigest(res.to_json)
   end
@@ -298,29 +300,29 @@ module MasterHandler
   #
   # Render a plain 401 page if object doesn't allow access
   def check_showable?
-    return unless object_instance
+    return false unless object_instance
 
-    return if object_instance.allows_current_user_access_to? :access
+    return false if object_instance.allows_current_user_access_to? :access
 
     not_authorized
-    nil
+    false
   end
 
   def check_editable?
     handle_option_type_config if action_name == 'edit' && respond_to?(:handle_option_type_config, true)
-    return if object_instance.allows_current_user_access_to?(:edit)
+    return false if object_instance.allows_current_user_access_to?(:edit)
 
     not_editable
-    nil
+    false
   end
 
   def check_creatable?
     handle_option_type_config if action_name == 'new' && respond_to?(:handle_option_type_config, true)
-    return if current_admin_sample || object_instance.allows_current_user_access_to?(:create)
+    return false if current_admin_sample || object_instance.allows_current_user_access_to?(:create)
 
     Rails.logger.warn "This item is not creatable by #{current_user&.email || 'unknown user'}: #{object_instance.class.name} - #{object_instance&.attributes}"
     not_creatable
-    nil
+    false
   end
 
   #
@@ -367,7 +369,7 @@ module MasterHandler
       @id = object.id
     end
 
-    if @master&.respond_to? objects_name
+    if @master.respond_to? objects_name
       # Get the list of objects related to the master, in other words triggering the association
       # off of the master object
       @master_objects = @master.send(objects_name)

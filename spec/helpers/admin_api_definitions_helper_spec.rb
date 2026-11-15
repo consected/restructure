@@ -5,7 +5,14 @@
 # Tests helper methods for generating API documentation in admin definition panels.
 # Verifies that the correct REST API endpoints, curl examples, field definitions,
 # save trigger YAML, and report-specific curl/save trigger YAML are generated for
-# dynamic models, activity logs, external identifiers, and reports.
+# dynamic models, activity logs, external identifiers, reports, and standard master
+# record models (Admin::MasterRecord - issue #1183).
+#
+# Issue #1183: clicking the API tab for a non-masters entry in /admin/master_records
+# raised "undefined method 'full_item_type_name' for an instance of Admin::MasterRecord"
+# because the generic api_panel partial (and AdminApiDefinitionsHelper#api_params_key)
+# called full_item_type_name which was missing from Admin::MasterRecord. These specs
+# verify that all helper methods work correctly with Admin::MasterRecord instances.
 
 require 'rails_helper'
 
@@ -303,6 +310,16 @@ RSpec.describe AdminApiDefinitionsHelper, type: :helper do
       expect(yaml).to include("'Content-Type': 'application/json'")
     end
 
+    it 'explicitly sets method: post on the create_record action' do
+      # Without an explicit method, SaveTriggers::PullExternalData defaults to 'get',
+      # which would break the rendered create_record example.
+      dm = DynamicModel.active_model_configurations.find(&:table_or_view_ready?)
+      next unless dm
+
+      yaml = helper.api_save_trigger_example(dm)
+      expect(yaml).to match(/create_record:\s*\n(?:\s+(?!method:).*\n)*\s+method:\s*post\b/)
+    end
+
     it 'includes field-level post_data entries with type-appropriate values' do
       dm = DynamicModel.active_model_configurations.find(&:table_or_view_ready?)
       next unless dm
@@ -311,6 +328,35 @@ RSpec.describe AdminApiDefinitionsHelper, type: :helper do
       fields = helper.api_fields(dm)
       fields.each do |f|
         expect(yaml).to include("#{f[:name]}:")
+      end
+    end
+
+    it 'nests post_data fields under the controller params key' do
+      dm = DynamicModel.active_model_configurations.find(&:table_or_view_ready?)
+      next unless dm
+
+      yaml = helper.api_save_trigger_example(dm)
+      key = helper.api_params_key(dm)
+      # post_data block must include the wrapping key, followed by field lines
+      # indented one more level beneath it.
+      expect(yaml).to match(/post_data:\s*\n\s+#{Regexp.escape(key)}:\s*\n/)
+    end
+
+    it 'includes embedded_item placeholder in the post_data for activity logs' do
+      al = ActivityLog.active.find { |a| a.respond_to?(:table_or_view_ready?) && a.table_or_view_ready? }
+      next unless al
+
+      yaml = helper.api_save_trigger_example(al)
+      key = helper.api_params_key(al)
+      # The embedded_item: {} line must appear nested under the params key in post_data.
+      expect(yaml).to match(/#{Regexp.escape(key)}:\s*\n(?:\s+\S.*\n)*\s+embedded_item:\s*\{\}/)
+    end
+
+    it 'does not include embedded_item for dynamic models or external identifiers' do
+      [DynamicModel.active_model_configurations.find(&:table_or_view_ready?),
+       ExternalIdentifier.active.find { |e| e.respond_to?(:table_or_view_ready?) && e.table_or_view_ready? }].compact.each do |defn|
+        yaml = helper.api_save_trigger_example(defn)
+        expect(yaml).not_to include('embedded_item')
       end
     end
   end
@@ -326,12 +372,13 @@ RSpec.describe AdminApiDefinitionsHelper, type: :helper do
   end
 
   describe '#api_sample_json_body' do
-    it 'returns empty braces when no fields are available' do
+    it 'returns a wrapped empty object when no fields are available' do
       dm = DynamicModel.active_model_configurations.find { |d| !d.table_or_view_ready? }
       next unless dm
 
       body = helper.api_sample_json_body(dm)
-      expect(body).to eq('{}')
+      key = helper.api_params_key(dm)
+      expect(body).to eq("{\n  \"#{key}\": {}\n}")
     end
 
     it 'includes type-appropriate placeholders for each column type' do
@@ -347,6 +394,159 @@ RSpec.describe AdminApiDefinitionsHelper, type: :helper do
       fields.each do |f|
         expect(body).to include("\"#{f[:name]}\"")
       end
+    end
+
+    it 'wraps fields under the controller params key' do
+      dm = DynamicModel.active_model_configurations.find(&:table_or_view_ready?)
+      next unless dm
+
+      body = helper.api_sample_json_body(dm)
+      key = helper.api_params_key(dm)
+      parsed = JSON.parse(body)
+      expect(parsed.keys).to eq([key])
+      fields = helper.api_fields(dm)
+      fields.each do |f|
+        expect(parsed[key]).to have_key(f[:name])
+      end
+    end
+
+    it 'wraps fields under the params key for activity logs' do
+      al = ActivityLog.active.find { |a| a.respond_to?(:table_or_view_ready?) && a.table_or_view_ready? }
+      next unless al
+
+      body = helper.api_sample_json_body(al)
+      key = helper.api_params_key(al)
+      parsed = JSON.parse(body)
+      expect(parsed.keys).to eq([key])
+      expect(key).to start_with('activity_log_')
+      expect(key).not_to include('__')
+    end
+
+    it 'includes an embedded_item placeholder for activity logs so admins can see where to put nested item data' do
+      al = ActivityLog.active.find { |a| a.respond_to?(:table_or_view_ready?) && a.table_or_view_ready? }
+      next unless al
+
+      body = helper.api_sample_json_body(al)
+      key = helper.api_params_key(al)
+      parsed = JSON.parse(body)
+      expect(parsed[key]).to have_key('embedded_item')
+      expect(parsed[key]['embedded_item']).to eq({})
+    end
+
+    it 'does not include embedded_item for dynamic models' do
+      dm = DynamicModel.active_model_configurations.find(&:table_or_view_ready?)
+      next unless dm
+
+      body = helper.api_sample_json_body(dm)
+      parsed = JSON.parse(body)
+      expect(parsed[helper.api_params_key(dm)]).not_to have_key('embedded_item')
+    end
+
+    it 'does not include embedded_item for external identifiers' do
+      ei = ExternalIdentifier.active.find { |e| e.respond_to?(:table_or_view_ready?) && e.table_or_view_ready? }
+      next unless ei
+
+      body = helper.api_sample_json_body(ei)
+      parsed = JSON.parse(body)
+      expect(parsed[helper.api_params_key(ei)]).not_to have_key('embedded_item')
+    end
+
+    it 'wraps fields under the params key for external identifiers' do
+      ei = ExternalIdentifier.active.find { |e| e.respond_to?(:table_or_view_ready?) && e.table_or_view_ready? }
+      next unless ei
+
+      body = helper.api_sample_json_body(ei)
+      key = helper.api_params_key(ei)
+      parsed = JSON.parse(body)
+      expect(parsed.keys).to eq([key])
+      expect(key).not_to include('__')
+      expect(key).to eq(ei.implementation_model_name)
+    end
+  end
+
+  describe '#api_params_key' do
+    it 'collapses double underscores to a single underscore for dynamic models' do
+      dm = DynamicModel.active_model_configurations.first
+      next unless dm
+
+      key = helper.api_params_key(dm)
+      expect(key).not_to include('__')
+      expect(key).to start_with('dynamic_model_')
+    end
+
+    it 'collapses double underscores to a single underscore for activity logs' do
+      al = ActivityLog.active.first
+      next unless al
+
+      key = helper.api_params_key(al)
+      expect(key).not_to include('__')
+      expect(key).to start_with('activity_log_')
+    end
+
+    it 'returns the singular table name for external identifiers' do
+      ei = ExternalIdentifier.active.first
+      next unless ei
+
+      key = helper.api_params_key(ei)
+      expect(key).not_to include('__')
+      expect(key).to eq(ei.implementation_model_name)
+    end
+
+    it 'returns the singular table name for Admin::MasterRecord (issue #1183)' do
+      record = Admin::MasterRecord.find(2) # player_infos
+      key = helper.api_params_key(record)
+      expect(key).to eq(Settings::DefaultSubjectInfoTableName.singularize)
+      expect(key).not_to include('__')
+    end
+
+    it 'does not raise an error when called with Admin::MasterRecord (issue #1183)' do
+      Admin::MasterRecord.all.each do |record|
+        expect { helper.api_params_key(record) }.not_to raise_error
+      end
+    end
+  end
+
+  describe 'Admin::MasterRecord support in API helpers (issue #1183)' do
+    let(:player_info_record) { Admin::MasterRecord.find(2) }
+
+    it 'api_base_path generates a master-nested path for player_infos' do
+      path = helper.api_base_path(player_info_record)
+      expect(path).to start_with('/masters/{{master_id}}/')
+      expect(path).to include(Settings::DefaultSubjectInfoTableName)
+    end
+
+    it 'api_endpoints generates the 4 standard endpoints for a master record model' do
+      endpoints = helper.api_endpoints(player_info_record)
+      expect(endpoints.length).to eq(4)
+      methods = endpoints.map { |e| e[:method] }
+      expect(methods).to eq(%w[GET GET POST PUT])
+    end
+
+    it 'api_fields excludes standard fields for a master record model' do
+      fields = helper.api_fields(player_info_record)
+      field_names = fields.map { |f| f[:name] }
+      expect(field_names).not_to include('id', 'created_at', 'updated_at', 'master_id')
+      expect(fields).to be_an Array
+    end
+
+    it 'api_sample_json_body does not raise an error for Admin::MasterRecord' do
+      expect { helper.api_sample_json_body(player_info_record) }.not_to raise_error
+    end
+
+    it 'api_sample_json_body wraps fields under the singular table name key' do
+      body = helper.api_sample_json_body(player_info_record)
+      key = player_info_record.table_name.singularize
+      parsed = JSON.parse(body)
+      expect(parsed.keys).to eq([key])
+    end
+
+    it 'api_save_trigger_example does not raise an error for Admin::MasterRecord' do
+      expect { helper.api_save_trigger_example(player_info_record) }.not_to raise_error
+    end
+
+    it 'api_save_trigger_example includes the correct base path for player_infos' do
+      yaml = helper.api_save_trigger_example(player_info_record)
+      expect(yaml).to include("/masters/{{master_id}}/#{Settings::DefaultSubjectInfoTableName}")
     end
   end
 
@@ -463,7 +663,11 @@ RSpec.describe AdminApiDefinitionsHelper, type: :helper do
     FakeDefinition = Struct.new(:ready, :columns) do
       def table_or_view_ready? = ready
       def table_columns = columns
-      def respond_to?(m, *) = %i[table_columns table_or_view_ready?].include?(m) || super
+      def full_item_type_name = 'fake_module__fake_thing'
+
+      def respond_to?(m, *)
+        %i[table_columns table_or_view_ready? full_item_type_name].include?(m) || super
+      end
     end
 
     def fake_def_with_column(col_name, col_type)

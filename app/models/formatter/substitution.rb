@@ -37,7 +37,7 @@ module Formatter
 
     NoAutoTitleizeTags = %w[resource_name item_type_name default_embed_resource_name
                             definition_resource_name definition_item_type_name table_name schema_name
-                            default_schema_name redcap_event_name].freeze
+                            default_schema_name redcap_event_name role_name].freeze
     #
     # Perform substitutions on the text, using either a Hash of data or an object item.
     # Provide a tag substitution to be used to enclose the substituted items
@@ -60,7 +60,7 @@ module Formatter
     #    true - quietly ignore the missing tag
     #    false, nil - raise exception if tag is missing
     # @return [String] resulting text after substitution
-    def self.substitute(all_content, data: {}, tag_subs: nil, ignore_missing: false)
+    def self.substitute(all_content, data: {}, tag_subs: nil, ignore_missing: false, html_escape_values: false)
       return unless all_content
 
       all_content = all_content.dup
@@ -130,6 +130,7 @@ module Formatter
         end
 
         # Finally, substitute the results into the original text
+        tag_value = ERB::Util.html_escape(tag_value) if html_escape_values
         all_content.gsub!(tag_container, tag_value)
       end
 
@@ -518,6 +519,11 @@ module Formatter
         sym = rn.id_underscore.to_sym
         cur[sym] = rn
       end
+
+      # Make the user's first role available as {{role_name}} for {{#is role_name '===' 'xxx'}} patterns.
+      # Uses ||= to avoid overwriting an existing role_name attribute on the primary data object
+      # (e.g. when processing Admin::UserRole records that have their own role_name column).
+      data[:role_name] ||= cu.role_names.first&.to_s || ''
     end
 
     #
@@ -726,7 +732,8 @@ module Formatter
           item_reference = true
         end
 
-        res_data = setup_data res_data if res_data
+        # Skip setup_data for raw Array results (e.g. from json_parse/yaml_parse)
+        res_data = setup_data res_data if res_data && !res_data.is_a?(Array)
 
         return unless res_data
       rescue StandardError => e
@@ -758,7 +765,9 @@ module Formatter
     #
     def self.get_associated_item(master, name, data, item_reference: false)
       data, is_index = init_associated_data(name, data)
-      data = setup_data data if data
+      # Skip setup_data for raw Array results (e.g. from json_parse/yaml_parse) —
+      # setup_data is designed for Hash/object data and will corrupt a plain Array.
+      data = setup_data data if data && !data.is_a?(Array)
       return unless data
 
       item = data[:original_item] if data.is_a? Hash
@@ -826,6 +835,9 @@ module Formatter
              elsif name == 'json_parse' && data.is_a?(String)
                is_index = true
                JSON.parse(data) if data.present?
+             elsif name == 'yaml_parse' && data.is_a?(String)
+               is_index = true
+               YAML.safe_load(data) if data.present?
              elsif anumber.to_s == name && data.is_a?(Enumerable)
                is_index = true
                data[anumber]

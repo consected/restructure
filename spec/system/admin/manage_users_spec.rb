@@ -14,7 +14,7 @@
 # - Server option: self-registration info shown vs hidden
 # - 2FA set up? column displays correct status per user
 #
-# Related issues: #1025 (api_access_only flag), #330, #1047 (2FA column)
+# Related issues: #1025 (api_access_only flag), #330, #1047 (2FA column), #1096 (email/first/last filters)
 
 require 'rails_helper'
 
@@ -108,6 +108,31 @@ describe 'admin manage users page - Issue #1027', js: true, driver: $browser_dri
       expect(page).to have_content(new_email)
       expect(page).to have_content('Standard')
       expect(page).to have_content('Testuser')
+    end
+
+    it 'shows a view user record link that navigates to the user row' do
+      visit_manage_users_page
+      click_add_user_button
+
+      new_email = "new_view_link_#{SecureRandom.hex(4)}@test.com"
+
+      within('#admin-edit- .admin-edit-form') do
+        fill_user_form(email: new_email, first_name: 'Viewlink', last_name: 'Testuser')
+        submit_user_form
+      end
+
+      expect(page).to have_content('New password:', wait: 10)
+      expect(page).to have_link('View user record', wait: 5)
+
+      click_link 'View user record'
+      finish_page_loading
+
+      expect(page).to have_css('td', text: new_email)
+      user_row = find('tr', text: new_email)
+      within(user_row) do
+        expect(page).to have_content('Viewlink')
+        expect(page).to have_content('Testuser')
+      end
     end
 
     it 'adds an API-access-only user and shows API credentials' do
@@ -218,6 +243,38 @@ describe 'admin manage users page - Issue #1027', js: true, driver: $browser_dri
 
       expect(page).to have_content('Adding Users')
       expect(page).not_to have_content('User Registration')
+    end
+  end
+
+  context 'when filtering users - Issue #1096' do
+    it 'filters by email, first name and last name' do
+      user, = create_user(nil, '', email: "issue1096_#{SecureRandom.hex(4)}@testing.com")
+      user.update!(
+        first_name: 'Issue1096First',
+        last_name: 'Issue1096Last'
+      )
+
+      visit '/admin/manage_users'
+      finish_page_loading
+
+      expect(page).to have_content('Email:')
+      expect(page).to have_content('First name:')
+      expect(page).to have_content('Last name:')
+
+      visit "/admin/manage_users?filter[email]=#{CGI.escape(user.email)}"
+      finish_page_loading
+      expect(page).to have_css('td', text: user.email)
+      expect(page).not_to have_css('td', text: @test_user_email)
+
+      visit "/admin/manage_users?filter[first_name]=#{CGI.escape(user.first_name)}"
+      finish_page_loading
+      expect(page).to have_css('td', text: user.email)
+      expect(page).not_to have_css('td', text: @test_user_email)
+
+      visit "/admin/manage_users?filter[last_name]=#{CGI.escape(user.last_name)}"
+      finish_page_loading
+      expect(page).to have_css('td', text: user.email)
+      expect(page).not_to have_css('td', text: @test_user_email)
     end
   end
 end

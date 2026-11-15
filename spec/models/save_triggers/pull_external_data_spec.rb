@@ -637,6 +637,81 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
     end
   end
 
+  # Tests for SSRF guard against admin-configurable URLs (OWASP A10).
+  # Admins (or substituted record fields) must not be able to drive the
+  # pull_external_data save trigger to reach loopback / RFC1918 / link-local
+  # addresses, including cloud instance metadata (169.254.169.254).
+  context 'SSRF guard on configured url' do
+    let(:trigger_for_url) do
+      lambda do |url|
+        config = {
+          this1: {
+            data_field: 'notes',
+            method: 'get',
+            from: { url:, format: 'json' }
+          }
+        }
+        SaveTriggers::PullExternalData.new(config, @al)
+      end
+    end
+
+    it 'rejects loopback IPv4 literal' do
+      expect { trigger_for_url.call('http://127.0.0.1/admin').perform }
+        .to raise_error(SaveTriggers::PullExternalData::UnsafeUrlError, /blocked address/)
+    end
+
+    it 'rejects cloud instance metadata link-local address' do
+      expect { trigger_for_url.call('http://169.254.169.254/latest/meta-data/').perform }
+        .to raise_error(SaveTriggers::PullExternalData::UnsafeUrlError, /blocked address/)
+    end
+
+    it 'rejects RFC1918 private addresses' do
+      %w[http://10.0.0.5/x http://192.168.1.1/x http://172.16.0.1/x].each do |u|
+        expect { trigger_for_url.call(u).perform }
+          .to raise_error(SaveTriggers::PullExternalData::UnsafeUrlError, /blocked address/)
+      end
+    end
+
+    it 'rejects IPv6 loopback' do
+      expect { trigger_for_url.call('http://[::1]/x').perform }
+        .to raise_error(SaveTriggers::PullExternalData::UnsafeUrlError, /blocked address/)
+    end
+
+    it 'rejects IPv4-mapped IPv6 loopback (filter bypass)' do
+      expect { trigger_for_url.call('http://[::ffff:127.0.0.1]/x').perform }
+        .to raise_error(SaveTriggers::PullExternalData::UnsafeUrlError, /blocked address/)
+    end
+
+    it 'rejects unsupported schemes' do
+      expect { trigger_for_url.call('file:///etc/passwd').perform }
+        .to raise_error(SaveTriggers::PullExternalData::UnsafeUrlError, /unsupported scheme/)
+      expect { trigger_for_url.call('gopher://127.0.0.1:11211/').perform }
+        .to raise_error(SaveTriggers::PullExternalData::UnsafeUrlError, /unsupported scheme/)
+    end
+
+    it 'rejects hostnames that resolve to blocked addresses' do
+      trigger = trigger_for_url.call('http://internal.example.invalid/x')
+      allow(Resolv).to receive(:getaddresses).with('internal.example.invalid').and_return(['10.0.0.5'])
+      expect { trigger.perform }
+        .to raise_error(SaveTriggers::PullExternalData::UnsafeUrlError, /blocked address/)
+    end
+
+    it 'permits public hostnames (request reaches the HTTP client)' do
+      trigger = trigger_for_url.call('http://public.example.invalid/x')
+      allow(Resolv).to receive(:getaddresses).with('public.example.invalid').and_return(['93.184.216.34'])
+      stub_request(:get, 'http://public.example.invalid/x').to_return(status: 200, body: '{}')
+      expect { trigger.perform }.not_to raise_error
+    end
+
+    it 'honors the explicit allowlist for an otherwise blocked host' do
+      stub_const('Settings::PullExternalDataAllowedHosts', ['internal.dev.local'])
+      trigger = trigger_for_url.call('http://internal.dev.local/x')
+      allow(Resolv).to receive(:getaddresses).with('internal.dev.local').and_return(['10.0.0.5'])
+      stub_request(:get, 'http://internal.dev.local/x').to_return(status: 200, body: '{}')
+      expect { trigger.perform }.not_to raise_error
+    end
+  end
+
   # Tests for submitted request data saved to save_trigger_results (issue #950)
   context 'with submitted_request saved to save_trigger_results' do
     it 'saves submitted request data, url, and method for a POST with send_data' do

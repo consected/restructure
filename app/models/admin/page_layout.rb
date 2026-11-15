@@ -75,7 +75,8 @@ class Admin::PageLayout < Admin::AdminBase
             with: %i[initial_show orientation add_item_label limit find_with hide_sublist_controls default_expander
                      hide_activity_logs_header close_others
                      show_for_single_master_only show_for_multi_master_only filter_items
-                     active_sublist_values sort_sublists]
+                     active_sublist_values sort_sublists
+                     perspectives default_perspective]
 
   # List options for dashboards list
   configure :list_options, with: %i[hide_in_list]

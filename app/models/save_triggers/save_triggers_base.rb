@@ -156,7 +156,7 @@ class SaveTriggers::SaveTriggersBase
         result = trigger.perform_with_lifecycle
         results << { trigger: trigger_name, result: }
       rescue FphsException => e
-        raise FphsException, "#{e.message}. Full config:\n#{String.yaml_dump(trigger_list)}"
+        raise FphsException, "#{e.message}. Full config:\n#{String.yaml_dump(trigger_list)}\nTriggering instance: #{@item.class.name}##{@item.id || '(new)'}"
       end
     end
 
@@ -272,7 +272,7 @@ class SaveTriggers::SaveTriggersBase
         trigger = klass.new(config, @item)
         trigger.perform_with_lifecycle
       rescue FphsException => e
-        raise FphsException, "#{e.message}. Full config:\n#{String.yaml_dump(trigger_configs)}"
+        raise FphsException, "#{e.message}. Full config:\n#{String.yaml_dump(trigger_configs)}\nTriggering instance: #{@item.class.name}##{@item.id || '(new)'}"
       end
     end
   end

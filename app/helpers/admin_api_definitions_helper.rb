@@ -100,13 +100,37 @@ module AdminApiDefinitionsHelper
   end
 
   #
+  # The wrapper key that must be used when posting JSON to the create/update
+  # endpoints for a dynamic definition. The controllers call
+  # +params.require(<key>)+ to extract attributes from the body, so the body
+  # fields must be nested under this key.
+  #
+  # For dynamic models and activity logs the key is the implementation class
+  # name with the namespace separator collapsed to a single underscore, e.g.
+  # +dynamic_model_contact_info+ or +activity_log_press_assignment+.
+  # For external identifiers it is the singularized table name, e.g. +scantron_id+.
+  #
+  # @param object_instance [DynamicModel, ActivityLog, ExternalIdentifier] the definition
+  # @return [String] the wrapping key for the JSON body
+  def api_params_key(object_instance)
+    object_instance.full_item_type_name.gsub('__', '_')
+  end
+
+  #
   # Generate a sample JSON body with field names and placeholder values
-  # for use in curl examples.
+  # for use in curl examples. The fields are wrapped under the controller's
+  # required params key (see #api_params_key) so the body matches what the
+  # API endpoint actually expects.
   # @param object_instance [DynamicModel, ActivityLog, ExternalIdentifier] the definition
   # @return [String] JSON-formatted body string
   def api_sample_json_body(object_instance)
+    key = api_params_key(object_instance)
     fields = api_fields(object_instance)
-    return '{}' if fields.empty?
+    # Activity logs support an embedded_item payload that creates/updates the
+    # related primary record in the same API call. Surface it in examples so
+    # admins can see where to insert that nested data.
+    include_embedded = object_instance.is_a?(ActivityLog)
+    return "{\n  \"#{key}\": {#{"\n    \"embedded_item\": {}\n  " if include_embedded}}\n}" if fields.empty?
 
     pairs = fields.map do |f|
       value = case f[:type]
@@ -117,10 +141,11 @@ module AdminApiDefinitionsHelper
               when 'datetime' then '"YYYY-MM-DDTHH:MM:SS"'
               else '""'
               end
-      "  \"#{f[:name]}\": #{value}"
+      "    \"#{f[:name]}\": #{value}"
     end
+    pairs << '    "embedded_item": {}' if include_embedded
 
-    "{\n#{pairs.join(",\n")}\n}"
+    "{\n  \"#{key}\": {\n#{pairs.join(",\n")}\n  }\n}"
   end
 
   #
@@ -184,11 +209,20 @@ module AdminApiDefinitionsHelper
 
   #
   # Generate save trigger YAML usage example for pull_external_data.
+  # The post_data block wraps the fields under the controller's required params
+  # key (see #api_params_key) so that the request body matches what the API
+  # endpoint actually expects.
   # @param object_instance [DynamicModel, ActivityLog, ExternalIdentifier] the definition
   # @return [String] YAML-formatted save trigger example
   def api_save_trigger_example(object_instance)
     base = api_base_path(object_instance)
+    key = api_params_key(object_instance)
     fields = api_fields(object_instance)
+    # Indentation note: after <<~YAML dedent strips 6 leading spaces from each
+    # line below, "post_data:" sits at 12 spaces, the wrapper "#{key}:" at 14,
+    # and field lines must be at 16 to nest under the wrapper key. Because the
+    # interpolation point "      #{field_lines}" is also dedented by 6 spaces,
+    # each field line itself must contain 16 leading spaces.
     field_lines = fields.map do |f|
       value = case f[:type]
               when 'integer', 'bigint' then '0'
@@ -196,8 +230,13 @@ module AdminApiDefinitionsHelper
               when 'boolean' then 'false'
               else '""'
               end
-      "              #{f[:name]}: #{value}"
-    end.join("\n")
+      "                #{f[:name]}: #{value}"
+    end
+    # Activity logs support an embedded_item payload that creates/updates the
+    # related primary record in the same API call. Surface it in examples so
+    # admins can see where to insert that nested data.
+    field_lines << '                embedded_item: {}' if object_instance.is_a?(ActivityLog)
+    field_lines = field_lines.join("\n")
 
     <<~YAML
       _constants:
@@ -223,6 +262,7 @@ module AdminApiDefinitionsHelper
               - create_record:
                   force_not_editable_save: true
                   local_data: create_result
+                  method: post
                   to:
                     url: "{{base_url}}#{base}.json?use_app_type={{constants.api_app_type}}&user_email={{constants.api_user_email}}&user_token={{constants.api_shared_secret}}"
                     format: json
@@ -231,6 +271,7 @@ module AdminApiDefinitionsHelper
                       'Content-Type': 'application/json'
 
                   post_data:
+                    #{key}:
       #{field_lines}
     YAML
   end

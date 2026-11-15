@@ -51,6 +51,9 @@ _fpa.loaded.default = function () {
   _fpa.timed_flash_fadeout();
   _fpa.form_utils.format_block();
 
+  // Set up delegated click handler for activity log perspective buttons (all pages).
+  _fpa.page_layouts.setup_perspective_buttons($(document));
+
   // Initialize page title module and bind search tab handlers
   _fpa.page_title.init();
   _fpa.page_title.bind_search_tabs();

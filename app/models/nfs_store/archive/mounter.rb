@@ -77,7 +77,7 @@ module NfsStore
             next
           end
 
-          STDERR.puts 'Retrying extract and indexing'
+          $stderr.puts 'Retrying extract and indexing'
           # Remove the existing flags before restarting
           mounter.extract_completed!
           mounter.index_completed!
@@ -112,11 +112,11 @@ module NfsStore
           # is a directory and is not the base archive path
           return unless pn.exist? && pn.directory? && !path_is_archive?(file_path)
 
-          STDERR.puts "Reset file_path to its directory #{file_path}"
+          $stderr.puts "Reset file_path to its directory #{file_path}"
 
           if pn.empty?
             pn.rmdir
-            STDERR.puts "Removed empty archive directory #{file_path}"
+            $stderr.puts "Removed empty archive directory #{file_path}"
           end
         end
       end
@@ -125,10 +125,15 @@ module NfsStore
       # @param path [String] the path string
       # @return [Boolean]
       def self.path_is_archive?(path)
-        return unless path
+        return false unless path
 
-        path = NfsStore::Manage::Filesystem.clean_path(path)
-        return unless path
+        # NOTE: this is invoked with already-resolved absolute filesystem
+        # paths (e.g. from `remove_empty_archive_dir`). We do not pass
+        # through `Filesystem.clean_path`, which strictly rejects absolute
+        # paths and traversal sequences as part of the user-input
+        # boundary contract.
+        path = path.to_s
+        return false if path.blank?
 
         path.include?(ArchiveMountSuffix)
       end
@@ -149,7 +154,7 @@ module NfsStore
       # @return [true|false|nil]
       def indicator_timed_out?(clear: false)
         # File is missing - consider it not an indicator and return
-        return unless File.exist?(archive_path)
+        return false unless File.exist?(archive_path)
         # File represents a failure indicator - these don't time out so return false
         return false if failed_indicator?
 
@@ -450,7 +455,7 @@ module NfsStore
       def extract_archived_files
         unless Rails.env.test?
           msg = "Start to extract files? (archive not extracted? #{!archive_extracted?}) to DB for #{mounted_path}"
-          STDERR.puts msg
+          $stderr.puts msg
 
           unless mounted_path&.present?
             Rails.logger.warn msg
@@ -483,7 +488,7 @@ module NfsStore
 
           files = Dir.glob(glob_path)
 
-          STDERR.puts "Starting extract_archived_files of #{files.length} files" unless Rails.env.test?
+          $stderr.puts "Starting extract_archived_files of #{files.length} files" unless Rails.env.test?
 
           container = stored_file.container
 

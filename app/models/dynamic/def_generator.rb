@@ -202,6 +202,8 @@ module Dynamic
     # @option opt [String] :class_name is an alternative class name within the
     #   parent class to test. This can be used to avoid namespacing issues
     # @option opt [Boolean] :fail_without_exception if true we return a Boolean rather than raising an exception
+    # @option opt [Boolean] :not_found_ok if true, a missing class is expected (for example, when checking
+    #   whether an old class exists before generating a new one) and is logged at debug level rather than warn
     # @return [Boolean] true if the class is defined, and false or a raised exception depending on the options
     def implementation_class_defined?(parent_class = Module, opt = {})
       icn = opt[:class_name] || full_implementation_class_name
@@ -234,7 +236,11 @@ module Dynamic
       end
     rescue NameError => e
       err = "Failed to get the class #{icn} in parent #{parent_class}: #{e}"
-      logger.warn err
+      if opt[:not_found_ok]
+        logger.debug err
+      else
+        logger.warn err
+      end
       false
     end
 
@@ -378,7 +384,8 @@ module Dynamic
       assoc_ext_name = "#{short_class_name}#{alt_target_class}AssociationExtension"
       return unless klass.const_defined?(assoc_ext_name.to_sym)
 
-      remove_const_for(klass, assoc_ext_name) if implementation_class_defined?(Object)
+      # The class may not exist yet (for example, on first generation), which is expected here
+      remove_const_for(klass, assoc_ext_name) if implementation_class_defined?(Object, not_found_ok: true)
     rescue StandardError => e
       logger.debug "Failed to remove #{assoc_ext_name} : #{e}"
     end
@@ -386,9 +393,11 @@ module Dynamic
     def remove_implementation_class(alt_prefix_class = nil)
       klass = alt_prefix_class || prefix_class
       # This may fail if an underlying dependent class (parent class) has been redefined by
-      # another dynamic implementation, such as external identifier
+      # another dynamic implementation, such as external identifier.
+      # A missing class is also expected here on first generation, since there is nothing to remove yet
       return unless implementation_class_defined?(klass, fail_without_exception: true,
-                                                         fail_without_exception_newable_result: true)
+                                                         fail_without_exception_newable_result: true,
+                                                         not_found_ok: true)
 
       remove_const_for(klass, model_class_name)
     rescue StandardError => e

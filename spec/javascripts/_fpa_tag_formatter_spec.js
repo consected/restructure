@@ -336,4 +336,49 @@ describe('_fpa.tag_formatter', function () {
     result = _fpa.tag_formatter.format_with('1', testString, testString, 'text', {});
     expect(result).toEqual('He');
   });
+
+  it("parses JSON strings into objects with parse_json", function () {
+    const jsonString = '{"key1":"value1","key2":["item1","item2"]}';
+    const expectedObj = { key1: 'value1', key2: ['item1', 'item2'] };
+
+    var result = _fpa.tag_formatter.format_with('parse_json', jsonString, jsonString, 'json_field', {});
+    expect(result).toEqual(expectedObj);
+  });
+
+  it("parses YAML strings into objects with parse_yaml", function () {
+    const yamlString = "key1: value1\nkey2:\n- item1\n- item2\n";
+    const expectedObj = { key1: 'value1', key2: ['item1', 'item2'] };
+
+    var result = _fpa.tag_formatter.format_with('parse_yaml', yamlString, yamlString, 'yaml_field', {});
+    expect(result).toEqual(expectedObj);
+  });
+
+  it("chains parse_json with yaml to convert JSON string to YAML string", function () {
+    const jsonString = '{"name":"Alice","age":30}';
+
+    var parsed = _fpa.tag_formatter.format_with('parse_json', jsonString, jsonString, 'json_field', {});
+    var yamlResult = _fpa.tag_formatter.format_with('yaml', parsed, parsed, 'json_field', {});
+    expect(yamlResult).toContain('name: Alice');
+    expect(yamlResult).toContain('age: 30');
+  });
+
+  it("chains parse_yaml with json to convert YAML string to JSON string", function () {
+    const yamlString = "name: Alice\nage: 30\n";
+
+    var parsed = _fpa.tag_formatter.format_with('parse_yaml', yamlString, yamlString, 'yaml_field', {});
+    var jsonResult = _fpa.tag_formatter.format_with('json', parsed, parsed, 'yaml_field', {});
+    const obj = JSON.parse(jsonResult);
+    expect(obj.name).toEqual('Alice');
+    expect(obj.age).toEqual(30);
+  });
+
+  it("returns null for invalid JSON in parse_json", function () {
+    var result = _fpa.tag_formatter.format_with('parse_json', 'not valid json {{{', 'not valid json {{{', 'json_field', {});
+    expect(result).toBeNull();
+  });
+
+  it("returns null for invalid YAML in parse_yaml", function () {
+    var result = _fpa.tag_formatter.format_with('parse_yaml', ': invalid: [yaml', ': invalid: [yaml', 'yaml_field', {});
+    expect(result).toBeNull();
+  });
 });

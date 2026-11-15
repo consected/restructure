@@ -100,7 +100,8 @@ module FilterUtils
   def filter_params_permitted
     return @filter_params_permitted if @filter_params_permitted
 
-    fo = filters_on
+    fo = respond_to?(:effective_filters_on, true) ? effective_filters_on : filters_on
+    fo = Array(fo).dup # ensure it's a mutable array
     # Add some additional attributes to allow to be filtered on
     fo << :disabled if has_disabled_field
     fo << :id
@@ -161,5 +162,20 @@ module FilterUtils
     res.symbolize_keys!
 
     @filter_params = res
+  end
+
+  #
+  # Generate a list of unique, non-blank values for a given field from the primary model.
+  # This is useful for populating filter dropdown options, excluding nil and empty string values.
+  # Results are sorted alphabetically for consistent display in filter UI dropdowns.
+  # Avoids SQL DISTINCT to prevent PostgreSQL ORDER BY conflicts with model default scopes.
+  # @param [Symbol, String] field_name the database field to retrieve values from
+  # @return [Array] sorted array of unique non-blank values from the field
+  def filter_values_for(field_name)
+    primary_model
+      .where.not(field_name => [nil, ''])
+      .pluck(field_name)
+      .uniq
+      .sort
   end
 end

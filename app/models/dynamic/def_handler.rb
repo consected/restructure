@@ -77,13 +77,23 @@ module Dynamic
         force_update ||= Admin::AppType.active_app_types_changed?
         return got if got && !force_update
 
+        olat_setting = Settings::OnlyLoadAppTypes
         olat = Admin::AppType.active_app_types force: force_update
 
         # List of names that the associated_* items have already returned
         # to avoid building huge lists of repetitive joined queries
         got_names = []
 
-        if olat&.present?
+        if olat_setting.present? && olat.blank?
+          # The operator set a filter (FPHS_LOAD_APP_TYPES) but it matched no active app type.
+          # This is likely a misconfiguration (typo, or a disabled app type), so avoid the
+          # fail-open behavior of loading all definitions. Return nothing and log an error loudly.
+          Rails.logger.error(
+            "FPHS_LOAD_APP_TYPES=#{olat_setting.join(',')} matched no active app type; " \
+            'active_model_configurations will return empty to avoid loading unintended definitions'
+          )
+          dma = where(id: nil)
+        elsif olat&.present?
           qs = []
           olat.each do |app_type|
             resnames = []
@@ -217,9 +227,9 @@ module Dynamic
             list += imp_class.attribute_names
                              .select { |a| Classification::GeneralSelection.use_with_attribute?(a) }
                              .map do |a|
-                               mn = imp_class.model_name.to_s.ns_underscore
-                               mn = mn.pluralize unless imp_class.respond_to?(:is_activity_log)
-                               :"#{mn}_#{a}"
+              mn = imp_class.model_name.to_s.ns_underscore
+              mn = mn.pluralize unless imp_class.respond_to?(:is_activity_log)
+              :"#{mn}_#{a}"
             end
           end
 
@@ -240,20 +250,20 @@ module Dynamic
       def latest_stored_update(using: nil)
         using ||= active_model_configurations
         @latest_def_update = using
-          .select(:updated_at)
-          .reorder('')
-          .order('updated_at desc nulls last')
-          .limit(1)
-          .pluck(:updated_at)
-          .first
+                             .select(:updated_at)
+                             .reorder('')
+                             .order('updated_at desc nulls last')
+                             .limit(1)
+                             .pluck(:updated_at)
+                             .first
 
         cl_update = Admin::ConfigLibrary
-          .where(format: 'yaml')
-          .reorder('')
-          .order('updated_at desc nulls last')
-          .limit(1)
-          .pluck(:updated_at)
-          .first
+                    .where(format: 'yaml')
+                    .reorder('')
+                    .order('updated_at desc nulls last')
+                    .limit(1)
+                    .pluck(:updated_at)
+                    .first
 
         [@latest_def_update, cl_update].compact.max
       end
@@ -305,8 +315,10 @@ module Dynamic
         app_type = Admin::AppType.find_active_by_name_or_id(app_type) if app_type
         if user
           user = User.find_active_by_email_or_id(user)
-          user.app_type = app_type if app_type
-          user.save
+          if app_type && user.app_type != app_type
+            user.app_type = app_type 
+            user.save
+          end
         elsif app_type
           user = User.use_batch_user(app_type)
         end
@@ -555,10 +567,11 @@ module Dynamic
         # or will be manually triggered as needed. Re-importing should not re-trigger one-time jobs.
         return if Admin::AppTypeImport.import_in_progress?
 
+        scheduled_run_at = run_at.present? ? Time.zone.parse(run_at.to_s) : DateTime.now + 10.seconds
         RecurringBatchTask.schedule_task self,
                                          { dynamic_def: to_global_id.to_s },
                                          run_every: 10_000.years,
-                                         run_at: DateTime.now + 10.seconds
+                                         run_at: scheduled_run_at
       else
         RecurringBatchTask.schedule_task self,
                                          { dynamic_def: to_global_id.to_s },
@@ -694,7 +707,7 @@ module Dynamic
       ckey = estimated_record_count_ckey
       Rails.cache.fetch(ckey, expires_in: 15.minutes) do
         implementation_class.count
-      rescue StandardError => e
+      rescue StandardError
         Rails.logger.warn "Failed to get estimated record count for #{name}"
         nil
       end

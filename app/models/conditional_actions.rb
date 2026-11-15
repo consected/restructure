@@ -11,7 +11,9 @@ class ConditionalActions
     @action_conf = action_conf
     @current_instance = current_instance
     @return_failures = return_failures
-    @return_this ||= return_this || { value: nil }
+    @return_this ||= (return_this || {})
+    @return_this[:value] = CalcActions::Common::UnsetThisVal unless @return_this.key?(:value)
+    @return_this[:mode] = nil unless @return_this.key?(:mode)
     @top_level_error = top_level_error
     @top_level_error_above = top_level_error_above
 
@@ -32,8 +34,10 @@ class ConditionalActions
     res
   end
 
-  # Get the value of a field with expected value set as 'return_value'
-  # Since we are only trying to return a single field value, no :all is needed on the configuration
+  # Get the value produced by a return_* directive.
+  # Since we are only trying to return a value, no :all is needed on the configuration.
+  # If no code path sets this_val, this still returns nil, but this_val_set? can now
+  # distinguish that from an explicit nil result.
   def get_this_val
     @action_conf = { all: @action_conf }
     do_calc_action_if

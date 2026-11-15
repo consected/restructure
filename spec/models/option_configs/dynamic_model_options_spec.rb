@@ -292,7 +292,6 @@ RSpec.describe 'Dynamic Model Options', type: :model do
         test1: A test comment
 
 
-
       default:
         label: Something
 
@@ -323,7 +322,6 @@ RSpec.describe 'Dynamic Model Options', type: :model do
         test1: A test comment
 
 
-
       default:
         label: Something
 
@@ -333,9 +331,8 @@ RSpec.describe 'Dynamic Model Options', type: :model do
   end
 
   # Test that prepend_to_options correctly handles _comments containing escaped single quotes.
-  # GitHub issue #1029: When a comment value contains a literal backslash-quote (e.g., Alzheimer\'s),
-  # YAML.dump produces text with \' which Ruby's gsub interprets as a postmatch backreference,
-  # corrupting the output.
+  # GitHub issue #1029: A comment value like Alzheimer\'s Disease must survive a replace cycle
+  # without corrupting the options text or losing other sections.
   it 'handles comments containing escaped quotes in prepend_to_options' do
     table_name = 'test_replace_opts'
     DynamicModel.active.where(table_name:).each { |dm| dm.disable!(@admin) }
@@ -422,8 +419,7 @@ RSpec.describe 'Dynamic Model Options', type: :model do
     expect { first_pass = YAML.safe_load(dm.options) }.not_to raise_error
 
     # Second prepend: simulate "Update Config from Table" re-generating _comments
-    # This is where the bug manifests — the already-corrupted options text
-    # gets further mangled on the second pass
+    # The section replacement must be idempotent across multiple passes
     hash2 = {
       _comments: {
         test1: comment_value
@@ -441,6 +437,205 @@ RSpec.describe 'Dynamic Model Options', type: :model do
 
     # The default section should still be intact
     expect(second_pass['default']['label']).to eq 'Test Label'
+  end
+
+  # Test that multiple prepend_to_options calls with a key that exists do not grow
+  # the options text, even when the options YAML fails to parse (e.g. due to
+  # unescaped single-quotes in a caption_before value as reported in issue #676).
+  it 'does not grow options text on repeated prepends when YAML is invalid' do
+    table_name = 'test_replace_opts'
+    DynamicModel.active.where(table_name:).each { |dm| dm.disable!(@admin) }
+
+    dm = DynamicModel.create! current_admin: @admin,
+                              name: 'test replace opts',
+                              table_name:,
+                              schema_name: 'ml_app',
+                              category: :test,
+                              options: nil
+
+    # Initial options contain a caption_before with unescaped single-quotes — valid
+    # YAML plain-scalar but adjacent to a key name that breaks parsing in context
+    dm.options = <<~END_OPT
+      _comments:
+        table: 'Dynamicmodel: Rc Femfl Cif Rc'
+        fields:
+          hear_about_wives_group: simple comment
+
+      _data_dictionary:
+        study: rcfemfl
+
+      default:
+        caption_before:
+          hear_about_wives_group: 'Which wives'/partners'/mothers' group? '
+
+    END_OPT
+
+    comments_hash = {
+      _comments: {
+        table: 'Dynamicmodel: Rc Femfl Cif Rc',
+        fields: {
+          hear_about_wives_group: "Which wives'/partners'/mothers' group?"
+        }
+      }
+    }
+
+    # Simulate multiple before_save / update_config_from_table cycles
+    length_after_first = nil
+    5.times do |i|
+      dm.prepend_to_options(comments_hash.deep_dup)
+      length_after_first ||= dm.options.length
+      expect(dm.options.scan(/^_comments:/).length).to eq(1),
+                                                       "Cycle #{i + 1}: _comments appeared more than once"
+      expect(dm.options.length).to eq(length_after_first),
+                                   "Cycle #{i + 1}: options text grew from #{length_after_first} to #{dm.options.length}"
+    end
+
+    # _data_dictionary must still be present as a top-level key
+    expect(dm.options).to match(/^_data_dictionary:/)
+    # default section must be intact
+    expect(dm.options).to match(/^default:/)
+  end
+
+  # Reproduces the exact symptom from issue #676: a caption containing single
+  # quotes (from a REDCap folded scalar) sitting in a _comments section directly
+  # followed by _data_dictionary must never merge into "...wivesdata_dictionary:".
+  # Repeated prepends must keep the options stable and parseable.
+  it 'keeps quoted captions adjacent to _data_dictionary intact across saves' do
+    table_name = 'test_replace_opts'
+    DynamicModel.active.where(table_name:).each { |dm| dm.disable!(@admin) }
+
+    dm = DynamicModel.create! current_admin: @admin,
+                              name: 'test replace opts',
+                              table_name:,
+                              schema_name: 'ml_app',
+                              category: :test,
+                              options: nil
+
+    dm.options = <<~END_OPT
+      _comments:
+        table: 'Dynamicmodel: Rc Femfl Cif Rc'
+        fields:
+          record_id: Study ID
+          hear_about_wives_group: old value
+
+      _data_dictionary:
+        study: rcfemfl
+
+      _db_columns:
+        record_id:
+          type: string
+
+    END_OPT
+
+    comments_hash = {
+      _comments: {
+        table: 'Dynamicmodel: Rc Femfl Cif Rc',
+        fields: {
+          record_id: 'Study ID',
+          hear_about_wives_group: "Which wives'/partners'/mothers' group?",
+          cis_yob: 'Year of birth:'
+        }
+      }
+    }
+
+    stable_length = nil
+    10.times do |i|
+      dm.prepend_to_options(comments_hash.deep_dup)
+      stable_length ||= dm.options.length
+
+      expect(dm.options).not_to include('wivesdata_dictionary'),
+                                "Cycle #{i + 1}: caption merged with following key"
+      expect(dm.options.length).to eq(stable_length),
+                                   "Cycle #{i + 1}: options grew to #{dm.options.length}"
+
+      parsed = nil
+      expect { parsed = YAML.safe_load(dm.options) }.not_to raise_error
+      expect(parsed.dig('_comments', 'fields', 'hear_about_wives_group'))
+        .to eq "Which wives'/partners'/mothers' group?"
+      # The following top-level sections must remain intact and separate
+      expect(parsed['_data_dictionary']).to eq({ 'study' => 'rcfemfl' })
+    end
+  end
+
+  # strip_db_definition_sections removes only the DB-definition-only top-level
+  # sections (_comments, _db_columns, _data_dictionary) and leaves the runtime
+  # configuration intact. It uses line-based scanning so it works even when the
+  # text is malformed. See issue #676.
+  it 'strips only the DB-definition sections from options text' do
+    text = <<~END_OPT
+      _comments:
+        table: x
+        fields:
+          f1: this caption breaks: parsing:
+      _data_dictionary:
+        study: rcfemfl
+      _db_columns:
+        f1:
+          type: string
+      default:
+        label: My Model
+        caption_before:
+          f1: A normal caption
+    END_OPT
+
+    stripped = OptionConfigs::ExtraOptions.strip_db_definition_sections(text)
+
+    expect(stripped).not_to match(/^_comments:/)
+    expect(stripped).not_to match(/^_data_dictionary:/)
+    expect(stripped).not_to match(/^_db_columns:/)
+    # The runtime configuration is preserved
+    expect(stripped).to match(/^default:/)
+    expect(stripped).to include('A normal caption')
+    # The retained runtime config parses on its own
+    expect { YAML.safe_load(stripped) }.not_to raise_error
+  end
+
+  # Reproduces the production failure in issue #676: a definition whose runtime
+  # configuration is valid but whose _comments section was corrupted (a field
+  # caption fused with a following key, producing "...data_dictionary:") must not
+  # break runtime parsing. The DB-definition sections are not needed at runtime,
+  # so parse_options_text recovers the runtime configuration by stripping them.
+  it 'recovers the runtime configuration when _comments is corrupted' do
+    table_name = 'test_replace_opts'
+    DynamicModel.active.where(table_name:).each { |dm| dm.disable!(@admin) }
+
+    dm = DynamicModel.create! current_admin: @admin,
+                              name: 'test replace opts',
+                              table_name:,
+                              schema_name: 'ml_app',
+                              category: :test,
+                              options: nil
+
+    # _comments is corrupted exactly as observed in production: the caption value
+    # has fused with a following key, leaving a trailing ': ' that makes YAML
+    # treat it as an (illegal) nested mapping. The runtime 'default' config below
+    # it is perfectly valid.
+    dm.update_column(:options, <<~END_OPT)
+      _comments:
+        table: 'Dynamicmodel: Rc Femfl Cif Rc'
+        fields:
+          hear_about_wives_group: Which wivespartnersdata_dictionary:
+      _db_columns:
+        test1:
+          type: string
+      default:
+        label: Rc Femfl
+        caption_before:
+          test1: A valid caption
+    END_OPT
+
+    # The stored options as-is are not valid YAML
+    expect { YAML.safe_load(dm.options) }.to raise_error(Psych::Exception)
+
+    # parse_options_text recovers the runtime configuration by dropping the
+    # corrupt DB-definition sections, rather than failing the whole parse
+    loaded = nil
+    expect { loaded = OptionConfigs::ExtraOptions.parse_options_text(dm) }.not_to raise_error
+    expect(loaded).to be_a(Hash)
+    expect(loaded).to have_key(:default)
+    expect(loaded.dig(:default, :label)).to eq 'Rc Femfl'
+    # The DB-definition sections were removed during recovery
+    expect(loaded).not_to have_key(:_comments)
   end
 
   it 'generates show_if from show_if_condition_strings' do

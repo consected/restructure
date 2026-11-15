@@ -1,12 +1,10 @@
-<% if object_instance.persisted? && object_instance.options_text && !object_instance.disabled
-     field_configs = object_instance.option_configs.map { |oc| [oc.name, oc.raw_field_configs] }.to_h %>
+<% if object_instance.persisted? && !object_instance.disabled
+     field_configs = (object_instance.option_configs || []).map { |oc| [oc.name, oc.raw_field_configs] }.to_h %>
 <div class="activity-list-field-configs">
-  <label>field configs</label>
 <% 
 if field_configs.present?
 %>
-  <p><a href="#full-field-configs" class="collapsed btn btn-default" data-toggle="collapse">show all field configs</a></p>
-  <div id="full-field-configs" class="collapse">
+  <div id="full-field-configs">
 <%
     field_configs.each do |k, v|
        next unless v&.present?

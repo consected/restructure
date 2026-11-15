@@ -22,6 +22,8 @@ describe 'admin parsed config display', js: true, driver: $browser_driver do
       # Set up options with actual config so parsed_options_text produces output
       dm.current_admin = @admin
       dm.options = <<~YAML
+        _configurations:
+          prevent_migrations: true
         default:
           labels:
             field_1: Test Field

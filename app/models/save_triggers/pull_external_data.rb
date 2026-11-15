@@ -6,6 +6,10 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
   BODY_METHODS = %w[put patch lock mkcol propfind proppatch unlock].freeze
   NO_BODY_METHODS = %w[head delete options trace copy move].freeze
 
+  # Re-exposed so existing callers and rescue blocks keep working after the
+  # SSRF guard was extracted into Utilities::UrlSafety.
+  UnsafeUrlError = Utilities::UrlSafety::UnsafeUrlError
+
   def self.config_def(if_extras: {}); end
 
   def initialize(config, item)
@@ -113,7 +117,7 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
   end
 
   def post_form
-    uri = URI.parse(url_from_config)
+    uri = safe_uri_parse(url_from_config)
     form = @this_config[:form] || {}
     form = form.deep_transform_values { |v| FieldDefaults.calculate_default @item, v }
     @submitted_request_data = form.deep_stringify_keys
@@ -122,7 +126,7 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
   end
 
   def send_body_request(method)
-    uri = URI.parse(url_from_config)
+    uri = safe_uri_parse(url_from_config)
     data = serialize_send_data
 
     request_class = Net::HTTP.const_get(method.capitalize)
@@ -135,7 +139,7 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
   end
 
   def send_no_body_request(method)
-    uri = URI.parse(url_from_config)
+    uri = safe_uri_parse(url_from_config)
     request_class = Net::HTTP.const_get(method.capitalize)
     req = request_class.new(uri)
     apply_headers(req)
@@ -240,5 +244,22 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
   # @param [Net::HTTPGenericRequest] req
   def apply_headers(req)
     header_config&.each { |k, v| req[k] = v }
+  end
+
+  #
+  # Parse and SSRF-validate the configured URL before opening a connection.
+  # Admin configuration and substitutions from record fields can both influence
+  # url_from_config, so every URL must be checked. Delegates to the reusable
+  # Utilities::UrlSafety validator using pull_external_data-scoped settings.
+  # @param [String] url
+  # @return [URI::Generic]
+  # @raise [UnsafeUrlError]
+  def safe_uri_parse(url)
+    Utilities::UrlSafety.safe_parse(
+      url,
+      allowed_hosts: Settings::PullExternalDataAllowedHosts,
+      allow_private: Settings::PullExternalDataAllowPrivateHosts,
+      context: 'pull_external_data'
+    )
   end
 end

@@ -522,4 +522,67 @@ Good?)
     res = Formatter::Substitution.substitute(txt.dup, data:)
     expect(res.strip).to eq 'Result: Z and D'
   end
+
+  it 'converts a JSON string field to YAML via parse_json and yaml formatters' do
+    json_string = '{"name":"Alice","scores":[10,20,30]}'
+    txt = '{{json_field::parse_json::yaml}}'
+    data = { json_field: json_string }
+    res = Formatter::Substitution.substitute txt.dup, data:, tag_subs: nil
+    expect(res).to eq "name: Alice\nscores:\n- 10\n- 20\n- 30\n"
+  end
+
+  it 'converts a YAML string field to JSON via parse_yaml and json formatters' do
+    yaml_string = "name: Alice\nscores:\n- 10\n- 20\n- 30\n"
+    txt = '{{yaml_field::parse_yaml::json}}'
+    data = { yaml_field: yaml_string }
+    res = Formatter::Substitution.substitute txt.dup, data:, tag_subs: nil
+    expect(res).to eq "{\n  \"name\": \"Alice\",\n  \"scores\": [\n    10,\n    20,\n    30\n  ]\n}"
+  end
+
+  it 'returns nil representation when parse_json fails and is chained with a serializer' do
+    txt = '{{json_field::parse_json::json}}'
+    data = { json_field: 'not valid json' }
+    res = Formatter::Substitution.substitute txt.dup, data:, tag_subs: nil
+    expect(res).to eq 'null'
+  end
+
+  it 'parses a YAML encoded string using yaml_parse for hash key access' do
+    txt = 'YAML {{yaml.yaml_parse.ykey2}}'
+    data = { 'yaml' => "ykey1: 22\nykey2: abc\nykey3:\n- 1230\n- 4560\n" }
+    res = Formatter::Substitution.substitute txt.dup, data:, tag_subs: nil
+    expect(res).to eq 'YAML abc'
+  end
+
+  it 'parses a YAML encoded string using yaml_parse for array index access' do
+    txt = 'YAML {{yaml.yaml_parse.ykey3.1}}'
+    data = { 'yaml' => "ykey1: 22\nykey2: abc\nykey3:\n- 1230\n- 4560\n" }
+    res = Formatter::Substitution.substitute txt.dup, data:, tag_subs: nil
+    expect(res).to eq 'YAML 4560'
+  end
+
+  it 'indexes a top-level YAML array using yaml_parse with a numeric index' do
+    txt = 'YAML {{yaml.yaml_parse.0}}'
+    data = { 'yaml' => "- first\n- second\n- third\n" }
+    res = Formatter::Substitution.substitute txt.dup, data:, tag_subs: nil
+    expect(res).to eq 'YAML first'
+  end
+
+  it 'indexes a top-level YAML array using yaml_parse with first and last' do
+    data = { 'yaml' => "- alpha\n- beta\n- gamma\n" }
+    expect(Formatter::Substitution.substitute('{{yaml.yaml_parse.first}}', data:, tag_subs: nil)).to eq 'alpha'
+    expect(Formatter::Substitution.substitute('{{yaml.yaml_parse.last}}', data:, tag_subs: nil)).to eq 'gamma'
+  end
+
+  it 'indexes a top-level JSON array using json_parse with a numeric index' do
+    txt = 'JSON {{json.json_parse.0}}'
+    data = { 'json' => '["first","second","third"]' }
+    res = Formatter::Substitution.substitute txt.dup, data:, tag_subs: nil
+    expect(res).to eq 'JSON first'
+  end
+
+  it 'indexes a top-level JSON array using json_parse with first and last' do
+    data = { 'json' => '["alpha","beta","gamma"]' }
+    expect(Formatter::Substitution.substitute('{{json.json_parse.first}}', data:, tag_subs: nil)).to eq 'alpha'
+    expect(Formatter::Substitution.substitute('{{json.json_parse.last}}', data:, tag_subs: nil)).to eq 'gamma'
+  end
 end

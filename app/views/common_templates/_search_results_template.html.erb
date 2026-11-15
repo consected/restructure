@@ -387,9 +387,18 @@
   <% if full_name.to_s.start_with?('dynamic_model__') && option_type_config_name.to_s == default_option_type_name.to_s %>
   _fpa.state.caption_before.<%=name.underscore%> = _fpa.state.caption_before.<%=name_with_option_type.underscore%>;
   _fpa.state.labels_<%=name.underscore%> = _fpa.state.labels_<%=name_with_option_type.underscore%>;
-  _fpa.state.template_config.<%=resource_name%> = _fpa.state.template_config.<%=resource_name%> || _fpa.state.template_config.<%=name.underscore%>;
-  _fpa.state.template_config.<%=name.underscore.pluralize%> = _fpa.state.template_config.<%=name.underscore.pluralize%> || _fpa.state.template_config.<%=name.underscore%>;
-  _fpa.state.template_config.<%=name.underscore.sub('dynamic_model__', '')%> = _fpa.state.template_config.<%=name.underscore.sub('dynamic_model__', '')%> || _fpa.state.template_config.<%=name.underscore%>
+  <%# Alias the dynamic model's template config under its alternative resource
+      names (plural resource_name, pluralized name, and short name). The current
+      version's template object is aliased as before, but we must ALSO alias the
+      specific def_version key. Without this, when the base object already exists
+      from the initial page load (the current version), an older version's
+      template (loaded on demand via the template_config endpoint) is never linked
+      onto these alternative names, so versioned embedded items fail to render in
+      show mode (issue #1238). %>
+  <% [resource_name, name.underscore.pluralize, name.underscore.sub('dynamic_model__', '')].uniq.each do |alias_name| %>
+  _fpa.state.template_config.<%=alias_name%> = _fpa.state.template_config.<%=alias_name%> || _fpa.state.template_config.<%=name.underscore%>;
+  _fpa.state.template_config.<%=alias_name%>.v<%=def_version%> = _fpa.state.template_config.<%=alias_name%>.v<%=def_version%> || _fpa.state.template_config.<%=name.underscore%>.v<%=def_version%>;
+  <% end %>
   <% end %>
   
 <% end %>

@@ -24,7 +24,7 @@
             emails: |
               (optional) list of email addresses - not necessarily users. Supports:
               - literal string: 'admin@example.com'
-              - array of literals: ['admin@example.com', 'manager@example.com']
+              - array of literals or templates: ['admin@example.com', '{{some_field}}']
               - conditional reference with single value: {this: {email: return_value}}
               - conditional reference with list: {player_contacts: {rec_type: email, data: return_value_list}}
               - simple template: '{{player_contact_emails.data}}' substitutes associated record field(s)
@@ -35,7 +35,7 @@
             phones: |
               (optional) list of phone numbers to notify. Supports:
               - literal string: '+16175550118'
-              - array of literals: ['+16175550118', '+16175550104']
+              - array of literals or templates: ['+16175550118', '{{some_field}}']
               - conditional reference with single value: {this: {phone: return_value}}
               - conditional reference with list: {player_contacts: {rec_type: phone, data: return_value_list}}
               - simple template: '{{data}}' substitutes field value as string

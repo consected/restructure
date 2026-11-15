@@ -165,7 +165,8 @@
 <%= handlebars_template_tag('sublist_controls', css_class: 'hidden handlebars-partial') do %>
   <div class="sublist-controls">
     {{#if filter_attr}}
-    <div class="sublist-filter-selectors">
+    <button class="btn btn-clear btn-sm sublist-filter-toggle glyphicon glyphicon-triangle-right" title="show/hide filters"></button>
+    <div class="sublist-filter-selectors hidden">
       {{#if filter_all}}
       <button class="btn btn-default btn-sm filter-switch-all glyphicon glyphicon-minus" data-filter-all="true"></button>
       {{/if}}

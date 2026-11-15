@@ -234,4 +234,60 @@ RSpec.describe Imports::ModelGenerator, type: :model do
     expect(mg.options).not_to be_blank
     expect(mg.options).to eq updated_yaml
   end
+
+  describe 'CSV header labels' do
+    it 'sets a field label from the original CSV header when normalization changes the name' do
+      csv = <<~CSV
+        Blood Pressure (Systolic),already_clean
+        120,ok
+      CSV
+
+      mg = Imports::ModelGenerator.new(
+        name: 'Label test',
+        dynamic_model_table: 'test_csv_imports_labels',
+        description: 'Header label test'
+      )
+
+      mg.analyze_csv(csv)
+
+      expect(mg.generator_config.fields[:blood_pressure_systolic].label).to eq('Blood Pressure (Systolic)')
+      expect(mg.generator_config.fields[:already_clean].label).to be_nil
+    end
+  end
+
+  describe 'dynamic_model_def_current? stability after label assignment' do
+    before :all do
+      csv = <<~CSV
+        A String!,A Int!
+        hello,1
+      CSV
+      table = "dynamic_test.test_importslabel#{rand 100_000_000_000_000}_recs"
+      @label_mg = Imports::ModelGenerator.new(
+        name: 'Label current test',
+        dynamic_model_table: table,
+        category: 'dynamic-test-env',
+        current_admin: @admin
+      )
+      @label_mg.analyze_csv(csv)
+      @label_mg.create_dynamic_model
+    end
+
+    it 'returns true after re-analyzing a CSV whose headers were normalized to set labels' do
+      # Confirms labels generated from CSV headers (issue #1099) are persisted to the
+      # dynamic model and remain consistent on re-analysis. Without label persistence
+      # via dynamic model default_options.labels, dynamic_model_def_current? would
+      # return false on the second analyze pass.
+      expect(@label_mg.generator_config.fields[:a_string].label).to eq('A String!')
+      expect(@label_mg.generator_config.fields[:a_int].label).to eq('A Int!')
+
+      csv = <<~CSV
+        A String!,A Int!
+        hello,1
+      CSV
+      @label_mg.analyze_csv(csv)
+
+      expect(@label_mg.generator_config.fields[:a_string].label).to eq('A String!')
+      expect(@label_mg.dynamic_model_def_current?).to be true
+    end
+  end
 end

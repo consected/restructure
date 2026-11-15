@@ -22,6 +22,16 @@ module BulkMsgSupport
     let_user_create :dynamic_model__zeus_bulk_message_recipients
     let_user_create :dynamic_model__zeus_bulk_message_statuses
     let_user_create :dynamic_model__zeus_bulk_messages
+    # ZeusBulkMessageRecipient#set_response temporarily switches the user's app_type
+    # to bulk-msg (issue #1129) so that background-job updates pass the edit access check.
+    # Grant the test user explicit create access in the bulk-msg app type as well so that
+    # check_can_save passes when set_response runs under that app context.
+    bulk_msg_app = Settings.bulk_msg_app
+    if bulk_msg_app
+      Admin::UserAccessControl.create! current_admin: @admin, app_type: bulk_msg_app,
+                                       user: @user, access: :create, resource_type: :table,
+                                       resource_name: :dynamic_model__zeus_bulk_message_recipients
+    end
     @bulk_master = Master.find(-1)
     @bulk_master.current_user = @user
     @bulk_master.dynamic_model__zeus_bulk_message_recipients.update_all(response: nil)

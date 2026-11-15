@@ -45,6 +45,19 @@ describe('substitutions', function () {
 
   });
 
+  it("parses a YAML encoded string with yaml_parse for hash and array access", function () {
+    const text = '<p>YAML hash {{yaml.yaml_parse.ykey3.1}}. YAML top-level array {{yaml_array.yaml_parse.0}}</p>'
+    const use_data = {
+      yaml: "ykey1: 22\nykey2: abc\nykey3:\n  - 1230\n  - 4560\n",
+      yaml_array: "- first\n- second\n"
+    };
+
+    const expected_text = '<p>YAML hash 4560. YAML array first</p>'
+    const res = _fpa.substitution.substitute(text, use_data);
+    expect(res).toEqual(expected_text)
+
+  });
+
   it("substitutes conditionally", function () {
 
     var t = '<html><body><div><div class="caption-before"><p>{{#if id}}This is some content.{{else}}no id{{/if}}</p><p>Related to master_id {{master_id}}. This is a name: {{name::uppercase}}.</p></div><div>--</div><div class="caption-before">Done!</div></div></body></html>'

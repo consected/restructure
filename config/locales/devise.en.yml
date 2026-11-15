@@ -18,6 +18,7 @@ en:
       unconfirmed: "You have to confirm your email address before continuing."
       account_has_been_disabled: "This account has been disabled."
       account_expired: "Your account has expired. Please contact your administrator."
+      otp_secret_invalid: "Your account requires administrator assistance. Please contact support."
     mailer:
       confirmation_instructions:
         subject: "Confirmation instructions"

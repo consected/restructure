@@ -44,6 +44,10 @@ class Imports::ModelGeneratorsController < AdminController
     raise FphsException, 'Failed to generate the dynamic model table' unless @dynamic_model
 
     redirect_to edit_imports_model_generator_path(@model_generator, from_upload: 'generated_model')
+  rescue StandardError => e
+    logger.warn "Failed to generate model from CSV for Imports::ModelGenerator ##{@model_generator&.id}: #{e.class}"
+    logger.warn e.full_message
+    render plain: model_generation_error_message(e), status: :bad_request
   end
 
   private
@@ -87,5 +91,19 @@ class Imports::ModelGeneratorsController < AdminController
     return if object_instance.file_store
 
     object_instance.create_file_store
+  end
+
+  def model_generation_error_message(exception)
+    details = extract_model_generation_error_details(exception)
+    return 'Failed to generate the dynamic model table' if details.blank?
+
+    "Failed to generate the dynamic model table: #{details}"
+  end
+
+  def extract_model_generation_error_details(exception)
+    [exception.message, exception.cause&.message]
+      .filter_map { |message| message.to_s.squish.presence }
+      .uniq
+      .join(' | ')
   end
 end

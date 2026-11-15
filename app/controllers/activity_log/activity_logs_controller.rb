@@ -12,6 +12,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
   # e.g. a player contact
   # Not called for new or edit, since these are call elsewhere
   before_action :set_item, only: %i[index create update destroy]
+  before_action :apply_perspective, only: :index
   after_action :check_authentication_still_valid
 
   def template_config
@@ -224,11 +225,12 @@ class ActivityLog::ActivityLogsController < UserBaseController
   end
 
   #
-  # The activity log implementation class, based on the controller name
+  # The activity log implementation class, based on the controller name.
+  # Resolved through the Resources::Models registry rather than String#constantize
+  # so only registered (allow-listed) ActivityLog implementations can be returned.
   def implementation_class
     cn = controller_name.singularize.to_s.camelize
-    cnf = "ActivityLog::#{cn}"
-    cnf.constantize
+    Resources::Models.find_model!("ActivityLog::#{cn}")
   end
 
   #
@@ -279,5 +281,75 @@ class ActivityLog::ActivityLogsController < UserBaseController
 
     et = params[:extra_type]
     params[pname] = { extra_log_type: et }
+  end
+
+  #
+  # Apply a named perspective to @master_objects when params[:perspective] is present,
+  # or when a default perspective is configured in the app configuration for the current
+  # user and resource. Looks up the panel by params[:panel_name] and the current user's
+  # app type, then resolves the matching perspective config and runs the backend runner.
+  def apply_perspective
+    panel_name = params[:panel_name].presence
+    return unless panel_name && @implementation_class && @master
+
+    perspective_name = params[:perspective].presence
+    resource_name    = @implementation_class.resource_name.to_s
+
+    # When no explicit perspective param, check the app config for a per-user default
+    if perspective_name.blank?
+      defaults = Admin::AppConfiguration.hash_for(:default_activity_log_perspective, current_user)
+      raw_default = defaults[resource_name.to_sym].presence || defaults[resource_name].presence
+      if raw_default.present?
+        resolved = if raw_default.is_a?(String) && raw_default.include?('{{')
+                     Formatter::Substitution.substitute(raw_default, data: current_user, tag_subs: nil,
+                                                                     ignore_missing: true)&.strip
+                   else
+                     raw_default
+                   end
+        perspective_name = resolved.presence
+      end
+    end
+
+    return unless perspective_name
+
+    # Any missing or invalid configuration raises FphsException so the error surfaces
+    # immediately rather than silently showing unfiltered results.
+
+    panel = Admin::PageLayout.active
+                             .where(app_type_id: current_user.app_type_id, panel_name:)
+                             .first
+
+    unless panel
+      raise FphsException, "apply_perspective: no active panel found for panel_name=#{panel_name.inspect} app_type_id=#{current_user.app_type_id}"
+    end
+
+    all_perspectives = panel.view_options&.perspectives
+
+    unless all_perspectives.present?
+      raise FphsException, "apply_perspective: panel #{panel.id} has no perspectives configured"
+    end
+
+    perspectives_for_resource = (all_perspectives.with_indifferent_access[resource_name] || [])
+    config = perspectives_for_resource.find { |p| p.with_indifferent_access[:name].to_s == perspective_name }
+
+    unless config
+      raise FphsException, "apply_perspective: no perspective named #{perspective_name.inspect} found for resource #{resource_name.inspect}; available keys: #{all_perspectives.keys.inspect}"
+    end
+
+    # Wrap only the runner so unexpected runtime errors are logged with context
+    # before being re-raised. The validation guards above propagate directly.
+    begin
+      result = ActivityLog::Perspectives::Runner.new(
+        config, @implementation_class, current_user, master: @master
+      ).run
+    rescue StandardError => e
+      msg = "apply_perspective: runner failed for perspective #{perspective_name.inspect} on #{resource_name.inspect}: #{e.message}"
+      Rails.logger.error msg
+      Rails.logger.error e.short_string_backtrace
+      raise FphsException, msg
+    end
+
+    Rails.logger.debug { "apply_perspective: runner result=#{result.nil? ? 'nil (no matching records)' : result.to_sql}" }
+    @master_objects = @master_objects.merge(result) if result
   end
 end

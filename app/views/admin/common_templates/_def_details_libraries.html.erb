@@ -1,7 +1,6 @@
-<% if object_instance.persisted? && object_instance.options_text 
+<% if object_instance.persisted?
      libs = OptionConfigs::ExtraOptions.requested_libraries(object_instance.options_text) %>
 <div class="activity-list-libraries">
-  <label>libraries</label>
   <% if libs.present? %>
   <ul class="al-reference-list">  
   <% libs.each do |l| %>
@@ -12,8 +11,8 @@
   </li>
   <% end %>
   </ul>
-  <% end %>
   <hr />
+  <% end %>
     <p>Add a library with <code># @library [category] [name]</code> after adding a
     <%= link_to link_label_open_in_new("config library"), admin_config_libraries_path(init_with: {category: object_instance.category, format: 'yaml'}, perform_action: 'new'), target: "_blank" %>
     </p>

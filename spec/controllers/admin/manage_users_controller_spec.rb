@@ -1,5 +1,21 @@
 # frozen_string_literal: true
 
+# Admin Manage Users Controller Spec
+#
+# Tests the Admin::ManageUsersController (Usernames and Passwords admin page).
+#
+# Covers:
+# - Standard CRUD actions for admin user management
+# - Special user actions (password reset, 2FA reset, expiration extension, unlock)
+# - Limited admin capabilities
+# - current_app_access filter: boolean column and filter for Issue #1168
+#   - filters hash includes current_app_access key with yes/no options
+#   - filters_on includes :current_app_access
+#   - Filtering by current_app_access: 'true' returns only users with access to
+#     the admin's current app type
+#   - Filtering by current_app_access: 'false' returns only users without access
+#     to the admin's current app type
+
 require 'rails_helper'
 
 RSpec.describe Admin::ManageUsersController, type: :controller do
@@ -296,6 +312,82 @@ RSpec.describe Admin::ManageUsersController, type: :controller do
     it 'never destroys the requested item' do
       create_item
       expect_to_be_bad_route(delete: "#{path_prefix}/#{object_symbol}/#{item_id}")
+    end
+  end
+
+  describe 'current_app_access filter - Issue #1168' do
+    before_each_login_admin
+
+    before :each do
+      @test_app_type = Admin::AppType.active.first
+      raise 'No active app type found for current_app_access filter tests' unless @test_app_type
+
+      # User WITH access to the current app type
+      @user_with_access = User.create!(
+        email: "caa_with_#{SecureRandom.hex(4)}@test.com",
+        current_admin: @admin
+      )
+      Admin::UserAccessControl.create!(
+        user: @user_with_access,
+        app_type: @test_app_type,
+        access: :read,
+        resource_type: :general,
+        resource_name: :app_type,
+        current_admin: @admin
+      )
+      Rails.cache.delete("all_app_type_ids_available_to::#{@user_with_access.id}")
+
+      # User WITHOUT access to any app type
+      @user_without_access = User.create!(
+        email: "caa_without_#{SecureRandom.hex(4)}@test.com",
+        current_admin: @admin
+      )
+      Rails.cache.delete("all_app_type_ids_available_to::#{@user_without_access.id}")
+    end
+
+    describe '#filter_params_permitted' do
+      it 'defaults current_app_access to true when no filter params are given' do
+        expect(controller.send(:filter_params_permitted)[:current_app_access]).to eq('true')
+      end
+    end
+
+    describe '#filters' do
+      it 'includes current_app_access key with yes/no options' do
+        get :index
+        f = controller.send(:filters)
+        expect(f).to have_key(:current_app_access)
+        expect(f[:current_app_access]).to have_key('true')
+        expect(f[:current_app_access]).to have_key('false')
+      end
+    end
+
+    describe '#filters_on' do
+      it 'includes :current_app_access' do
+        expect(controller.send(:filters_on)).to include(:current_app_access)
+      end
+    end
+
+    describe 'GET #index with current_app_access filter' do
+      it 'returns only users with current app access when no filter is set (default)' do
+        get :index
+        expect(response).to have_http_status(200)
+        expect(assigns(:users)).to include(@user_with_access)
+        expect(assigns(:users)).not_to include(@user_without_access)
+      end
+
+      it 'returns only users with current app access when filter is true' do
+        get :index, params: { filter: { current_app_access: 'true' } }
+        expect(response).to have_http_status(200)
+        expect(assigns(:users)).to include(@user_with_access)
+        expect(assigns(:users)).not_to include(@user_without_access)
+      end
+
+      it 'returns only users without current app access when filter is false' do
+        get :index, params: { filter: { current_app_access: 'false' } }
+        expect(response).to have_http_status(200)
+        expect(assigns(:users)).not_to include(@user_with_access)
+        expect(assigns(:users)).to include(@user_without_access)
+      end
     end
   end
 end

@@ -29,7 +29,10 @@ module NfsStore
       validates :content_type, presence: true
       validates :container_id, presence: true
 
-      validate :file_uniqueness, unless: :skip_file_uniqueness
+      validate :file_name_is_safe_basename
+      validate :path_is_safe_relative
+
+      validate :file_uniqueness, unless: :skip_file_uniqueness_or_unsafe
 
       attr_accessor :skip_file_uniqueness, :current_gid, :current_role_name, :no_access_check
 
@@ -76,7 +79,7 @@ module NfsStore
     def mime_type_text
       mt = MIME::Types[content_type]&.first if content_type.present?
 
-      mt.present? && (mt.friendly || mt.sub_type || mt.media_type) || UnknownMimeTypeText
+      (mt.present? && (mt.friendly || mt.sub_type || mt.media_type)) || UnknownMimeTypeText
     end
 
     # Generate download URL for item
@@ -152,6 +155,36 @@ module NfsStore
       File.join(*parts)
     end
 
+    # Skip the uniqueness check if the caller requested it OR if basic field
+    # validation has already flagged file_name / path as unsafe — running the
+    # uniqueness query with a NUL byte (or other invalid value) raises before
+    # validation completes, which would mask the real validation error.
+    def skip_file_uniqueness_or_unsafe
+      skip_file_uniqueness || errors[:file_name].present? || errors[:path].present?
+    end
+
+    # Defence-in-depth: rejects file_name values that bypassed entry-point
+    # guards (e.g. direct SQL insert, regressed migration) on next save.
+    def file_name_is_safe_basename
+      return if file_name.blank? # presence validation handles blank case
+
+      NfsStore::Manage::Filesystem.validate_file_name!(file_name)
+    rescue FsException::Action => e
+      errors.add :file_name, e.message
+    end
+
+    # Defence-in-depth: reject any persisted path containing NUL bytes,
+    # absolute paths, or traversal segments. Multi-segment relative paths
+    # are permitted because path represents a directory within the container.
+    def path_is_safe_relative
+      return if path.blank?
+
+      cleaned = NfsStore::Manage::Filesystem.clean_path(path)
+      errors.add :path, 'must match its cleaned form' if cleaned != path
+    rescue FsException::Action => e
+      errors.add :path, e.message
+    end
+
     def file_uniqueness
       return unless @file_uniqueness.nil?
 
@@ -175,7 +208,9 @@ module NfsStore
     def clean_path
       return true if persisted?
 
-      self.path = NfsStore::Manage::Filesystem.clean_path path
+      self.path = NfsStore::Manage::Filesystem.clean_path(path) if path.present?
+    rescue FsException::Action => e
+      errors.add :path, e.message
     end
   end
 end

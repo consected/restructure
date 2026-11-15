@@ -103,6 +103,13 @@ class Admin::AppTypesController < AdminController
               filename: "#{atn}--#{Admin::AppType::AppExportDirSuffix}.zip"
   end
 
+  def components_panel
+    html = Rails.cache.fetch(helpers.partial_cache_key('index_admin_components', force_user_or_admin: current_admin)) do
+      render_to_string partial: 'admin/app_types/components'
+    end
+    render html: html.html_safe, layout: false
+  end
+
   protected
 
   def routes_reload

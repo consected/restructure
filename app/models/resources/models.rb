@@ -52,7 +52,7 @@ module Resources
     # keyed by resource_name
     # @return [Hash]
     def self.all
-      resources.sort_by { |_k, r| "#{r[:type]} - #{r[:human_name]}" }.to_h || {}
+      resources.sort_by { |_k, r| "#{r[:type]} - #{r[:human_name]}" }.to_h
     end
 
     def self.to_a
@@ -130,6 +130,71 @@ module Resources
                                       updated_at: updated_at
       self.updated_at = Time.now
       resources[resource_name]
+    end
+
+    #
+    # Safely resolve a class-name-like string to the registered model class.
+    #
+    # This is an allow-list alternative to String#constantize / ns_constantize for
+    # any code path that takes a model identifier from user-influenced input
+    # (params, URL segments, background-job arguments, admin configuration, etc.).
+    #
+    # Only classes that have been registered in this registry (via Resources::Models.add)
+    # can be resolved. Any input that does not match a registered entry returns nil,
+    # eliminating the constantize-as-RCE / arbitrary-autoload attack surface.
+    #
+    # Accepted input forms (all map to the same registry entry):
+    # - resource_name symbol/string  e.g. "dynamic_model__contact_infos" / :masters
+    # - resource_item_name           e.g. "dynamic_model__contact_info"  / :master
+    # - fully qualified class name   e.g. "DynamicModel::ContactInfo"
+    # - ns_camelized slash form      e.g. "DynamicModel/ContactInfo"
+    #
+    # @param name [String, Symbol, nil]
+    # @return [Class, nil] the registered model class, or nil if no match
+    def self.find_model(name)
+      return nil if name.nil?
+
+      s = name.to_s
+      return nil if s.empty?
+
+      # Class-name form (with :: or /): match by class_name directly.
+      if s.include?('::') || s.include?('/')
+        class_name = s.tr('/', ':').gsub(/:+/, '::')
+        match = resources.values.find { |r| r[:class_name] == class_name }
+        return match[:model] if match
+        return nil
+      end
+
+      # Camel-cased single segment e.g. "Master" - match by class_name.
+      if s =~ /\A[A-Z]/
+        match = resources.values.find { |r| r[:class_name] == s }
+        return match[:model] if match
+        return nil
+      end
+
+      # Snake-cased forms: resource_name (plural) or resource_item_name (singular).
+      sym = s.to_sym
+      entry = resources[sym]
+      return entry[:model] if entry
+
+      match = resources.values.find { |r| r[:resource_item_name] == sym }
+      return match[:model] if match
+
+      nil
+    end
+
+    #
+    # Same as .find_model but raises FphsException when the name does not resolve
+    # to a registered model. Use this at boundaries where an unknown identifier
+    # indicates a bad request or programming error rather than expected absence.
+    #
+    # @param name [String, Symbol, nil]
+    # @return [Class]
+    def self.find_model!(name)
+      model = find_model(name)
+      return model if model
+
+      raise FphsException, "#{name.inspect} is not a recognized model resource name"
     end
 
     #

@@ -13,6 +13,8 @@ require 'rails_helper'
 #    Each timestamp is handled independently.
 # 2. CSV WITH id/created_at/updated_at columns: should succeed and
 #    use the values provided in the CSV (even if blank)
+# 3. CSV with columns that don't match the model: should return an actionable
+#    error message that includes guidance to go back and re-upload.
 RSpec.describe Imports::Import, type: :model do
   include ModelSupport
   include UserSupport
@@ -150,6 +152,21 @@ RSpec.describe Imports::Import, type: :model do
       expect(first_item.created_at).to be_within(1.second).of(expected_created)
       # updated_at should be auto-populated since it's not in the CSV
       expect(first_item.updated_at).to be >= before_import
+    end
+  end
+
+  describe 'check_csv_columns error messaging' do
+    let(:csv_with_bad_column) do
+      "a_string,a_int,nonexistent_column\nhello,1,bad\n"
+    end
+
+    it 'returns a message including guidance to go back and re-upload' do
+      import = Imports::Import.setup_import(@resource_name, @user, 'bad-columns.csv')
+      import.import_csv(csv_with_bad_column)
+
+      error_messages = import.errors.full_messages.join("\n")
+      expect(error_messages).to include('Go back to upload another file')
+      expect(error_messages).to include('nonexistent_column')
     end
   end
 end

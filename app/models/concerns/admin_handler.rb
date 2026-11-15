@@ -277,12 +277,24 @@ module AdminHandler
   # Invalidate the cache and latest update value
   # @return [<Type>] <description>
   def invalidate_cache
-    logger.info "Admin record added or updated (#{self.class.name}). Invalidating cache"
-
     # Allows caching in other classes to reset
     self.class.reset_latest_update
 
+    return unless clear_rails_cache_on_save?
+
+    logger.info "Admin record added or updated (#{self.class.name}). Invalidating cache"
+
     # Unfortunately we have no way to clear pattern matched keys with memcached so we just clear the whole cache
     Rails.cache.clear
+  end
+
+  #
+  # Whether this save should clear the entire Rails cache.
+  # Defaults to true for all admin models. Override in models that are saved
+  # very frequently during normal operation (e.g. User, Admin) to limit
+  # the whole-cache clear to only the changes that actually require it.
+  # @return [Boolean]
+  def clear_rails_cache_on_save?
+    true
   end
 end

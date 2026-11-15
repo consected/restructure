@@ -8,7 +8,10 @@
   record_id = form_object_instance.record_id
   sntn = "#{sn}.#{tn}"
   tns = [tn , sntn]
-  project_admin = Redcap::ProjectAdmin.active.find_by(dynamic_model_table: tns)
+  # When more than one active project admin shares the same dynamic model table,
+  # prefer one that actually pulls data (frequency != 'never') and the most recently
+  # created (highest id), to match the project that actually captures files.
+  project_admin = Redcap::ProjectAdmin.preferred_active(tns)
   if project_admin
     project_admin.current_user = current_user 
     container = project_admin.file_store
