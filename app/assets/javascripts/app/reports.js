@@ -81,9 +81,9 @@ _fpa.reports = {
     block.find('td[data-col-type^="search_reports_"]').not('.attached_report_search').each(function () {
       var dct = $(this).attr('data-col-type');
       if (!$(this).hasClass('attached_report_search') && dct.match(/search_reports_[0-9]+_.+/)) {
-        var dct_parts = dct.split('_', 4);
+        var dct_parts = dct.split('_');
 
-        var dct_field = dct_parts[3];
+        var dct_field = dct_parts.slice(3).join('_');
         var dct_report = dct_parts[2];
         var dct_search = $(this).html().trim();
 

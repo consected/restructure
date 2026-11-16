@@ -20,6 +20,7 @@ See [Full Text Search](full_text_search.md) for a concise guide and query patter
 
 ## Contents
 
+- [Search another report from a result cell](search_report_results.md)
 - [SQL Search Attributes](search_attributes.md)
 - [URL Search Attributes](url_search_attributes.md)
 - [Detailed Options](detailed_options.md)
