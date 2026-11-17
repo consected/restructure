@@ -14,6 +14,42 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #1562 - 2026-11-17
+
+- [Changed] large multi-file filestore downloads to be prepared in the background and downloaded from a link in a notification - fixes #1552
+
+### From FPHS - PR #1561 - 2026-11-17
+
+- Fixed report result search links - resolves #1555
+
+### From FPHS - PR #1556
+
+- [Changed] Filestore to send a single selected file directly instead of zipping it - fixes #1553
+
+
+
+### From FPHS - PR #1554 - 2026-11-11
+
+- [Changed] submission of filestore selections to allow use of one JSON param to avoid Rack params limit - fixes #1551
+
+### From FPHS - PR #1548 - 2026-11-11
+
+- [Added] name keys for protocol lookups in tracker_history conditions - fixes #1491
+
+### From FPHS - PR #1523 - 2026-11-11
+
+- [Added] automatic tracker entries for message notifications - fixes #1479
+- [Added] modal preview of message notifications from tracker entries
+
+### From FPHS - PR #1547 - 2026-11-11
+
+- [Fixed] field_options HTML attributes dropped by select edit field partials - fixes #1460
+
+### From FPHS - PR #1540 - 2026-11-10
+
+- [Refactored] app type import to reduce wasted time by deferring system-wide regeneration work - fixes 1538
+
+
 ## [10.1.0] - 2026-11-10
 
 ### From FPHS - PR #1544 - 2026-11-10
