@@ -1,6 +1,6 @@
 Download ruby-advisory-db ...
 Cloning into '/root/.local/share/ruby-advisory-db'...
 ruby-advisory-db:
-  advisories:	1353 advisories
-  last updated:	2026-11-10 13:05:29 -0500
-  commit:	38f94284b05c2052b13a4922a86cc7cffb2266e2
+  advisories:	1378 advisories
+  last updated:	2026-11-17 10:25:12 -0500
+  commit:	cad74bbe85c643bb9456450f357d6288c9ded2f8
