@@ -30,6 +30,8 @@ class ItemFlag < UserBase
 
   default_scope -> { where disabled: [nil, false] }
 
+  add_model_to_list
+
   def user_name
     return nil unless user
 

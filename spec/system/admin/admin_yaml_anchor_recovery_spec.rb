@@ -122,13 +122,12 @@ describe 'admin YAML anchor recovery', js: true, driver: $browser_driver do
       find('input[type="submit"], button[type="submit"]', match: :first).click
     end
 
-    # Wait for save to complete - should NOT get a server error
-    expect(page).to have_content('updated', wait: 10)
-    finish_page_loading
-
-    # After save, errors should be displayed
-    expect(page).to have_css('.config-error-block', wait: 10)
+    # After save, errors should be displayed (form re-rendered via AJAX)
+    # This is the reliable wait: server-side rendering of config-error-block
+    # confirms the AJAX response was processed and DOM updated.
+    expect(page).to have_css('.config-error-block', wait: 15)
     expect(page).to have_content('configuration errors')
+    finish_page_loading
 
     # Verify the broken YAML was actually saved to the database
     dm.reload
@@ -144,18 +143,17 @@ describe 'admin YAML anchor recovery', js: true, driver: $browser_driver do
       find('input[type="submit"], button[type="submit"]', match: :first).click
     end
 
-    # Should succeed, not get a server error flash
+    # Should succeed: wait for the config-error-block to disappear,
+    # which is the reliable indicator that the AJAX response was processed
+    # and the form re-rendered with the now-valid YAML.
     expect(page).not_to have_content('server error', wait: 5)
-    expect(page).to have_content('updated', wait: 10)
+    expect(page).to have_no_css('.config-error-block', wait: 15)
     finish_page_loading
 
     # Step 6: Verify the fixed YAML was actually saved
     dm.reload
     expect(dm.options).not_to include('bad entry')
     expect(dm.options).to include('&common') # The anchor should still be there
-
-    # Verify errors are gone from the page
-    expect(page).not_to have_css('.config-error-block')
   end
 
   it 'allows recovery from broken YAML with view_sql configuration' do
@@ -238,13 +236,12 @@ describe 'admin YAML anchor recovery', js: true, driver: $browser_driver do
       find('input[type="submit"], button[type="submit"]', match: :first).click
     end
 
-    # Wait for save to complete - should NOT get a server error
-    expect(page).to have_content('updated', wait: 10)
-    finish_page_loading
-
-    # After save, errors should be displayed
-    expect(page).to have_css('.config-error-block', wait: 10)
+    # After save, errors should be displayed (form re-rendered via AJAX).
+    # Waiting for the server-rendered config-error-block is the reliable
+    # signal that the AJAX response was processed.
+    expect(page).to have_css('.config-error-block', wait: 15)
     expect(page).to have_content('configuration errors')
+    finish_page_loading
 
     # Verify the broken YAML was actually saved to the database
     dm.reload
@@ -260,17 +257,16 @@ describe 'admin YAML anchor recovery', js: true, driver: $browser_driver do
       find('input[type="submit"], button[type="submit"]', match: :first).click
     end
 
-    # Should succeed, not get a server error flash
+    # Should succeed: wait for the config-error-block to disappear,
+    # which is the reliable indicator that the AJAX response was processed
+    # and the form re-rendered with the now-valid YAML.
     expect(page).not_to have_content('server error', wait: 5)
-    expect(page).to have_content('updated', wait: 10)
+    expect(page).to have_no_css('.config-error-block', wait: 15)
     finish_page_loading
 
     # Step 6: Verify the fixed YAML was actually saved
     dm.reload
     expect(dm.options).not_to include('bad entry')
     expect(dm.options).to include('view_sql')
-
-    # Verify errors are gone from the page
-    expect(page).not_to have_css('.config-error-block')
   end
 end

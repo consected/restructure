@@ -191,16 +191,19 @@ describe User do
     expect(@user.need_change_password?).to be_truthy
   end
 
+  def set_up_registration_admin
+    @registration_admin = SetupHelper.registration_admin
+    stub_const('Settings::RegistrationAdminEmail', @registration_admin.email)
+  end
+
   describe 'create a user' do
-    before do
-      @registration_admin = SetupHelper.registration_admin
-      stub_const('Settings::RegistrationAdminEmail', @registration_admin.email)
+    before :example do
+      set_up_registration_admin
     end
 
     context 'when user NOT are allowed to self-register; i.e., AllowUsersToRegister is false' do
       before do
         stub_const('Settings::AllowUsersToRegister', false)
-        Seeds.setup
       end
       it 'requires admin to create a user' do
         expect { User.create! email: "atest-#{@good_email}", first_name: 'Last', last_name: 'Last' }.to raise_error(
@@ -220,9 +223,9 @@ describe User do
     context 'when user are allowed to self-register; i.e., AllowUsersToRegister is true' do
       before do
         stub_const('Settings::AllowUsersToRegister', true)
-        Seeds.setup
       end
       it 'is expected to be created by the self registering user' do
+        set_up_registration_admin
         expect do
           User.create!(email: "#{rand(100_000_000..1_099_999_999)}-atest-#{@good_email}",
                        password: 'AwDuHxX3LwhrfQyF',

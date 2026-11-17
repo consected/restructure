@@ -1,0 +1,5 @@
+# Pattern 2: Role scoped to a specific app_type
+change_user_roles:
+  add_role_names:
+    - app_type: study info
+      role_name: viewer-has-agreement

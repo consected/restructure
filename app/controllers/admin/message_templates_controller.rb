@@ -1,4 +1,8 @@
+# frozen_string_literal: true
+
 class Admin::MessageTemplatesController < AdminController
+  include DefinitionVersionsController
+
   helper_method :message_type_options, :template_type_options
   before_action :set_defaults
 
@@ -10,6 +14,7 @@ class Admin::MessageTemplatesController < AdminController
 
   def set_defaults
     @show_again_on_save = true
+    @show_extra_help_info = { form_info_partial: 'admin/message_templates/form_info' }
   end
 
   def filters

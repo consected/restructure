@@ -1,0 +1,19 @@
+# Pattern 3: Returning whole records
+# @runnable: true
+# @instance: activity_log
+# @return_class: Address
+
+# return_result returns the most recently created matching record itself, rather
+# than one of its field values. Because the field name is not used, any unused
+# name may be given - `return` reads well.
+#
+# return_all_results returns every matching record instead of just the latest:
+#
+#   all:
+#     addresses:
+#       city: portland
+#       return: return_all_results
+all:
+  addresses:
+    city: portland
+    return: return_result

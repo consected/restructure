@@ -800,8 +800,8 @@ module Formatter
       elsif name == 'embedded_item' && item.respond_to?(:embedded_item)
         item.embedded_item
       elsif name == 'constants'
-        # Options constants
-        item.versioned_definition.options_constants&.dup if item.respond_to?(:versioned_definition)
+        # Options constants — convert to plain Hash for tag substitution compatibility
+        item.versioned_definition.options_constants&.to_h if item.respond_to?(:versioned_definition)
       elsif name == 'variables'
         # Set variables from option type config
         data[:variables] if data.is_a?(Hash)

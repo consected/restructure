@@ -4,7 +4,7 @@ class Settings
   LogLevel = DefaultSettings::LogLevel
   DefaultMigrationSchema = DefaultSettings::DefaultMigrationSchema
   DefaultSchemaOwner = ENV['FPHS_DEFAULT_SCHEMA_OWNER'].presence || DefaultSettings::DefaultSchemaOwner
-  MigrationTimeoutSec = 120
+  MigrationTimeoutSec = Rails.env.test? ? 10 : 120
   MaxPostgresIdentifierLength = 63
 
   # Does not set the prefix, just specifies what we search by in jobs
@@ -22,6 +22,46 @@ class Settings
   # Inactivity timeouts for user / admin sessions
   UserTimeout = (ENV['USER_TIMEOUT_MINS'].presence || 30).to_i.minutes.freeze
   AdminTimeout = (ENV['ADMIN_TIMEOUT_MINS'].presence || 30).to_i.minutes.freeze
+
+  # Max seconds a request will retry acquiring HandlebarsPrecompiler::FileLock before
+  # proceeding unlocked (issue #1362). Short by design: the lock is a work-duplication
+  # optimisation, never a correctness mechanism, so a user request must not wait long.
+  HandlebarsLockWaitSeconds = (ENV['FPHS_HANDLEBARS_LOCK_WAIT'].presence || 2).to_f
+
+  # How many previous compiled-Handlebars generations to retain on disk alongside the
+  # current one (issue #1362), so a process/request that has not yet observed a
+  # rotation can still find its generation's compiled files. Older generations are
+  # swept opportunistically.
+  HandlebarsKeepGenerations = (ENV['FPHS_HANDLEBARS_KEEP_GENERATIONS'].presence || 2).to_i
+
+  # A generation directory younger than this is never swept, regardless of
+  # HandlebarsKeepGenerations, so one created moments ago can't be deleted out from
+  # under a concurrent writer (issue #1362).
+  HandlebarsGenerationSafetyWindowSeconds = (ENV['FPHS_HANDLEBARS_GENERATION_SAFETY_WINDOW'].presence || 60).to_i
+
+  # HandlebarsPrecompiler::FileLock files older than this are swept opportunistically
+  # (issue #1362 S7 fix) - lock file names are per user/app_type/template-set, so without
+  # this they would accumulate without bound on a long-lived server. Generous relative to
+  # HandlebarsLockWaitSeconds, since a lock file's mtime is its CREATION time (re-opening
+  # an existing file for flock does not bump it), not its last-used time.
+  HandlebarsLockFileMaxAgeSeconds = (ENV['FPHS_HANDLEBARS_LOCK_FILE_MAX_AGE'].presence || 300).to_i
+
+  # Whether the server spawns a `prewarm:templates` pass on boot (issue #1362 Stage 2).
+  # Opt-in, and always disabled in test, since specs exercise prewarming directly.
+  PrewarmTemplatesEnabled = ENV['FPHS_PREWARM_TEMPLATES'] == 'true' && !Rails.env.test?
+
+  # Only users who have signed in within this many days are candidates for prewarming.
+  PrewarmSignInWindowDays = (ENV['FPHS_PREWARM_SIGN_IN_WINDOW_DAYS'].presence || 30).to_i
+
+  # Upper bound on the number of distinct (app_type, access variant) combinations warmed
+  # in one pass, to cap worst-case pass duration on an app with many disjoint variants.
+  PrewarmMaxVariants = (ENV['FPHS_PREWARM_MAX_VARIANTS'].presence || 50).to_i
+
+  # Pause between warmed renders, to keep the pass low priority relative to user requests.
+  PrewarmThrottleSeconds = (ENV['FPHS_PREWARM_THROTTLE'].presence || 0.5).to_f
+
+  # Browser lifetime for user-specific master-template HTML before ETag revalidation.
+  TemplateBrowserCacheSeconds = (ENV['FPHS_TEMPLATE_BROWSER_CACHE_SECONDS'].presence || 1.hour).to_i
 
   OsWordsFile = '/usr/share/dict/words'
   # Setup information for the StrongPassword::StrengthChecker and
@@ -59,6 +99,10 @@ class Settings
   BatchUserEmail = ENV['FPHS_BATCH_USER_EMAIL'].presence || AdminEmail.presence
   # Email address that identifies the Redcap job user profile. Defaults to the BatchUserEmail
   RedcapJobUserEmail = ENV['FPHS_RC_JOB_USER_EMAIL'].presence || BatchUserEmail.presence
+  # Email address of the API-only user recommended for submitting REDCap Data Entry Trigger
+  # requests. Shown as the default in the generated Data Entry Trigger endpoint URL/instructions;
+  # this user still needs its own real API token, substituted manually by an admin.
+  RedcapDetUserEmail = ENV['FPHS_RC_DET_USER_EMAIL'].presence || 'redcap_det@system-user'
   # Provide an email address for a technical admin to receive failure notifications
   FailureNotificationsToEmail = ENV['FAIL_TO_EMAIL'].presence || ENV['FAIL_FROM_EMAIL'].presence || DefaultSettings::FailureNotificationsToEmail.presence || Settings::AdminEmail.presence
 
@@ -101,6 +145,10 @@ class Settings
   BaseUrl = ENV['BASE_URL'].presence || DefaultSettings::BaseUrl
   # title tag page title, appears in tab or browser heading
   PageTitle = ENV['PAGE_TITLE'].presence || DefaultSettings::PageTitle
+
+  NfsStoreBackgroundDownloadMaxFiles = (ENV['NFS_STORE_BACKGROUND_DOWNLOAD_MAX_FILES'].presence || 100).to_i
+  NfsStoreBackgroundDownloadMaxBytes = (ENV['NFS_STORE_BACKGROUND_DOWNLOAD_MAX_BYTES'].presence || 20.megabytes).to_i
+  NfsStorePreparedDownloadsTtlHours = (ENV['NFS_STORE_PREPARED_DOWNLOADS_TTL_HOURS'].presence || 24).to_i
 
   # Registration Settings
   # Since passwords have generated upon user creation, we must suppress generating a password
@@ -160,9 +208,9 @@ class Settings
   # and a template is a good way to allow all related roles to be represented, for copying by an admin
   TemplateUserEmailPattern = '@template'
   # For the SQL LIKE operator
-  TemplateUserEmailPatternForSQL = "%#{TemplateUserEmailPattern}"
+  TemplateUserEmailPatternForSQL = "%#{TemplateUserEmailPattern}".freeze
   # A template user is defined to allow user roles to be set up even if no real users are assigned
-  TemplateUserEmail = "template#{TemplateUserEmailPattern}"
+  TemplateUserEmail = "template#{TemplateUserEmailPattern}".freeze
 
   # A dummy role used by all user access controls to allow them to be exported, even if no other
   # roles or users are assigned
@@ -189,7 +237,12 @@ class Settings
   end
 
   def self.nfs_store_default_app_type_id
-    (ENV['NFS_STORE_DEFAULT_APP_TYPE_ID'].presence || OnlyLoadAppTypes&.first || Admin::AppType.active.first&.id || 1).to_i
+    (ENV['NFS_STORE_DEFAULT_APP_TYPE_ID'].presence || Array(OnlyLoadAppTypes).first || Admin::AppType.active.first&.id || 1).to_i
+  end
+
+  def self.nfs_store_prepared_downloads_dir
+    ENV['FILESTORE_PREPARED_DOWNLOADS_DIR'].presence ||
+      File.join(NfsStore::Manage::Filesystem.temp_directory, 'prepared_downloads')
   end
 
   # Allow-list mapping of resource names => fully qualified class name strings for
@@ -246,6 +299,8 @@ class Settings
 
   # Dynamic models create their own migrations during configuration, if this is set
   AllowDynamicMigrations = ENV['FPHS_ALLOW_DYN_MIGRATIONS'] == 'true' || Rails.env.development?
+  # Set to true to allow production dynamic migrations to drop removed database columns.
+  AllowDropColumns = ENV['ALLOW_DROP_COLUMNS'] == 'true'
 
   # Convert inline data URI images in email bodies to MIME inline attachments
   ProcessInlineDataUriImages = ENV.key?('FPHS_PROCESS_INLINE_DATA_URI_IMAGES') ? ENV['FPHS_PROCESS_INLINE_DATA_URI_IMAGES'] == 'true' : true
@@ -314,7 +369,7 @@ class Settings
   # ISO3166::Country.find_country_by_iso_short_name('united states of america').alpha2 == 'US'
   # If setting more than one country, separate them with a blank-space.
   # For example, PRIORITY_TIMEZONE_COUNTRY_CODES='us gb au'
-  DefaultCountryCodesForTimezones = %w[us ie gb de gr au nz]
+  DefaultCountryCodesForTimezones = %w[us ie gb de gr au nz].freeze
   CountryCodesForTimezones = (ENV['PRIORITY_TIMEZONE_COUNTRY_CODES'].presence&.split || DefaultCountryCodesForTimezones).freeze
 
   # Use the timezone name or identifier. For example, "London" or "Eastern Time (US & Canada)".
@@ -340,13 +395,18 @@ class Settings
   # Set the priority listing for the country select
   DefaultCountrySelect = (ENV['DEFAULT_COUNTRY_SELECT'].presence&.split || %w[US CA DE]).freeze
 
+  DefaultPhoneCountryCode = (ENV['FPHS_DEFAULT_PHONE_COUNTRY_CODE'].presence || '1').delete_prefix('+').gsub(/[^0-9]/, '').presence || '1'
+  DefaultPhoneCountryCode.freeze
+  DefaultPhoneTrunkNumber = (ENV['FPHS_DEFAULT_PHONE_TRUNK_NUMBER'].presence || '1').delete_prefix('+').gsub(/[^0-9]/, '').presence || '1'
+  DefaultPhoneTrunkNumber.freeze
+
   # Countries for which GDPR specific terms of use should be shown
   GdprCountryCodes = %w[AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SE SK SI ES SE GB].freeze
 
   AdminReportItemTypes = {
     'z-admin' => 'Admin Reports',
     'admin-user-access-overview' => 'User Access Overview'
-  }
+  }.freeze
 
   # IMPORTANT: add any app setting config variable to the following array
   # that is worthy of showing to the admin users,
@@ -356,21 +416,25 @@ class Settings
     OnlyLoadAppTypes
     DefaultMigrationSchema DefaultSchemaOwner StartYearRange EndYearRange AgeRange CareerYearsRange
     UserTimeout AdminTimeout OsWordsFile PasswordConfig
-    NotificationsFromEmail AdminEmail BatchUserEmail FailureNotificationsToEmail RedcapJobUserEmail
+    HandlebarsLockWaitSeconds HandlebarsKeepGenerations HandlebarsGenerationSafetyWindowSeconds HandlebarsLockFileMaxAgeSeconds
+    PrewarmTemplatesEnabled PrewarmSignInWindowDays PrewarmMaxVariants PrewarmThrottleSeconds TemplateBrowserCacheSeconds
+    NotificationsFromEmail AdminEmail BatchUserEmail FailureNotificationsToEmail RedcapJobUserEmail RedcapDetUserEmail
+    MaxNotificationRecipients
     TwoFactorAuthDisabledForUser TwoFactorAuthDisabledForAdmin TwoFactorAuthIssuer TwoFactorAuthDrift TwoFactorAuthIdleTimeout
-    CheckPrevPasswords PasswordAgeLimit PasswordReminderDays PasswordMaxAttempts PasswordUnlockStrategy
+    CheckPrevPasswords PasswordAgeLimit PasswordReminderDays PasswordReminderRepeatDays PasswordMaxAttempts PasswordUnlockStrategy PasswordUnlockTimeMins
     LoginIssuesUrl LoginMessage
     SearchResultsLimit
     DefaultShortLinkS3Bucket DefaultShortLinkLogS3Bucket LogBucketPrefix ShortcodeLength
     DefaultSubjectInfoTableName DefaultSecondaryInfoTableName DefaultContactInfoTableName DefaultAddressInfoTableName
     ScriptedJobDirectory
-    DisableVDef AllowDynamicMigrations ProcessInlineDataUriImages
-    AllowUsersToRegister DefaultUserTemplateEmail RegistrationAdminEmail AllowAdminsToManageAdmins NotifyOnRegistration
+    DisableVDef AllowDynamicMigrations AllowDropColumns ProcessInlineDataUriImages
+    AllowUsersToRegister DefaultUserTemplateEmail RegistrationAdminEmail AllowAdminsToManageAdmins NotifyOnRegistration NotifyEmailOnRegistration
     InvitationCode ReCaptchaSiteKey ReCaptchaMinScore
+    PullExternalDataAllowedHosts PullExternalDataAllowPrivateHosts
     CountryCodesForTimezones DefaultUserTimezone
     DefaultDateFormat DefaultTimeFormat DefaultDateTimeFormat
     nfs_store_default_app_type_id
     admin_nfs_role
-    DefaultCountrySelect GdprCountryCodes
+    DefaultCountrySelect DefaultPhoneCountryCode DefaultPhoneTrunkNumber GdprCountryCodes
   ].freeze
 end

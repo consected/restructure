@@ -50,6 +50,7 @@ module Dynamic
       @always_embed_item = nil
       @never_embed_item = nil
       @never_embed_creatable_item = nil
+      @latest_embedded_item = nil
     end
 
     #
@@ -180,6 +181,12 @@ module Dynamic
       @model_references[memokey] = block.call
     end
 
+    # Clear the memoized #model_references / #creatable_model_references results, forcing the next
+    # call to recompute against current DB state.
+    # NOTE: this intentionally does NOT clear @always_embed_item / @never_embed_item /
+    # @never_embed_creatable_item - those are only reset via #reset_model_references (wired to
+    # after_commit), since they represent config-derived state that isn't expected to change mid-save.
+    # Don't add those clears here without checking #link_embedded_item's use of this method first.
     def clear_model_reference_memo
       @creatable_model_references = nil
       @model_references = nil
@@ -540,11 +547,20 @@ module Dynamic
     #
     # @return [UserBase]
     def embedded_item(embed_action_type: nil, only_creatables: true, force_reload: nil, current_admin_sample: nil)
+      # :latest bypasses all recomputation of mrs/cmrs and the dispatch logic below entirely,
+      # simply returning whatever the most recent :creating evaluation on this instance resolved
+      # to (deliberately NOT any other embed_action_type - see the assignment below). This is for
+      # callers that don't want to make - or re-make - a decision about what's creatable/embeddable
+      # (e.g. reload_objects, handle_additional_updates in MasterHandler, which just need "the item
+      # we already established during creation", not a fresh evaluation that could behave
+      # differently once the save just performed has changed reference/limit counts).
+      return @latest_embedded_item if embed_action_type == :latest
+
       embed_action_type ||= self.embed_action_type
 
       clear_embedded_item_memo if force_reload
 
-      memoize_embedded_item do
+      res = memoize_embedded_item(embed_action_type) do
         res = nil
         mrs = model_references(force_reload:)
         cmrs = creatable_model_references(only_creatables:, force_reload:, current_admin_sample:)
@@ -555,9 +571,7 @@ module Dynamic
           # The current action is to display a new form or to create an item from a submitted form.
           # If always_embed_creatable_reference: true has been specified, use this,
           # unless the embeddable item is an activity log or is configured to not be viewable as embedded.
-          res = build_model_reference([always_embed_creatable.to_sym, always_embed_creatable_model_reference(cmrs)],
-                                      optional_params: { current_admin_sample: })
-          res = nil if creatable_model_not_embeddable?(cmrs, res)
+          res = always_embed_creatable_item(cmrs, mrs, current_admin_sample:)
         elsif (res = always_embed_item(mrs))
           # Do nothing, we've found an embedded item that matches the configured type and set it in the condition above
         elsif embed_action_type == :creating && cmrs.length == 1
@@ -590,6 +604,15 @@ module Dynamic
         apply_embedded_item_current_user(res)
         res
       end
+
+      # Only track :creating evaluations as "latest". Other embed_action_type evaluations
+      # (e.g. :viewing calc_action conditions via NonQueryCondition#in_instance, which can be
+      # triggered by show_if/creatable_if/save_trigger conditions at almost any point in the
+      # lifecycle) must never clobber this - callers requesting :latest specifically want "the
+      # most recently established creatable item", not whatever type happened to be evaluated
+      # most recently for an unrelated reason.
+      @latest_embedded_item = res if embed_action_type == :creating
+      res
     end
 
     #
@@ -682,10 +705,20 @@ module Dynamic
       ei
     end
 
-    def memoize_embedded_item(&block)
+    # Memoize the result of #embedded_item, keyed by the actual embed_action_type used for
+    # this call (which may have been explicitly overridden by the caller, e.g. #link_embedded_item
+    # always evaluates with embed_action_type: :creating). Previously this method recomputed
+    # #embed_action_type itself (ignoring any override), so an explicit :creating evaluation and a
+    # default (persisted-state-derived) evaluation could collide on the same cache key once the
+    # record became persisted - allowing an earlier, unrelated :viewing evaluation (which can never
+    # find a directly-embedded item, since direct embeds have no model_reference row) to poison the
+    # memo that #link_embedded_item's after_create :creating evaluation would then read back as nil.
+    # @param [Symbol] for_embed_action_type - the resolved embed_action_type this call is evaluating.
+    #   Named differently from the #embed_action_type instance method so it isn't shadowed by it.
+    def memoize_embedded_item(for_embed_action_type, &block)
       # Check for a memoized result
       @memoize_embedded_items ||= {}
-      memokey = "embedded_item_#{embed_action_type}"
+      memokey = "embedded_item_#{for_embed_action_type}"
       return @memoize_embedded_items[memokey] if @memoize_embedded_items.key?(memokey)
 
       @memoize_embedded_items[memokey] = block.call
@@ -718,19 +751,72 @@ module Dynamic
     # Get the model reference config, for the model that has
     # been specified to alway embed during creation.
     # Raises an exception if there is a always_embed_creatable_reference setting
-    # but no corresponding model reference configuration was found
+    # but no corresponding model reference configuration was found at all.
+    # If the reference is genuinely configured, but is just not currently creatable
+    # (for example its limit has already been reached, or the current user does not
+    # have permission), this returns nil rather than raising, allowing the caller to
+    # fall back to an existing linked record instead.
     # @param [Hash] cmrs - creatable model reference config
-    # @return [Hash]
+    # @return [Hash, nil]
     def always_embed_creatable_model_reference(cmrs)
       return {} unless always_embed_creatable
 
       @always_embed_creatable_model_reference = cmrs[always_embed_creatable.to_sym]
       return @always_embed_creatable_model_reference if @always_embed_creatable_model_reference
 
+      all_refs = creatable_model_references(only_creatables: false)
+      return nil if all_refs.key?(always_embed_creatable.to_sym)
+
       raise FphsException,
             'Creatable reference not found or not creatable for always_embed_creatable_reference named ' \
             "#{always_embed_creatable}" \
             "#{' Try singular version' if always_embed_creatable != always_embed_creatable.singularize}"
+    end
+
+    #
+    # Build (or fall back to) the item for an always_embed_creatable_reference configuration,
+    # for the :creating embed_action_type.
+    # @param [Hash] cmrs - creatable model reference config
+    # @param [Array{ModelReference}] mrs - result of #model_references
+    # @param [Boolean] current_admin_sample
+    # @return [UserBase, nil]
+    def always_embed_creatable_item(cmrs, mrs, current_admin_sample:)
+      acmr = always_embed_creatable_model_reference(cmrs)
+      if acmr.present?
+        res = build_model_reference([always_embed_creatable.to_sym, acmr],
+                                    optional_params: { current_admin_sample: })
+        return nil if creatable_model_not_embeddable?(cmrs, res)
+
+        return res
+      end
+
+      # The always_embed_creatable_reference target is genuinely configured, but is not
+      # currently creatable (for example its limit has already been reached). Fall back to
+      # the existing linked record for that SAME reference type - never an unrelated
+      # reference that happens to be the only one currently linked (e.g. when other
+      # references are also configured alongside it).
+      matching_mrs = mrs.select { |m| m.to_record_type == always_embed_creatable_record_type }
+      return unless matching_mrs.length == 1
+
+      rec = matching_mrs.first.to_record
+      # We don't have the capability to handle embedded items that are activity logs - see the
+      # #embedded_item docstring. Mirrors the same guard applied to the "build" path above.
+      return if rec.class.class_parent_name == 'ActivityLog'
+
+      rec
+    end
+
+    #
+    # The actual to_record_type (class name) that always_embed_creatable resolves to, derived
+    # from the full reference configuration - NOT by camelizing the reference key directly, since
+    # reference keys can be composite (e.g. "modelname_extralogtype" for add_with: extra_log_type
+    # references, or activity_selector-generated keys) and would not match to_record_type at all.
+    # @return [String, nil]
+    def always_embed_creatable_record_type
+      ref_type = creatable_model_references(only_creatables: false)[always_embed_creatable.to_sym]&.keys&.first
+      return unless ref_type
+
+      ModelReference.to_record_class_for_type(ref_type)&.name
     end
 
     #
@@ -890,10 +976,12 @@ module Dynamic
     # the target embedded item, depending on the configuration. We can only do this when
     # either record has been persisted with an id.
     def link_embedded_item
-      # Capture force_save? state during before_create, before other after_create
-      # callbacks (e.g. process_new_file in NFS store) may set force_save! for
-      # unrelated reasons. This ensures we only bypass permission checks when
-      # the record was intentionally force-created (e.g. by a save trigger).
+      # Capture force_save? state during this before_create invocation of link_embedded_item
+      # (this method runs twice per record - before_create then after_create - and persisted? is
+      # only false on the first of those). Capturing it here, before other after_create callbacks
+      # (e.g. process_new_file in NFS store) may set force_save! for unrelated reasons, ensures we
+      # only bypass permission checks when the record was intentionally force-created (e.g. by a
+      # save trigger).
       @embed_force_create = force_save? unless persisted?
 
       ei = embedded_item(embed_action_type: :creating)
@@ -906,6 +994,28 @@ module Dynamic
       return unless direct_embed?
 
       link_new_embedded_item(ei)
+
+      # A "field" type direct embed (embed_resource_name / embed_resource_id) only gets its
+      # target id set here, inside link_new_embedded_item, once the embedded item exists. Any
+      # earlier call to #model_references / #creatable_model_references / #embedded_item on this
+      # same in-memory instance - e.g. HandlesUserBase#valid_embedded_item, which validates on
+      # every save including the one that creates this very link - would have memoized its result
+      # using the not-yet-linked state (embed_resource_id still nil). That stale memo would
+      # otherwise persist for the rest of this instance's lifetime, making the item appear to have
+      # no embedded item even after the link has been established (e.g. on a subsequent re-save
+      # during file processing, or when the caller later asks to view the already-created item).
+      #
+      # Only clear once persisted (i.e. after the after_create invocation of this method): a
+      # target_fk style embed (e.g. an "option type" embed) can only be linked once this record has
+      # an id, so #link_new_embedded_item intentionally does nothing on the before_create
+      # invocation and relies on the before_create-built `ei` being reused, unmodified, by the
+      # after_create invocation. Clearing the embedded_item memo on the before_create invocation
+      # would discard that built-but-not-yet-linked item and cause a second, different one to be
+      # built when this method runs again after_create.
+      return unless persisted?
+
+      clear_model_reference_memo
+      clear_embedded_item_memo
     end
 
     #

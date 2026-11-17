@@ -1,4 +1,45 @@
 # Save Trigger: Pull External Data options
+# Canonical schema
+# pull_external_data: <Hash(entry_label: PullExternalDataEntry) | Array(Hash(entry_label: PullExternalDataEntry))>
+#
+# Key type
+# entry_label: <any label - used to build the local_data / *_http_response_code substitution names>
+#
+# Value type
+# PullExternalDataEntry: <Hash(
+#   if: Condition,
+#   force_not_editable_save: Boolean,
+#   force_not_valid: Boolean,
+#   local_data: String,
+#   data_field: String,
+#   data_field_format: <json>,
+#   response_code_field: String,
+#   method: <get | post>,
+#   from: RequestValue,
+#   to: RequestValue,
+#   post_data: String | Hash,
+#   success_if: Condition,
+#   on_complete: TriggerTaskList,
+#   on_failure: TriggerTaskList
+# )>
+# All keys are optional. method defaults to 'get'. Use from: for get requests (Pattern 1)
+# and to: for post requests (Pattern 2) - see below.
+#
+# RequestValue type (from, to)
+# RequestValue: <Hash(
+#   url: String (required),
+#   format: <xml | json | text>,
+#   allow_empty_result: Boolean,
+#   allow_response_codes: Array(Integer),
+#   headers: Hash(header_name: String)
+# )>
+# Keys are optional unless marked (required). headers only applies to `to:` (post requests).
+#
+# Pattern 1: GET request (save_triggers_pull_external_data_pattern_1_get_defs.yaml)
+# Pattern 2: POST request with headers and a body (save_triggers_pull_external_data_pattern_2_post_defs.yaml)
+# See save_trigger_pull_external_data.md for the worked examples.
+
+# Common keys - apply regardless of get/post
         pull_external_data:
           - this_1:
             if: if_extras
@@ -15,6 +56,18 @@
 
               The corresponding response code will be available as:
                   \{\{save_trigger_results.identity_http_response_code\}\}
+
+              Response headers will be available as a hash in:
+                  save_trigger_results.identity_http_response_headers
+
+                Header names are available as lowercase hyphenated strings or
+                underscored keys. For example:
+                  \{\{save_trigger_results.identity_http_response_headers.x_restructure_error\}\}
+
+                Headers with multiple values are exposed as one comma-separated string. If
+                different header names normalize to the same underscored key, the later value
+                overwrites the earlier value for that symbol key; use the hyphenated string
+                keys when those names must be distinguished.
 
               If *success_if:* condition is set, the following will also be set
                   \{\{save_trigger_results.identity_success_if_res\}\}
@@ -48,6 +101,12 @@
                   if:
                     this:
                       save_trigger_results:
+                        element: identity_http_response_headers.x_restructure_error
+                        value: invalid-authenticity-token
+
+                  if:
+                    this:
+                      save_trigger_results:
                         element: identity_success_if_res
                         value: true
 
@@ -69,14 +128,14 @@
               url: url with substitutions
               format: xml|json|text
               allow_empty_result: true | false (default)
-              allow_response_codes: [array of allowable integer codes that are not 200]
+              allow_response_codes: [array of allowable integer codes outside the successful 2xx range]
 
             # For 'post' requests
             to:
               url: url with substitutions
               format: xml|json|text
               allow_empty_result: true | false (default)
-              allow_response_codes: [array of allowable integer codes that are not 200]
+              allow_response_codes: [array of allowable integer codes outside the successful 2xx range]
               headers:
                 'Authorization': 'Bearer {{save_trigger_results.identity.access_token}}'
                 'Content-Type': 'application/json'
@@ -93,3 +152,10 @@
                         element: 'post_response.success'
                         value: true              
 #!defs(save_triggers_lifecycle_hooks_defs.yaml)
+
+# Notes:
+# - Use from: for get requests and to: for post requests - only the one matching method:
+#   is consulted; the other is ignored.
+# - entry_label becomes the base of the local_data substitution names shown above.
+# - success_if is checked in addition to the HTTP response code; a successful 2xx response with a
+#   failing success_if is still treated as unsuccessful.

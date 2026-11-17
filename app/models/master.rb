@@ -641,6 +641,7 @@ class Master < ActiveRecord::Base
           else
             res - self.class.crosswalk_attrs - [:master_id]
           end
+    res = res.select { |field| self.class.alternative_id?(field, access_by: current_user) }
 
     @show_ids_in_results = res
   end
@@ -659,6 +660,7 @@ class Master < ActiveRecord::Base
   # rubocop:disable Metrics/MethodLength
   def as_json(extras = {})
     # rubocop:enable Metrics/MethodLength
+    extras = extras.dup
     included_tables = {}
 
     self.current_user ||= extras[:current_user]

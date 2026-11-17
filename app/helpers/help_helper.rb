@@ -26,6 +26,7 @@ module HelpHelper
   # @param [String] subsection
   # @return [String]
   def formatted_doc(library, section, subsection)
+    subsection = subsection.to_s.sub(/\.md\z/, '')
     subsection = clean_path(subsection)
     where = [
       'docs',
@@ -38,6 +39,17 @@ module HelpHelper
 
     path = Rails.root.join(*where)
     raise FphsException, 'invalid request' if path.to_s.include?('..')
+
+    message_template_content = Admin::MessageTemplate.generate_content(
+      content_template_name: "#{section}/#{subsection}",
+      category: library,
+      message_type: 'dialog',
+      allow_missing_template: true,
+      markdown_to_html: true,
+      data: current_admin || current_user || {},
+      ignore_missing: :show_tag
+    )
+    return message_template_content.html_safe if message_template_content.present?
 
     text = if File.exist?(path)
              File.read(path)

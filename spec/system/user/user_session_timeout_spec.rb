@@ -8,8 +8,7 @@
 # Run with a short timeout using:
 #   app-scripts/test_session_timeout_rspec.sh spec/system/user/user_session_timeout_spec.rb
 #
-# The test_session_timeout_rspec.sh script sets USER_TIMEOUT_MINS=1 so sessions
-# expire after 1 minute of inactivity, making timeout behavior testable.
+# The timeout examples use a 30-second UserTimeout so they run quickly.
 #
 # Key regression: CSP violation reports (sent automatically by the browser) were
 # resetting the server-side last_request_at via the Warden after_set_user hook.
@@ -28,6 +27,8 @@ require 'rails_helper'
 describe 'user session timeout', js: true, driver: $browser_driver do
   include ModelSupport
   include FeatureSupport
+
+  let(:short_timeout) { 30.seconds }
 
   before(:all) do
     change_setting('TwoFactorAuthDisabledForUser', true)
@@ -49,8 +50,8 @@ describe 'user session timeout', js: true, driver: $browser_driver do
     expected_timeout = Settings::UserTimeout.to_i
 
     expect(timeout_value).to eq(expected_timeout),
-                              "Expected client-side timeout to be #{expected_timeout}s " \
-                              "(Settings::UserTimeout), got #{timeout_value}s"
+                             "Expected client-side timeout to be #{expected_timeout}s " \
+                             "(Settings::UserTimeout), got #{timeout_value}s"
   end
 
   it 'confirms Devise server-side timedout? matches the Settings value' do
@@ -58,8 +59,8 @@ describe 'user session timeout', js: true, driver: $browser_driver do
     expected = Settings::UserTimeout
 
     expect(user.timeout_in).to eq(expected),
-                                "User#timeout_in should equal Settings::UserTimeout. " \
-                                "Got #{user.timeout_in.inspect}, expected #{expected.inspect}"
+                               'User#timeout_in should equal Settings::UserTimeout. ' \
+                               "Got #{user.timeout_in.inspect}, expected #{expected.inspect}"
 
     # A time just before the timeout should NOT be timed out
     barely_within = (expected.to_i - 1).seconds.ago
@@ -73,7 +74,7 @@ describe 'user session timeout', js: true, driver: $browser_driver do
   end
 
   it 'times out the session after inactivity and redirects to login' do
-    change_setting('UserTimeout', 1.minute) # Set timeout to 1 minute for testing
+    change_setting('UserTimeout', short_timeout)
     login
     finish_page_loading
 
@@ -86,7 +87,7 @@ describe 'user session timeout', js: true, driver: $browser_driver do
 
     # Wait for the server-side timeout to expire
     server_timeout = Settings::UserTimeout.to_i
-    wait_time = server_timeout + 15
+    wait_time = server_timeout + 10
 
     sleep wait_time
 
@@ -101,7 +102,7 @@ describe 'user session timeout', js: true, driver: $browser_driver do
   end
 
   it 'shows a timeout warning alarm before session expires' do
-    change_setting('UserTimeout', 1.minute) # Set timeout to 1 minute for testing
+    change_setting('UserTimeout', short_timeout)
     login
     finish_page_loading
 
@@ -118,7 +119,7 @@ describe 'user session timeout', js: true, driver: $browser_driver do
   end
 
   it 'keeps the session alive when the user clicks Continue Working' do
-    change_setting('UserTimeout', 1.minute) # Set timeout to 1 minute for testing
+    change_setting('UserTimeout', short_timeout)
     login
     finish_page_loading
 
@@ -147,12 +148,28 @@ describe 'user session timeout', js: true, driver: $browser_driver do
     half_timeout = (Settings::UserTimeout.to_i / 2).ceil
     sleep half_timeout
 
+    visit '/masters/search'
     expect(user_logged_in?).to be(true),
                                'User should still be logged in after session refresh'
+
+    # Now wait for the page to time out
+    server_timeout = Settings::UserTimeout.to_i
+    wait_time = server_timeout + 10
+
+    sleep wait_time
+
+    # Now try to access a protected page — server should detect expired session
+    visit '/masters/search'
+
+    # After timeout, user should be redirected to login page
+    expect(page).to have_css('#new_user', wait: 10),
+                    "Expected login form after #{wait_time}s inactivity " \
+                    "(timeout=#{server_timeout}s). Current URL: #{current_url}"
+    expect(current_path).to eq('/users/sign_in')
   end
 
   after(:all) do
     # Clean up
-      change_setting('UserTimeout', 30.minutes) # Set timeout back to 30 minutes
+    change_setting('UserTimeout', 30.minutes) # Set timeout back to 30 minutes
   end
 end

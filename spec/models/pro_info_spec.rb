@@ -4,7 +4,6 @@ RSpec.describe ProInfo, type: :model do
   include ModelSupport
 
   before(:each) do
-    seed_database
     create_user
     @master = Master.new
     @master.current_user = @user

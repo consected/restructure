@@ -77,9 +77,7 @@ RSpec.describe 'ExternalIdentifier versioned template config', type: :request do
   # beyond the id attribute, so the definition can expose a genuine descriptive
   # field whose label can be versioned.
   def create_external_identifier_table
-    unless Admin::MigrationGenerator.table_exists?(EiNameVersionedTplCfg)
-      TableGenerators.external_identifiers_table(EiNameVersionedTplCfg, true, EiAttrVersionedTplCfg)
-    end
+    TableGenerators.external_identifiers_table(EiNameVersionedTplCfg, true, EiAttrVersionedTplCfg, skip_if_exists: true)
 
     columns = Admin::MigrationGenerator.table_column_names(EiNameVersionedTplCfg)
     return if columns.include?(EiExtraFieldVersionedTplCfg)
@@ -169,7 +167,7 @@ RSpec.describe 'ExternalIdentifier versioned template config', type: :request do
       # Reset memoization so the freshly bumped definition is re-fetched.
       ExternalIdentifier.reset_active_model_configurations!
       ExternalIdentifier.all_versions_memo = {}
-      HandlebarsPrecompiler.cleanup_public_dir
+      HandlebarsPrecompiler.cleanup_compiled_output
 
       get template_page_path(1)
 

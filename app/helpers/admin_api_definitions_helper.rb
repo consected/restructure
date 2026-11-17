@@ -156,10 +156,12 @@ module AdminApiDefinitionsHelper
   # @return [String] the curl command
   def api_curl_example(method:, path:, body: nil)
     curl = <<~CURL.chomp
-      curl -X#{method} -H "Content-Type: application/json" \\
+      curl -X#{method} -H "Content-Type: application/json" \
+      -H "X-User-Email: {{user_email}}" \\
+      -H "X-User-Token: {{api_token}}" \\
       "{{base_url}}"\\
       "#{path}"\\
-      "?use_app_type={{app_type_id}}&user_email={{user_email}}&user_token={{api_token}}"
+      "?use_app_type={{app_type_id}}"
     CURL
     curl += " \\\n  -d '\n#{body}\n'" if body.present?
     curl
@@ -173,11 +175,13 @@ module AdminApiDefinitionsHelper
   # @return [String] the curl command
   def api_report_curl_example(report, format:, sa:)
     <<~CURL.chomp
-      curl -XGET -H "Content-Type: application/json" \\\
+      curl -XGET -H "Content-Type: application/json" \
+      -H "X-User-Email: {{user_email}}" \\
+      -H "X-User-Token: {{api_token}}" \\
       "{{base_url}}"\\\
       "/reports/#{report.alt_resource_name}.#{format}"\\\
       "?#{sa}"\\\
-      "&use_app_type={{app_type_id}}&user_email={{user_email}}&user_token={{api_token}}"
+      "&use_app_type={{app_type_id}}"
     CURL
   end
 
@@ -201,7 +205,10 @@ module AdminApiDefinitionsHelper
               - get_report:
                   local_data: get_result
                   from:
-                    url: "{{base_url}}/reports/#{report.alt_resource_name}.json?#{sa}&use_app_type={{constants.api_app_type}}&user_email={{constants.api_user_email}}&user_token={{constants.api_shared_secret}}"
+                    url: "{{base_url}}/reports/#{report.alt_resource_name}.json?#{sa}&use_app_type={{constants.api_app_type}}"
+                    headers:
+                      'X-User-Email': '{{constants.api_user_email}}'
+                      'X-User-Token': '{{constants.api_shared_secret}}'
                     format: json
                     allow_empty_result: false
     YAML
@@ -254,7 +261,10 @@ module AdminApiDefinitionsHelper
               - get_record:
                   local_data: get_result
                   from:
-                    url: "{{base_url}}#{base}/{{constants.item_id}}.json?use_app_type={{constants.api_app_type}}&user_email={{constants.api_user_email}}&user_token={{constants.api_shared_secret}}"
+                    url: "{{base_url}}#{base}/{{constants.item_id}}.json?use_app_type={{constants.api_app_type}}"
+                    headers:
+                      'X-User-Email': '{{constants.api_user_email}}'
+                      'X-User-Token': '{{constants.api_shared_secret}}'
                     format: json
                     allow_empty_result: false
 
@@ -264,11 +274,13 @@ module AdminApiDefinitionsHelper
                   local_data: create_result
                   method: post
                   to:
-                    url: "{{base_url}}#{base}.json?use_app_type={{constants.api_app_type}}&user_email={{constants.api_user_email}}&user_token={{constants.api_shared_secret}}"
+                    url: "{{base_url}}#{base}.json?use_app_type={{constants.api_app_type}}"
                     format: json
                     allow_empty_result: false
                     headers:
                       'Content-Type': 'application/json'
+                      'X-User-Email': '{{constants.api_user_email}}'
+                      'X-User-Token': '{{constants.api_shared_secret}}'
 
                   post_data:
                     #{key}:

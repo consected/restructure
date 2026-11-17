@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 # Tests for SaveTriggers::RedcapRequest, covering the import_records and
@@ -6,25 +8,25 @@ require 'rails_helper'
 # user's access from a project via the REDCap API), and the import_project_user
 # method for adding or updating a user's privileges in a REDCap project via
 # a save_trigger or batch_trigger (both share the same RedcapRequest handler).
+# Also covers issue #1364: config substitutions for study and project_name
+# attributes must be resolved before the Redcap::ProjectAdmin lookup, and the
+# error message for a missing project must have correct formatting.
 RSpec.describe SaveTriggers::RedcapRequest, type: :model do
-  include ModelSupport
   include ActivityLogSupport
 
-  include Redcap::RedcapSupport
+  include_context 'with redcap project admins'
 
-  before :example do
-    create_admin
-    @projects = setup_redcap_project_admin_configs
-    @project = @projects.find { |h| h[:name] == 'save_trigger' }
+  before_all do
+    SetupHelper.setup_al_player_contact_phones
+    @aldef = SetupHelper.setup_al_gen_tests 'Test Pull External RR', 'test_pull_rr', 'player_contact'
   end
 
   before :example do
-    SetupHelper.setup_al_player_contact_phones
-    res = SetupHelper.setup_al_gen_tests 'Test Pull External', 'test_pull_external', 'player_contact'
+    @project = @projects.find { |h| h[:name] == 'save_trigger' }
     create_user
     @master = create_master
     @player_contact = @master.player_contacts.create! data: '(617)123-1234 b', rec_type: :phone, rank: 10
-    @al = create_al_for_resource_name(res.resource_name, master: @master)
+    @al = create_al_for_resource_name(@aldef.resource_name, master: @master)
     expect(@al.master_id).to eq @master.id
     setup_access @al.resource_name, resource_type: :activity_log_type, access: :create, user: @user
   end
@@ -32,8 +34,6 @@ RSpec.describe SaveTriggers::RedcapRequest, type: :model do
   it 'pushes data to Redcap' do
     # SetupHelper.get_webmock_responses
     # WebMock.allow_net_connect!
-
-    lead_email = 'phil-test12@consected.com'
 
     instrument = 'research_form'
     record_id = -1
@@ -271,5 +271,82 @@ RSpec.describe SaveTriggers::RedcapRequest, type: :model do
 
     expect(@al.save_trigger_results['batch_update_user_response']).to eq 1
     expect(@al.save_trigger_results['batch_update_user_response_http_response_code']).to eq 200
+  end
+
+  # Issue #1364 - config substitutions for study and project_name
+  describe 'config substitutions for study and project_name (issue #1364)' do
+    it 'resolves {{variables.*}} templates in study and project_name before lookup' do
+      project_name = @project[:name]
+      study = @project[:study] || Redcap::RedcapSupport::DefaultStudy
+
+      @al.trigger_variables = {
+        redcap_study_name: study,
+        redcap_project_name: project_name
+      }
+
+      config = {
+        this1: {
+          study: '{{variables.redcap_study_name}}',
+          project_name: '{{variables.redcap_project_name}}',
+          local_data: 'templated_response',
+          method: 'project_users',
+          post_data: {}
+        }
+      }
+
+      @trigger = SaveTriggers::RedcapRequest.new(config, @al)
+      @trigger.perform
+
+      expect(@al.save_trigger_results['templated_response']).to be_a(Array)
+      expect(@al.save_trigger_results['templated_response_http_response_code']).to eq 200
+    end
+
+    it 'formats the missing-project error with balanced study / project_name' do
+      @al.trigger_variables = {}
+
+      config = {
+        this1: {
+          study: 'nonexistent_study',
+          project_name: 'nonexistent_project',
+          local_data: 'err_response',
+          method: 'project_users',
+          post_data: {}
+        }
+      }
+
+      @trigger = SaveTriggers::RedcapRequest.new(config, @al)
+
+      expect { @trigger.perform }.to raise_error(
+        FphsException,
+        'save_trigger redcap_request: cannot find REDCap project nonexistent_study / nonexistent_project'
+      )
+    end
+  end
+
+  # Issue #1384 - redcap_request updates `this` via a genuine #update!, which is
+  # reentrant (and silently corrupts on_create/on_update/on_disable dispatch) when run
+  # from a before_save trigger, since the record isn't (fully) saved yet at that point.
+  describe 'invoked from a before_save trigger (issue #1384)' do
+    it 'raises instead of silently corrupting the outer save' do
+      config = {
+        this1: {
+          study: @project[:study] || Redcap::RedcapSupport::DefaultStudy,
+          project_name: @project[:name],
+          local_data: 'link_response',
+          method: 'survey_link',
+          data_field: 'notes',
+          data_field_format: 'json',
+          post_data: {
+            instrument: 'research_form',
+            record_id: 107
+          }
+        }
+      }
+
+      @al.in_before_save_trigger = true
+      @trigger = SaveTriggers::RedcapRequest.new(config, @al)
+
+      expect { @trigger.perform }.to raise_error(FphsException, /before_save/)
+    end
   end
 end

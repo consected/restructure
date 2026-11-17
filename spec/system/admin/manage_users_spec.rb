@@ -167,7 +167,11 @@ describe 'admin manage users page - Issue #1027', js: true, driver: $browser_dri
 
   context 'when editing users' do
     it 'disables an existing user' do
-      visit_manage_users_page
+      # Filter to the target user: the default current-app-access filter evaluates access for every user
+      # after the update clears the cache, which is very slow once users accumulate in the persistent test DB.
+      # The form's hidden filter fields carry these filters into the update request.
+      visit "/admin/manage_users?filter[email]=#{CGI.escape(@test_user_email)}&filter[disabled]=enabled"
+      finish_page_loading
       click_edit_for_user(@test_user_email)
 
       within('#admin-edit- .admin-edit-form') do

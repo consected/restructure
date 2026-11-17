@@ -999,7 +999,10 @@ _fpa = {
 
         if (status != 'abort') {
           var j = xhr.responseJSON;
-          if (xhr.status === 422) {
+          var is_authenticity_token_error = xhr.status === 403 &&
+            xhr.getResponseHeader &&
+            xhr.getResponseHeader('X-ReStructure-Error') === 'invalid-authenticity-token';
+          if (xhr.status === 422 || is_authenticity_token_error) {
             _fpa.form_utils.set_field_errors($('.ajax-running'), j);
             if (j) {
               var msg = '<p>Could not complete action:</p>';
@@ -1431,12 +1434,24 @@ _fpa = {
     $('body').removeClass('prevent-page-change');
   },
 
-  load_template_version: function (template_version, rails_env) {
-    $.get({ url: `/pages/${template_version}/template`, cache: true }).done(function (data) {
-      // Inject the template HTML into the page and run any included scripts.
-      // Inline scripts in the appended HTML call retrieve_requested_handlebars_templates,
-      // which increments pending_template_retrieves before starting async AJAX.
-      $('body').append(data);
+  load_template_version: function (template_version, rails_env, rebuild) {
+    var url = `/pages/${template_version}/template`;
+    if (rebuild) {
+      url += '?rebuild=true';
+      _fpa.status.pending_template_retrieves = (_fpa.status.pending_template_retrieves || 0) + 1;
+    }
+
+    $.get({ url: url, cache: !rebuild }).done(function (data) {
+      // A full HTML document (such as a sign-in page after a redirect) is not a template fragment.
+      // Appending it would duplicate the whole page and re-run the app scripts.
+      if (typeof data === 'string' && /<(!doctype|html)\b/i.test(data)) {
+        console.error('Template response was a full page, not a template fragment', url);
+      } else {
+        // Inject the template HTML into the page and run any included scripts.
+        // Inline scripts in the appended HTML call retrieve_requested_handlebars_templates,
+        // which increments pending_template_retrieves before starting async AJAX.
+        $('body').append(data);
+      }
 
       // Wait for all pending multi file AJAX requests to complete before
       // marking templates as loaded. This prevents the splash guard from
@@ -1452,11 +1467,18 @@ _fpa = {
       window.setTimeout(waitForPendingRetrieves, 1);
     }).fail(function (jqXHR, textStatus, errorThrown) {
       console.log(jqXHR, textStatus, errorThrown);
+      if (!rebuild && !_fpa.status.template_rebuild_attempted && _fpa.state.template_version) {
+        _fpa.status.template_rebuild_attempted = true;
+        _fpa.load_template_version(_fpa.state.template_version, rails_env, true);
+        return;
+      }
       if (rails_env != 'test') {
         _fpa.flash_notice('The page failed to load correctly. Please refresh to try again.', 'danger');
         $('body').removeClass('status-compiling initial-compiling').addClass('status-failed-compilation');
       }
       _fpa.cache.clean();
+    }).always(function () {
+      if (rebuild) _fpa.status.pending_template_retrieves--;
     });
   },
 
@@ -1490,12 +1512,17 @@ _fpa = {
       _fpa.status.pending_template_retrieves--;
     }).fail(function (jqXHR, textStatus, errorThrown) {
       console.log(jqXHR, textStatus, errorThrown);
+      _fpa.status.pending_template_retrieves--;
+      if (!_fpa.status.template_rebuild_attempted && _fpa.state.template_version) {
+        _fpa.status.template_rebuild_attempted = true;
+        _fpa.load_template_version(_fpa.state.template_version, rails_env, true);
+        return;
+      }
       if (rails_env != 'test') {
         _fpa.flash_notice('The requested templates failed to load correctly. Please refresh to try again.', 'danger');
         $('body').removeClass('status-compiling initial-compiling').addClass('status-failed-compilation');
       }
       _fpa.cache.clean();
-      _fpa.status.pending_template_retrieves--;
     });
   },
 

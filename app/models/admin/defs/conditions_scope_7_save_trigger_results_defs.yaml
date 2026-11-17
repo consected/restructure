@@ -1,0 +1,25 @@
+# Pattern 7: Testing save trigger results
+# @runnable: true
+# @instance: activity_log_with_trigger_results
+# @expect: true
+
+# save_trigger_results holds values produced by save triggers during the current
+# transaction. They are never written to the database, so they can only be tested
+# by later triggers within the same save.
+#
+# Triggers such as pull_external_data write into it when configured with
+# `local_data: <key-name>`, and also record the HTTP status as
+# `<key-name>_http_response_code`.
+all:
+  this:
+    save_trigger_results:
+      element: 'result1.res_value'
+      value: 'element result value'
+
+# Checking that an external request succeeded:
+#
+#   all:
+#     this:
+#       save_trigger_results:
+#         element: 'post_response_http_response_code'
+#         value: 200

@@ -2,6 +2,49 @@
 
 require 'rails_helper'
 
+# Verify implementation handler presets and typed conditional access rules.
+RSpec.describe Dynamic::ImplementationHandler, type: :model do
+  describe '#calc_can' do
+    it 'evaluates a typed editable_if configuration' do
+      editable_if = OptionConfigs::ExtraOptionConfigs::EditableIf.new(never: true)
+      option_type_config = double(editable_if:)
+      old_object = Struct.new(:id, :master).new
+      handler = Object.new.extend(described_class)
+      master = Object.new
+
+      handler.define_singleton_method(:option_type_config) { option_type_config }
+      handler.define_singleton_method(:master) { master }
+      handler.define_singleton_method(:changes) { {} }
+      handler.define_singleton_method(:id) { 123 }
+      handler.define_singleton_method(:dup) { old_object }
+      expect(option_type_config).to receive(:calc_if).with(:editable_if, old_object).and_return(false)
+
+      expect(handler.send(:calc_can, :edit)).to be false
+    end
+
+    it 'does not evaluate a blank typed editable_if configuration' do
+      editable_if = OptionConfigs::ExtraOptionConfigs::EditableIf.new
+      option_type_config = double(editable_if:)
+      handler = Object.new.extend(described_class)
+
+      handler.define_singleton_method(:option_type_config) { option_type_config }
+      expect(option_type_config).not_to receive(:calc_if)
+
+      expect(handler.send(:calc_can, :edit)).to be_nil
+    end
+
+    it 'does not evaluate a malformed scalar editable_if configuration' do
+      option_type_config = double(editable_if: 'never')
+      handler = Object.new.extend(described_class)
+
+      handler.define_singleton_method(:option_type_config) { option_type_config }
+      expect(option_type_config).not_to receive(:calc_if)
+
+      expect(handler.send(:calc_can, :edit)).to be_nil
+    end
+  end
+end
+
 # Use the activity log player contact phone activity log implementation,
 # since it includes the works_with concern
 
@@ -21,7 +64,6 @@ RSpec.describe 'Implementation handler', type: :model do
   end
 
   it 'presets fields in a new item' do
-    resource_name = :activity_log__player_contact_phone__primary
     @player_contact.master.current_user = @user
     master = @player_contact.master
     expect(master.current_user).to eq @user

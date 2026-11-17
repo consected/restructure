@@ -1,0 +1,7 @@
+# Pattern 6: Allow users to create a new record when their entered value doesn't already exist
+field_options:
+  category_id:
+    edit_as:
+      field_type: select_record_from_table_categories
+      creatable:
+        enabled: true

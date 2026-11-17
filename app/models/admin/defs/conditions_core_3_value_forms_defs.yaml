@@ -1,0 +1,17 @@
+# Pattern 3: Field value forms
+# @runnable: true
+# @instance: activity_log
+# @expect: true
+all:
+  this:
+    # A literal scalar value - the field must equal it
+    extra_log_type: primary
+
+    # null - the field must be NULL (or blank for non-string columns)
+    notes: null
+
+    # A list - the field must match any one of the values (SQL IN)
+    select_who:
+      - user
+      - player
+      - staff

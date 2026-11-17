@@ -1,0 +1,17 @@
+<div class="">
+  <ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active"><a href="#def-details-block" aria-controls="def-details-block" role="tab" data-toggle="tab">Details</a></li>
+    <li role="presentation"><a href="#def-versions" aria-controls="def-versions" role="tab" data-toggle="tab">Versions</a></li>
+  </ul>
+
+  <div class="tab-content">
+    <div role="tabpanel" class="tab-pane active" id="def-details-block">
+      <h4>Details</h4>
+      <%= render partial: 'admin/message_templates/def_details', locals: { object_instance: object_instance } %>
+    </div>
+
+    <div role="tabpanel" class="tab-pane on-open-click" id="def-versions">
+      <%= render partial: 'admin/message_templates/versions_panel', locals: { object_instance: object_instance } %>
+    </div>
+  </div>
+</div>

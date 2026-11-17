@@ -106,11 +106,12 @@ describe 'switch ID display in search results', js: true, driver: $browser_drive
 
   def set_id_display_config(id_list)
     add_app_config(@user.app_type, 'show ids in master result', id_list)
+    Admin::AppConfiguration.clear_memo!
   end
 
   def reset_id_display_config
     # Reset to default master_id only
-    add_app_config(@user.app_type, 'show ids in master result', 'master_id')
+    set_id_display_config('master_id')
   end
 
   def search_for_master(master)
@@ -119,6 +120,10 @@ describe 'switch ID display in search results', js: true, driver: $browser_drive
 
     # Wait for search results to load
     expect(page).to have_css('#master_results_block .master-result', wait: 10)
+  end
+
+  def switch_id_button
+    find('.result-refs.initialized-switchable-ids a.switch_id.attached-switch-click', wait: 10)
   end
 
   describe 'with single ID (master_id only)' do
@@ -174,7 +179,7 @@ describe 'switch ID display in search results', js: true, driver: $browser_drive
         expect(msid_span).not_to be_visible
 
         # Click switch button
-        switch_button = find('a.switch_id')
+        switch_button = switch_id_button
         expect(switch_button['title']).to eq('switch to MSID')
         switch_button.click
 
@@ -194,7 +199,7 @@ describe 'switch ID display in search results', js: true, driver: $browser_drive
 
       within '#master_results_block .master-result' do
         # Click switch to show msid
-        find('a.switch_id').click
+        switch_id_button.click
 
         # Should show (none) with "No MSID" title
         msid_span = find('.alt-id-item.msid', visible: true)
@@ -213,7 +218,7 @@ describe 'switch ID display in search results', js: true, driver: $browser_drive
       search_for_master(@master_all_ids)
 
       within '#master_results_block .master-result' do
-        switch_button = find('a.switch_id')
+        switch_button = switch_id_button
 
         # Initially master_id should be visible
         expect(page).to have_css('.alt-id-item.master_id', visible: true)
@@ -249,7 +254,7 @@ describe 'switch ID display in search results', js: true, driver: $browser_drive
       search_for_master(@master_msid_only)
 
       within '#master_results_block .master-result' do
-        switch_button = find('a.switch_id')
+        switch_button = switch_id_button
 
         # master_id should show actual value
         expect(find('.alt-id-item.master_id', visible: true)).to have_content(@master_msid_only.id.to_s)
@@ -284,7 +289,7 @@ describe 'switch ID display in search results', js: true, driver: $browser_drive
       search_for_master(@master_all_ids)
 
       within '#master_results_block .master-result' do
-        switch_button = find('a.switch_id')
+        switch_button = switch_id_button
 
         # First should be msid
         expect(page).to have_css('.alt-id-item.msid', visible: true)
@@ -307,7 +312,7 @@ describe 'switch ID display in search results', js: true, driver: $browser_drive
       search_for_master(@master_no_ext_ids)
 
       within '#master_results_block .master-result' do
-        switch_button = find('a.switch_id')
+        switch_button = switch_id_button
 
         # First (msid) should show (none)
         expect(page).to have_css('.alt-id-item.msid', visible: true)
@@ -333,7 +338,7 @@ describe 'switch ID display in search results', js: true, driver: $browser_drive
       search_for_master(@master_all_ids)
 
       within '#master_results_block .master-result' do
-        switch_button = find('a.switch_id')
+        switch_button = switch_id_button
 
         # First should be sage_id
         expect(page).to have_css('.alt-id-item.sage_id', visible: true)
@@ -352,7 +357,7 @@ describe 'switch ID display in search results', js: true, driver: $browser_drive
       search_for_master(@master_sage_only)
 
       within '#master_results_block .master-result' do
-        switch_button = find('a.switch_id')
+        switch_button = switch_id_button
 
         # First should be sage_id with value
         expect(page).to have_css('.alt-id-item.sage_id', text: (@sage_base + 3).to_s, visible: true)

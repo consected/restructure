@@ -84,7 +84,7 @@ var SecureView = function () {
           fn = $(this).attr(options.attr_for_filename);
         }
         else {
-          fn = $(this).html();
+          fn = $(this).text();
         }
 
         options.file_name = fn;
@@ -246,7 +246,7 @@ var SecureView = function () {
 
     // Everything is clean and setup
 
-    this.$file_name.html(this.file_name);
+    this.$file_name.text(this.file_name);
     this.$loading_page_message.show();
 
     if (set_preview_as) {
@@ -563,7 +563,7 @@ var SecureView = function () {
     }
     url += $.param(params);
 
-    $.ajax({ url: url }).done(function (data) {
+    $.ajax({ url: url, dataType: 'json' }).done(function (data) {
       _this.page_count = data.page_count;
       _this.current_zoom = data.default_zoom || 'fit';
       _this.can_preview = data.can_preview;

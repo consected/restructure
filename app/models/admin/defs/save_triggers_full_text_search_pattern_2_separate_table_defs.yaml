@@ -1,0 +1,10 @@
+# Pattern 2: Separate-table mode - upsert into a target table via a foreign key reference
+full_text_search:
+  index_this:
+    source_fields:
+      - title
+      - description
+    target_column: tsv_column_name
+    target_table: schema_name.records_search_index
+    target_foreign_key_column: source_record_id
+    extra_content: '{{some_field}}'

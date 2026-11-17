@@ -4,7 +4,8 @@
 # Validates RFC 5545 compliant VCALENDAR/VEVENT .ics generation
 # supporting METHOD:REQUEST (invitation) and METHOD:CANCEL (cancellation).
 # Tests cover: defaults, case insensitivity, duration option, validation errors,
-# and optional field omission.
+# optional field omission, and (issue #1302) Date-typed dtstart/dtend input via
+# the parse_datetime `Date` branch.
 
 require 'rails_helper'
 
@@ -87,6 +88,24 @@ RSpec.describe Messaging::CalendarInvite, type: :model do
       ics_content = invite.generate
 
       expect(ics_content).to include('DTSTAMP:20260305T120000Z')
+    end
+
+    # Regression coverage for issue #1302 (config.active_support.to_time_preserves_timezone).
+    # #parse_datetime's `Date` branch calls `value.to_time.utc`. Under :zone, `Date#to_time`
+    # is unaffected (only ActiveSupport::TimeWithZone#to_time changes behaviour), but this
+    # confirms the whole chain still produces a correct UTC ical timestamp when a Date object
+    # (rather than a String) is supplied for dtstart/dtend. `Date#to_time` converts using the
+    # server's local system timezone (not Rails' `Time.zone`), so the expected value is
+    # computed the same way rather than hardcoded, keeping the spec environment-independent.
+    it 'accepts a Date object for dtstart/dtend and formats it to UTC' do
+      date = Date.new(2026, 6, 15)
+      config = valid_config.merge('dtstart' => date, 'dtend' => date)
+      invite = described_class.new(config)
+      ics_content = invite.generate
+
+      expected = date.to_time.utc.strftime('%Y%m%dT%H%M%SZ')
+      expect(ics_content).to include("DTSTART:#{expected}")
+      expect(ics_content).to include("DTEND:#{expected}")
     end
 
     context 'with defaults' do

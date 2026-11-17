@@ -12,12 +12,11 @@ RSpec.describe 'Import an app configuration', type: :model do
   include MasterSupport
   include ModelSupport
 
-  before :each do
-    Seeds.setup
+  with_activity_log_setup(player_contact_phones: true)
 
+  before :each do
     create_admin
     create_user
-    SetupHelper.setup_al_player_contact_phones
 
     apps = Admin::AppType.active.where("name = 'test1' or label = 'Test App 12' or name = 'new_name'")
     apps.each do |a|
@@ -75,7 +74,7 @@ RSpec.describe 'Import an app configuration', type: :model do
   end
 
   def import_test_app
-    @app_name = app_name = "bhs_model_#{$STARTED_AT}"
+    @app_name = app_name = "bhs_model_#{Process.pid}"
 
     @admin, = create_admin unless @admin
     # Setup the triggers, functions, etc
@@ -145,8 +144,6 @@ RSpec.describe 'Import an app configuration', type: :model do
   end
 
   it 'imports a test JSON config file' do
-    Seeds.setup
-
     res = import_test_app
 
     expect(res).to be_a Admin::AppType

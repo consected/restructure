@@ -108,11 +108,15 @@ module Dynamic
 
       return @versioned_definition = current_definition if respond_to?(:use_current_version) && use_current_version
 
-      unless respond_to?(:use_def_version_time) || respond_to?(:created_at)
+      unless respond_to?(:use_def_version_at) || respond_to?(:use_def_version_time) || respond_to?(:created_at)
         return @versioned_definition = current_definition
       end
 
-      version_at = use_def_version_time if respond_to?(:use_def_version_time)
+      version_at = if respond_to?(:use_def_version_at)
+                     use_def_version_at
+                   elsif respond_to?(:use_def_version_time)
+                     use_def_version_time
+                   end
       version_at ||= created_at if respond_to?(:created_at)
       @versioned_definition = self.class.definition.versioned(version_at) || current_definition
     end

@@ -1,0 +1,13 @@
+# Pattern 5: Testing an element within a JSON field
+# @runnable: true
+# @instance: activity_log_with_trigger_results
+# @expect: true
+
+# `element` addresses a nested key inside a JSON / hash attribute using dot
+# notation. Use `first` or `last` to index into an array.
+# An optional `condition` may be supplied; the default is equality.
+all:
+  this:
+    save_trigger_results:
+      element: 'result1.res_value'
+      value: 'element result value'

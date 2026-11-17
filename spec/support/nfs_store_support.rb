@@ -1,8 +1,25 @@
 # frozen_string_literal: true
 
 module NfsStoreSupport
-  AlFilterTestName = 'AL Filter Test 2'
-  SetupHelper.setup_al_gen_tests AlFilterTestName, nil, 'player_contact', rec_type: 'phone'
+  AlFilterTestName = 'NfsStore Filestore Test'
+  AlProcessName = 'nfs_store_test'
+  SetupHelper.setup_al_gen_tests AlFilterTestName, AlProcessName, 'player_contact'
+
+  def nfs_al_class
+    @aldef.implementation_class
+  end
+
+  def nfs_al_rn
+    @aldef.resource_name
+  end
+
+  def nfs_al_type
+    nfs_al_rn.singularize
+  end
+
+  def nfs_al_step_rn(activity)
+    "#{nfs_al_type}__#{activity}"
+  end
 
   def default_role
     'file1'
@@ -49,13 +66,12 @@ module NfsStoreSupport
     end
 
     setup_access :player_contacts
-    setup_access :activity_log__player_contact_phones
     create_item(data: rand(10_000_000_000_000_000), rank: 10)
 
     @al_name = AlFilterTestName
     @al_item_type = 'player_contact'
 
-    aldefs = ActivityLog.active.where(name: @al_name)
+    aldefs = ActivityLog.active.where(name: @al_name, process_name: AlProcessName)
     @aldef = aldefs.first
 
     if @aldef
@@ -70,20 +86,22 @@ module NfsStoreSupport
     end
 
     unless @aldef
-      @aldef = ActivityLog.where(name: @al_name).first
+      @aldef = ActivityLog.where(name: @al_name, process_name: AlProcessName).first
       unless @aldef
         # Re-run the setup if the activity log was completely removed by other specs
-        SetupHelper.setup_al_gen_tests AlFilterTestName, nil, 'player_contact', rec_type: 'phone'
-        @aldef = ActivityLog.where(name: @al_name).first
+        SetupHelper.setup_al_gen_tests AlFilterTestName, AlProcessName, 'player_contact'
+        @aldef = ActivityLog.where(name: @al_name, process_name: AlProcessName).first
       end
       if @aldef
         ActivityLogSupport.cleanup_matching_activity_logs(@aldef.item_type, @aldef.rec_type, @aldef.process_name, admin: @admin, excluding_id: @aldef.id)
         @aldef.update(disabled: false, current_admin: @admin)
       end
-      @aldef = ActivityLog.active.where(name: @al_name).first
+      @aldef = ActivityLog.active.where(name: @al_name, process_name: AlProcessName).first
       puts 'About to fail' unless @aldef
     end
     expect(@aldef).not_to be nil
+    setup_access nfs_al_rn
+    refresh_activity_log_definition(@aldef)
 
     t = '<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div>{{main_content}}</div></body></html>'
     @layout = Admin::MessageTemplate.create! name: 'test email layout upload', message_type: :email, template_type: :layout, template: t, current_admin: @admin
@@ -305,24 +323,37 @@ module NfsStoreSupport
     @aldef.current_admin = @admin
     @aldef.save!
     @aldef.option_configs(force: true)
-    ActivityLog::PlayerContactPhone.definition.option_configs(force: true)
-    otc = ActivityLog::PlayerContactPhone.definition.option_type_config_for(:step_1)
-    expect(otc).not_to be(nil), "PlayerContactPhone.option_type_config_for('step_1') is nil after configuration"
+    nfs_al_class.definition.option_configs(force: true)
+    otc = nfs_al_class.definition.option_type_config_for(:step_1)
+    expect(otc).not_to be(nil), "option_type_config_for('step_1') is nil after configuration"
 
     finalize_al_setup user: @user
     finalize_al_setup user: batch_user, skip_al_setup: true
   end
 
+  def refresh_activity_log_definition(aldef)
+    Admin::MigrationGenerator.tables_and_views_reset!
+    schema_name = Admin::MigrationGenerator.table_schema_hash[aldef.table_name]
+    aldef.update_columns(schema_name:) if schema_name.present?
+    ActivityLog.reset_active_model_configurations!
+
+    implementation_class_name = aldef.model_class_name
+    if ActivityLog.const_defined?(implementation_class_name, false)
+      ActivityLog.send(:remove_const, implementation_class_name)
+    end
+    aldef.generate_model
+  end
+
   def finalize_al_setup(activity: nil, user: nil, skip_al_setup: nil)
     user ||= @user
     activity ||= :step_1
-    otc = ActivityLog::PlayerContactPhone.definition.option_type_config_for(activity)
-    expect(otc).not_to be(nil), "PlayerContactPhone.option_type_config_for('#{activity}') is nil - available: #{ActivityLog::PlayerContactPhone.definition.option_configs_names}"
+    otc = nfs_al_class.definition.option_type_config_for(activity)
+    expect(otc).not_to be(nil), "option_type_config_for('#{activity}') is nil - available: #{nfs_al_class.definition.option_configs_names}"
     @resource_name = otc.resource_name
 
-    setup_access 'activity_log__player_contact_phones', user: user
+    setup_access nfs_al_rn, user: user
     setup_access @resource_name, resource_type: :activity_log_type, user: user
-    setup_access "activity_log__player_contact_phone__#{activity}".to_sym, resource_type: :activity_log_type, user: user
+    setup_access nfs_al_step_rn(activity), resource_type: :activity_log_type, user: user
 
     setup_access 'nfs_store__manage__containers', user: user
     setup_access 'nfs_store__manage__stored_files', user: user
@@ -345,10 +376,10 @@ module NfsStoreSupport
   def setup_container_and_al(activity: nil)
     activity ||= :step_1
 
-    names = ActivityLog::PlayerContactPhone.definition.option_configs.map(&:name)
+    names = nfs_al_class.definition.option_configs.map(&:name)
     expect(names).to include activity
 
-    @activity_log = ActivityLog::PlayerContactPhone.new(
+    @activity_log = nfs_al_class.new(
       select_call_direction: 'from player',
       select_who: 'user',
       extra_log_type: activity,
@@ -357,8 +388,8 @@ module NfsStoreSupport
     )
 
     @activity_log.save!
-    expect(@activity_log.resource_name).to eq "activity_log__player_contact_phone__#{activity}"
-    expect(@activity_log).to be_a ActivityLog::PlayerContactPhone
+    expect(@activity_log.resource_name).to eq nfs_al_step_rn(activity)
+    expect(@activity_log).to be_a nfs_al_class
     expect(@activity_log.extra_log_type_config.nfs_store).to be_a Hash
     expect(@activity_log.user_id).to eq @player_contact.current_user.id
     expect(@activity_log.user_id).to eq @activity_log.current_user.id
@@ -378,8 +409,8 @@ module NfsStoreSupport
     activity ||= :step_1
     create_filter('.*', role_name: nil)
     create_filter('.*', resource_name: 'nfs_store__manage__containers', role_name: nil)
-    create_filter('.*', resource_name: 'activity_log__player_contact_phones', role_name: nil)
-    create_filter('.*', resource_name: "activity_log__player_contact_phone__#{activity}", role_name: nil)
+    create_filter('.*', resource_name: nfs_al_rn, role_name: nil)
+    create_filter('.*', resource_name: nfs_al_step_rn(activity), role_name: nil)
   end
 
   def upload_file(filename = 'test-name.txt', content = nil, upload_set: nil)

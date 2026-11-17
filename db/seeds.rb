@@ -21,14 +21,13 @@ module Seeds
       list = so.split(',').map(&:strip)
       do_list list
     else
-      log "Running all seed setup"
+      log 'Running all seed setup'
       do_all
     end
 
     Rails.logger.info "============ Completed seed setup (#{DateTime.now}) ==============="
     # puts "#{Time.now} Completed seed setup"
     $seed_results
-
   end
 
   def self.do_list(list)
@@ -72,7 +71,10 @@ end
 
 module Seeds
   def self.auto_admin
-    Object.new.send(:auto_admin)
+    res = Object.new.send(:auto_admin)
+    res.disabled = false
+    res.save! if res.changed?
+    res
   end
 end
 

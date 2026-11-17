@@ -6,9 +6,33 @@ The ReStructure API is a REST API allowing access to all aspects of user functio
 
 ## Authentication
 
-Simple authentication uses a shared secret. Set the following URL params in the call:
+Simple authentication uses a shared secret. Pass the API credentials as HTTP headers
+and set the app type as a URL parameter:
 
-`use_app_type=<app-type name or id>&user_email=<api user email address>&user_token=<shared secret>`
+```text
+X-User-Email: <api user email address>
+X-User-Token: <shared secret>
+```
+
+`use_app_type=<app-type name or id>`
+
+As a fallback, you can alternatively pass the email and token as query parameters.
+This risks leaking sensitive information in URLs and server logs.
+
+`?user_email={{user_email}}&user_token={{user_token}}`
+
+### Authentication failures
+
+If `user_email`/`user_token` are supplied (as headers or params) but rejected, the response has
+status `401 Unauthorized` with a generic JSON body
+(`{"error": "You need to sign in or sign up before continuing."}`) and an
+`X-ReStructure-Error: api-token-authentication-failed` header, letting API clients distinguish
+"credentials were sent but rejected" from other failures.
+
+For state-changing requests (`POST`/`PUT`/`PATCH`/`DELETE`), if no credentials are supplied at
+all, the request instead fails CSRF protection first and returns `403 Forbidden`, since there is
+no token to justify bypassing the CSRF check. `GET` requests are not CSRF-protected, so a missing
+credentials there returns the `401` response above (without the `X-ReStructure-Error` header).
 
 ## Endpoints
 

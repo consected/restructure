@@ -30,7 +30,7 @@ describe 'page layout initial_show tab auto-expand', js: true, driver: $browser_
   include MasterDataSupport
   include FeatureSupport
 
-  def navigate_to_master
+  def navigate_to_master_and_allow_auto_expand
     visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{@master.id}"
     finish_page_loading
     expect(page).to have_css("#master-#{@master.id}", wait: 15)
@@ -86,7 +86,7 @@ describe 'page layout initial_show tab auto-expand', js: true, driver: $browser_
     yaml
   end
 
-  before(:all) do
+  before_all do
     change_setting('TwoFactorAuthDisabledForUser', true)
     change_setting('TwoFactorAuthDisabledForAdmin', true)
     SetupHelper.feature_setup
@@ -155,37 +155,37 @@ describe 'page layout initial_show tab auto-expand', js: true, driver: $browser_
     @original_open_panels_disabled = @original_open_panels_config&.disabled
   end
 
-  after(:all) do
-    # Remove test layouts FIRST to avoid panel_name uniqueness conflicts when restoring originals
-    [@details_panel, @trackers_panel].compact.each do |pl|
-      ActiveRecord::Base.connection.execute(
-        "DELETE FROM page_layout_history WHERE page_layout_id = #{pl.id}"
-      )
-      pl.destroy
-    end
+  # after(:all) do
+  #   # Remove test layouts FIRST to avoid panel_name uniqueness conflicts when restoring originals
+  #   [@details_panel, @trackers_panel].compact.each do |pl|
+  #     ActiveRecord::Base.connection.execute(
+  #       "DELETE FROM page_layout_history WHERE page_layout_id = #{pl.id}"
+  #     )
+  #     pl.destroy
+  #   end
 
-    # Restore original layouts (no panel_name conflicts now)
-    @original_layouts&.each do |id, attrs|
-      pl = Admin::PageLayout.find_by(id: id)
-      pl&.update!(current_admin: @admin, options: attrs[:options], disabled: attrs[:disabled])
-    end
+  #   # Restore original layouts (no panel_name conflicts now)
+  #   @original_layouts&.each do |id, attrs|
+  #     pl = Admin::PageLayout.find_by(id: id)
+  #     pl&.update!(current_admin: @admin, options: attrs[:options], disabled: attrs[:disabled])
+  #   end
 
-    # Restore original open_panels config
-    if @original_open_panels_config
-      @original_open_panels_config.update!(
-        current_admin: @admin,
-        value: @original_open_panels_value,
-        disabled: @original_open_panels_disabled
-      )
-    else
-      ac = @app_type.app_configurations.active.where(name: 'open panels').first
-      ac&.update!(current_admin: @admin, disabled: true)
-    end
-  end
+  #   # Restore original open_panels config
+  #   if @original_open_panels_config
+  #     @original_open_panels_config.update!(
+  #       current_admin: @admin,
+  #       value: @original_open_panels_value,
+  #       disabled: @original_open_panels_disabled
+  #     )
+  #   else
+  #     ac = @app_type.app_configurations.active.where(name: 'open panels').first
+  #     ac&.update!(current_admin: @admin, disabled: true)
+  #   end
+  # end
 
   before(:each) do
     # Clear the AppConfiguration memoization cache before each test.
-    # DatabaseCleaner truncates records between tests, so any user-specific config
+    # Transactional fixtures roll back records between tests, so any user-specific config
     # created by a previous test is gone from the DB. Without clearing the memo,
     # value_for still returns the stale cached value from the prior test even though
     # the record no longer exists, causing incorrect open_panels behavior.
@@ -193,7 +193,7 @@ describe 'page layout initial_show tab auto-expand', js: true, driver: $browser_
     # Clear precompiled Handlebars templates so each test gets a fresh compilation
     # reflecting the current layout and config state (avoids stale cache from prior tests)
     HandlebarsPrecompiler.cleanup_tmp_dir
-    HandlebarsPrecompiler.cleanup_public_dir
+    HandlebarsPrecompiler.cleanup_compiled_output
     Rails.cache.delete('server_cache_version')
     login
   end
@@ -204,7 +204,7 @@ describe 'page layout initial_show tab auto-expand', js: true, driver: $browser_
       update_layout(@trackers_panel, trackers_layout_yaml)
       set_open_panels(nil)
 
-      navigate_to_master
+      navigate_to_master_and_allow_auto_expand
       wait_for_panel_expanded('details')
       expect_panel_collapsed('trackers')
     end
@@ -214,7 +214,7 @@ describe 'page layout initial_show tab auto-expand', js: true, driver: $browser_
       update_layout(@trackers_panel, trackers_layout_yaml)
       set_open_panels(nil)
 
-      navigate_to_master
+      navigate_to_master_and_allow_auto_expand
       expect_panel_collapsed('details')
       expect_panel_collapsed('trackers')
     end
@@ -226,7 +226,7 @@ describe 'page layout initial_show tab auto-expand', js: true, driver: $browser_
       update_layout(@trackers_panel, trackers_layout_yaml)
       set_open_panels('details')
 
-      navigate_to_master
+      navigate_to_master_and_allow_auto_expand
       wait_for_panel_expanded('details')
       expect_panel_collapsed('trackers')
     end
@@ -240,7 +240,7 @@ describe 'page layout initial_show tab auto-expand', js: true, driver: $browser_
       update_layout(@trackers_panel, trackers_layout_yaml)
       set_open_panels('trackers')
 
-      navigate_to_master
+      navigate_to_master_and_allow_auto_expand
       # details opens because initial_show: true is not suppressed by open_panels
       wait_for_panel_expanded('details')
       # trackers also opens because it is listed in open_panels (initial_show: nil allows the override)
@@ -255,7 +255,7 @@ describe 'page layout initial_show tab auto-expand', js: true, driver: $browser_
       update_layout(@trackers_panel, trackers_layout_yaml(initial_show: true))
       set_open_panels('details')
 
-      navigate_to_master
+      navigate_to_master_and_allow_auto_expand
       # Both open because initial_show: true is not overridden by open_panels
       wait_for_panel_expanded('details')
       wait_for_panel_expanded('trackers')
@@ -266,7 +266,7 @@ describe 'page layout initial_show tab auto-expand', js: true, driver: $browser_
       update_layout(@trackers_panel, trackers_layout_yaml)
       set_open_panels('details')
 
-      navigate_to_master
+      navigate_to_master_and_allow_auto_expand
       # details expands because open_panels evaluation is independent of initial_show
       wait_for_panel_expanded('details')
       expect_panel_collapsed('trackers')
@@ -279,7 +279,7 @@ describe 'page layout initial_show tab auto-expand', js: true, driver: $browser_
       update_layout(@trackers_panel, trackers_layout_yaml(initial_show: true))
       set_open_panels(nil)
 
-      navigate_to_master
+      navigate_to_master_and_allow_auto_expand
       wait_for_panel_expanded('details')
       wait_for_panel_expanded('trackers')
     end

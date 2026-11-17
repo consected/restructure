@@ -1,0 +1,5 @@
+# Pattern 2: Create a new master and move the current item (and any embedded item) to it
+create_master:
+  with:
+    msid: '{{new_msid}}'
+  move_this: true

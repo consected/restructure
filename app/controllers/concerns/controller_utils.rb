@@ -14,9 +14,11 @@ module ControllerUtils
   # Always includes 'private' to prevent WAFs/proxies from caching sensitive data.
   # Expires is computed automatically from max_age for HTTP/1.0 client compatibility.
   # Use immutable: true for responses where the URL changes on content change (cache busting by URL).
-  def set_browser_cache(max_age:, immutable: false)
+  # Use must_revalidate: true when stale content must not be reused while disconnected.
+  def set_browser_cache(max_age:, immutable: false, must_revalidate: false)
     directives = "private, max-age=#{max_age}"
     directives += ', immutable' if immutable
+    directives += ', must-revalidate' if must_revalidate
     response.headers['Cache-Control'] = directives
     response.headers['Expires'] = (Time.now + max_age).httpdate
   end

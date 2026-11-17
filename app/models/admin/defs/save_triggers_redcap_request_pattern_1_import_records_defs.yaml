@@ -1,0 +1,19 @@
+# Pattern 1: import_records
+redcap_request:
+  request_1:
+    study: Test
+    project_name: Test API
+    local_data: import_response
+    method: import_records
+    post_data:
+      data:
+        - record_id: -1
+          study_id: '{{test_study_id}}'
+      force_auto_number: true
+    success_if:
+      all:
+        this:
+          save_trigger_results:
+            element: import_response
+            condition: "<> ARRAY_LENGTH"
+            value: 0

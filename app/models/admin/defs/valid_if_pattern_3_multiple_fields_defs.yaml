@@ -1,0 +1,8 @@
+# Pattern 3: Multiple current-item requirements
+valid_if:
+  on_save:
+    all:
+      this:
+        status: active
+        item_type: primary
+        invalid_error_message: Record must have status=active and item_type=primary

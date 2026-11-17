@@ -1,0 +1,6 @@
+# Pattern 1: Simple caption string
+caption_before:
+  field_name: |
+    String caption to appear before field. Use markdown formatting if needed.
+
+    Substitutions of data can be performed with `\{\{data_attribute\}\}` notation.

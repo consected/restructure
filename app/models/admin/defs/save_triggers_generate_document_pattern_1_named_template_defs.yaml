@@ -1,0 +1,6 @@
+# Pattern 1: Named content template, container resolved via model reference
+generate_document:
+  content_template_name: 'test generate doc content'
+  container:
+    from_this: model_reference
+  filename: 'generated-report-{{id}}.html'

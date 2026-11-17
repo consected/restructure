@@ -1,0 +1,8 @@
+# Pattern 1: Override the edit field type and provide alternative select options
+field_options:
+  status:
+    edit_as:
+      field_type: select_status_override
+      alt_options:
+        Active: active
+        Inactive: inactive

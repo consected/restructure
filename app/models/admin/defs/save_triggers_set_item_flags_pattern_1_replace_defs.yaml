@@ -1,0 +1,6 @@
+# Pattern 1: Set the full flag list on a referenced item
+set_item_flags:
+  first:
+    player_infos:
+      update: return_result
+  flags: ['reviewed', 'flagged for follow up']

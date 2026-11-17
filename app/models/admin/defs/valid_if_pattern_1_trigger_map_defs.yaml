@@ -1,0 +1,17 @@
+# Pattern 1: Trigger map
+  valid_if:
+    on_save:
+      all:
+        this:
+          field_name: expected_value
+          invalid_error_message: Custom error message shown when validation fails
+    on_create:
+      all:
+        this:
+          create_only_field: expected_value
+          invalid_error_message: Only checked on create
+    on_update:
+      all:
+        this:
+          update_only_field: expected_value
+          invalid_error_message: Only checked on update

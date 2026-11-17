@@ -98,7 +98,8 @@ module UserHandler
     def assoc_rules
       r = { inverse_of: assoc_inverse }
       r[:foreign_key] = foreign_key_name if foreign_key_name && foreign_key_name != :master_id
-      r[:primary_key] = primary_key_name if primary_key_name && primary_key_name != :id
+      master_key = respond_to?(:master_primary_key_name) ? master_primary_key_name : primary_key_name
+      r[:primary_key] = master_key if master_key && master_key != :id
       if (defined?(no_master_association) && no_master_association) || (self < Dynamic::ExternalIdentifierBase)
         r[:optional] = true
       end
@@ -204,8 +205,31 @@ module UserHandler
     end
   end
 
+  # Alternative-key master associations have no physical master_id column, but
+  # the rest of the user/master handling code still needs the master's record ID.
+  # Always derive it from the current association (never memoize) so it can't go stale
+  # if the crosswalk attribute is reassigned on this same instance, e.g. mid-request.
   def master_id
     return nil if self.class.no_master_association
+
+    return master&.id if self.class.respond_to?(:virtual_master_id?) && self.class.virtual_master_id?
+
+    super
+  end
+
+  # For virtual master ids, there is usually no column to persist to, so the assignment is
+  # discarded (the getter always derives the value from the current association instead).
+  # Some foreign_key_through_external_id definitions (e.g. Redcap dynamic models) do keep a
+  # physical master_id column alongside the association, to materialize the looked-up value -
+  # for those (only), still persist the assignment as normal. Masters-crosswalk associations
+  # never persist master_id, even if a legacy physical column happens to exist on the table.
+  def master_id=(value)
+    virtual_master_id = self.class.respond_to?(:virtual_master_id?) && self.class.virtual_master_id?
+    through_external_id = self.class.respond_to?(:foreign_key_through_external_id) &&
+                          self.class.foreign_key_through_external_id.present?
+    persist_physical_column = through_external_id && self.class.has_attribute?(:master_id)
+
+    return if virtual_master_id && !persist_physical_column
 
     super
   end

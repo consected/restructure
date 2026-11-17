@@ -1,0 +1,6 @@
+# Pattern 2: Filesystem source
+pull_emails:
+  source:
+    type: filesystem
+    path: /var/mail/incoming
+    since_modified: '{{variables.last_run.at}}'

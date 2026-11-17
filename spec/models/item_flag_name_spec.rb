@@ -6,7 +6,6 @@ RSpec.describe Classification::ItemFlagName, type: :model do
   include ItemFlagNameSupport  
   describe "definition" do
     before :each do
-      seed_database
       create_user
       create_admin
       create_master      

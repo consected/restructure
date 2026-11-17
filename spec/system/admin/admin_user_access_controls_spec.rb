@@ -509,7 +509,8 @@ describe 'admin user access controls', js: true, driver: $browser_driver do
     # This tests the scenario where the same role_name exists in multiple app types,
     # creating duplicate option values in different optgroups
     before(:all) do
-      @app_type_2 = Admin::AppType.create!(
+      # Committed by earlier runs, so find the existing app type before creating it
+      @app_type_2 = Admin::AppType.active.find_by(name: 'test_app_uac_2') || Admin::AppType.create!(
         name: 'test_app_uac_2',
         label: 'Test App UAC 2',
         current_admin: @setup_admin

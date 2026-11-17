@@ -1,3 +1,8 @@
+# Canonical schema
+# _merge_override: <Hash(key: Any)>
+# All keys are optional. Keys are the same top-level option-type keys as any other
+# dynamic definition option type.
+#
 # Keys to be "deep merged" in to all dynamic definitions. These inner items 
 # will take precedence over the later inner items. The rest of the key
 # definition will remain untouched.
@@ -6,3 +11,8 @@ _merge_override:
     inner: will be merged into key1 within all dynamic definitions
   key2:
     inner: will be merged into key2 within all dynamic definitions
+
+# Notes:
+# - Applied after _merge_default but before _override, using a deep merge where this
+#   entry's values take precedence over the option type's own value on conflict - but only
+#   for the keys present here; the rest of the option type's value is untouched.

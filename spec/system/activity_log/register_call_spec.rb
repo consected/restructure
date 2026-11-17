@@ -38,14 +38,7 @@ describe 'Register an incoming call', driver: $browser_driver do
     ac = Admin::AppConfiguration.find_default_app_config(@user.app_type, 'menu research label')
     ac&.disable!(@admin)
 
-    @app_type.app_configurations.where(name: 'notes field format').update_all(disabled: true)
-    Admin::AppConfiguration.create!(
-      name: 'notes field format',
-      value: 'markdown',
-      app_type: @app_type,
-      current_admin: @admin
-    )
-
+    set_up_markdown_notes
     puts_debug 'done setting up user access'
   end
 
@@ -160,7 +153,9 @@ describe 'Register an incoming call', driver: $browser_driver do
     mark_next_step_status ActivityLogMain::NextStepComplete
     select_related_protocol ActivityLogMain::StudyProtocol
     add_free_text_notes 'Look at me!'
-    sleep 2
+    within PhoneListActions::NewPhoneLogFormCss do
+      expect(page).to have_css("[data-edit-field-name='notes'] .custom-editor", text: 'Look at me!', wait: 10)
+    end
     save_log
 
     expect_log_to_show select_call_direction: ActivityLogMain::CallToPlayer,

@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
+# Issue #1457: cover the real e-signature partial render with field-specific options.
+
 require 'rails_helper'
 
 RSpec.describe 'electronic signature of records', type: 'model' do
   include ModelSupport
+  include FeatureSupport
   include ESignatureSupport
   include ESignImportConfig
 
@@ -58,6 +61,35 @@ RSpec.describe 'electronic signature of records', type: 'model' do
 
     it 'adds the user email address to the end of the document' do
       expect(@al.e_signed_document).to include("<small>Signed by</small> <esignuser>#{@user.first_name} #{@user.last_name} - #{@user.email} (id: #{@user.id})</esignuser>")
+    end
+  end
+
+  describe 'e-signature note fields with distinct formats' do
+    before :each do
+      @al = create_item
+      @model_to_sign.update_columns(
+        ix_consent_details: '**consent markdown**',
+        ix_not_pro_details: '**pro plain**'
+      )
+
+      signed_model_options = double(
+        fields: %w[ix_consent_details ix_not_pro_details],
+        field_options: {
+          ix_consent_details: { format: 'markdown' },
+          ix_not_pro_details: { format: 'plain' }
+        },
+        caption_before: {},
+        show_if: {}
+      )
+      allow_any_instance_of(@model_to_sign.class).to receive(:option_type_config).and_return(signed_model_options)
+    end
+
+    it 'renders each signed note field using its own format (issue #1457)' do
+      @al.prepare_activity_for_signature
+
+      expect(@al.e_signed_document).to include('<p><strong>consent markdown</strong></p>')
+      expect(@al.e_signed_document).to include('**pro plain**')
+      expect(@al.e_signed_document).not_to include('<p><strong>pro plain</strong></p>')
     end
   end
 
@@ -327,7 +359,8 @@ RSpec.describe 'electronic signature of records', type: 'model' do
     end
 
     it 'prevents the signed record being signed again' do
-      sleep 30 # to allow OTP to reset
+      # Avoid the need for a sleep to allow OTP to reset
+      reset_last_otp_timestamp
       @al = create_item
       @al.prepare_activity_for_signature
       @al.save!
@@ -335,7 +368,8 @@ RSpec.describe 'electronic signature of records', type: 'model' do
       @al.e_signature_password = @good_password
       @al.e_signature_otp_attempt = @user.current_otp
       @al.save!
-      sleep 30 # to allow OTP to reset
+      # Avoid the need for a sleep to allow OTP to reset
+      reset_last_otp_timestamp
 
       @al.reload
       @al.current_user = @user

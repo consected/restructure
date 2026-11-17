@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 class ClientLogsController < ApplicationController
-  protect_from_forgery with: :exception, if: proc { |c| c.params[:user_token].blank? }
-  protect_from_forgery with: :null_session, if: proc { |c| !c.params[:user_token].blank? }
+  protect_from_forgery with: :exception,
+                       if: proc { |c| ApiTokenHeaderAuth.user_token_from_request(c.request).blank? }
+  protect_from_forgery with: :null_session,
+                       if: proc { |c| ApiTokenHeaderAuth.user_token_from_request(c.request).present? }
   acts_as_token_authentication_handler_for User
   before_action :authenticate_user!
 

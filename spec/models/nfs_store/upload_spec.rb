@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# Regression coverage for issue #1493: retrying a chunk upload removes an existing chunk file.
+
 require 'rails_helper'
 require 'securerandom'
 
@@ -59,6 +61,20 @@ RSpec.describe NfsStore::Upload, type: :model do
 
     md5tot = Digest::MD5.hexdigest(totstring)
     expect(u.hash_for_file).to eq md5tot
+  end
+
+  it 'replaces an existing chunk file when uploading a duplicate chunk' do
+    u = NfsStore::Upload.new container: @container, user: @container.master.current_user, file_name: 'test-name.txt'
+    chunk_path = u.send(:chunk_path, 1)
+    File.write(chunk_path, 'stale chunk')
+
+    u.upload = StringIO.new('replacement chunk')
+    u.chunk_count = 0
+
+    expect { u.send(:store_chunk) }.not_to raise_error
+    expect(File.read(chunk_path)).to eq 'replacement chunk'
+  ensure
+    FileUtils.rm_f(chunk_path) if chunk_path
   end
 
   it 'uploads a single large chunk efficiently' do

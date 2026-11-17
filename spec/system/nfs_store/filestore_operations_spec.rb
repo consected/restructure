@@ -12,6 +12,10 @@
 #   - Moving files between folders
 #   - Downloading single and multiple files
 #   - Sending a file to trash
+#   - Downloading a stored file whose on-disk location has been replaced with a symlink
+#     receives a friendly placeholder response instead of following it or showing a
+#     generic error (NfsStore::HandlesContainerFile#raise_if_symlink!,
+#     FsException::SymlinkBlocked, NfsStore::DownloadsController#render_symlink_blocked)
 #
 # Regression test for Issue #878:
 #   Error when renaming or sending files to trash due to
@@ -32,15 +36,36 @@ require_relative '../../support/nfs_store_feature_support/z_filestore_feature_ma
 describe 'Filestore file operations', js: true, driver: $browser_driver, type: :system do
   include FilestoreFeatureMain
 
-  # rubocop:disable Lint/ConstantDefinitionInBlock
-  ActivityLogName = 'AL Filter Test 2'
-  # rubocop:enable Lint/ConstantDefinitionInBlock
+  def activity_log_name
+    'Filestore Ops Test'
+  end
+
+  def activity_log_process_name
+    'fs_ops'
+  end
+
+  def activity_log_class
+    @aldef.implementation_class
+  end
+
+  def activity_log_resource_name
+    @aldef.resource_name
+  end
+
+  def activity_log_step_resource_name
+    step_1_config = @aldef.option_configs(force: true).find { |config| config.name.to_s == 'step_1' }
+    step_1_config.resource_name
+  end
+
+  def activity_log_block_selector
+    ".activity-log--#{@aldef.item_type_name.dasherize.pluralize}-block"
+  end
 
   def set_up_user_access
     puts_debug 'set up user access'
     setup_access :player_contacts, user: @user
-    setup_access :activity_log__player_contact_phones, user: @user
-    setup_access :activity_log__player_contact_phone__step_1, resource_type: :activity_log_type, user: @user
+    setup_access activity_log_resource_name.to_sym, user: @user
+    setup_access activity_log_step_resource_name.to_sym, resource_type: :activity_log_type, user: @user
 
     # NFS Store access
     setup_access :nfs_store__manage__containers, user: @user
@@ -60,7 +85,7 @@ describe 'Filestore file operations', js: true, driver: $browser_driver, type: :
   end
 
   def expand_phone_log_tab
-    expand_master_record_tab('activity_log__player_contact_phones')
+    expand_master_record_tab(activity_log_resource_name)
   end
 
   before :all do
@@ -68,7 +93,7 @@ describe 'Filestore file operations', js: true, driver: $browser_driver, type: :
     change_setting('TwoFactorAuthDisabledForAdmin', true)
 
     # Setup activity log definitions first
-    SetupHelper.setup_al_gen_tests ActivityLogName, nil, 'player_contact', rec_type: 'phone'
+    SetupHelper.setup_al_gen_tests activity_log_name, activity_log_process_name, 'player_contact'
 
     # Create user first
     create_user(create_master: false)
@@ -92,7 +117,7 @@ describe 'Filestore file operations', js: true, driver: $browser_driver, type: :
     FileUtils.mkdir_p test_dir
 
     # Find and configure the activity log definition
-    @aldef = ActivityLog.active.where(name: ActivityLogName).first
+    @aldef = ActivityLog.active.where(name: activity_log_name, process_name: activity_log_process_name).first
     expect(@aldef).not_to be_nil
 
     # Configure step_1 with filestore
@@ -139,13 +164,13 @@ describe 'Filestore file operations', js: true, driver: $browser_driver, type: :
     @aldef.save!
     @aldef.option_configs(force: true)
     ActivityLog.define_models
-    ActivityLog::PlayerContactPhone.definition.option_configs(force: true)
+    activity_log_class.definition.option_configs(force: true)
 
     # Set up user access before creating test data
     set_up_user_access
 
     # Setup NFS store filters
-    resource_name = 'activity_log__player_contact_phone__step_1'
+    resource_name = activity_log_step_resource_name
     NfsStore::Filter::Filter.active.where(app_type: @app_type, resource_name:).update_all(disabled: true)
     NfsStore::Filter::Filter.create!(
       current_admin: @admin,
@@ -165,9 +190,10 @@ describe 'Filestore file operations', js: true, driver: $browser_driver, type: :
       rec_type: :phone
     )
     @player_contact.master.current_user = @user
+    @master.current_user = @user
 
     # Create the activity log with filestore
-    @activity_log = ActivityLog::PlayerContactPhone.create!(
+    @activity_log = activity_log_class.create!(
       select_call_direction: 'from player',
       select_who: 'user',
       extra_log_type: :step_1,
@@ -202,7 +228,7 @@ describe 'Filestore file operations', js: true, driver: $browser_driver, type: :
       expand_phone_log_tab
 
       # Wait for activity log entries to load
-      expect(page).to have_css('.activity-log--player-contact-phones-block', wait: 15)
+      expect(page).to have_css(activity_log_block_selector, wait: 15)
 
       # The filestore should already be visible in the step_1 activity log entry
       # Wait for the filestore container to be visible
@@ -236,6 +262,41 @@ describe 'Filestore file operations', js: true, driver: $browser_driver, type: :
       refresh_filestore_list
       expect(file_exists_in_browser?(new_filename)).to be true
       expect(file_exists_in_browser?(original_filename)).to be false
+    end
+
+    it 'preserves escaped filename characters through rename and on disk (Issue #1492)' do
+      navigate_to_master(@master.id)
+      expand_phone_log_tab
+      wait_for_filestore_container
+
+      unique_part = SecureRandom.hex(4)
+      original_filename = "roundtrip-#{unique_part} &amp; <draft> \"quoted\".txt"
+      upload_file_to_filestore(create_temp_test_file(filename: original_filename))
+
+      stored_file = @container.stored_files.find_by!(file_name: original_filename)
+      stored_file.current_user = @user
+      original_retrieval_path = stored_file.retrieval_path
+      expect(File.exist?(original_retrieval_path)).to be(true)
+
+      select_file_in_browser(original_filename)
+      open_filestore_menu
+      click_rename_file_menu_item
+      expect(page).to have_field('new_name', with: original_filename)
+
+      renamed_filename = "renamed-#{unique_part} <final> &amp; \"quoted\".txt"
+      rename_file_to(renamed_filename)
+      refresh_filestore_list
+
+      expect(file_exists_in_browser?(renamed_filename)).to be(true)
+      expect(file_exists_in_browser?(original_filename)).to be(false)
+
+      stored_file.reload
+      stored_file.current_user = @user
+      renamed_retrieval_path = stored_file.retrieval_path
+      expect(stored_file.file_name).to eq(renamed_filename)
+      expect(File.basename(renamed_retrieval_path)).to eq(renamed_filename)
+      expect(File.exist?(renamed_retrieval_path)).to be(true)
+      expect(File.exist?(original_retrieval_path)).to be(false)
     end
   end
 
@@ -382,9 +443,142 @@ describe 'Filestore file operations', js: true, driver: $browser_driver, type: :
       expand_folder(new_folder_name)
       expect(file_exists_in_browser?(filename)).to be true
     end
+
+    it 'renders a hostile folder name as literal text in the move modal (Issue #1492)' do
+      navigate_to_master(@master.id)
+      expand_phone_log_tab
+      wait_for_filestore_container
+
+      filename = "xss-move-test-#{SecureRandom.hex(4)}.txt"
+      test_file_path = create_temp_test_file(filename:)
+      upload_file_to_filestore(test_file_path)
+      select_file_in_browser(filename)
+      open_filestore_menu
+      click_move_files_menu_item
+
+      folder_name = "<img src=x onerror='window.__xss=1'>-#{SecureRandom.hex(3)}"
+      move_files_to_folder(folder_name)
+      refresh_filestore_list
+      expect(folder_exists_in_browser?(folder_name)).to be true
+
+      expand_folder(folder_name)
+      expect(file_exists_in_browser?(filename)).to be true
+      select_file_in_browser(filename)
+      open_filestore_menu
+      click_move_files_menu_item
+
+      expect_move_modal_path_as_literal_text(folder_name)
+    end
+
+    it 'keeps stored folder paths out of move-modal HTML attributes (Issue #1492)' do
+      navigate_to_master(@master.id)
+      expand_phone_log_tab
+      wait_for_filestore_container
+
+      filename = "xss-attribute-test-#{SecureRandom.hex(4)}.txt"
+      upload_file_to_filestore(create_temp_test_file(filename:))
+      select_file_in_browser(filename)
+      open_filestore_menu
+      click_move_files_menu_item
+
+      folder_name = 'x" data-xss-marker="y"><img src=x data-xss-probe=issue1492-attribute ' \
+                    'onerror=window.__issue1492_attribute_xss=1>'
+      flag = '__issue1492_attribute_xss'
+      reset_xss_flag(flag)
+      move_files_to_folder(folder_name)
+      expect_xss_flag_unset(flag)
+      refresh_filestore_list
+      expect(folder_exists_in_browser?(folder_name)).to be(true)
+
+      safe_filename = "safe-source-#{SecureRandom.hex(4)}.txt"
+      upload_file_to_filestore(create_temp_test_file(filename: safe_filename))
+      select_file_in_browser(safe_filename)
+      reset_xss_flag(flag)
+      open_filestore_menu
+      click_move_files_menu_item
+
+      destination_paths = move_modal_add_folder_paths
+      select_move_destination_folder(folder_name)
+
+      aggregate_failures('issue #1492 stored folder path handling') do
+        expect(destination_paths).to include("./#{folder_name}")
+        expect_move_modal_destination_as_literal(folder_name, 'issue1492-attribute')
+        expect_xss_flag_unset(flag)
+      end
+    end
   end
 
   describe 'File download' do
+    def latest_action_id(model_class)
+      model_class.where(user_id: @user.id).maximum(:id) || 0
+    end
+
+    def wait_for_new_action(model_class, previous_action_id)
+      Timeout.timeout(Capybara.default_max_wait_time) do
+        loop do
+          action = model_class.where(user_id: @user.id)
+                              .where('id > ?', previous_action_id)
+                              .order(created_at: :desc, id: :desc)
+                              .first
+          return action if action
+
+          sleep 0.1
+        end
+      end
+    end
+
+    def action_file_names(action, items_field)
+      items = action.public_send(items_field)
+      items = JSON.parse(items) if items.is_a?(String)
+      items.map { |item| item['file_name'] || item[:file_name] }.sort
+    end
+
+    # Guards against stale selections being resent across repeated actions (issue #1551).
+    it 'uses only each current selection across repeated downloads and a trash action' do
+      navigate_to_master(@master.id)
+      expand_phone_log_tab
+      wait_for_filestore_container
+
+      filenames = %w[A B C D].map { |file| "selection-sequence-#{file}-#{SecureRandom.hex(4)}.txt" }
+      file_paths = filenames.map.with_index do |filename, index|
+        create_temp_test_file(filename:, content: "File #{index + 1}")
+      end
+      upload_multiple_files_to_filestore(file_paths)
+      filenames.each { |filename| expect(file_exists_in_browser?(filename)).to be(true) }
+      expect(has_error_alert?).to be(false), "Unexpected error after upload: #{error_alert_text}"
+
+      select_multiple_files_in_browser(filenames.first(2))
+      previous_download_id = latest_action_id(NfsStore::Download)
+      click_download_button
+      expect(has_error_alert?).to be(false), "Unexpected error: #{error_alert_text}"
+      first_download = wait_for_new_action(NfsStore::Download, previous_download_id)
+      expect(action_file_names(first_download, :retrieved_items)).to match_array(filenames.first(2))
+
+      # Keep A selected, deselect B, and select C for the next download.
+      select_file_in_browser(filenames[1])
+      select_file_in_browser(filenames[2])
+      previous_download_id = latest_action_id(NfsStore::Download)
+      click_download_button
+      expect(has_error_alert?).to be(false), "Unexpected error: #{error_alert_text}"
+      second_download = wait_for_new_action(NfsStore::Download, previous_download_id)
+      expect(action_file_names(second_download, :retrieved_items)).to match_array([filenames[0], filenames[2]])
+
+      # Deselect A and C, then select only D for trash.
+      select_file_in_browser(filenames[0])
+      select_file_in_browser(filenames[2])
+      select_file_in_browser(filenames[3])
+      previous_trash_id = latest_action_id(NfsStore::Trash)
+      open_filestore_menu
+      click_send_to_trash_menu_item
+      expect(has_error_alert?).to be(false), "Unexpected error: #{error_alert_text}"
+      trash_action = wait_for_new_action(NfsStore::Trash, previous_trash_id)
+      expect(action_file_names(trash_action, :trashed_items)).to eq([filenames[3]])
+
+      refresh_filestore_list
+      expect(file_exists_in_browser?(filenames[3])).to be(false)
+      filenames.first(3).each { |filename| expect(file_exists_in_browser?(filename)).to be(true) }
+    end
+
     it 'downloads a single file' do
       # Navigate to the master record
       navigate_to_master(@master.id)
@@ -410,10 +604,15 @@ describe 'Filestore file operations', js: true, driver: $browser_driver, type: :
       # Click the download button
       # Note: In headless mode, the download happens but we can't easily verify
       # the file was saved. We verify that the button click doesn't cause errors.
-      click_download_button
+      # A single selected file is delivered directly under its own name, not packed into a zip (issue #1553)
+      with_browser_download_dir do |dir|
+        click_download_button
+        expect(has_error_alert?).to be(false), "Unexpected error: #{error_alert_text}"
 
-      # Verify no error occurred
-      expect(has_error_alert?).to be(false), "Unexpected error: #{error_alert_text}"
+        downloaded = wait_for_downloaded_file(dir)
+        expect(File.basename(downloaded)).to eq(filename)
+        expect(File.read(downloaded)).to eq(content)
+      end
     end
 
     it 'downloads multiple files as a zip' do
@@ -444,10 +643,169 @@ describe 'Filestore file operations', js: true, driver: $browser_driver, type: :
 
       # Click the download button
       # When multiple files are selected, they download as a zip archive
-      click_download_button
+      # Multiple files are still delivered as a zip containing each file (issue #1553)
+      with_browser_download_dir do |dir|
+        click_download_button
+        expect(has_error_alert?).to be(false), "Unexpected error: #{error_alert_text}"
 
-      # Verify no error occurred
-      expect(has_error_alert?).to be(false), "Unexpected error: #{error_alert_text}"
+        downloaded = wait_for_downloaded_file(dir)
+        expect(File.basename(downloaded)).to end_with('2 files.zip')
+        entries = Zip::File.open(downloaded) { |zip| zip.entries.map { |e| File.basename(e.name) } }
+        expect(entries).to match_array([file1_name, file2_name])
+      end
+    end
+  end
+
+  # Purpose: ensure large selections queue an archive, notify the user, and serve the prepared link.
+  describe 'Large background downloads' do
+    it 'queues a selected archive, emails its prepared link, and serves the archive' do
+      previous_max_files = Settings::NfsStoreBackgroundDownloadMaxFiles
+      previous_max_bytes = Settings::NfsStoreBackgroundDownloadMaxBytes
+      change_setting('NfsStoreBackgroundDownloadMaxFiles', 1)
+      change_setting('NfsStoreBackgroundDownloadMaxBytes', 100_000_000)
+      archive_path = nil
+      user_download_dir = nil
+      previous_delay_jobs = Delayed::Worker.delay_jobs
+      previous_download_job_id = Delayed::Job.where(queue: 'nfs_store_downloads').maximum(:id) || 0
+      Delayed::Worker.delay_jobs = true
+
+      begin
+        expect(User.find(@user.id).app_type_valid?).to be(true)
+        navigate_to_master(@master.id)
+        expand_phone_log_tab
+        wait_for_filestore_container
+
+        filenames = ["background-a-#{SecureRandom.hex(4)}.txt", "background-b-#{SecureRandom.hex(4)}.txt"]
+        files = filenames.map.with_index do |filename, index|
+          create_temp_test_file(filename:, content: "Background file #{index + 1}")
+        end
+        upload_multiple_files_to_filestore(files)
+        filenames.each { |filename| expect(file_exists_in_browser?(filename)).to be(true) }
+        select_multiple_files_in_browser(filenames)
+
+        click_download_button
+        expect(page).to have_css('.flash .alert-info', text: 'being prepared')
+
+        queued_job = Delayed::Job.where(queue: 'nfs_store_downloads')
+                                 .where('id > ?', previous_download_job_id)
+                                 .order(:id).last
+        expect(queued_job).not_to be_nil
+        queued_job.invoke_job
+        queued_job.destroy!
+
+        notification = Messaging::MessageNotification.where(user_id: @user.id,
+                                                              content_template_name: 'server prepared download ready')
+                                                      .order(:id).last
+        expect(notification).not_to be_nil
+        expect(notification.generated_content).to include("use_app_type=#{@user.app_type_id}")
+        user_download_dir = File.dirname(NfsStore::PreparedDownload.new.path_for(user_id: @user.id, token: 'A' * 43))
+        archive_path = Dir.glob(File.join(user_download_dir, '*.zip')).first
+        expect(archive_path).to be_present
+
+        token = File.basename(archive_path, '.zip')
+        download_url = "/nfs_store/downloads/prepared/#{token}?use_app_type=#{@user.app_type_id}&no_redirect=true"
+        with_browser_download_dir do |directory|
+          visit download_url
+          downloaded = wait_for_downloaded_file(directory)
+          expect(Zip::File.open(downloaded) { |zip| zip.entries.map { |entry| File.basename(entry.name) } })
+            .to match_array(filenames)
+        end
+      ensure
+        change_setting('NfsStoreBackgroundDownloadMaxFiles', previous_max_files)
+        change_setting('NfsStoreBackgroundDownloadMaxBytes', previous_max_bytes)
+        Delayed::Worker.delay_jobs = previous_delay_jobs
+        Delayed::Job.where(queue: 'nfs_store_downloads').where('id > ?', previous_download_job_id).delete_all
+        FileUtils.rm_f(archive_path) if archive_path
+        FileUtils.rm_rf(user_download_dir) if user_download_dir
+      end
+    end
+  end
+
+  describe 'Symlink protection' do
+    it 'returns a friendly placeholder instead of following a symlink planted at a stored file location' do
+      # Navigate to the master record
+      navigate_to_master(@master.id)
+
+      # Expand the phone log tab
+      expand_phone_log_tab
+
+      # Wait for the filestore container to be visible
+      wait_for_filestore_container
+
+      # Create and upload a real test file via the UI
+      filename = "symlink-blocked-#{SecureRandom.hex(4)}.txt"
+      test_file_path = create_temp_test_file(filename:)
+      upload_file_to_filestore(test_file_path)
+      expect(file_exists_in_browser?(filename)).to be true
+
+      stored_file = @container.stored_files.find_by!(file_name: filename)
+      retrieval_path = stored_file.retrieval_path
+
+      # Stand-in for a file outside the container entirely - e.g. another user's home
+      # directory, or any other file the app server process can read.
+      secret_path = Rails.root.join('tmp', "secret-#{SecureRandom.hex}.txt").to_s
+      File.write(secret_path, 'unauthorized secret content')
+
+      begin
+        # Replace the stored file's on-disk entry with a symlink, simulating tampering
+        # by some means other than the app's own upload code.
+        File.delete(retrieval_path)
+        File.symlink(secret_path, retrieval_path)
+
+        select_file_in_browser(filename)
+        click_download_button
+
+        # A blocked symlink is a deliberate safety response, not an application error -
+        # it must not show up as a scary generic error alert.
+        expect(has_error_alert?).to be(false), "Unexpected error: #{error_alert_text}"
+
+        # Verify the actual served response, via same-origin requests from within the
+        # authenticated browser session (so they go through real routing, auth and access
+        # control - not just a Ruby-level model check). This is the same URL the filestore
+        # UI itself constructs for a single-file download (see
+        # app/assets/javascripts/app/_fpa_ajax_processors_nfs_store.js).
+        download_url = "/nfs_store/downloads/#{@container.id}?activity_log_id=#{@activity_log.id}" \
+                       "&activity_log_type=#{@activity_log.class.to_s.ns_underscore}" \
+                       "&download_id=#{stored_file.id}&retrieval_type=stored_file"
+
+        # Plain browser navigation (an <a href> click, an ambiguous Accept header) gets an
+        # actual small text file, not an error page.
+        download_response = page.evaluate_script(<<~JS)
+          (function() {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', #{download_url.to_json}, false);
+            xhr.send(null);
+            return { status: xhr.status, body: xhr.responseText, type: xhr.getResponseHeader('Content-Type') };
+          })()
+        JS
+
+        expect(download_response['status']).to eq(200)
+        expect(download_response['body']).to eq('Symbolic link file not returned.')
+        expect(download_response['type']).to include('text/plain')
+
+        # An explicit JSON/AJAX request gets a structured, non-error body the UI can key
+        # off of instead of a generic failure toast. 409 (not 200), since this represents
+        # a blocked security event, not an unconditional success.
+        json_response = page.evaluate_script(<<~JS)
+          (function() {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', #{download_url.to_json}, false);
+            xhr.setRequestHeader('Accept', 'application/json');
+            xhr.send(null);
+            return { status: xhr.status, body: xhr.responseText };
+          })()
+        JS
+
+        expect(json_response['status']).to eq(409)
+        parsed = JSON.parse(json_response['body'])
+        expect(parsed).to eq(
+          'blocked' => true,
+          'reason' => 'symbolic_link',
+          'message' => 'Symbolic link file not returned.'
+        )
+      ensure
+        File.delete(secret_path) if File.exist?(secret_path)
+      end
     end
   end
 end

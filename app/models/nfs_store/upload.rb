@@ -295,7 +295,7 @@ module NfsStore
       # @upload_chunk = @upload.read
       new_chunk_num = chunk_count + 1
       @chunk_path = chunk_path new_chunk_num
-      FileUtil.rm @chunk_path if File.exist? @chunk_path
+      FileUtils.rm_f @chunk_path
       # Efficiently copy from upload IO to chunk path without consuming too much memory
       IO.copy_stream(@upload, @chunk_path)
       self.chunk_count = new_chunk_num

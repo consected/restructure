@@ -33,10 +33,6 @@ describe 'admin copy user roles', js: true, driver: $browser_driver do
     )
   end
 
-  after(:all) do
-    # Cleanup is handled by DatabaseCleaner
-  end
-
   before(:each) do
     # Create admin for login (using login_as helper)
     make_an_admin

@@ -1,0 +1,13 @@
+# Pattern 2: Field validators within conditions
+# @runnable: true
+# @instance: activity_log
+# @expect: true
+
+# A `validate` block applies a named field validator to the value of a field on a
+# non-query record source. The validator names match those available to
+# field_options validations.
+all:
+  this:
+    select_who:
+      validate:
+        min_length: 2

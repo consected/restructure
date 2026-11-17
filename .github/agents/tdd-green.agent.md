@@ -1,7 +1,7 @@
 ---
 description: 'Implement minimal code to satisfy GitHub issue requirements and make failing tests pass without over-engineering.'
 name: 'TDD Green Phase - Make Tests Pass Quickly'
-tools: [vscode/memory, vscode/askQuestions, execute/testFailure, execute/getTerminalOutput, execute/killTerminal, execute/sendToTerminal, execute/runInTerminal, read/problems, read/readFile, read/viewImage, read/terminalSelection, read/terminalLastCommand, agent/runSubagent, edit/createDirectory, edit/createFile, edit/editFiles, search/changes, search/codebase, search/fileSearch, search/listDirectory, search/searchResults, search/textSearch, search/usages, web/fetch, web/githubRepo, browser/openBrowserPage, vscode.mermaid-chat-features/renderMermaidDiagram, todo]
+tools: [execute, read, edit, search, web, agent, todo]
 handoffs:
   - label: Return to TDD RED Phase
     agent: tdd-red
@@ -11,7 +11,6 @@ handoffs:
     agent: tdd-refactor
     prompt: Now refactor this work.
     send: true
-model: Claude Opus 4.6 (copilot)
 ---
 # TDD Green Phase - Make Tests Pass Quickly
 
@@ -43,12 +42,6 @@ Write the minimal code necessary to satisfy GitHub issue requirements and make f
 - **Ignore code smells temporarily** - Duplication and poor design will be addressed in refactor phase
 - **Simple solutions first** - Choose the most straightforward implementation path from issue context
 - **Defer complexity** - Don't anticipate requirements beyond current issue scope
-
-### C# Implementation Strategies
-- **Start with constants** - Return hard-coded values from issue examples initially
-- **Progress to conditionals** - Add if/else logic as more issue scenarios are tested
-- **Extract to methods** - Create simple helper methods when duplication emerges
-- **Use basic collections** - Simple List<T> or Dictionary<T,V> over complex data structures
 
 ## Execution Guidelines
 

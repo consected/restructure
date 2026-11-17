@@ -1,0 +1,28 @@
+# Pattern 5: Testing item flags
+# @runnable: true
+# @instance: player_info
+# @expect: true
+
+# Item flags attached to a record's own table are reached through an association
+# named after the pluralised resource name with _item_flags appended - for
+# example player_infos_item_flags, dynamic_model__some_tables_item_flags or
+# activity_log__some_type_item_flags.
+#
+# The association is already scoped to flags belonging to that resource, so an
+# item_type condition is neither required nor useful.
+#
+# Each _item_flags association is joined independently, so several may be tested
+# in one condition. return_value, return_value_list, return_result and
+# return_all_results all work here as they do for any other table.
+#
+# Add item_flag_name_id to require one specific flag:
+#
+#   all:
+#     player_infos_item_flags:
+#       item_flag_name_id: 123
+#       item_id:
+#         this: id
+all:
+  player_infos_item_flags:
+    item_id:
+      this: id

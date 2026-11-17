@@ -1,0 +1,7 @@
+# Pattern 1: Update the current item's own attributes, including its embedded item
+update_this:
+  this_1:
+    with:
+      select_who: 'new person'
+      embedded_item:
+        data: '{{cell_phone}}'

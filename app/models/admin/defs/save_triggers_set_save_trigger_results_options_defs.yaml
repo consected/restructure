@@ -1,22 +1,29 @@
 # Save Trigger: Set Save Trigger Results options
-        set_save_trigger_results:
-          - set_1:
-            if: #if_extras
-            element: variable_name  # Name of the element to set in save_trigger_results, supports dot-notation (e.g. 'hash_var.key1')
-            value: literal_or_substitution  # Value to set - can be a literal, substitution string like '{{field}}', or object hash
-          # NOTE: this sets the specified element in save_trigger_results for use in subsequent triggers
-          # e.g. |-
-          #   save_trigger:
-          #     on_create:
-          #       - set_save_trigger_results:
-          #           element: simple_var
-          #           value: 123
-          #       - set_save_trigger_results:
-          #           element: hash_var
-          #           value:
-          #             object:
-          #               id: '{{study_id}}'
-          #       - set_save_trigger_results:
-          #           element: hash_var.key1
-          #           value: hello
+# Canonical schema
+# set_save_trigger_results: <SetResultsEntry | Array(SetResultsEntry)>
+#
+# Value type
+# SetResultsEntry: <Hash(
+#   if: Condition,
+#   element: String (required),
+#   value: Scalar | Hash(object: Hash) | Condition,
+#   on_complete: TriggerTaskList,
+#   on_failure: TriggerTaskList
+# )>
+# Keys are optional unless marked (required).
+#
+# Pattern 1: Set a simple literal or substituted value (save_triggers_set_save_trigger_results_pattern_1_simple_defs.yaml)
+# Pattern 2: Set a Hash value using object: (save_triggers_set_save_trigger_results_pattern_2_object_defs.yaml)
+# Pattern 3: Set a nested key using dot-notation (save_triggers_set_save_trigger_results_pattern_3_dot_notation_defs.yaml)
+# See save_trigger_set_save_trigger_results.md for the worked examples.
+
 #!defs(save_triggers_lifecycle_hooks_defs.yaml)
+
+# Notes:
+# - element supports dot-notation to set a nested key within an existing Hash result
+#   (e.g. 'hash_var.key1') without replacing the whole hash_var value.
+# - The specified element is set in save_trigger_results for use by subsequent triggers
+#   (e.g. via {{save_trigger_results.<element>}} substitutions).
+# - Unlike set_variables (trigger_variables, {{variables.*}}), this sets save_trigger_results
+#   ({{save_trigger_results.*}}), which is also readable by other code inspecting the item
+#   after the trigger pipeline completes.

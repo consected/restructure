@@ -80,7 +80,7 @@ RSpec.describe 'Config library _constants and _configurations merging - Issue #1
 
       constants = dm.options_constants
 
-      expect(constants).to be_a(Hash)
+      expect(constants).to be_a(OptionConfigs::ExtraOptionConfigs::Constants)
       expect(constants[:lib_var]).to eq('library_value'),
                                      "Expected lib_var from library to be present in options_constants, got: #{constants.inspect}"
       expect(constants[:direct_var]).to eq('direct_value'),
@@ -123,7 +123,7 @@ RSpec.describe 'Config library _constants and _configurations merging - Issue #1
 
       constants = dm.options_constants
 
-      expect(constants).to be_a(Hash)
+      expect(constants).to be_a(OptionConfigs::ExtraOptionConfigs::Constants)
       expect(constants[:var_from_lib1]).to eq('value_from_lib1'),
                                            "Expected var_from_lib1 to be in options_constants, got: #{constants.inspect}"
       expect(constants[:var_from_lib2]).to eq('value_from_lib2'),
@@ -158,7 +158,7 @@ RSpec.describe 'Config library _constants and _configurations merging - Issue #1
 
       configurations = dm.configurations
 
-      expect(configurations).to be_a(Hash)
+      expect(configurations).to be_a(OptionConfigs::ExtraOptionConfigs::Configurations)
       expect(configurations[:option_type_attr_name]).to eq('lib_type_field'),
                                                         "Expected option_type_attr_name from library to be in configurations, got: #{configurations.inspect}"
       expect(configurations[:secondary_key]).to eq('direct_secondary'),

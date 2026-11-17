@@ -3,15 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe Redcap::DataDictionaries::FieldType, type: :model do
-  include ModelSupport
-  include Redcap::RedcapSupport
-
-  before :example do
-    @bad_admin, = create_admin
-    @bad_admin.update! disabled: true
-    create_admin
-    @projects = setup_redcap_project_admin_configs
-  end
+  include_context 'with redcap project admins'
 
   def check_all_choices(form)
     all_choices_fields = form.fields_of_type(:dropdown).merge(
@@ -27,7 +19,7 @@ RSpec.describe Redcap::DataDictionaries::FieldType, type: :model do
 
     count_choices = 0
 
-    all_choices_fields.each do |_k, field|
+    all_choices_fields.each_value do |field|
       base_attrs = {
         source_name: dd.source_name,
         source_type: :redcap,

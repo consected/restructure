@@ -15,66 +15,9 @@ if changes.present?
     multiline_fields = ['options', 'extra_log_types']
     show_line_numbers = multiline_fields.include?(field_name.to_s)
     
-    # Use Diffy to generate visual diffs with context=2 to hide most unchanged lines
-    # Get raw diff to extract line number information from all chunks
-    raw_diff = Diffy::Diff.new(previous_val, current_val, context: 2, include_diff_info: true).to_s
-    diff = Diffy::SplitDiff.new(previous_val, current_val, format: :html, context: 2)
-    
-    # Parse all @@ headers to build a map of line numbers
-    # Format: @@ -left_start,left_count +right_start,right_count @@
-    chunk_info = []
-    raw_diff.scan(/@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@/) do |match|
-      chunk_info << {
-        left_start: match[0].to_i,
-        left_count: (match[1] || '1').to_i,
-        right_start: match[2].to_i,
-        right_count: (match[3] || '1').to_i
-      }
-    end
-    
-    # Add line numbers to the diff output (only for multiline fields)
-    def add_line_numbers_with_chunks(html, chunk_info, is_left_side)
-      return html unless html.present?
-      
-      chunk_idx = 0
-      current_chunk = chunk_info[chunk_idx]
-      line_num = is_left_side ? current_chunk[:left_start] : current_chunk[:right_start]
-      lines_in_chunk = 0
-      max_lines = is_left_side ? current_chunk[:left_count] : current_chunk[:right_count]
-      
-      html.gsub(/<li class="(del|ins|unchanged)">(<del>|<ins>|<span>)/) do |match|
-        line_class = $1
-        tag_start = $2
-        
-        # Check if we need to move to the next chunk
-        if lines_in_chunk >= max_lines && chunk_idx + 1 < chunk_info.length
-          chunk_idx += 1
-          current_chunk = chunk_info[chunk_idx]
-          line_num = is_left_side ? current_chunk[:left_start] : current_chunk[:right_start]
-          lines_in_chunk = 0
-          max_lines = is_left_side ? current_chunk[:left_count] : current_chunk[:right_count]
-        end
-        
-        result = "<li class=\"#{line_class}\"><span class=\"line-number\">#{line_num}</span>#{tag_start}"
-        
-        # Count lines and increment line number appropriately
-        should_increment = is_left_side ? (line_class != 'ins') : (line_class != 'del')
-        if should_increment
-          line_num += 1
-          lines_in_chunk += 1
-        end
-        
-        result
-      end
-    end
-    
-    if show_line_numbers && chunk_info.any?
-      left_html = add_line_numbers_with_chunks(diff.left, chunk_info, true)
-      right_html = add_line_numbers_with_chunks(diff.right, chunk_info, false)
-    else
-      left_html = diff.left
-      right_html = diff.right
-    end
+    diff_html = version_diff_field_html(previous_val, current_val, show_line_numbers: show_line_numbers)
+    left_html = diff_html[:left]
+    right_html = diff_html[:right]
 %>
   <tr>
     <td><strong><%= field_name.to_s.humanize %></strong></td>
@@ -84,6 +27,13 @@ if changes.present?
 <% 
   end 
 %>
+</tbody>
+<% 
+else %>
+<tbody>
+  <tr>
+    <td colspan="3" class="text-muted">No changes recorded for this version.</td>
+  </tr>
 </tbody>
 <% 
 end # if changes.present?

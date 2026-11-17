@@ -3,8 +3,12 @@
   if Rails.configuration.action_controller.perform_caching == false
     part = render(partial: 'masters/search_results_template')
   else
-    part = Rails.cache.fetch partial_cache_key(:master__search_results_template) do
-      render(partial: 'masters/search_results_template')
+    cache_key = partial_cache_key(:master__search_results_template)
+    part = Rails.cache.read(cache_key)
+    unless part
+      @handlebars_template_bundle_failed = false
+      part = render(partial: 'masters/search_results_template')
+      Rails.cache.write(cache_key, part) unless @handlebars_template_bundle_failed
     end
   end
 %>

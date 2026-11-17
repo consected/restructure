@@ -1,0 +1,4 @@
+# Pattern 1: Set a simple literal or substituted value
+set_variables:
+  name: simple_var
+  value: 123

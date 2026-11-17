@@ -36,6 +36,7 @@ module Dynamic
       alias_method :db_configs=, :db_columns=
       attr_writer :allow_migrations
 
+      before_validation :prep_migration
       before_validation :init_schema_name
       validate :schema_name_ok
       validate :table_name_ok
@@ -65,17 +66,30 @@ module Dynamic
     end
 
     #
-    # Typically we only allow migrations in development, but an app setting
-    # can allow this on servers running in Rails production that are used for
+    # App settings can allow migrations on servers running in Rails production that are used for
     # app development.
+    # In the test environment, we don't memoize the value, since the server settings may change
+    # between tests that reuse a dynamic definition.
     def allow_migrations
-      unless @allow_migrations.nil?
-        Rails.logger.warn "Migrations not allowed for #{schema_name}" unless @allow_migrations
+      env_test = Rails.env.test?
+      unless @allow_migrations.nil? || env_test
+        unless @allow_migrations
+          msg = "Migrations not allowed for '#{schema_name}' (table name: #{table_name})"
+          Rails.logger.warn msg
+          ExceptionExtensions.puts_or_tmp_log msg unless Rails.env.production?
+        end
         return @allow_migrations
       end
 
-      @allow_migrations = Settings::AllowDynamicMigrations && !prevent_migrations
-      Rails.logger.warn "Migrations not allowed for #{schema_name}" unless @allow_migrations
+      setting = Settings::AllowDynamicMigrations
+      @allow_migrations = setting && !prevent_migrations
+      unless @allow_migrations
+        msg = "Migrations not allowed #{'(test environment)' if env_test} #{self} for schema '#{schema_name}' (table name: #{table_name}) - Allow based on setting: '#{setting}' && *not* configuration prevent_migrations: '#{!prevent_migrations}'"
+        Rails.logger.warn msg
+        ExceptionExtensions.puts_or_tmp_log msg unless Rails.env.production?
+        ExceptionExtensions.puts_or_tmp_log ExceptionExtensions.short_string_backtrace(caller) if Rails.env.test?
+      end
+
       @allow_migrations
     end
 
@@ -102,45 +116,23 @@ module Dynamic
       return unless config_view_sql
       return true if saved_change_to_disabled? && !disabled
 
-      options_attr_name = self.class.option_configs_attr.to_s
-      v1 = attribute_before_last_save(options_attr_name) || ''
-      v2 = attributes[options_attr_name] || ''
-      v1 = v1.sub("---\n", '')
-      v2 = v2.sub("---\n", '')
-      v1 = OptionConfigs::ExtraOptions.prepend_standard_definitions(v1)
-      v2 = OptionConfigs::ExtraOptions.prepend_standard_definitions(v2)
-      v1 = OptionConfigs::ExtraOptions.include_libraries(v1)
-      v2 = OptionConfigs::ExtraOptions.include_libraries(v2)
-      if v1
-        begin
-          v1def = YAML.safe_load(v1, permitted_classes: [],
-                                     permitted_symbols: [],
-                                     aliases: true)
-          v1_sql = v1def.dig('_configurations', 'view_sql')
-        rescue Psych::Exception => e
-          # Previous YAML was broken - treat view_sql as changed so migration can proceed
-          Rails.logger.warn "Error parsing previous YAML in view_sql_changed? for #{table_name}: #{e.message}"
-          v1_sql = nil
-        end
-      end
-      if v2
-        begin
-          v2def = YAML.safe_load(v2, permitted_classes: [],
-                                     permitted_symbols: [],
-                                     aliases: true)
-          v2_sql = v2def.dig('_configurations', 'view_sql')
-        rescue Psych::Exception => e
-          # Current YAML is broken - can't determine view_sql, treat as unchanged
-          Rails.logger.warn "Error parsing current YAML in view_sql_changed? for #{table_name}: #{e.message}"
-          v2_sql = nil
-        end
-      end
+      v1_sql, v2_sql = saved_configurations_key_change('view_sql')
       changed = (v1_sql != v2_sql)
       if changed
         Rails.logger.info "In migration, the view_sql for #{table_name} is going to change (from/to):\n" \
                           "\n-------#{v1_sql}\n-------\n#{v2_sql}\n-------"
       end
       !!changed
+    end
+
+    #
+    # Check if the _configurations: view_skip_updates: value has changed in the last save
+    def view_skip_updates_changed?
+      return unless config_view_sql
+      return true if saved_change_to_disabled? && !disabled
+
+      v1_val, v2_val = saved_configurations_key_change('view_skip_updates')
+      !!(v1_val != v2_val)
     end
 
     #
@@ -169,11 +161,11 @@ module Dynamic
 
       # Return if there is nothing to update
       return unless (!config_view_sql && migration_generator.migration_update_table) ||
-                    (config_view_sql && view_sql_changed?) ||
+                    (config_view_sql && (view_sql_changed? || view_skip_updates_changed?)) ||
                     (table_comments && (
-                        migration_generator.table_comment_changes ||
-                        migration_generator.fields_comments_changes.present?
-                      )
+                      migration_generator.table_comment_changes ||
+                      migration_generator.fields_comments_changes.present?
+                    )
                     ) ||
                     reference_views_missing? ||
                     saved_change_to_table_name? ||
@@ -202,7 +194,7 @@ module Dynamic
     #
     # Run a generated migration triggered after_save
     def run_migration
-      return if @ran_migration
+      return if @ran_migration || !allow_migrations
 
       @ran_migration = true
       migration_generator.run_migration
@@ -242,6 +234,18 @@ module Dynamic
     end
 
     #
+    # Whether the view should be given a dummy INSTEAD OF trigger so it appears updatable.
+    #
+    # The value
+    #   _configurations:
+    #     view_skip_updates:
+    # @return [Boolean]
+    def config_view_skip_updates?
+      option_configs
+      !!(configurations && configurations[:view_skip_updates])
+    end
+
+    #
     # Set up and memoize a migration generator to be used for all DB and migration
     # related actions.
     # @return [Admin::MigrationGenerator]
@@ -270,6 +274,7 @@ module Dynamic
           db_configs: db_columns,
           view_sql: config_view_sql,
           view_sql_changed: view_sql_changed?,
+          view_skip_updates: config_view_skip_updates?,
           all_referenced_tables: art,
           resource_type: self.class.name.underscore.to_sym,
           allow_migrations:
@@ -296,11 +301,46 @@ module Dynamic
       errors.add :table_name, "must only include characters acceptable to the database: #{table_name}"
     end
 
+    #
+    # Parse the previous and current saved options YAML, returning the before/after
+    # value of a single _configurations key, for change detection (e.g. view_sql,
+    # view_skip_updates). Broken YAML is treated as nil rather than raising.
+    # @param [String] config_key - the _configurations key to compare
+    # @return [Array(Object, Object)] before, after values
+    def saved_configurations_key_change(config_key)
+      options_attr_name = self.class.option_configs_attr.to_s
+      v1 = attribute_before_last_save(options_attr_name) || ''
+      v2 = attributes[options_attr_name] || ''
+      v1 = v1.sub("---\n", '')
+      v2 = v2.sub("---\n", '')
+      v1 = OptionConfigs::ExtraOptions.prepend_standard_definitions(v1)
+      v2 = OptionConfigs::ExtraOptions.prepend_standard_definitions(v2)
+      v1 = OptionConfigs::ExtraOptions.include_libraries(v1)
+      v2 = OptionConfigs::ExtraOptions.include_libraries(v2)
+      [parse_configurations_value(v1, config_key, 'previous'), parse_configurations_value(v2, config_key, 'current')]
+    end
+
+    #
+    # @return [Object, nil]
+    def parse_configurations_value(yaml_text, config_key, which)
+      return unless yaml_text
+
+      def_hash = YAML.safe_load(yaml_text, permitted_classes: [], permitted_symbols: [], aliases: true)
+      def_hash.dig('_configurations', config_key)
+    rescue Psych::Exception => e
+      Rails.logger.warn "Error parsing #{which} YAML for #{config_key} in #{table_name}: #{e.message}"
+      nil
+    end
+
     def schema_name_ok
       return true if disabled? || Admin::MigrationGenerator.current_search_paths.include?(schema_name)
 
       errors.add :schema_name, "(#{schema_name}) not in current search_path for #{table_name} - " \
                                "#{Admin::MigrationGenerator.current_search_paths}\#{nattributes}"
+    end
+
+    def prep_migration
+      @ran_migration = false
     end
   end
 end

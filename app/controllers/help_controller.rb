@@ -43,9 +43,9 @@ class HelpController < ApplicationController
     end
 
     if display_embedded?
-      render partial: 'help/show_embedded'
+      render partial: 'help/show_embedded', formats: [:html]
     else
-      render 'help/show', status: @result_status
+      render 'help/show', formats: [:html], status: @result_status
     end
   end
 
@@ -149,5 +149,4 @@ class HelpController < ApplicationController
   def clean_path(component)
     component.to_s.gsub(/[^a-zA-Z0-9\-_]/, '_')
   end
-
 end

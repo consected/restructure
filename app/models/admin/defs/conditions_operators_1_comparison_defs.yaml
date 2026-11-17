@@ -1,0 +1,26 @@
+# Pattern 1: Comparison operators
+# @runnable: true
+# @instance: activity_log
+# @expect: true
+
+# A field value given as a hash with a `condition` key performs a comparison
+# other than equality. `value` supplies the value to compare against.
+all:
+  activity_log__player_contact_phones:
+    id:
+      this: id
+    created_at:
+      condition: '<='
+      value: 'now()'
+    select_who:
+      condition: '<>'
+      value: 'not this value'
+
+# Pattern matching operators are available for query conditions:
+#   LIKE, ILIKE (SQL wildcards), ~ and ~* (POSIX regular expression, case
+#   sensitive and insensitive)
+all_2:
+  activity_log__player_contact_phones:
+    select_who:
+      condition: ILIKE
+      value: 'USE%'

@@ -1,3 +1,11 @@
 # label options
+# Canonical schema
+# label: <String>
+#
   label: main label  (also used as + button label if button_label not defined)
   button_label: add record button label
+
+# Notes:
+# - label must be a String; non-string values produce a warning and default to empty string.
+# - If not specified, defaults to the humanized option type name.
+# - button_label is a separate top-level key, not nested under label.

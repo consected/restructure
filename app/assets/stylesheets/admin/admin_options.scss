@@ -95,6 +95,18 @@ ul.admin-options-tag-list {
   }
 }
 
+.data-entry-trigger-url-block {
+  background-color: #f8f8f8;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  margin-bottom: 2px;
+}
+
 .admin-options-ref-block .tab-content,
 .master-records-show-panel .tab-content {
   background-color: white;

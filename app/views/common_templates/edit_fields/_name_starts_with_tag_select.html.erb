@@ -31,10 +31,10 @@ else
 end
 options = field_options_for(form_object_instance, field_name_sym)
 options[:include_blank] = false
-html_options = {
+html_options = html_options_for_field_options(options, {
   data: {attr_name: field_name_sym, object_name: form_object_item_type_us},
   multiple: 'multiple'
-}
+})
 
 
 %>

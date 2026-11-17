@@ -15,12 +15,13 @@ RSpec.describe 'Activity Log Options', type: :model do
     'ActivityLog::PlayerContactEmail'
   end
 
-  before :example do
+  before_all do
     @user0, = create_user
     create_admin
     create_user
     setup_access :trackers
     setup_access :tracker_histories
+    generate_test_activity_log
   end
 
   it 'gets the correct version of extra options based on creation date of the instance' do
@@ -230,6 +231,7 @@ RSpec.describe 'Activity Log Options', type: :model do
     expect(al.can_edit?).to be_truthy
 
     al.update! select_result: 'bad'
+    al.reset_access_evaluations!
 
     res = al.can_edit?
     expect(res).to be_falsey
@@ -268,6 +270,7 @@ RSpec.describe 'Activity Log Options', type: :model do
     expect(al.can_edit?).to be_truthy
 
     al.update! select_result: 'good'
+    al.reset_access_evaluations!
     expect(al.can_edit?).to be_falsey
 
     # Expect the previous version still to be non-editable based on its definition (select_result: 'bad')
@@ -276,6 +279,7 @@ RSpec.describe 'Activity Log Options', type: :model do
 
     @dyn_instances[2].force_save!
     @dyn_instances[2].update! select_result: 'good'
+    @dyn_instances[2].reset_access_evaluations!
     expect(@dyn_instances[2].can_edit?).to be_truthy
 
     expect do
@@ -406,6 +410,7 @@ RSpec.describe 'Activity Log Options', type: :model do
     expect(al.can_edit?).to be_truthy
 
     al.update! select_result: 'bad'
+    al.reset_access_evaluations!
 
     res = al.can_edit?
     expect(res).to be_falsey
@@ -449,6 +454,7 @@ RSpec.describe 'Activity Log Options', type: :model do
     expect(al.can_edit?).to be_truthy
 
     al.update! select_result: 'good'
+    al.reset_access_evaluations!
     expect(al.can_edit?).to be_falsey
 
     # Expect the previous version still to be non-editable based on its definition (select_result: 'bad')
@@ -457,6 +463,7 @@ RSpec.describe 'Activity Log Options', type: :model do
 
     @dyn_instances[2].force_save!
     @dyn_instances[2].update! select_result: 'good'
+    @dyn_instances[2].reset_access_evaluations!
     expect(@dyn_instances[2].can_edit?).to be_truthy
 
     expect do

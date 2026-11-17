@@ -1,0 +1,7 @@
+# Pattern 7: value/preset_value via a return_value Hash lookup
+field_options:
+  field_name:
+    preset_value:
+      this:
+        dynamic_model__some_table:
+          field_name: return_value

@@ -64,7 +64,7 @@ class DynamicModel::DynamicModelsController < UserBaseController
 
     # Find the option type attribute name from the definition _configurations.option_type_attr_name
     impl_class = @implementation_class || object_instance.class
-    @option_type_attr_name = impl_class.option_type_attr_name if impl_class.respond_to?(:option_type_attr_name)
+    @option_type_attr_name = impl_class&.option_type_attr_name if impl_class.respond_to?(:option_type_attr_name)
     return unless @option_type_attr_name
 
     # Set the option type from the param if we are using a current admin sample form

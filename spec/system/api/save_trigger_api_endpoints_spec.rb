@@ -93,6 +93,10 @@ RSpec.describe 'pull_external_data save trigger API endpoints', type: :system, j
   # Allow pull_external_data to reach the Capybara test server (127.0.0.1)
   before(:each) do
     stub_const('Settings::PullExternalDataAllowPrivateHosts', true)
+    # Other system specs reload routes while running in parallel. Re-register the
+    # dynamic model routes here so the Capybara server always has the API endpoints.
+    DynamicModel.routes_load
+    Rails.application.routes_reloader.reload!
   end
 
   #
@@ -335,10 +339,12 @@ RSpec.describe 'pull_external_data save trigger API endpoints', type: :system, j
       )
 
       # Grant the user access to view reports and this specific report
+      # User-specific (not app-wide) so the committed grant does not leak to other users
       unless @user.has_access_to?(:read, :general, :view_reports)
         Admin::UserAccessControl.create!(
           app_type: @user.app_type, access: :read,
           resource_type: :general, resource_name: :view_reports,
+          user: @user,
           current_admin: @admin
         )
       end
@@ -621,8 +627,9 @@ RSpec.describe 'pull_external_data save trigger API endpoints', type: :system, j
         current_user: @user
       )
 
-      @al = ActivityLog.where(item_type: 'player_contact', rec_type: nil,
-                              process_name: 'api_panel_trigger_test_email').first
+      @al = ActivityLog.active.where(item_type: 'player_contact', rec_type: nil,
+                                     process_name: 'api_panel_trigger_test_email',
+                                     table_name: AL_TABLE_NAME, schema_name: SCHEMA_NAME).first
       @al ||= ActivityLog.create!(
         current_admin: @admin,
         name: AL_TABLE_NAME,
@@ -687,6 +694,7 @@ RSpec.describe 'pull_external_data save trigger API endpoints', type: :system, j
 
       setup_access EI_NAME.to_sym, user: @user
 
+      @ei.update_tracker_events
       @ei.other_regenerate_actions if @ei.respond_to?(:other_regenerate_actions)
       ExternalIdentifier.define_models
       # Use routes_reloader.reload! instead of ExternalIdentifier.routes_load to ensure EI routes

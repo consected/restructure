@@ -31,7 +31,7 @@ module ApplicationHelper
   def option_type_url_marker
     return unless object_instance.class.respond_to? :definition
 
-    'OPTION_TYPE-' if object_instance.class.definition.option_type_attr_name
+    'OPTION_TYPE-' if object_instance.class.definition&.option_type_attr_name
   end
 
   #
@@ -214,7 +214,9 @@ module ApplicationHelper
 
     mode ||= action_name == 'new' ? :new : :edit
     caption = captions[key]
-    caption = caption[:"#{mode}_caption"] || caption[:caption] || '' if caption.is_a?(Hash)
+    if caption.is_a?(Hash) || caption.is_a?(OptionConfigs::BaseNamedConfiguration)
+      caption = caption[:"#{mode}_caption"] || caption[:caption] || ''
+    end
     if @form_object_instance && !no_sub
       caption = Formatter::Substitution.substitute(caption, data: @form_object_instance, tag_subs: nil,
                                                             ignore_missing:)
@@ -280,26 +282,22 @@ module ApplicationHelper
     end
 
     auth_type = u.class.name
-    if u.is_a? User
-      apptype = u.app_type_id
-      userrole = Admin::UserRole.where(app_type_id: apptype)
-                                .reorder(updated_at: :desc)
-                                .limit(1)
-                                .pluck(:updated_at)
-                                &.first.to_i.to_s
 
-      uac = Admin::UserAccessControl.where(app_type_id: apptype)
-                                    .reorder(updated_at: :desc)
-                                    .limit(1)
-                                    .pluck(:updated_at)
-                                    &.first.to_i.to_s
+    paired_user = if u.is_a?(User)
+                    u
+                  elsif u.is_a?(Admin)
+                    safe_current_user || u.matching_user
+                  end
+
+    if paired_user
+      apptype = paired_user.app_type_id
+      userrole, uac = partial_cache_key_access_control_timestamps(apptype)
     end
 
+    paired_user_key = "-#{paired_user.id}-#{paired_user.current_sign_in_at}" if u.is_a?(Admin) && paired_user
+
     unless @item_updates
-      cs = [Admin::MessageTemplate,
-            DynamicModel, ActivityLog, ExternalIdentifier,
-            Admin::ConfigLibrary, Admin::PageLayout, Admin::AppConfiguration]
-      @item_updates = cs.map do |c|
+      @item_updates = HandlebarsPrecompiler.item_update_classes.map do |c|
         c.reorder(updated_at: :desc)
          .limit(1)
          .pluck(:updated_at)
@@ -310,17 +308,36 @@ module ApplicationHelper
     end
 
     ver = Application.server_cache_version
-    res = "#{partial}-partial2-#{ver}-#{auth_type}-#{u&.id}-#{u&.current_sign_in_at}-" \
-          "#{apptype}-#{@item_updates}-#{userrole}-#{uac}"
-    prev_key = "#{partial}-#{auth_type}-#{u&.id}"
-    @@prev_partial_cache_key ||= {}
-    prev = @@prev_partial_cache_key[prev_key]
-    changed = prev != res
-    if changed
-      Rails.logger.warn "Partial cache key changed (#{prev_key}): \nfrom:#{prev}\nto:  #{res}"
-      @@prev_partial_cache_key[prev_key] = res
-    end
-    res
+    # Admin report partials use this key with 48-hour browser caching, while Report is
+    # deliberately absent from the shared item-update list; retain session rotation.
+    current_sign_in_at = u.current_sign_in_at if u.is_a?(Admin)
+    "#{partial}-partial2-#{ver}-#{auth_type}-#{u&.id}-#{current_sign_in_at}-" \
+      "#{apptype}-#{@item_updates}-#{userrole}-#{uac}#{paired_user_key}"
+  end
+
+  #
+  # Role/UAC updated_at timestamps for the given app type, delegated to
+  # HandlebarsPrecompiler.app_type_access_control_timestamps (the single source of truth
+  # shared with HandlebarsPrecompilerHelper#handlebars_cache_key/#access_control_version -
+  # issue #1400 Phase 1). Memoized per app_type_id so the ETag and template_version
+  # computations in one view context reuse the same values instead of re-querying.
+  # @param app_type_id [Integer, nil] the app_type to scope the queries to
+  # @return [Array(String, String)] [userrole_timestamp, uac_timestamp] as epoch-integer strings
+  def partial_cache_key_access_control_timestamps(app_type_id)
+    @partial_cache_key_access_control_timestamps ||= {}
+    @partial_cache_key_access_control_timestamps[app_type_id] ||=
+      HandlebarsPrecompiler.app_type_access_control_timestamps(app_type_id)
+  end
+
+  #
+  # Safely resolve the current signed-in user, returning nil instead of raising
+  # if unavailable (e.g. no user session present). Used by #partial_cache_key to
+  # determine the effective user paired with an Admin without duplicating the
+  # rescue logic at each call site.
+  def safe_current_user
+    current_user
+  rescue StandardError
+    nil
   end
 
   #
@@ -438,7 +455,9 @@ module ApplicationHelper
 
     from_file_path = from_file_path.to_s.split('/').last(2).join('-').gsub('.html.erb', '').id_underscore
     compile_handlebars_templates
-    url, handlebars_template_ids, handlebars_partial_ids = write_multiple_handlebars_templates(@requested_handlebars_templates)
+    url, handlebars_template_ids, handlebars_partial_ids, bundle_available =
+      write_multiple_handlebars_templates(@requested_handlebars_templates)
+    @handlebars_template_bundle_failed ||= !bundle_available
     @requested_handlebars_template_count = @requested_handlebars_templates.length
     @retrieved_requested_handlebars_template_count = (handlebars_template_ids + handlebars_partial_ids).length
     # Clean up before the next set of handlebars templates

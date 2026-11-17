@@ -7,11 +7,17 @@
 # - Configuration handling for stored files
 # - Embedded items based on nfs_store configuration
 # - Regression tests for Issue #878 (implementation handler method guards)
+# - Regression test for Issue #1303 (stale embedded_item memoization across before/after_create)
 #
 # The regression test (Issue #878) ensures that container files, which include
 # Dynamic::ImplementationHandler, do not raise errors when calling methods like
 # `default_option_type_name` that would otherwise call `definition` on classes
 # that don't have it defined.
+#
+# The "uploads a file and creates a StoredFile with an embedded item" test guards against Issue
+# #1303, where a stale per-instance memoization in Dynamic::ModelReferenceHandler#embedded_item
+# could cache a nil result computed before the direct-embed link (embed_resource_id) was set,
+# causing #embedded_item to keep returning nil even after the link was correctly persisted.
 
 require 'rails_helper'
 require './db/table_generators/dynamic_models_table'
@@ -35,12 +41,15 @@ RSpec.describe NfsStore::Manage::ContainerFile, type: :model do
     # expect(@uploaded_files.length).to be > 2
   end
 
-  before :each do
+  before :all do
     seed_database && ActivityLog.define_models
 
-    setup_nfs_store
     generate_test_dynamic_model
     generate_test_embed_dynamic_models
+  end
+
+  before :each do
+    setup_nfs_store
     @activity_log = @container.parent_item
 
     # upload_test_dicom_files

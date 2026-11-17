@@ -34,15 +34,8 @@ RSpec.describe 'Redcap::DataRecords request source recording', type: :model do
   include ModelSupport
   include Redcap::RedcapSupport
 
-  before :all do
-    @bad_admin, = create_admin
-    @bad_admin.update! disabled: true
-    create_admin
-    @projects = setup_redcap_project_admin_configs
-    @project = @projects.first
-  end
-
-  before :example do
+  before_all do
+    change_setting('AllowDynamicMigrations', true)
     @bad_admin, = create_admin
     @bad_admin.update! disabled: true
     create_admin
@@ -50,24 +43,27 @@ RSpec.describe 'Redcap::DataRecords request source recording', type: :model do
     setup_file_store
     @projects = setup_redcap_project_admin_configs
     @project = @projects.first
+    dm = create_dynamic_model_for_sample_response
+  end
+
+  before :example do
     reset_mocks
   end
 
   #
   # Helper: return a ProjectAdmin with current_admin set and a valid dynamic model class_name
   def project_admin_with_dm
-    dm = create_dynamic_model_for_sample_response
     rc = Redcap::ProjectAdmin.active.first
     rc.current_admin = @admin
-    [rc, dm.implementation_class.name]
+    [rc, @dynamic_model.implementation_class.name]
   end
 
   #
   # Helper: configure stubs so request_records proceeds past the inline adapter guard
   # and past the existing-jobs guard, without running a real background job.
-  def stub_for_request_records(rc)
+  def stub_for_request_records(_rc)
     # Prevent the "already queued" early return
-    allow(Redcap::ProjectAdmin).to receive(:existing_jobs).and_return(double(count: 0))
+    allow(Redcap::ProjectAdmin).to receive(:existing_jobs).and_return([])
 
     # Prevent the real job from running
     fake_job = double('job', job_id: 'test-job-id')

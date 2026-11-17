@@ -11,15 +11,44 @@ RSpec.describe Admin::MessageTemplate, type: :model do
   include ReportSupport
   include ItemFlagSupport
 
-  before :example do
+  before_all do
     seed_database # to ensure embedded reports work
     create_admin
     create_user
     create_master
+  end
+
+  before :example do
     l = Admin::MessageTemplate.last.id
     Admin::MessageTemplate.where(name: 'test email layout').update_all(name: "test old layout #{l}")
     Admin::MessageTemplate.where(name: 'test email content').update_all(name: "test old content #{l}")
     create_items
+  end
+
+  describe 'generate_content message type filtering' do
+    it 'filters by message type only when the optional keyword is provided' do
+      template_name = 'optional message type filter'
+      Admin::MessageTemplate.create!(
+        name: template_name,
+        category: 'issue-1484',
+        message_type: :email,
+        template_type: :content,
+        template: 'Email template content',
+        current_admin: @admin
+      )
+
+      expect(
+        Admin::MessageTemplate.generate_content(content_template_name: template_name, category: 'issue-1484')
+      ).to eq 'Email template content'
+      expect(
+        Admin::MessageTemplate.generate_content(
+          content_template_name: template_name,
+          category: 'issue-1484',
+          message_type: :dialog,
+          allow_missing_template: true
+        )
+      ).to be_nil
+    end
   end
 
   it 'generates a message' do
@@ -181,8 +210,11 @@ RSpec.describe Admin::MessageTemplate, type: :model do
 
     expect(@item_flag).not_to be nil
 
-    Admin::UserAccessControl.create! app_type: @user.app_type, access: :read, resource_type: :general,
-                                     resource_name: :view_reports, current_admin: @admin
+    # An app-wide view_reports UAC may already be committed by another spec, which would fail validation
+    unless @user.can? :view_reports, :general
+      Admin::UserAccessControl.create! app_type: @user.app_type, access: :read, resource_type: :general,
+                                       resource_name: :view_reports, current_admin: @admin
+    end
 
     check_reports_accessible
 
@@ -294,32 +326,36 @@ RSpec.describe Admin::MessageTemplate, type: :model do
   # contains tags or attributes capable of executing script when rendered as
   # HTML on public info pages, dialogs, or emails.
   describe 'stored XSS protection' do
-    [
-      '<script>alert(1)</script>',
-      '<SCRIPT src="//evil"></SCRIPT>',
-      '<iframe src="//evil"></iframe>',
-      '<frame src="//evil">',
-      '<frameset><frame></frameset>',
-      '<object data="//evil"></object>',
-      '<embed src="//evil">',
-      '<a href="javascript:alert(1)">x</a>',
-      '<a href="javascript&#x3A;alert(1)">x</a>',
-      '<iframe srcdoc="<script>alert(1)</script>"></iframe>',
-      '<img src="x" onerror="alert(1)">',
-      '<svg onload="alert(1)">',
-      '<body onload="alert(1)">',
-      '<meta http-equiv="refresh" content="0;url=javascript:alert(1)">',
-      '<meta http-equiv="refresh" content="0; url=\'javascript:alert(1)\'">',
-      '<meta http-equiv="refresh" content="0; url=&quot;javascript:alert(1)&quot;">',
-      '<meta http-equiv="refresh" content="0;url=https://evil.example">',
-      '<meta http-equiv="refresh" content="0;url=data:text/html,%3Ch1%3Ephish%3C/h1%3E">'
-    ].each do |payload|
-      it "raises when generated content contains: #{payload.truncate(40)}" do
-        Admin::MessageTemplate.create! name: 'xss content', message_type: :email, template_type: :content,
+    def payloads
+      [
+        '<script>alert(1)</script>',
+        '<SCRIPT src="//evil"></SCRIPT>',
+        '<iframe src="//evil"></iframe>',
+        '<frame src="//evil">',
+        '<frameset><frame></frameset>',
+        '<object data="//evil"></object>',
+        '<embed src="//evil">',
+        '<a href="javascript:alert(1)">x</a>',
+        '<a href="javascript&#x3A;alert(1)">x</a>',
+        '<iframe srcdoc="<script>alert(1)</script>"></iframe>',
+        '<img src="x" onerror="alert(1)">',
+        '<svg onload="alert(1)">',
+        '<body onload="alert(1)">',
+        '<meta http-equiv="refresh" content="0;url=javascript:alert(1)">',
+        '<meta http-equiv="refresh" content="0; url=\'javascript:alert(1)\'">',
+        '<meta http-equiv="refresh" content="0; url=&quot;javascript:alert(1)&quot;">',
+        '<meta http-equiv="refresh" content="0;url=https://evil.example">',
+        '<meta http-equiv="refresh" content="0;url=data:text/html,%3Ch1%3Ephish%3C/h1%3E">'
+      ]
+    end
+    it 'raises when generated content contains XSS payloads' do
+      payloads.each_with_index do |payload, index|
+        template_name = "xss content #{index}"
+        Admin::MessageTemplate.create! name: template_name, message_type: :email, template_type: :content,
                                        template: payload, current_admin: @admin
 
         expect do
-          Admin::MessageTemplate.generate_content content_template_name: 'xss content'
+          Admin::MessageTemplate.generate_content content_template_name: template_name
         end.to raise_error(FphsException, /disallowed tag or attribute/)
       end
     end

@@ -1,0 +1,6 @@
+# Pattern 2: Set a Hash value using the object: wrapper
+set_save_trigger_results:
+  element: hash_var
+  value:
+    object:
+      id: '{{study_id}}'

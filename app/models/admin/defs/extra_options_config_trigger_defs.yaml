@@ -1,5 +1,16 @@
 # config_trigger options
+# Canonical schema
+# config_trigger: <Hash(on_define: TriggerTaskList)>
+# All keys are optional.
+#
+# TriggerTaskList type - same shape as save_trigger's, see extra_options_save_trigger_defs.yaml
+# TriggerTaskList: <Hash(trigger_type: TriggerConfig) | Array(Hash(trigger_type: TriggerConfig))>
+#
   config_trigger:
     on_define:
       # Add default configurations and extra detailed configurations when a dynamic definition configuration is saved or updated
 #!defs(config_trigger_options_defs.yaml)
+
+# Notes:
+# - on_define runs at configuration-save time in the admin panel, not at record save time -
+#   it uses the same per-trigger-type validation rules as save_trigger's event keys.

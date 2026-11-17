@@ -17,6 +17,27 @@ Common use cases:
 !defs(save_triggers_generate_document_options_defs.yaml)
 ```
 
+### Pattern 1: Named content template, container via model reference
+
+```yaml
+!defs(save_triggers_generate_document_pattern_1_named_template_defs.yaml)
+```
+
+### Pattern 2: Inline content_template_text with layout and extra_substitutions
+
+`content_template_text` is used instead of `content_template_name` when the content isn't
+worth storing as a separate named template.
+
+```yaml
+!defs(save_triggers_generate_document_pattern_2_inline_text_defs.yaml)
+```
+
+### Pattern 3: Resolve the container by name or id
+
+```yaml
+!defs(save_triggers_generate_document_pattern_3_container_lookup_defs.yaml)
+```
+
 ### Container Resolution
 
 The `container` configuration determines which NFS filestore container the generated document

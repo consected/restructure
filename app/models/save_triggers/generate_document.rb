@@ -220,11 +220,15 @@ class SaveTriggers::GenerateDocument < SaveTriggers::SaveTriggersBase
   # Resolve the user for the file store operation.
   # Uses store_as_user and store_in_app_type configuration,
   # following the pattern in DynamicModel.user_for_conf_snippet.
+  # Both accept a literal id/name, a {{substitution}}, or a conditional
+  # Hash reference (e.g. {this: {field: return_value}}), resolved here via
+  # FieldDefaults before being passed to the id/name lookup.
   # @return [User]
   def resolve_user
     user_config = {
-      user: @config[:store_as_user],
-      app_type: @config[:store_in_app_type]
+      user: FieldDefaults.calculate_default(@item, @config[:store_as_user], allow_nil: true, ignore_missing: true),
+      app_type: FieldDefaults.calculate_default(@item, @config[:store_in_app_type], allow_nil: true,
+                                                                                    ignore_missing: true)
     }.compact
 
     if user_config.present?

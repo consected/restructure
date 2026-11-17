@@ -3,13 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe Redcap::ClientRequest, type: :model do
-  include ModelSupport
-  include Redcap::RedcapSupport
-
-  before :example do
-    create_admin
-    @projects = setup_redcap_project_admin_configs
-  end
+  include_context 'with redcap project admins'
 
   it 'saves a record for the action' do
     name = @projects.first[:name]

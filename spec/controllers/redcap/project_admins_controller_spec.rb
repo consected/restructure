@@ -1,13 +1,26 @@
 # frozen_string_literal: true
 
+# Covers REDCap project-admin actions and standard admin-controller behavior.
 require 'rails_helper'
 
 RSpec.describe Redcap::ProjectAdminsController, type: :controller do
   include UserSupport
 
   include MasterSupport
-  include Redcap::RedcapSupport
   include Redcap::ProjectAdminSupport
+
+  include_context 'with redcap project admins'
+
+  around do |example|
+    if example.metadata[:queue_adapter_test]
+      original_adapter = ActiveJob::Base.queue_adapter
+      ActiveJob::Base.queue_adapter = :test
+      example.run
+      ActiveJob::Base.queue_adapter = original_adapter
+    else
+      example.run
+    end
+  end
 
   def object_class
     Redcap::ProjectAdmin
@@ -21,14 +34,16 @@ RSpec.describe Redcap::ProjectAdminsController, type: :controller do
     @edit_form_admin = 'admin/common_templates/_form'
   end
 
+  def create_items
+    @created_items = Redcap::ProjectAdmin.active.to_a
+  end
+
   # def saved_item_template
   #   'admin/common_templates/_item'
   # end
 
   before(:context) do
     @path_prefix = '/redcap'
-    @admin, = ControllerMacros.create_admin
-    create_admin_matching_user
   end
 
   before(:example) do
@@ -39,10 +54,6 @@ RSpec.describe Redcap::ProjectAdminsController, type: :controller do
 
   describe 'transfer mode "none" action restrictions' do
     before_each_login_admin
-
-    before(:each) do
-      setup_redcap_project_admin_configs
-    end
 
     let!(:project_admin) do
       pa = Redcap::ProjectAdmin.active.first
@@ -70,6 +81,13 @@ RSpec.describe Redcap::ProjectAdminsController, type: :controller do
 
     it 'prevents request_archive action when transfer_mode is none' do
       post :request_archive, params: { id: project_admin.id }, format: :json
+      expect(response).to have_http_status(:bad_request)
+      json_response = JSON.parse(response.body)
+      expect(json_response['message']).to match(/Actions cannot be performed on projects with transfer mode "none"/)
+    end
+
+    it 'prevents request_archive_definition action when transfer_mode is none' do
+      post :request_archive_definition, params: { id: project_admin.id }, format: :json
       expect(response).to have_http_status(:bad_request)
       json_response = JSON.parse(response.body)
       expect(json_response['message']).to match(/Actions cannot be performed on projects with transfer mode "none"/)
@@ -136,14 +154,21 @@ RSpec.describe Redcap::ProjectAdminsController, type: :controller do
 
       expect(response).to have_http_status(200)
     end
+
+    it 'queues a definition-only archive when transfer_mode is enabled', queue_adapter_test: true do
+      project_admin.update!(transfer_mode: 'manual')
+
+      expect do
+        post :request_archive_definition, params: { id: project_admin.id }, format: :json
+      end.to have_enqueued_job(Redcap::CaptureProjectArchiveJob).with(project_admin, definition_only: true)
+
+      expect(response).to have_http_status(200)
+      expect(JSON.parse(response.body)['message']).to match(/Project definition requested/)
+    end
   end
 
   describe 'remove_user action' do
     before_each_login_admin
-
-    before(:each) do
-      setup_redcap_project_admin_configs
-    end
 
     let!(:project_admin) do
       pa = Redcap::ProjectAdmin.active.first

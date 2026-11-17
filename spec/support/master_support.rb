@@ -7,6 +7,7 @@ module MasterSupport
   include ::UserSupport
 
   def seed_database
+    return if SetupHelper.seed_database_info_correct?
     return if @seed_database_done
 
     Rails.logger.info 'Starting seed setup in Master Support'

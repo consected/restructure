@@ -590,6 +590,7 @@ class ModelReference < ActiveRecord::Base
   end
 
   def as_json(extras = {})
+    extras = extras.dup
     extras[:methods] ||= []
     extras[:methods] << :to_record_id
     extras[:methods] << :to_record_master_id

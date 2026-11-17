@@ -1,6 +1,17 @@
 # editable_if options
-  editable_if: |
-    'ref: ** conditions reference **'
+# Canonical schema
+# editable_if: <Condition>
+#
+# Condition type - see conditions.md for the full syntax
+# Condition: <Hash(always: Boolean) | Hash(never: Boolean) | Hash(selection_type: record_source: field_conditions)>
+#
+# Pattern 1: Explicitly always editable (extra_options_editable_if_pattern_1_always_defs.yaml)
+# Pattern 2: Explicitly never editable (extra_options_editable_if_pattern_2_never_defs.yaml)
+# Pattern 3: Conditional editable rules using the standard conditions reference (extra_options_editable_if_pattern_3_conditional_defs.yaml)
+# Pattern 4: Merge reusable conditions with local rules (extra_options_editable_if_pattern_4_merge_anchor_defs.yaml)
+# See editable_if.md for the worked examples.
 
-    NOTE: if not defined, the default is to only allow an item to be editable if it is the most recently created or
-    item in the list. If you want items to be always editable, use *always: true*
+# Notes:
+# - editable_if must be a Hash using the standard conditional-actions syntax.
+# - If not defined, the default behavior is to allow editing only for the most recent item in the list.
+# - Use always: true when you want to override that default and keep all matching items editable.

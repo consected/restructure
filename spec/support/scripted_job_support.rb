@@ -1,16 +1,18 @@
 # frozen_string_literal: true
 
+require_relative 'nfs_store_support'
+
 module ScriptedJobSupport
-  AlFilterTestName = 'AL Filter Test 2'
+  AlFilterTestName = NfsStoreSupport::AlFilterTestName
 
   def setup_scripted_job
     @al_name = AlFilterTestName
 
-    @aldef = ActivityLog.active.where(name: @al_name).first
+    @aldef = ActivityLog.active.where(name: @al_name, process_name: NfsStoreSupport::AlProcessName).first
     unless @aldef
-      @aldef = ActivityLog.where(name: @al_name).first
+      @aldef = ActivityLog.where(name: @al_name, process_name: NfsStoreSupport::AlProcessName).first
       @aldef.update(disabled: false, current_admin: @admin)
-      @aldef = ActivityLog.active.where(name: @al_name).first
+      @aldef = ActivityLog.active.where(name: @al_name, process_name: NfsStoreSupport::AlProcessName).first
       puts 'About to fail' unless @aldef
     end
     expect(@aldef).not_to be nil

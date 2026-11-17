@@ -78,6 +78,8 @@ class SaveTriggers::RedcapRequest < SaveTriggers::SaveTriggersBase
 
           next unless vals.present?
 
+          raise_if_in_before_save_trigger!
+
           # Retain the flags so that the #update! doesn't change
           # what we need to report through the API
           res = @item
@@ -97,11 +99,23 @@ class SaveTriggers::RedcapRequest < SaveTriggers::SaveTriggersBase
     end
   end
 
+  # Reentrant #update! on `this` from within a before_save trigger corrupts the outer
+  # save's dirty-tracking, silently breaking on_create/on_update/on_disable dispatch (issue #1384).
+  def raise_if_in_before_save_trigger!
+    return unless @item.respond_to?(:in_before_save_trigger) && @item.in_before_save_trigger
+
+    raise FphsException,
+          'redcap_request can not update the record being saved from within a ' \
+          'before_save trigger - the outer save is still in progress, so this write would ' \
+          'be lost or corrupt on_create/on_update/on_disable trigger dispatch (issue #1384); ' \
+          'use on_create/on_update/on_disable instead'
+  end
+
   def run_request
     request_data
 
     rc = Redcap::ProjectAdmin.active.find_by(study:, name: project_name)
-    raise FphsException, "save_trigger redcap_request: cannot find REDCap project #{study} / {#{project_name}" unless rc
+    raise FphsException, "save_trigger redcap_request: cannot find REDCap project #{study} / #{project_name}" unless rc
 
     rc.current_admin = rc.job_admin
     pc = rc.api_client
@@ -134,11 +148,25 @@ class SaveTriggers::RedcapRequest < SaveTriggers::SaveTriggersBase
   end
 
   def project_name
-    @this_config[:project_name]
+    resolve_config_raw(@this_config[:project_name])
   end
 
   def study
-    @this_config[:study]
+    resolve_config_raw(@this_config[:study])
+  end
+
+  def resolve_config_raw(value)
+    return value.to_s unless value.is_a?(String)
+
+    tag = value.match(/\A\{\{([^{}]+)\}\}\z/)&.captures&.first
+    return value if tag.blank?
+
+    data = Formatter::Substitution.setup_data(@item)
+    tag.split('.').reduce(data) do |current, key|
+      break if current.nil?
+
+      current[key.to_sym] || current[key]
+    end.to_s
   end
 
   def study_name_pair

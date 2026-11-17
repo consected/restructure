@@ -54,6 +54,7 @@ describe '2FA OTP idle timeout on login page - issue #1075', js: true, driver: $
 
   after(:all) do
     change_setting('TwoFactorAuthDisabledForUser', true)
+    change_setting('TwoFactorAuthIdleTimeout', DefaultSettings::TwoFactorAuthIdleTimeout)
   end
 
   # ---------------------------------------------------------------------------
@@ -92,9 +93,9 @@ describe '2FA OTP idle timeout on login page - issue #1075', js: true, driver: $
       timeout_value = page.evaluate_script('_fpa.loaded.login_state && _fpa.loaded.login_state.otp_idle_timeout')
 
       expect(timeout_value).to eq(SHORT_TIMEOUT_SECS),
-                                "Expected client-side otp_idle_timeout to equal " \
-                                "Settings::TwoFactorAuthIdleTimeout (#{SHORT_TIMEOUT_SECS}), " \
-                                "got #{timeout_value.inspect}"
+                               'Expected client-side otp_idle_timeout to equal ' \
+                               "Settings::TwoFactorAuthIdleTimeout (#{SHORT_TIMEOUT_SECS}), " \
+                               "got #{timeout_value.inspect}"
     end
 
     it 'resets the form to step 1 after the idle timeout expires' do

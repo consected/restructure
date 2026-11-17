@@ -1,10 +1,106 @@
 # `notify`
+
 ## Send a Notification
 
 Send a notification (email, SMS, etc.) using a configured message template when this trigger fires.
 
+### When substitutions are made
+
+The trigger runs in two stages, and it matters which values are resolved in each.
+
+When the trigger fires, the recipients, `subject:`, the string values of
+`extra_substitutions:` and `content_template_text:` are substituted against the record that
+fired it, while that record is still in memory. A message notification record is then
+created holding those resolved values, and a job is queued to send it.
+
+The message body is not rendered until that job runs. It re-loads the record from the
+database by ID and substitutes the layout together with the content in a single pass, so
+those tags resolve against the saved record and its master record.
+
+This gives the two ways of supplying content different behaviour:
+
+| | `content_template_text:` | Named `content_template:` |
+| --- | --- | --- |
+| Substituted when the trigger fires | Yes, against the in-memory record | No — only the template name is stored |
+| Substituted when the message is sent | Yes, with the layout | Yes, with the layout |
+| A tag that can not be resolved | Silently replaced with a blank at the first stage, so it never reaches the second | Raises an error when the message is sent |
+
+Values held on the record but not yet saved are therefore visible to
+`content_template_text:` and not to a named `content_template:`. See
+[record scoping](scoping.md) for what each stage can reach.
+
 ```yaml
 !defs(save_triggers_notify_options_defs.yaml)
+```
+
+Completed and failed notifications addressed to participants automatically create tracker
+entries by default. Notifications sent to end users through `role:` or `users:` are internal
+alerts and never create participant tracker entries. Set `no_tracker_entry: true` to prevent
+an otherwise eligible entry; the value may also be resolved from a `{{{substitution}}}` (triple
+curly, so a boolean is returned rather than a string) or conditional reference.
+
+Participant notifications associated with a real master are tracked against that master.
+Without a real master, raw `emails:` and `phones:` are matched to participant contacts, while
+list-style `phone_records:` are tracked against each resolved recipient master using the
+referenced record or a matching contact. Temporary holding masters are never tracker targets.
+
+### Backfilling existing notifications
+
+After deploying this tracker-entry feature, run the task once to add history for existing
+completed and failed notifications:
+
+```sh
+bundle exec rake message_notifications:backfill_tracker_entries
+```
+
+The task is safe to rerun: it skips each notification/master target that already has an
+entry, so a run interrupted partway through can complete the remaining targets. The
+optional `batch_size` defaults to `250`; the optional `from_id` resumes inclusively from a
+notification ID:
+
+```sh
+bundle exec rake 'message_notifications:backfill_tracker_entries[500,12345]'
+```
+
+The task requires the active `General > Notification > Sent/Failed` tracker records. If
+any part is missing or disabled, run `rails db:seed` or migration `20261027120000` first.
+The seed repairs an incomplete hierarchy while leaving an already complete active hierarchy
+alone. Invalid contact-resource configuration is reported as a backfill failure; the task
+continues processing other notifications and exits non-zero at the end. Notifications opted out
+with `no_tracker_entry: true` cannot be distinguished from older participant notifications
+that have no tracker history, so they may also receive entries during the backfill. User-
+addressed notifications are ignored and counted in the task summary. List recipients and
+notifications on temporary holding masters follow the same targeting rules as live
+notifications; holding masters themselves are not tracker targets.
+
+### Pattern 1: Email notification to a role
+
+```yaml
+!defs(save_triggers_notify_pattern_1_email_defs.yaml)
+```
+
+### Pattern 2: SMS notification to phone numbers
+
+```yaml
+!defs(save_triggers_notify_pattern_2_sms_defs.yaml)
+```
+
+### Pattern 3: Recipients via phone_records association
+
+```yaml
+!defs(save_triggers_notify_pattern_3_phone_records_defs.yaml)
+```
+
+### Pattern 4: Calendar invite (email only)
+
+```yaml
+!defs(save_triggers_notify_pattern_4_calendar_invite_defs.yaml)
+```
+
+### Pattern 5: File attachments (email only)
+
+```yaml
+!defs(save_triggers_notify_pattern_5_attachments_defs.yaml)
 ```
 
 ## Inline Image Handling

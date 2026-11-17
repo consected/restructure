@@ -15,6 +15,12 @@ require 'rails_helper'
 # - "All" and "Not set" options are included
 # - disabled filter is included for admin users
 # - JavaScript for filter navigation is included
+#
+# Additional tests for the "Not set" dropdown bug:
+# - filter_select accepts allow_not_set: false to suppress the "Not set" option for
+#   filters that aren't real nullable database columns (e.g. a computed/virtual filter)
+# - "Not set" (a present filter key with a nil value) is now distinguishable from "All"
+#   (no filter key at all) in the rendered dropdown - both previously stringified to ''
 # - reports index page also uses the new select-based filters
 RSpec.describe AdminHelper, type: :helper do
   include ModelSupport
@@ -54,6 +60,31 @@ RSpec.describe AdminHelper, type: :helper do
 
       expect(result).to include('Not set')
       expect(result).to include('IS NULL')
+    end
+
+    it 'omits the not set option when allow_not_set is false' do
+      values = { 'general' => 'General', 'user' => 'User' }
+      result = helper.filter_select(:item_type, values, allow_not_set: false)
+
+      expect(result).not_to include('Not set')
+      expect(result).not_to include('IS NULL')
+    end
+
+    it 'marks "Not set" as selected (not "All") when the filter value is explicitly nil' do
+      helper.instance_variable_set(:@_test_filter_params, { item_type: nil })
+      values = { 'general' => 'General', 'user' => 'User' }
+      result = helper.filter_select(:item_type, values)
+
+      expect(result).to match(/value="IS NULL"[^>]*selected/)
+      expect(result).not_to match(/value=""[^>]*selected/)
+    end
+
+    it 'does not mark "Not set" as selected when no filter is applied at all ("All")' do
+      helper.instance_variable_set(:@_test_filter_params, {})
+      values = { 'general' => 'General', 'user' => 'User' }
+      result = helper.filter_select(:item_type, values)
+
+      expect(result).not_to match(/value="IS NULL"[^>]*selected/)
     end
 
     it 'includes options for each filter value' do

@@ -41,11 +41,7 @@ RSpec.describe 'Lookup sub-query and condition return-flags in ConditionalAction
     @lookup_dm.update_tracker_events
   end
 
-  after :all do
-    change_setting('AllowDynamicMigrations', false)
-  end
-
-  before :each do
+  before_all do
     create_user
     setup_test_no_master_dm_rec_dynamic_model
     expect(DynamicModel::TestNoMasterDmRec.no_master_association).to be true

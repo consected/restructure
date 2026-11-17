@@ -1,0 +1,8 @@
+# Pattern 1: Create a reference from the current item (in: this - the default/most common case)
+create_reference:
+  player_contact:
+    in: this
+    with:
+      data: '{{cell_phone}}'
+      rec_type: phone
+      rank: 5

@@ -1,0 +1,25 @@
+# Pattern 7: Dynamic and substituted comparison values
+# @runnable: true
+# @instance: activity_log
+# @expect: true
+
+# Comparison values are passed through the standard default value calculation, so
+# they may use dynamic keywords and substitutions rather than literals:
+#
+#   now(), today(), time()      the current date / time
+#   id                          the id of the current record
+#   current_user                the current user's id
+#   current_user_email          the current user's email address
+#   current_user_roles          the current user's active role ids
+#   current_user_role_names     the current user's active role names
+#   '<n> seconds|minutes|hours|days|months|years'  offset from now, e.g. '-1 day'
+#   '{{attribute}}'             substitution of data from the current record
+#
+# See the substitutions reference for the full substitution syntax.
+all:
+  activity_log__player_contact_phones:
+    id: id
+    created_at:
+      condition: '>'
+      value: '-1 day'
+    select_who: '{{select_who}}'

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Tests background trigger-list composition, including the each iterator.
 require 'rails_helper'
 
 RSpec.describe SaveTriggers::Background, type: :model do
@@ -14,7 +15,7 @@ RSpec.describe SaveTriggers::Background, type: :model do
     ActiveJob::Base.queue_adapter = original_adapter
   end
 
-  before :each do
+  before_all do
     create_user
     setup_access :player_contacts
     let_user_create_player_contacts
@@ -176,6 +177,43 @@ RSpec.describe SaveTriggers::Background, type: :model do
           perform_enqueued_jobs
         end.not_to raise_error
       end
+
+      it 'executes each within a background trigger list and its lifecycle callback' do
+        config = [
+          {
+            each: {
+              value: %w[first second],
+              do: [
+                {
+                  log: {
+                    message: 'Background {{save_trigger_results.iterator_index}} => {{save_trigger_results.iterator_value}}',
+                    severity: 'info',
+                    on_complete: [
+                      {
+                        log: {
+                          message: 'Background callback {{save_trigger_results.iterator_index}} => {{save_trigger_results.iterator_value}}',
+                          severity: 'info'
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+
+        trigger = SaveTriggers::Background.new(config, @activity_log)
+        trigger.perform
+
+        expect(Rails.logger).to receive(:info).with(/Background 0 => first/)
+        expect(Rails.logger).to receive(:info).with(/Background callback 0 => first/)
+        expect(Rails.logger).to receive(:info).with(/Background 1 => second/)
+        expect(Rails.logger).to receive(:info).with(/Background callback 1 => second/)
+        allow(Rails.logger).to receive(:info)
+
+        expect { perform_enqueued_jobs }.not_to raise_error
+      end
     end
   end
 end
@@ -192,7 +230,7 @@ RSpec.describe SaveTriggersBackgroundJob, type: :job do
     ActiveJob::Base.queue_adapter = original_adapter
   end
 
-  before :each do
+  before_all do
     create_user
     setup_access :player_contacts
     let_user_create_player_contacts

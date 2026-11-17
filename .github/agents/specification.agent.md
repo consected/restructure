@@ -1,6 +1,6 @@
 ---
 description: 'Generate or update specification documents for new or existing functionality.'
-tools: [vscode/memory, vscode/askQuestions, execute/testFailure, execute/getTerminalOutput, execute/killTerminal, execute/sendToTerminal, execute/runInTerminal, read/problems, read/readFile, read/viewImage, read/terminalSelection, read/terminalLastCommand, agent/runSubagent, edit/createDirectory, edit/createFile, edit/editFiles, search/changes, search/codebase, search/fileSearch, search/listDirectory, search/searchResults, search/textSearch, search/usages, web/fetch, web/githubRepo, browser/openBrowserPage, vscode.mermaid-chat-features/renderMermaidDiagram, todo]
+tools: [execute, read, edit, search, web, agent, todo]
 ---
 # Specification mode instructions
 

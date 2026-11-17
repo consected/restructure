@@ -1,0 +1,34 @@
+<h4>Data Entry Trigger</h4>
+<% if object_instance.persisted? %>
+<p>REDCap can call this application directly whenever a record or survey response is created or
+modified, instead of using a separate infrastructure stopgap. Configure this in the REDCap
+project's <b>Project Setup</b> tab, under <b>Enable optional modules and customizations</b> ->
+<b>Additional customizations</b> -> <b>Data Entry Trigger</b>.</p>
+
+<h5>1. In ReStructure</h5>
+<p>Check if the API user already exists: <code><%= Settings::RedcapDetUserEmail %></code></p>
+<p>If the user already exists, retrieve its API token from your password manager.</p>
+<p>If a new user must be created:</p>
+<ul>
+  <li>add user <code><%= Settings::RedcapDetUserEmail %></code> (with <b>API access only</b> checked) and retain the API token in a password manager</li>
+  <li>add two User Access Controls for the app type <code>ref-data</code> and the new username:
+    <ul>
+      <li>resource type <code>general</code>, resource name <code>app_type</code></li>
+      <li>resource type <code>general</code>, resource name <code>redcap_pull_request</code></li>
+    </ul>
+  </li>
+</ul>
+<p>NOTE: the specified user must be valid, and set up exclusively for the purpose of submitting REDCap Data Entry Trigger requests.</p>
+
+<h5>2. In the REDCap project</h5>
+<p>In the <b>URL of website</b> field, add the ReStructure endpoint below, substituting <code>&lt;user API token&gt;</code> with the real API token of the user above:</p>
+
+<pre class="data-entry-trigger-url-block"><%= object_instance.data_entry_trigger_url %></pre>
+<a class="copy-block-button in-block glyphicon glyphicon-copy"
+   title="Copy to clipboard"
+   data-copy-text="<%= ERB::Util.html_escape(object_instance.data_entry_trigger_url) %>"></a>
+
+<p class="info-danger">NOTE: the internal project token is unique to this project. Do not reuse this URL for another project.</p>
+<% else %>
+<p>Save this project before setting up the Data Entry Trigger.</p>
+<% end %>

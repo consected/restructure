@@ -1,0 +1,18 @@
+<% if object_instance.config_errors.present? %>
+  <div class="config-error-block">
+    <label>configuration errors</label>
+    <% object_instance.config_errors.each do |config_error| %>
+      <div>
+        <div class="config-error-def-config-type">
+          <span class="config-error-list-type"><%= config_error[:config_class] %></span>
+        </div>
+        <p><%= config_error[:message] %></p>
+        <% if config_error[:offending_keys].present? %>
+          <div class="ceb-extra-details">
+            <pre><%= config_error[:offending_keys].join("\n") %></pre>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+<% end %>

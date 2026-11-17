@@ -1,0 +1,25 @@
+# Pattern 6: Deriving a comparison value from a sub-query
+# @runnable: true
+# @instance: activity_log
+# @expect: true
+
+# `lookup` runs an independent sub-query and substitutes its result as the
+# comparison value for the enclosing field. Because the sub-query is not joined
+# to the outer scope it may safely target the same table as the current record.
+#
+# Restrictions:
+#  - structure the sub-query like a normal condition, rooted in a selection type
+#    and including no_masters: {} or masters: {} at that level
+#  - only return_value and return_value_list are supported; return_result and
+#    return_all_results raise an error
+#  - a missing or unsupported return directive raises an error naming the outer
+#    table and field
+all:
+  addresses:
+    zip:
+      lookup:
+        all:
+          masters: {}
+          addresses:
+            city: portland
+            zip: return_value

@@ -16,6 +16,9 @@ describe 'Create a BHS subject and activity', driver: $browser_driver do
   end
 
   before :all do
+    # Capture shared definitions and settings first, so after(:all) can restore them
+    @definition_snapshot = BhsDefinitionSnapshot.capture
+
     app = BhsImportConfig.import_config name: BhsImportConfig.bhs_app_name
     SetupHelper.feature_setup
     change_setting('TwoFactorAuthDisabledForUser', true)
@@ -74,6 +77,10 @@ describe 'Create a BHS subject and activity', driver: $browser_driver do
 
     dmcats = DynamicModel.categories - ['details']
     DynamicModel.active.where.not(category: 'extended-info').update_all(disabled: true) if dmcats.length > 1
+  end
+
+  after :all do
+    BhsDefinitionSnapshot.restore(@definition_snapshot) if @definition_snapshot
   end
 
   def as_user(role)

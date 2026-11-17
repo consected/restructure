@@ -1,0 +1,7 @@
+# Pattern 2: Explicit protocol_name/protocol_id (entry label is not a protocol name)
+add_tracker:
+  dynamic:
+    with:
+      protocol_name: Study
+      sub_process_name: Alerts
+      protocol_event_name: Level 1

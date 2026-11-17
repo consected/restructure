@@ -30,14 +30,12 @@ RSpec.describe 'Config library versioning with dynamic definitions', type: :mode
   include OptionsSupport
 
   before :all do
-    change_setting('AllowDynamicMigrations', true)
-  end
-
-  after :all do
+    generate_dm_with_library_ref_table(use_current_version: true)
+    generate_dm_with_library_ref_table(use_current_version: false)
     change_setting('AllowDynamicMigrations', false)
   end
 
-  before :example do
+  before_all do
     @user0, = create_user
     create_admin
     create_user
@@ -61,22 +59,21 @@ RSpec.describe 'Config library versioning with dynamic definitions', type: :mode
     )
   end
 
-  def generate_dm_with_library_ref(_config_library, use_current_version: false)
-    unless Admin::MigrationGenerator.table_exists? 'test_created_by_recs'
-      TableGenerators.dynamic_models_table('test_created_by_recs', :create_do,
-                                           'test1', 'test2', 'created_by_user_id',
-                                           'use_def_version_time', 'text_array')
-    end
+  def table_name(use_current_version: false)
+    "test_created_by_library_recs#{use_current_version ? '_currvers' : '_vers'}"
+  end
 
+  def generate_dm_with_library_ref_table(use_current_version: false)
+    DynamicModelSupport.generate_test_dynamic_model(
+      table_name: table_name(use_current_version:),
+      name: 'test config by library version',
+      allow_updating: true
+    )
+  end
+
+  def generate_dm_with_library_ref(use_current_version: false)
     @master = Master.create! current_user: @user
     @master.current_user = @user
-
-    DynamicModel.active.where(table_name: 'test_created_by_recs').reload.each { |dm| dm.disable!(@admin) }
-    begin
-      DynamicModel.send(:remove_const, :TestCreatedByRec) if DynamicModel.const_defined?(:TestCreatedByRec, false)
-    rescue NameError
-      # ignored
-    end
 
     ucv_config = if use_current_version
                    "_configurations:\n  use_current_version: true\n"
@@ -93,21 +90,18 @@ RSpec.describe 'Config library versioning with dynamic definitions', type: :mode
           - test2
     YAML
 
-    dm = DynamicModel.create!(
-      current_admin: @admin,
-      name: 'test created by',
-      table_name: 'test_created_by_recs',
-      primary_key_name: :id,
-      foreign_key_name: :master_id,
-      field_list: 'test1 test2',
-      category: :test,
-      options: options_yaml
+    tn = table_name(use_current_version: use_current_version)
+
+    dm = generate_test_dynamic_model(
+      table_name: tn,
+      extra_attrs: { options: options_yaml }
     )
+
     dm.current_admin = @admin
     dm.update_tracker_events
 
-    setup_access :dynamic_model__test_created_by_recs, user: @user
-    setup_access :dynamic_model__test_created_by_recs, user: @user0
+    setup_access "dynamic_model__#{tn}", user: @user
+    setup_access "dynamic_model__#{tn}", user: @user0
     dm
   end
 
@@ -160,7 +154,7 @@ RSpec.describe 'Config library versioning with dynamic definitions', type: :mode
     it 'uses the v1 library content for instances created under v1 definition' do
       # Create library v1 and dynamic model referencing it
       lib = create_test_config_library(label_value: 'v1_label')
-      dmdef = generate_dm_with_library_ref(lib)
+      dmdef = generate_dm_with_library_ref
 
       # Verify v1 definition has the v1 label
       v1_otc = dmdef.option_type_config_for(:default)
@@ -170,7 +164,7 @@ RSpec.describe 'Config library versioning with dynamic definitions', type: :mode
       sleep 2
 
       # Create an instance under v1
-      instance_v1 = @master.dynamic_model__test_created_by_recs.create!(test1: 'v1_record')
+      instance_v1 = @master.dynamic_model__test_created_by_library_recs_vers.create!(test1: 'v1_record')
 
       sleep 2
 
@@ -193,8 +187,10 @@ RSpec.describe 'Config library versioning with dynamic definitions', type: :mode
       current_otc = dmdef.option_type_config_for(:default)
       expect(current_otc.label).to eq('v2_label')
 
+      puts dmdef.implementation_class
+      puts dmdef.resource_name
       # Reload the v1 instance to clear any memoization
-      instance_v1 = DynamicModel::TestCreatedByRec.find(instance_v1.id)
+      instance_v1 = DynamicModel::TestCreatedByLibraryRecsVer.find(instance_v1.id)
 
       # The v1 instance's versioned definition should still use v1 library content
       versioned_otc = instance_v1.versioned_definition.option_type_config_for(:default)
@@ -207,7 +203,10 @@ RSpec.describe 'Config library versioning with dynamic definitions', type: :mode
     it 'uses the v2 library content for instances created after v2' do
       # Create library v1 and dynamic model referencing it
       lib = create_test_config_library(label_value: 'v1_label')
-      dmdef = generate_dm_with_library_ref(lib)
+      dmdef = generate_dm_with_library_ref
+      expect(dmdef.use_current_version).not_to be(true),
+                                               'Expected the versioned dynamic definition not to use the current library version'
+      version_count_before_library_update = dmdef.all_versions_count
 
       sleep 2
 
@@ -219,6 +218,9 @@ RSpec.describe 'Config library versioning with dynamic definitions', type: :mode
           label_from_lib: &label_from_lib v2_label
       YAML
 
+      expect(dmdef.all_versions_count).to be > version_count_before_library_update,
+                                          'Expected the library update to create a new version for the versioned definition'
+
       # Reload and re-parse the definition to simulate what refresh_outdated does
       # on the next web request. This is needed because refresh_dependencies
       # parses a throwaway object, not the cached definition (see issue #1033).
@@ -228,10 +230,10 @@ RSpec.describe 'Config library versioning with dynamic definitions', type: :mode
       sleep 2
 
       # Create an instance under v2
-      instance_v2 = @master.dynamic_model__test_created_by_recs.create!(test1: 'v2_record')
+      instance_v2 = @master.dynamic_model__test_created_by_library_recs_vers.create!(test1: 'v2_record')
 
       # Reload to clear memoization
-      instance_v2 = DynamicModel::TestCreatedByRec.find(instance_v2.id)
+      instance_v2 = DynamicModel::TestCreatedByLibraryRecsVer.find(instance_v2.id)
 
       # The v2 instance should use v2 library content
       versioned_otc = instance_v2.versioned_definition.option_type_config_for(:default)
@@ -247,53 +249,16 @@ RSpec.describe 'Config library versioning with dynamic definitions', type: :mode
       # Create library v1 and dynamic model with use_current_version: true
       lib = create_test_config_library(label_value: 'v1_label')
 
-      unless Admin::MigrationGenerator.table_exists? 'test_created_by_recs'
-        TableGenerators.dynamic_models_table('test_created_by_recs', :create_do,
-                                             'test1', 'test2', 'created_by_user_id',
-                                             'use_def_version_time', 'text_array')
-      end
-
       @master = Master.create! current_user: @user
       @master.current_user = @user
 
-      DynamicModel.active.where(table_name: 'test_created_by_recs').reload.each { |dm| dm.disable!(@admin) }
-      begin
-        DynamicModel.send(:remove_const, :TestCreatedByRec) if DynamicModel.const_defined?(:TestCreatedByRec, false)
-      rescue NameError
-        # ignored
-      end
-
-      options_yaml = <<~YAML
-        # @library #{@lib_category} #{@lib_name}
-        _configurations:
-          use_current_version: true
-        default:
-          label: *label_from_lib
-          fields:
-            - test1
-            - test2
-      YAML
-
-      dmdef = DynamicModel.create!(
-        current_admin: @admin,
-        name: 'test created by',
-        table_name: 'test_created_by_recs',
-        primary_key_name: :id,
-        foreign_key_name: :master_id,
-        field_list: 'test1 test2',
-        category: :test,
-        options: options_yaml
-      )
-      dmdef.current_admin = @admin
-      dmdef.update_tracker_events
-
-      setup_access :dynamic_model__test_created_by_recs, user: @user
-      setup_access :dynamic_model__test_created_by_recs, user: @user0
-
+      dmdef = generate_dm_with_library_ref(use_current_version: true)
       sleep 2
 
+      puts dmdef.implementation_class
+      puts dmdef.resource_name
       # Create an instance under v1
-      instance_v1 = @master.dynamic_model__test_created_by_recs.create!(test1: 'v1_record')
+      instance_v1 = @master.dynamic_model__test_created_by_library_recs_currvers.create!(test1: 'v1_record')
 
       sleep 2
 
@@ -310,7 +275,7 @@ RSpec.describe 'Config library versioning with dynamic definitions', type: :mode
       dmdef.force_option_config_parse
 
       # Reload the v1 instance to clear memoization
-      instance_v1 = DynamicModel::TestCreatedByRec.find(instance_v1.id)
+      instance_v1 = DynamicModel::TestCreatedByLibraryRecsCurrver.find(instance_v1.id)
 
       # With use_current_version: true, the v1 instance should use CURRENT (v2) library
       versioned_def = instance_v1.versioned_definition
@@ -326,28 +291,31 @@ RSpec.describe 'Config library versioning with dynamic definitions', type: :mode
 
     it 'does not pass version_at to include_libraries when use_current_version is true' do
       lib = create_test_config_library(label_value: 'v1_label')
-      dmdef = generate_dm_with_library_ref(lib, use_current_version: true)
+      dmdef = generate_dm_with_library_ref(use_current_version: true)
+      expect(dmdef.use_current_version).to be(true),
+                                           'Expected the dynamic definition to parse _configurations.use_current_version as true'
+      version_count_before_library_update = dmdef.all_versions_count
 
       sleep 2
 
       # Update the library to v2
       lib.current_admin = @admin
-      lib.update!(options: <<~YAML)
+      lib.update!(updated_at: Time.current, options: <<~YAML)
         _definitions_lib:
-          label_from_lib: &label_from_lib v2_label
+          label_from_lib: &label_from_lib v3_label
       YAML
 
       sleep 2
-
+      puts dmdef.implementation_class
+      puts dmdef.resource_name
       # With use_current_version, the library update should NOT have touched the definition,
-      # so no new version boundary exists. Verify versioned() returns nil.
-      versioned_def = dmdef.versioned(dmdef.created_at)
-      expect(versioned_def).to be_nil,
-                               'Expected no version boundary when use_current_version is true (touch should be skipped)'
+      # so it should not add a new version boundary.
+      expect(dmdef.all_versions_count).to eq(version_count_before_library_update),
+                                          'Expected the library update to skip touching the current-version definition'
 
-      # Verify prepare_options_text on the current definition uses latest library (v2)
+      # Verify prepare_options_text on the current definition uses latest library (v3)
       config_text = OptionConfigs::ExtraOptions.prepare_options_text(dmdef)
-      expect(config_text).to include('v2_label'),
+      expect(config_text).to include('v3_label'),
                              'Expected prepare_options_text to use current library content when use_current_version is true, ' \
                              "Got:\n#{config_text}"
       expect(config_text).not_to include('v1_label'),

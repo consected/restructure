@@ -14,6 +14,1435 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [10.2.0] - 2026-11-17
+
+### From FPHS - PR #1562 - 2026-11-17
+
+- [Changed] large multi-file filestore downloads to be prepared in the background and downloaded from a link in a notification - fixes #1552
+
+### From FPHS - PR #1561 - 2026-11-17
+
+- Fixed report result search links - resolves #1555
+
+### From FPHS - PR #1556
+
+- [Changed] Filestore to send a single selected file directly instead of zipping it - fixes #1553
+
+
+
+### From FPHS - PR #1554 - 2026-11-11
+
+- [Changed] submission of filestore selections to allow use of one JSON param to avoid Rack params limit - fixes #1551
+
+### From FPHS - PR #1548 - 2026-11-11
+
+- [Added] name keys for protocol lookups in tracker_history conditions - fixes #1491
+
+### From FPHS - PR #1523 - 2026-11-11
+
+- [Added] automatic tracker entries for message notifications - fixes #1479
+- [Added] modal preview of message notifications from tracker entries
+
+### From FPHS - PR #1547 - 2026-11-11
+
+- [Fixed] field_options HTML attributes dropped by select edit field partials - fixes #1460
+
+### From FPHS - PR #1540 - 2026-11-10
+
+- [Refactored] app type import to reduce wasted time by deferring system-wide regeneration work - fixes 1538
+
+
+## [10.1.0] - 2026-11-10
+
+### From FPHS - PR #1544 - 2026-11-10
+
+- [Fixed] handlebars precompiler parsing of double-quoted template names - fixes #1543 which was a regression introduced by #1542 CVE fixes
+
+- [Security] [Updated] gems to address various CVEs - fixes 1541
+- [Security] [Updated] yarn modules
+
+
+
+### From FPHS - PR #1539 - 2026-11-06
+
+- [Fixed] master search failing when show_ids_in_master_result lists an inaccessible ID - fixes #1537
+
+### From FPHS - PR #1470 - 2026-11-05
+
+- [Fixed] filestore setup for piped input and hardened retry handling - related to #1485 and #1487
+
+### From FPHS - PR #1488 - 2026-11-05
+
+- [Fixed] field options memoization scope across fields and forms - fixes 1457
+
+### From FPHS - PR #1536 - 2026-11-05
+
+- [Updated] documentation for dialog_before, explaining when a button is shown - fixes #616
+
+### From FPHS - PR #1534 - 2026-11-05
+
+- [Added] condition linter that warns admins about problems in conditional calculation configs, shown as configuration notices for dynamic definitions and page layouts - fixes #603
+- [Note] PR #1535 is empty, to allow the merge commit message required by the CHANGELOG to be added
+
+
+
+### From FPHS - PR #1529 - 2026-11-04
+
+- [Added] rec_type and rank dynamic model view handlers - fixes #1528
+
+### From FPHS - PR #1524 - 2026-11-02
+
+- [Fixed] duplicate class instantiation when removing generated classes - fixes #1520
+- [Fixed] duplicate caption HTML conversion -  related to #1520
+
+### From FPHS - PR #1517 - 2026-11-02
+
+- [Fixed] dynamic definitions being generated twice on boot and reload, and added alerts for definitions that fail to load - fixes #1516, fixes #1509
+
+### From FPHS - PR #1526 - 2026-10-31
+
+
+- [Fixed] stale captions in the page template after a direct edit of a dynamic definition - fixes #1525
+
+### From Consected - PR #1521 - 2026-10-27
+
+- [Updated] copilot instructions to support agent sandbox
+
+### From FPHS - PR #1519 - 2026-10-27
+
+- [Added] message template overrides for help pages - fixes #1484
+
+### From FPHS - PR #1518 - 2026-10-27
+
+- [Fixed] nested embedded_item condition error in calc actions - fixes #1515
+
+### From FPHS - PR #1514 - 2026-10-27
+
+- [Fixed] latent NfsStore bugs - fixes #1493
+
+### From FPHS - PR #1513 - 2026-10-26
+
+- [Added] record count to admin report preview - fixes #1497
+
+### From FPHS - PR #1512 - 2026-10-26
+
+- [Changed] headless/not_headless rspec scripts to check for running rspec processes
+
+### From FPHS - PR #1510 - 2026-10-26
+
+- [Fixed] XSS in filestore move modal path rendering - fixes #1492
+
+### From FPHS - PR #1490 - 2026-10-26
+
+- [Fixed] slow and stale admin components panel builds - fixes #1507
+
+### From FPHS - PR #1508 - 2026-10-22
+
+- [Fixed] failed dynamic migration error logging - fixes #1505
+
+### From FPHS - PR #1506 - 2026-10-22
+
+- [Added] workspace-scoped RSpec process checker
+
+### From FPHS - PR #1504 - 2026-10-22
+
+- [Added] .tar.xz extraction support - fixes #1501
+
+### From FPHS - PR #1503 - 2026-10-22
+
+- [Security] [Fixed] symlink-following vulnerability in NfsStore file retrieval and writes - fixes #1502
+
+
+
+### From FPHS - PR #1499 - 2026-10-21
+
+- [Added] composable save trigger each - fixes #1495
+
+### From FPHS - PR #1489 - 2026-09-29
+
+- [Fixed] NFS setup script stdin corruption and lost restart flag - fixes #1485
+
+### From FPHS - PR #1478 - 2026-09-24
+
+- [Fixed] missing attribute error in existing_not_in_retrieved_ids for foreign_key_through_external_id dynamic models - fixes #1477
+
+### From FPHS - PR #1473 - 2026-09-23
+
+- [Fixed] master_id column not persisted for Redcap external-identifier-associated dynamic models - fixes #1472
+
+### From FPHS - PR #1474 - 2026-09-23
+
+- [Added] config validation warning for update_this and related triggers missing named-entry wrapper - fixes #1444
+
+### From FPHS - PR #1475 - 2026-09-23
+
+- [Fixed] UserActionLogging NoMethodError on unsupported object_instance - fixes #1458
+
+### From FPHS - PR #1471 - 2026-09-23
+
+- [Added] AllowDropColumns setting to allow admins to see `ALLOW_DROP_COLUMNS` environment variable in server settings
+
+### From FPHS - PR #1469 - 2026-09-22
+
+- [Fixed] missing AppSettingsVars entries
+
+### From FPHS - PR #1468 - 2026-09-22
+
+- [Fixed] master association key resolved from the dynamic model primary key - fixes #1467
+
+### From FPHS - PR #1466 - 2026-09-17
+
+- [Fixed] nullable no_downcase field option - fixes #1462
+
+### From FPHS - PR #1463 - 2026-09-17
+
+- [Added] activity log no_sync_fields opt-out - fixes #1451
+
+### From FPHS - PR #1464 - 2026-09-17
+
+- [Fixed] Redcap project config rollback handling - fixes #1459
+
+### From FPHS - PR #1465 - 2026-09-17
+
+- [Added] spec proving extra_substitutions resolve before the notify background job runs
+
+
+
+### From FPHS - PR #1461 - 2026-09-17
+
+- [Fixed] field_options.disabled as a valid attribute - fixes #1456
+- [Fixed] duplicated/missing context in config validation messages
+
+
+
+### From FPHS - PR #1447 - 2026-09-16
+
+- [Fixed] activity log fallback field list Symbol/String mismatch and surfaced parent-synced fields in admin - fixes #1445
+
+
+
+### From FPHS - PR #1455 - 2026-09-16
+
+- [Fixed] dynamic field value literals - fixes #1453
+
+
+
+### From FPHS - PR #1454 - 2026-09-16
+
+- [Fixed] field_options include_blank validation - fixes #1452
+
+
+
+### From FPHS - PR #1450 - 2026-09-16
+
+- [Fixed] create_filestore_container skip_if_exists validation - fixes #1449
+
+
+
+### From FPHS - PR #1448
+
+- [Fixed] method call failure when changing external identifier columns - fixes 1446
+
+
+
+### From FPHS - PR #1443
+
+- [Fixed] pull_external_data on_failure missing response code and submitted_request - fixes #1442
+
+
+
+### From FPHS - PR #1441 - 2026-09-10
+
+- [Fixed] header-based API auth CSRF gap - fixes #1440
+- [Added] X-ReStructure-Error header
+
+
+
+### From FPHS - PR #1437 - 2026-09-10
+
+- [Updated] rubyzip compatibility - fixes #1436
+
+
+
+### From FPHS - PR #1439 - 2026-09-10
+
+- [Pinned] json below 3 for ActiveSupport compatibility - fixes #1438
+
+
+
+### From FPHS - PR #1435 - 2026-09-09
+
+- [Updated] gems
+- [Added] entry to brakeman allowlist
+
+
+
+### From FPHS - PR #1434 - 2026-09-09
+
+- [Added] pull external response headers - fixes #1430
+
+
+
+### From FPHS - PR #1425 - 2026-09-09
+
+- [Fixed] Redcap pull caching and status reporting - fixes #1405
+
+
+
+From FPHS - PR #1429 - 2029-09-09
+
+- [Updated] DB schema dump
+- [Migration] required
+
+
+
+### From FPHS - PR #1427 - 2026-09-08
+
+- [Fixed] current config library cache refresh - fixes #1409
+
+
+
+### From FPHS - PR #1428 - 2026-09-08
+
+- [Fixed] admin API definitions panel spec selection - fixes #1424
+
+
+
+### From FPHS - PR #1422 - 2026-09-08
+
+- [Changed] CSRF failure status to 403 and added a custom header - fixes #1414
+
+
+
+### From FPHS - PR #1415 - 2026-09-08
+
+- [Fixed] API-only user creation when 2FA is disabled - fixes #1410
+
+
+
+### From FPHS - PR #1421 - 2026-09-08
+
+- [Fixed] pull_external_data error bodies - fixes #1418
+
+
+
+### From FPHS - PR #1413 - 2026-09-08
+
+- [Fixed] master template cache churn on login - fixes #1400 (Phase 2)
+
+
+
+### From FPHS - PR #1402 - 2026-09-08
+
+- [Fixed] global role and access-control rows not rotating partial cache keys - refs #1400 (Phase 1)
+
+
+
+### From FPHS - PR #1420 - 2026-09-08
+
+- [Fixed] trigger task validation spec app type setup
+
+
+
+### From FPHS - PR #1411 - 2026-09-08
+
+- [Fixed] stale dynamic definitions in background save triggers - fixes #1406
+
+
+
+### From FPHS - PR #1417 - 2026-09-08
+
+- [Fixed] dynamic model validation transaction error - fixes #1416
+
+
+
+### From FPHS - PR #1407 - 2026-09-03
+
+- [Added] REDCap Data Entry Trigger endpoint - fixes #1403
+
+
+
+### From FPHS - PR #1408 - 2026-09-03
+
+- [Fixed] selector cache invalidation - fixes #1312
+
+
+
+### From FPHS - PR #1404 - 2026-09-03
+
+- [Added] dynamic model crosswalk associations - fixes #1399
+
+
+
+### From FPHS - PR #1398 - 2026-09-03
+
+- [Added] continue_on_record_error option for REDCap pulls - fixes #1383
+
+
+
+### From FPHS - PR #1401 - 2026-09-02
+
+- [Added] admin documentation for record scoping of conditions, substitutions and save triggers - resolves #1381
+
+
+
+### From FPHS - PR #1397 - 2026-09-02
+
+- [Added] prewarm logging, robustness and cross-process cache-version fixes - refs #1362
+
+
+
+### From FPHS - PR #1395 - 2026-09-01
+
+- [Fixed] dynamic model admin dialogs section not listing dialog_before entries - fixes #1394
+
+
+
+### From FPHS - PR #1392 - 2026-08-28
+
+- [Added] template pre-warming (Stage 2) - refs #1362
+
+
+
+### From FPHS - PR #1392 - 2026-08-27
+
+- [Fixed] reentrant save from before_save triggers targeting this - fixes #1384
+
+
+
+### From FPHS - PR #1391 - 2026-08-27
+
+- [Added] view_skip_updates config for view-backed dynamic models - fixes #1203
+
+
+
+### From FPHS - PR #1390 - 2026-08-27
+
+- [Documented] X-User-Email/X-User-Token header authentication for the API - refs #1342
+
+
+
+### From FPHS - PR #1389 - 2026-08-27
+
+- [Fixed] admin disabled filter All option always reverting to enabled - fixes #1387
+
+
+
+### From FPHS - PR #1388 - 2026-08-27
+
+- [Added] ID column and filter to Usernames and Passwords admin page - fixes #1386
+
+
+
+
+
+### From FPHS - PR #1385 - 2026-08-27
+
+- [Added] save_trigger before_save test coverage and documentation - resolves #1382
+
+
+
+### From FPHS - PR #1380 - 2026-08-26
+
+- [Fixed] handlebars multi-bundle permanently missing when same template id has different content in one request - fixes #1379
+
+
+
+### From FPHS - PR #1377 - 2026-08-25
+
+- [Changed} Handlebars template compile - hardened and shared the on-disk cache across users - refs #1362
+
+
+
+### From FPHS - PR #1378 - 2026-08-25
+
+- [Added] recipient validation and expiry filtering - fixes #1374
+- [Changed] test specs to improve speed
+
+
+
+### From FPHS - PR #1376 - 2026-08-24
+
+- [Added] REDCap definition archive export - fixes #794
+
+
+
+### From FPHS - PR #1373 - 2026-08-24
+
+- [Added] redcap request config validation - fixes #1364
+
+
+
+### From FPHS - PR #1375 - 2026-08-24
+
+- [Added] notify save_trigger option validation - fixes #1370
+
+
+
+### From FPHS - PR #1372 - 2026-08-24
+
+- [Changed] [Docs] canonical schema format for extra_options and save_trigger config docs
+
+
+
+### From FPHS - PR #1371 - 2026-08-24
+
+- [Fixed] no_masters conditional calculations with tracker_history - fixes #1367
+
+
+
+### From FPHS - PR #1369 - 2026-08-20
+
+- [Changed] on_failure default behavior and add exception save trigger - resolves #1365
+
+
+
+### From FPHS - 2026-08-20
+
+- [Added] conditions documentation reference pages and verification harness
+
+
+
+### From FPHS - 2026-08-19
+
+- [Updated] config validation checks in `inspect_app_config.rb` to check extra options schemas
+
+
+
+### From FPHS - 2026-08-19
+
+- [Security] [Updated] gems to address "mail" GHSA: GHSA-mvxr-6m87-mv2q -  "Email address spoofing via malformed RFC 2047 encoded-words in mail"
+
+
+
+### From FPHS - PR #1357 - 2026-08-18
+
+- [Fixed] admin dynamic_models index batch job/view SQL column performance - resolves #1354
+- [Changed] headers in dynamic models admin index table
+- [Fixed] admin filters having "Not set" option
+
+
+
+### From FPHS - PR #1356 - 2026-08-13
+
+- [Fixed] item_flags conditional actions for dynamic model associations - fixes #1355
+
+
+
+### From FPHS - PR #1353 - 2026-08-13
+
+- [Fixed] API header auth checks - fixes #1342
+
+
+
+### From FPHS - PR #1351 - 2026-08-13
+
+- [Fixed] admin/user session timeouts during active use - fixes #1345
+
+
+
+### From FPHS - PR #1350 - 2026-08-12
+
+- [Added] versions panels to reports, external identifiers, and message templates - fixes #1346
+
+
+
+### From FPHS - 2026-08-12
+
+- [Fixed] spec tests for reliability
+
+
+
+### From FPHS - PR #1348 - 2026-08-12
+
+- [Fixed] blank schema migration generation - fixes #1339
+
+
+
+### From FPHS - PR #1347 - 2026-08-12
+
+- Limited admin versions panel with paging and fixed slow diff rendering - fixes #1343
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## [10.0.10] - 2026-09-11
+
+- [Merged] release 10.0.9 back to develop
+- [Fixed] pull_external_data failure response diagnostics - fixes #1442
+
+## [10.0.9] - 2026-09-10
+
+- [Merged] release 10.0.8 back to develop
+- [Added] X-ReStructure-Error header and fixed header-based API auth CSRF gap - fixes #1440
+
+## [10.0.8] - 2026-09-10
+
+- [Updated] API authentication documentation
+- [Merged] release 10.0.7 back to develop
+- [Added] save_trigger before_save test coverage and documentation - resolves #1382
+- [Added] ID column and filter to Usernames and Passwords admin page - fixes #1386
+- [Fixed] admin disabled filter All option always reverting to enabled - fixes #1387
+- [Updated] API authentication documentation
+- [Added] view_skip_updates config for view-backed dynamic models - fixes #1203
+- [Fixed] reentrant save from before_save triggers targeting this - fixes #1384
+- [Added] template pre-warming (Stage 2) - refs #1362
+- [Fixed] dynamic model admin dialogs section not listing dialog_before entries - fixes #1394
+- [Added] prewarm logging, robustness and cross-process cache-version fixes - refs #1362
+- [Added] admin documentation for record scoping of conditions, substitutions and save triggers - resolves #1381
+- [Fixed] global role and access-control rows not rotating partial cache keys - refs #1400
+- [Added] continue_on_record_error option for REDCap pulls - fixes #1383
+- [Added] dynamic model crosswalk associations - fixes #1399
+- [Fixed] selector cache invalidation - fixes #1312
+- [Added] REDCap Data Entry Trigger endpoint - fixes #1403
+- [Fixed] dynamic model validation transaction error - fixes #1416
+- [Fixed] stale definitions in background save triggers - fixes #1406
+- [Fixed] trigger task spec setup dependency - fixes #1419
+- [Fixed] master template cache churn on login - fixes #1400
+- [Fixed] pull_external_data error bodies - fixes #1418
+- [Fixed] API-only user creation when 2FA is disabled - fixes #1410
+- [Changed] CSRF failure status to 403 - fixes #1414
+- [Fixed] current config library cache refresh - fixes #1409
+- [Fixed] admin API definitions panel spec selection - fixes #1424
+- [Updated] DB schema dump
+- [Fixed] Redcap pull caching and status reporting - fixes #1405
+- [Added] pull external response headers - fixes #1430
+
+## [10.0.7] - 2026-08-27
+
+- [Merged] release 10.0.6 back to develop
+- [Fixed] handlebars multi-bundle permanently missing when same template id has different content in one request - fixes #1379
+
+## [10.0.6] - 2026-08-26
+
+- [Merged] release 10.0.5 back to develop
+- [Updated] gems to address "mail" GHSA: GHSA-mvxr-6m87-mv2q -  "Email address spoofing via malformed RFC 2047 encoded-words in mail"
+- [Updated] config validation checks - fixes #0
+- [Added] conditions documentation reference pages and verification harness - fixes #0
+- [Added] exception save trigger and changed on_failure default behavior - fixes #1365
+- [Fixed] no_masters conditional calculations with tracker_history - fixes #1367
+- [Added] redcap request config validation - fixes #1364
+- [Added] notify save_trigger option validation - fixes #1370
+- [Added] REDCap definition archive export - fixes #794
+- [Hardened] and shared the on-disk Handlebars template compile cache across users - refs #1362
+- [Added] recipient validation and expiry filtering - fixes #1374
+- [Sped] up extra_option_configs and save_trigger specs by consolidating expensive setup into before(:all)
+
+## [10.0.5] - 2026-08-19
+
+- [Merged] release 10.0.4 back to develop
+- [Changed] raising of exceptions in pull_external_data to avoid leaking sensitive URL params
+- [Fixed] API header auth checks - fixes #1342
+- [Fixed] item_flags conditional actions for dynamic model associations - fixes #1355
+- [Changed] batch jobs header, removed position column, added id filter on dynamic models index
+- [Fixed] in_current_app_type filter dropdown always showing All despite filtering correctly
+- [Fixed] Not set vs All filter dropdown ambiguity and hid Not set for non-column filters
+
+## [10.0.4] - 2026-08-13
+
+- [Merged] release 10.0.3 back to develop
+- [Limited] admin versions panel to 100 rows and fixed slow diff rendering - fixes #1343
+- [Fixed] reversed heading date order and duplicate updated_at diff row - fixes #1343
+- [Added] load-more paging link to admin versions panel - fixes #1343
+- [Changed] default admin versions panel page size to 10 - fixes #1343
+- [Fixed] blank schema migration generation - fixes #1339
+- [Added] fixes for spec relaibility
+- [Added] versions panels to reports, external identifiers, and message templates - fixes #1346
+- [Fixed] admin session timing out during active use - fixes #1345
+- [Fixed] session inactivity timer not persisting due to activerecord-session_store dirty-tracking bug - fixes #1345
+
+## [10.0.3] - 2026-08-07
+
+- [Merged] release 9.46.6 back to develop
+- [Updated] CHANGELOG.md with git commits
+- [Updated] brakeman ignore list
+- [Updated] CHANGELOG
+- [Merged] release 9.47.0 back to develop
+- [Fixed] a range of flakey spec tests
+- [Updated] DB schema dump
+- [Fixed] otp_enc_key fallback to use Rails.application.secret_key_base - fixes #1015
+- [Advanced] config.load_defaults to 7.2 and removed stale defaults files - refs #1015
+- [Kept] SHA1 as previous scheme for AR encryption to decrypt legacy data - refs #1015 #1293
+- [Fixed] FrozenError in as_json methods for Rails 8 compatibility - refs #1015
+- [Moved] enqueue_after_transaction_commit to job base classes, removing deprecated global config - refs #1015 #1296
+- [Bumped] Rails to 8.0.5 and Puma to 8.0.2 - refs #1015
+- [Fixed] filter_parameters spec assertion for Rails 7.2+ regex compilation - refs #1015
+- [Added] new_framework_defaults_8_0.rb documenting reviewed Rails 8 template additions - refs #1327
+- [Changed] to_time_preserves_timezone to :zone - resolves #1302
+- [Fixed] review findings for to_time_preserves_timezone audit - refs #1302
+- [Adopted] postgresql_adapter_decode_dates = true - resolves #1295
+- [Migrated] otp_secret to SHA256 hash digest - resolves #1293
+- [Added] configurable hash_digest_class option for encrypted dynamic model fields - resolves #1294
+- [Upgraded] to Rails 8.1.3.1 and refreshed brakeman ignore fingerprints - refs #1325
+- [Updated] DB schema dump
+- [Fixed] spec test bug
+- [Bumped] version for Rails 8.1 upgrade
+- [Updated] CHANGELOG.md with git commits
+- [Bumped] version for Rails 8.1 upgrade
+- [Updated] CHANGELOG
+- [Bumped] version for Rails 8.1 upgrade
+- [Updated] CHANGELOG and gems
+- [Merged] release 10.0.1 back to develop
+- [Updated] CHANGELOG.md with git commits
+- [Merged] release 10.0.2 back to develop
+
+## [10.0.2] - 2026-08-06
+
+- [Merged] release 10.0.1 back to develop
+
+## [10.0.1] - 2026-08-06
+
+### From FPHS - PR #1338 - 2026-08-06
+
+- [Rails8][Upgrade] Upgrade to Rails 8.1.3.1 (part of #1015) - resolves #1325 and upgrades from PR #1305
+
+### From FPHS - PR #1335 - 2026-08-06
+
+- [Rails8][Upgrade] Add configurable hash_digest_class option for encrypted dynamic model fields - resolves #1294
+
+### From FPHS - PR #1332 - 2026-08-06
+
+- [Rails8][Upgrade] Migrate OTP encrypted field (otp_secret) to SHA256 hash digest - resolves #1293
+
+### From FPHS - PR #1333 - 2026-08-06
+
+- [Rails8][Upgrade] Adopt active_record.postgresql_adapter_decode_dates = true
+
+### From FPHS - PR #1329 - 2026-08-06
+
+- [Rails8][Upgrade] to_time_preserves_timezone audit - fixes #1302
+
+### From FPHS - PR #1328 - 2026-08-06
+
+- [Rails8][Upgrade] app:update audit + deploy/rollback acceptance checks - fixes #1327
+
+### From FPHS - PR #1305 - 2026-08-06
+
+- [Rails8][Upgrade] Upgrade Rails to 8.0.5 and Puma to 8.0.2
+
+### From FPHS - PR #1299 - 2026-08-06
+
+- [Rails8][Upgrade] Rails 8 upgrade prep: fix otp_enc_key, advance load_defaults to 7.2
+
+### From FPHS - PR #1341 - 2026-08-06
+
+- [Updated] DB schema dump
+
+### From FPHS - PR #1340 - 2026-08-06
+
+- [Fixed] a range of flakey spec tests
+
+## [9.47.0] - 2026-08-05
+
+- [DB-Migration] required before upgrade
+- [DB-Seeds] update required from admin panel
+- [Security][Updated] gems to address activestorage CVE: CVE-2026-66066
+
+### From FPHS - PR #1336 - 2026-08-04
+
+- [Fixed] blank primary_key_name causing PG::SyntaxError in view_sql dynamic models - fixes #1304
+
+### From FPHS - PR #1320 - 2026-08-04
+
+- [Fixed] always_embed_creatable_reference raising when a direct embed is at capacity - fixes #1319
+
+### From FPHS - PR #1334 - 2026-08-04
+
+- [Changed] user access overview report navigation and highlighting - fixes #1330
+- [Fixed] Seeding of user access overview reports to allow updates - fixes #1330
+
+### From FPHS - PR #1331 - 2026-08-04
+
+- [Changed] spec tests to improve reliability and increase performance
+- [Added] better agent prompts
+
+### From FPHS - PR #1321 - 2026-08-04
+
+- [Fixed] tracker_history rows written outside the app leaving tracker_id null - fixes #1309
+
+### From FPHS - PR #1324 - 2026-07-30
+
+- [Fixed] admin components panel cache not varying by app type - fixes #1323
+
+### From FPHS - PR #1322 - 2026-07-29
+
+- [Changed] handling of configurations to allow Hash-based app_type/user references across save triggers - fixes #1318
+
+### From FPHS - PR #1317 - 2026-07-25
+
+- [Added] typed conditional access regression tests - fixes #1316
+
+### From FPHS - PR #1315 - 2026-07-25
+
+- [Fixed] implementation bugs following trigger-tasks-validation refactoring
+- [Fixed] spec failures
+
+### From FPHS - PR #1314 - 2026-07-25
+
+- [Fixed] preset_value and related field options to allow array values - fixes #1313
+
+### From FPHS - PR #1306 - 2026-07-23
+
+- [Note] this represents a large refactor of the dynamic definitions configuration.
+- [Added] per-type trigger validation and ExtraOptionConfigs BaseConfiguration refactoring - fixes #986 fixes #1058
+
+### From FPHS - 2026-07-23
+
+- [Fixed] spec setup and common handling to improve reliability
+
+### From FPHS - PR #1307 - 2026-07-22
+
+- [Fixed] pre-existing memoization test-isolation failures in external_identifier_spec and container_file_spec - fixes #1303
+
+### From FPHS - PR #1301 - 2026-07-22
+
+- [Fixed] force_not_valid not bypassing PlayerInfo source and PlayerContact rec_type validation - fixes #1281
+
+### From FPHS - 2026-07-21
+
+- [Added] notes field format support for specs
+
+### From FPHS - 2026-07-21
+
+- [Fixed] system spec issues
+
+### From FPHS - PR #1292 - 2026-07-21
+
+- [Changed] parallel test scripts to limit processes and improve DB setup
+
+### From FPHS - PR #1291 - 2026-07-21
+
+- [Fixed] pages#template honoring version token to prevent browser cache poisoning - fixes #1287
+
+### From Viva - PR #1290 - 2026-07-20
+
+- [Added] testrelated app config inspector modes for page layouts/access controls and fixed flaky Rspec support helpers
+
+### From FPHS - PR #1288 - 2026-07-20
+
+- [Fixed] under-scoped access-control cache keys causing missing master panel tabs after in-session app type switch - fixes #1279
+
+### From FPHS - PR #1286 - 2026-07-20
+
+- [Fixed] col_type_json blank textarea clearing empty json/jsonb Hash/Array values - fixes #1285
+
+### From Viva - PR #1283 - 2026-07-16
+
+- [Fixed] handlebars_cache_key to be app_type- and user-aware, preventing cross-app_type and user cache poisoning - fixes #1279
+
+### From FPHS - PR #1282 - 2026-07-16
+
+- [Added] ability to remove a Redcap user from a project in project admin - fixes #1260
+
+### From Viva - PR #1280 - 2026-07-16
+
+- [Fixed] spec flakiness in register_call, admin_parsed_config, and API association specs
+
+### From FPHS - PR #1278 - 2026-07-16
+
+- [Fixed] and documented  ColTypeJson YAML-to-JSON field behaviour - fixes #1268
+
+### From FPHS - PR #1277 - 2026-07-16
+
+- [Added] import_project_user to REDCap API client and save/batch trigger support - resolves #1276
+
+### From FPHS - PR #1275 - 2016-07-16
+
+- [Added] REDCap Users admin report with Search Project Users admin link - resolves #1258
+
+### From FPHS - PR #1274 - 2026-07-16
+
+- [Added] yaml_parse substitution and fix json/yaml_parse top-level array indexing - fixed #1267 and #1273
+
+### From FPHS - PR #1272 - 2026-07-16
+
+- [Added] remove_project_user REDCap API method for save/batch triggers - resolves #1259
+
+### From FPHS - PR #1271 - 2026-07-16
+
+- [Fixed] whole-cache clear on routine User/Admin saves - fixes #1270
+
+### From FPHS - PR #1266 - 2026-07-15
+
+- [Fixed] Delayed::Job job_id lookup fragility that broke Admin Job UUID search - fixes #1232
+
+### From FPHS - PR #1265 - 2026-07-15
+
+- [Fixed] AppSettingsVars NfsStoreJobDefaultAppTypeId typo and added method fallback in app_settings - fixes #1248
+
+### From FPHS - PR #1264 - 2026-07-15
+
+- [Fixed] active_model_configurations fail-open when FPHS_LOAD_APP_TYPES matches no active app type - fixes #1263
+
+### From FPHS - PR #1261 - 2026-07-15
+
+- [Fixed] clean_references_def unresolved reference handling and suppressed spurious startup WARN logging - fixes #1246
+
+### From Viva - PR #1262 - 2026-07-14
+
+- [Added] system spec for edit-mode show_if with custom option_type_attr_name - resolves #1256
+
+### From Viva - PR #1257 - 2026-07-14
+
+- [Fixed] show_if hiding of read-only field values for option-typed dynamic models - fixes #1254
+
+### From Viva - PR #1255 - 2026-07-14
+
+- [Fixed] missing `library` definition in sidebar embedded page view - fixes #1252
+
+### From FPHS - PR #1250 - 2026-06-30
+
+- [Fixed] Chartjs datalabels plugin appearing on all charts - fixes #1249
+- [Added] documentation for Chartjs datalabels and disabling legends
+
+### From FPHS - PR #1247 - 2026-06-27
+
+- [Fixed] YAML corruption and config library cycle expansion in dynamic model options - fixes #676
+
 ## [9.46.0] - 2026-06-25
 
 ### From FPHS - PR #1244 - 2026-06-24
@@ -293,7 +1722,6 @@ Fixed notes field format: plain newlines overridden by app config markdown setti
 ### From FPHS - PR #1113 - 2026-05-06
 
 - [Fixed] tracker history protocol casing in history view - fixes #1112
-
 
 ## [9.44.0] - 2026-05-02
 

@@ -4,7 +4,15 @@
 # For triggers that accept multiple entries (e.g. add_tracker, update_this,
 # create_reference), these options can be placed inside each named entry
 # to run hooks per-entry.
-
+#
+# Canonical schema
+# on_complete: <TriggerTaskList>
+# on_failure: <TriggerTaskList>
+#
+# TriggerTaskList type - see save_trigger.md; a single trigger Hash or an Array of them
+# TriggerTaskList: <Hash(trigger_type: TriggerConfig) | Array(Hash(trigger_type: TriggerConfig))>
+# All keys are optional.
+#
             on_complete: |
               (optional) triggers to run after successful completion.
               Accepts a single trigger hash or an array of trigger configurations.
@@ -32,11 +40,17 @@
             on_failure: |
               (optional) triggers to run if an exception is raised.
               Accepts a single trigger hash or an array of trigger configurations.
-              The original exception is re-raised after on_failure triggers execute.
-              Errors within on_failure triggers are logged but do not suppress
-              the original exception.
+              By default, the original exception is NOT re-raised after on_failure executes, which prevents rolling back the DB transaction unless configured otherwise.
+              To explicitly raise a new error or re-raise the original failure, use the `exception` trigger.
               Can be placed at the top level or inside each named entry,
               matching on_complete placement.
+
+# Notes:
+# - on_complete/on_failure are extracted before the owning trigger's own validation runs,
+#   so they never appear as "unrecognized keys" even for triggers that don't declare them
+#   in their own allowed_keys list.
+# - Errors raised within an on_failure trigger itself are logged but do not replace or
+#   suppress the exception that triggered it.
               
               Example:
                 on_failure:
@@ -47,3 +61,5 @@
                       one:
                         with:
                           status: failed
+                  - exception:
+                      original_failure: true

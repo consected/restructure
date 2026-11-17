@@ -39,7 +39,7 @@ RSpec.describe NfsStore::Process::MountArchiveJob, type: :model do
     create_user_role 'nfs_store group 600', user: @user, app_type: app_type_b
     create_user_role default_role, user: @user, app_type: app_type_b
 
-    setup_access 'activity_log__player_contact_phones', user: @user, app_type: app_type_b
+    setup_access nfs_al_rn, user: @user, app_type: app_type_b
     setup_access 'nfs_store__manage__containers', user: @user, app_type: app_type_b
     setup_access 'nfs_store__manage__stored_files', user: @user, app_type: app_type_b
     setup_access 'nfs_store__manage__archived_files', user: @user, app_type: app_type_b
@@ -57,7 +57,7 @@ RSpec.describe NfsStore::Process::MountArchiveJob, type: :model do
 
   describe 'with use_parent_sub_dir enabled' do
     before :each do
-      seed_database && ActivityLog.define_models
+      ActivityLog.define_models
 
       @other_users = []
       @other_users << create_user.first
@@ -166,7 +166,7 @@ RSpec.describe NfsStore::Process::MountArchiveJob, type: :model do
 
   describe 'with use_parent_sub_dir disabled' do
     before :each do
-      seed_database && ActivityLog.define_models
+      ActivityLog.define_models
 
       @other_users = []
       @other_users << create_user.first

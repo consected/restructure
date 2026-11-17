@@ -1,0 +1,4 @@
+# Pattern 9: active_value with a live substitution, re-evaluated and persisted on every save
+field_options:
+  full_name:
+    active_value: '{{first_name}} {{last_name}}'

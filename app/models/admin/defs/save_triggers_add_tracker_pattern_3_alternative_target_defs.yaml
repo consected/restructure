@@ -1,0 +1,10 @@
+# Pattern 3: Target a different item/master than the one that fired the trigger
+add_tracker:
+  Q1:
+    with:
+      sub_process_name: REDCap
+      protocol_event_name: bounced email
+      notes: Different text
+      master_id: '{{alternative_master_id}}'
+      item_id: '{{alternative_item_id}}'
+      item_type: ActivityLog::PlayerContactPhone

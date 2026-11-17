@@ -136,6 +136,7 @@ describe 'User Access Overview drill-down links', type: :system do
   describe 'User Roles admin page' do
     it 'shows drill-down links to User Access Overview using user, role, and app type' do
       visit "/admin/user_roles?filter%5Buser_id%5D=#{@drill_user.id}"
+      finish_page_loading
 
       user_role_link = report_url('user_access_overview_by_role',
                                   user: @drill_user.id,
@@ -215,6 +216,7 @@ describe 'User Access Overview drill-down links', type: :system do
                        no_run: 'true')
 
       panel = find('.uao-related-perspectives', visible: :all)
+      expect(panel).to have_content('User access overviews')
       links_in_panel = panel.all(:link, visible: :all)
       hrefs = links_in_panel.map { |l| [l.text, l[:href]] }
 
@@ -254,6 +256,31 @@ describe 'User Access Overview drill-down links', type: :system do
                                        a_string_including(users_with_role_href))),
         "expected an 'Each Role's Users' link in the related panel. Found: #{hrefs.inspect}"
       )
+    end
+
+    it 'shows the same complete list on by_resource, including by_resource itself' do
+      visit report_url('user_access_overview_by_resource',
+                       user: @drill_user.id,
+                       app_type_id: @app_type.id,
+                       no_run: 'true')
+
+      panel = find('.uao-related-perspectives', visible: :all)
+      links_in_panel = panel.all(:link, visible: :all)
+      hrefs = links_in_panel.map { |l| [l.text, l[:href]] }
+
+      by_resource_href = report_url('user_access_overview_by_resource',
+                                    user: @drill_user.id,
+                                    app_type_id: @app_type.id)
+
+      expect(hrefs).to(
+        include(a_collection_including(a_string_matching(/Grants by Resource/i),
+                                       a_string_including(by_resource_href))),
+        "expected a 'Grants by Resource' self link in the related panel. Found: #{hrefs.inspect}"
+      )
+
+      current_row = panel.find('li.list-group-item.current-row', visible: :all)
+      expect(current_row).to have_link('User Access Controls - Selected User\'s Grants by Resource')
+      expect(current_row).to have_css('a[aria-current="page"]', visible: :all)
     end
   end
 end

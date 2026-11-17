@@ -60,9 +60,9 @@ RSpec.describe 'Delete stored files', type: :model do
 
   it 'delete a stored zip file but retain its exploded archive files' do
     al = @activity_log
-    expect(al).to be_a ActivityLog::PlayerContactPhone
+    expect(al).to be_a nfs_al_class
     expect(@container.parent_item).to eq al
-    expect(al.resource_name).to eq 'activity_log__player_contact_phone__step_1'
+    expect(al.resource_name).to eq nfs_al_step_rn(:step_1)
     expect(al.model_references.length).to eq 1
 
     orig_count = @container.list_fs_files.length
@@ -79,7 +79,7 @@ RSpec.describe 'Delete stored files', type: :model do
         id: sf.id,
         container_id: @container.id,
         retrieval_type: :stored_file,
-        activity_log_type: 'activity_log__player_contact_phone',
+        activity_log_type: nfs_al_type,
         activity_log_id: @activity_log.id
 
       }

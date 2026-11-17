@@ -7,7 +7,7 @@ RSpec.describe Imports::ModelGenerator, type: :model do
 
   before :all do
     create_admin
-
+    change_setting('AllowDynamicMigrations', true)
     csv = File.read('spec/fixtures/import/test-types.csv')
     ds = Imports::ModelGenerator.new dynamic_model_table: "dynamic_test.test_imports#{rand 100_000_000_000_000}_recs",
                                      category: 'dynamic-test-env',

@@ -4,7 +4,9 @@ module PlayerSetup
     expect(player).to be_a(PlayerInfo)
     expect(page).to have_link('Research')
     click_link 'Research'
-    have_css('#master-search-simple-form')
+    expect(page).to have_css('body.status-compiled', wait: 15)
+    expect(page).to have_no_css('body.initial-compiling', wait: 15)
+    expect(page).to have_css('#master-search-simple-form')
     within '#master-search-simple-form' do
       fill_in 'Last name', with: player.last_name
       fill_in 'First or nick name', with: player.first_name

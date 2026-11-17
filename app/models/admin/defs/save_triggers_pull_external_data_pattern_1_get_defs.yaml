@@ -1,0 +1,10 @@
+# Pattern 1: GET request
+pull_external_data:
+  identity:
+    local_data: identity
+    method: get
+    from:
+      url: 'https://example.com/api/status?id={{id}}'
+      format: json
+      allow_empty_result: false
+      allow_response_codes: [404]

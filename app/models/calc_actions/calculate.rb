@@ -197,8 +197,15 @@ module CalcActions
       tn = first_res.class.table_name
       # The field to return, checked by matching the defined field name against the attributes of the class
       fn = first_res.class.attribute_names.select { |s| s == @this_val_where[:field_name].to_s }.first
-      # For a return_result (instance), the table name of the item to return was specified
-      tv_tn = UserBase.clean_table_name(ModelReference.record_type_to_table_name(@this_val_where[:table_name]))
+      # For *_item_flags associations, calc_base_query joins using the association name as its alias
+      # (see calc_base_query), so results must be selected/ordered against that same alias, not the
+      # real item_flags table
+      if @this_val_where[:assoc].to_s.end_with?('_item_flags')
+        tn = @this_val_where[:assoc].to_s
+        tv_tn = tn
+      else
+        tv_tn = UserBase.clean_table_name(ModelReference.record_type_to_table_name(@this_val_where[:table_name]))
+      end
 
       # If we have a table name from the query result use it, otherwise use the return_result table name
       if tn
@@ -267,7 +274,7 @@ module CalcActions
 
         val = attribute_from_instance(from_instance, val_item_value)
 
-      elsif val_item_key == :embedded_item
+      elsif val_item_key == :embedded_item && !val_item_value.is_a?(Hash)
         from_instance = @current_instance.embedded_item
         val = from_instance && attribute_from_instance(from_instance, val_item_value)
       elsif val_item_key == :referring_record && !val_item_value.is_a?(Hash)
@@ -701,7 +708,15 @@ module CalcActions
       @condition_config.each do |c_table, t_conds|
         c_table = @current_instance.class.definition.resource_name if c_table == :definition_resources
         join_table_name = c_table.to_sym
-        table_name = ModelReference.record_type_to_table_name(c_table).to_sym
+        # *_item_flags is itself a Master association name (through: <items>, source: :item_flags) - keep it
+        # as-is rather than resolving through record_type_to_table_name, which would collapse distinct
+        # associations to the same physical item_flags table name and let simultaneous *_item_flags
+        # conditions silently overwrite each other's field values
+        table_name = if c_table.to_s.end_with?('_item_flags')
+                       join_table_name
+                     else
+                       ModelReference.record_type_to_table_name(c_table).to_sym
+                     end
 
         if selection_type?(table_name)
           # Nested conditions are ignored, since they are
@@ -712,6 +727,7 @@ module CalcActions
           @non_query_conditions.top_level_error = top_level_error
           @non_query_conditions.top_level_error_above = top_level_error_above
         else
+          t_conds = resolve_tracker_history_names(table_name, t_conds)
           @non_query_conditions.table = table_name
           t_conds.each do |field_name, val|
             if field_name == :invalid_error_message
@@ -755,6 +771,13 @@ module CalcActions
       setup_base_query
     end
 
+    # tracker_history conditions may name protocols, sub processes and protocol events, rather than give their ids
+    def resolve_tracker_history_names(table_name, t_conds)
+      return t_conds unless table_name.in?(TrackerHistoryNames::TABLES) && t_conds.is_a?(Hash)
+
+      TrackerHistoryNames.new(t_conds) { |val| dynamic_value(val) }.resolve
+    end
+
     def setup_no_masters
       # Specify `no_masters: {}` at the top level to directly query the record, rather than doing
       # an inner join on the masters table
@@ -764,7 +787,10 @@ module CalcActions
       # Use the first specified table as the base, not joining on masters table
       @join_tables.delete_if { |a| a == :no_masters }
       rn = @join_tables.first
-      r = Resources::Models.find_by(resource_name: rn)
+      # Config authors typically write the real table name here (matching every other join
+      # condition), but a resource's registered resource_name may differ from its table_name
+      # (e.g. tracker_history is deliberately singular) - fall back to a table_name match
+      r = Resources::Models.find_by(resource_name: rn) || Resources::Models.find_by(table_name: rn.to_s)
       raise FphsException, "No resource found for #{rn} with no_masters specified in calc_actions" unless r
 
       c = r.class_name.constantize

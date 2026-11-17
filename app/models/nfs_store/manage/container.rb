@@ -336,6 +336,20 @@ module NfsStore
           next unless Filesystem.test_dir role_name, self, :read
 
           p = path_for(role_name:)
+
+          # A container's own directory entry replaced with a symlink (e.g. to a
+          # different container) would otherwise have Dir.glob transparently follow it,
+          # leaking that other container's file names into this listing. Skip just this
+          # role rather than raising, so one tampered role mount doesn't take down
+          # listing for every other role/container (mirrors NfsStore::Archive::Mounter
+          # .mount_all and NfsStore::Manage::StoredFile.index_missing_entry).
+          begin
+            Filesystem.raise_if_symlink_in_path!(p)
+          rescue FsException::SymlinkBlocked => e
+            Rails.logger.warn "list_fs_files skipping role '#{role_name}' for container #{id} - #{e.message}"
+            next
+          end
+
           # Don't use Regex - it breaks if there are special characters
           paths = Dir.glob("#{p}/**/*").reject do |f|
             Pathname.new(f).directory?
@@ -428,9 +442,9 @@ module NfsStore
         perform = perform.to_sym
         cu = current_user
         !!(cu.can?(perform) && (
-            (can_perform_if?(perform) == :no_config && can_edit?) ||
-            can_perform_if?(perform)
-          ))
+          (can_perform_if?(perform) == :no_config && can_edit?) ||
+          can_perform_if?(perform)
+        ))
       end
 
       #

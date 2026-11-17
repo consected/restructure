@@ -38,10 +38,6 @@ RSpec.describe 'Embedded item preset_value in index vs show (#1067)', type: :mod
     change_setting('AllowDynamicMigrations', true)
   end
 
-  after :all do
-    change_setting('AllowDynamicMigrations', @allow_dms)
-  end
-
   before :each do
     create_admin
     create_user
@@ -64,7 +60,7 @@ RSpec.describe 'Embedded item preset_value in index vs show (#1067)', type: :mod
 
     # Embedded model: create a DM table that will be directly embedded
     # in the activity log, with a text_array field + FK back to the AL
-    al_table = 'activity_log_player_contact_elts'
+    al_table = 'activity_log_player_contact_eipvs'
     fk_column = "#{al_table.singularize}_id"
 
     unless Admin::MigrationGenerator.table_exists? 'test_preset_embed_recs'
@@ -109,7 +105,7 @@ RSpec.describe 'Embedded item preset_value in index vs show (#1067)', type: :mod
   end
 
   def setup_activity_log_with_embed
-    SetupHelper.setup_al_gen_tests AlNamePresetEmbed, 'elt', 'player_contact'
+    SetupHelper.setup_al_gen_tests AlNamePresetEmbed, 'eipv', 'player_contact'
 
     @activity_log = al = ActivityLog.active.where(name: al_name).first
     raise "Activity Log #{al_name} not set up" if al.nil?
@@ -128,7 +124,7 @@ RSpec.describe 'Embedded item preset_value in index vs show (#1067)', type: :mod
     al.current_admin = @admin
     al.save!
 
-    setup_access :activity_log__player_contact_elts, user: @user
+    setup_access :activity_log__player_contact_eipvs, user: @user
     al.option_configs.each do |c|
       setup_access c.resource_name, resource_type: :activity_log_type, user: @user
     end
@@ -146,7 +142,7 @@ RSpec.describe 'Embedded item preset_value in index vs show (#1067)', type: :mod
       # Create the activity log BEFORE the source record exists.
       # The embedded item is created with a null preset_value because
       # no source record is available during after_initialize.
-      al = @player_contact.activity_log__player_contact_elts.build(
+      al = @player_contact.activity_log__player_contact_eipvs.build(
         select_call_direction: 'from staff',
         extra_log_type: 'preset_embed_test',
         select_who: 'tester'
@@ -180,7 +176,7 @@ RSpec.describe 'Embedded item preset_value in index vs show (#1067)', type: :mod
       # Create the activity log BEFORE the source record exists.
       # The embedded item is created with a null preset_value because
       # no source record is available during after_initialize.
-      al = @player_contact.activity_log__player_contact_elts.build(
+      al = @player_contact.activity_log__player_contact_eipvs.build(
         select_call_direction: 'from staff',
         extra_log_type: 'preset_embed_test',
         select_who: 'tester'
@@ -213,7 +209,7 @@ RSpec.describe 'Embedded item preset_value in index vs show (#1067)', type: :mod
       master = @player_contact.master
 
       # Create the activity log BEFORE the source record exists
-      al = @player_contact.activity_log__player_contact_elts.build(
+      al = @player_contact.activity_log__player_contact_eipvs.build(
         select_call_direction: 'from staff',
         extra_log_type: 'preset_embed_test',
         select_who: 'tester'

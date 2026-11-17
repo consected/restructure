@@ -20,6 +20,9 @@ may be used within substitutions. Form captions do not have access to this data,
 
 Drill down through associations with `\{\{association_name.attribute_name\}\}`
 
+Associations are resolved from the current record's master record, so a definition with no
+master record returns blank for them. See [record scoping](scoping.md).
+
 Other options are also available see information [For Conditions and Message Templates](#for-conditions-and-message-templates)
 
 ## Data from an embedded form item

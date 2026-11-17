@@ -16,14 +16,14 @@ archive_fn="$(basename "${archive_path}")"
 rm -f ${single_zip_path}
 cd "$(dirname "${archive_path}")"
 
-if [ "$(echo "${archive_path}" | grep -E '\.tar\.gz$')" ]; then
+if [ "$(echo "${archive_path}" | grep -E '\.tar\.(gz|xz)$')" ]; then
 
-  tar -xvzf "${archive_path}" -C "${tmpzipdir}" > "${tmpres}"
+  tar -xvaf "${archive_path}" -C "${tmpzipdir}" > "${tmpres}"
   if [ $? != 0 ]; then
-    rm -f "${tempres}"
+    rm -f "${tmpres}"
     rm -f "${single_zip_path}"
 
-    echo >&2 "Failed tar -xvzf '${archive_path}' -C '${tmpzipdir}'"
+    echo >&2 "Failed tar -xvaf '${archive_path}' -C '${tmpzipdir}'"
     cd ${currdir}
     exit 1
   fi
@@ -34,7 +34,7 @@ if [ "$(echo "${archive_path}" | grep -E '\.tar\.gz$')" ]; then
   resnum=$(cat "${tmpres}" | wc -l)
   filecount=$(find "${tmpzipdir}" | wc -l)
 
-  rm -f "${tempres}"
+  rm -f "${tmpres}"
   rm -f "${single_zip_path}"
 
   if [ "${resnum}" != "${filecount}" ]; then
@@ -61,7 +61,7 @@ EOF
   unzip -n "${single_zip_path}" -d "${tmpzipdir}" > "${tmpres}"
 
   if [ $? != 0 ]; then
-    rm -f "${tempres}"
+    rm -f "${tmpres}"
     rm -f "${single_zip_path}"
 
     echo >&2 "Failed unzip -n '${archive_path}' -d '${tmpzipdir}'"
@@ -71,7 +71,7 @@ EOF
 
   resnum=$(grep -E '(inflating|extracting):' "${tmpres}" | wc -l)
   filecount=$(find "${tmpzipdir}" -type f | wc -l)
-  rm -f "${tempres}"
+  rm -f "${tmpres}"
   rm -f "${single_zip_path}"
 
   if [ "${resnum}" != "${filecount}" ]; then

@@ -9,22 +9,17 @@
 # - Top-level: extracted in initialize via extract_lifecycle_hooks, fired by perform_with_lifecycle
 # - Per-entry: extracted inside each named entry via with_entry_lifecycle in the trigger's perform loop
 #
-# See GitHub Issue #982.
+# See GitHub Issues #982 and #1495.
 require 'rails_helper'
 
 RSpec.describe 'SaveTrigger lifecycle hooks (on_complete / on_failure)', type: :model do
   include ModelSupport
   include PlayerContactSupport
 
-  before :each do
+  before_all do
     create_user
     setup_access :player_contacts
     let_user_create_player_contacts
-    create_item(data: rand(10_000_000_000_000_000), rank: 10)
-    @player_contact.master.current_user = @user
-    @master = @player_contact.master
-    expect(@master).not_to be nil
-
     # Set up activity log definition
     al_def = ActivityLog.find(ActivityLog::PlayerContactPhone.definition.id)
 
@@ -55,13 +50,20 @@ RSpec.describe 'SaveTrigger lifecycle hooks (on_complete / on_failure)', type: :
     setup_access :activity_log__player_contact_phone__lifecycle_test_1, resource_type: :activity_log_type,
                                                                         access: :create, user: @user
     al_def.add_master_association
+  end
+
+  before :each do
+    create_item(data: rand(10_000_000_000_000_000), rank: 10)
+    @player_contact.master.current_user = @user
+    @master = @player_contact.master
+    expect(@master).not_to be nil
 
     @activity_log = @player_contact.activity_log__player_contact_phones.create!(
       select_call_direction: 'from player',
       select_who: 'test user',
       extra_log_type: 'lifecycle_test_1'
     )
-    @activity_log.save_trigger_results ||= {}
+    @activity_log.save_trigger_results = {}
   end
 
   describe 'on_complete' do
@@ -153,10 +155,94 @@ RSpec.describe 'SaveTrigger lifecycle hooks (on_complete / on_failure)', type: :
 
       trigger.perform_with_lifecycle
     end
+
+    it 'supports each directly in on_complete and preserves iterator context in callbacks' do
+      config = {
+        message: 'Main lifecycle trigger',
+        severity: 'info',
+        on_complete: [
+          {
+            each: {
+              value: %w[first second],
+              do: [
+                {
+                  log: {
+                    message: 'Complete {{save_trigger_results.iterator_index}} => {{save_trigger_results.iterator_value}}',
+                    severity: 'info',
+                    on_complete: [
+                      {
+                        log: {
+                          message: 'Callback {{save_trigger_results.iterator_index}} => {{save_trigger_results.iterator_value}}',
+                          severity: 'info'
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+
+      trigger = SaveTriggers::Log.new(config, @activity_log)
+
+      expect(Rails.logger).to receive(:info).with(/Complete 0 => first/)
+      expect(Rails.logger).to receive(:info).with(/Callback 0 => first/)
+      expect(Rails.logger).to receive(:info).with(/Complete 1 => second/)
+      expect(Rails.logger).to receive(:info).with(/Callback 1 => second/)
+      allow(Rails.logger).to receive(:info)
+
+      trigger.perform_with_lifecycle
+
+      expect(@activity_log.save_trigger_results['iterator_index']).to eq 1
+      expect(@activity_log.save_trigger_results['iterator_value']).to eq 'second'
+    end
+
+    it 'supports named iterator context for nested each triggers' do
+      config = {
+        value: %w[outer_a outer_b],
+        iterator_name: 'outer_loop',
+        do: [
+          {
+            each: {
+              value: %w[inner_a inner_b],
+              iterator_name: 'inner_loop',
+              do: [
+                {
+                  log: {
+                    message: 'Nested {{save_trigger_results.outer_loop_index}}/' \
+                             '{{save_trigger_results.outer_loop_value}} => ' \
+                             '{{save_trigger_results.inner_loop_index}}/' \
+                             '{{save_trigger_results.inner_loop_value}}',
+                    severity: 'info'
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+
+      trigger = SaveTriggers::Each.new(config, @activity_log)
+
+      expect(Rails.logger).to receive(:info).with(/0\/outer_a => 0\/inner_a/)
+      expect(Rails.logger).to receive(:info).with(/0\/outer_a => 1\/inner_b/)
+      expect(Rails.logger).to receive(:info).with(/1\/outer_b => 0\/inner_a/)
+      expect(Rails.logger).to receive(:info).with(/1\/outer_b => 1\/inner_b/)
+      allow(Rails.logger).to receive(:info)
+
+      trigger.perform
+
+      expect(@activity_log.save_trigger_results['outer_loop_index']).to eq 1
+      expect(@activity_log.save_trigger_results['outer_loop_value']).to eq 'outer_b'
+      expect(@activity_log.save_trigger_results['inner_loop_index']).to eq 1
+      expect(@activity_log.save_trigger_results['inner_loop_value']).to eq 'inner_b'
+    end
   end
 
   describe 'on_failure' do
-    it 'fires on_failure triggers when perform raises an exception' do
+    it 'fires on_failure triggers when perform raises an exception and does not re-raise by default' do
       # message: nil will cause log trigger to raise FphsException
       config = {
         message: nil,
@@ -170,15 +256,16 @@ RSpec.describe 'SaveTrigger lifecycle hooks (on_complete / on_failure)', type: :
 
       expect(Rails.logger).to receive(:error).with(/Failure hook fired/)
 
-      expect { trigger.perform_with_lifecycle }.to raise_error(FphsException)
+      expect { trigger.perform_with_lifecycle }.not_to raise_error
     end
 
-    it 're-raises the original exception after on_failure triggers execute' do
+    it 're-raises the original exception after on_failure triggers execute if exception original_failure is configured' do
       config = {
         message: nil,
         severity: 'info',
         on_failure: [
-          { log: { message: 'Failure logged', severity: 'error' } }
+          { log: { message: 'Failure logged', severity: 'error' } },
+          { exception: { original_failure: true } }
         ]
       }
 
@@ -203,7 +290,7 @@ RSpec.describe 'SaveTrigger lifecycle hooks (on_complete / on_failure)', type: :
       trigger.perform_with_lifecycle
     end
 
-    it 'supports on_failure as a hash (single trigger)' do
+    it 'supports on_failure as a hash (single trigger) and does not re-raise' do
       config = {
         message: nil,
         severity: 'info',
@@ -216,7 +303,39 @@ RSpec.describe 'SaveTrigger lifecycle hooks (on_complete / on_failure)', type: :
 
       expect(Rails.logger).to receive(:error).with(/Single failure trigger/)
 
-      expect { trigger.perform_with_lifecycle }.to raise_error(FphsException)
+      expect { trigger.perform_with_lifecycle }.not_to raise_error
+    end
+
+    it 'supports each directly in on_failure and preserves iterator context' do
+      config = {
+        message: nil,
+        severity: 'info',
+        on_failure: [
+          {
+            each: {
+              value: %w[first second],
+              do: [
+                {
+                  log: {
+                    message: 'Failure {{save_trigger_results.iterator_index}} => {{save_trigger_results.iterator_value}}',
+                    severity: 'error'
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+
+      trigger = SaveTriggers::Log.new(config, @activity_log)
+
+      expect(Rails.logger).to receive(:error).with(/Failure 0 => first/)
+      expect(Rails.logger).to receive(:error).with(/Failure 1 => second/)
+      allow(Rails.logger).to receive(:error)
+
+      expect { trigger.perform_with_lifecycle }.not_to raise_error
+      expect(@activity_log.save_trigger_results['iterator_index']).to eq 1
+      expect(@activity_log.save_trigger_results['iterator_value']).to eq 'second'
     end
   end
 
@@ -242,7 +361,7 @@ RSpec.describe 'SaveTrigger lifecycle hooks (on_complete / on_failure)', type: :
       trigger.perform_with_lifecycle
     end
 
-    it 'fires only on_failure on exception when both are configured' do
+    it 'fires only on_failure on exception when both are configured and does not raise' do
       config = {
         message: nil,
         severity: 'info',
@@ -259,7 +378,7 @@ RSpec.describe 'SaveTrigger lifecycle hooks (on_complete / on_failure)', type: :
       expect(Rails.logger).not_to receive(:info).with(/Complete should not fire/)
       expect(Rails.logger).to receive(:error).with(/Failure fired/)
 
-      expect { trigger.perform_with_lifecycle }.to raise_error(FphsException)
+      expect { trigger.perform_with_lifecycle }.not_to raise_error
     end
   end
 
@@ -281,7 +400,7 @@ RSpec.describe 'SaveTrigger lifecycle hooks (on_complete / on_failure)', type: :
       OptionConfigs::ExtraOptions.calc_triggers(@activity_log, configs)
     end
 
-    it 'automatically fires on_failure when triggers dispatched via calc_triggers fail' do
+    it 'automatically fires on_failure when triggers dispatched via calc_triggers fail and does not raise' do
       configs = {
         log: {
           message: nil,
@@ -294,7 +413,7 @@ RSpec.describe 'SaveTrigger lifecycle hooks (on_complete / on_failure)', type: :
 
       expect(Rails.logger).to receive(:error).with(/Dispatched failure hook/)
 
-      expect { OptionConfigs::ExtraOptions.calc_triggers(@activity_log, configs) }.to raise_error(FphsException)
+      expect { OptionConfigs::ExtraOptions.calc_triggers(@activity_log, configs) }.not_to raise_error
     end
   end
 
@@ -353,11 +472,11 @@ RSpec.describe 'SaveTrigger lifecycle hooks (on_complete / on_failure)', type: :
         ]
       }
 
-      SaveTriggers::Log.new(config, @activity_log)
+      trigger = SaveTriggers::Log.new(config, @activity_log)
 
-      # on_complete is removed from Hash configs so triggers that iterate
-      # all config keys (e.g. update_this) don't encounter it
-      expect(config).not_to have_key(:on_complete)
+      # normalize_trigger_config creates an owned deep copy; on_complete is
+      # extracted from that copy so the trigger's working config never sees it
+      expect(trigger.config).not_to have_key(:on_complete)
     end
 
     it 'removes on_failure from Hash config before trigger processes it' do
@@ -369,9 +488,9 @@ RSpec.describe 'SaveTrigger lifecycle hooks (on_complete / on_failure)', type: :
         ]
       }
 
-      SaveTriggers::Log.new(config, @activity_log)
+      trigger = SaveTriggers::Log.new(config, @activity_log)
 
-      expect(config).not_to have_key(:on_failure)
+      expect(trigger.config).not_to have_key(:on_failure)
     end
 
     it 'does not modify Array configs, preserving per-entry on_complete' do
@@ -441,7 +560,7 @@ RSpec.describe 'SaveTrigger lifecycle hooks (on_complete / on_failure)', type: :
       expect(@activity_log.select_who).to eq 'entry lifecycle test'
     end
 
-    it 'fires per-entry on_failure for named entries when processing raises' do
+    it 'fires per-entry on_failure for named entries when processing raises and does not raise' do
       # Use log with nil message to trigger a FphsException
       log_config = {
         message: nil,
@@ -455,7 +574,7 @@ RSpec.describe 'SaveTrigger lifecycle hooks (on_complete / on_failure)', type: :
 
       expect(Rails.logger).to receive(:error).with(/Per-entry failure hook/)
 
-      expect { trigger.perform_with_lifecycle }.to raise_error(FphsException)
+      expect { trigger.perform_with_lifecycle }.not_to raise_error
     end
 
     it 'fires per-entry on_complete for each entry in a multi-entry log trigger' do
@@ -524,15 +643,17 @@ RSpec.describe 'SaveTrigger lifecycle hooks (on_complete / on_failure)', type: :
       }
 
       # After UpdateThis processes the config, on_complete should be
-      # extracted from the inner config hash by with_entry_lifecycle
+      # extracted from the inner config hash by with_entry_lifecycle.
+      # normalize_trigger_config owns a deep copy; with_entry_lifecycle
+      # deletes on_complete from the owned copy's entry, not the original.
       allow(Rails.logger).to receive(:info)
       trigger = SaveTriggers::UpdateThis.new(config, @activity_log)
       trigger.perform_with_lifecycle
 
-      # The inner config should have on_complete removed
-      expect(config[:one]).not_to have_key(:on_complete)
+      # The trigger's owned config entry should have on_complete removed
+      expect(trigger.config[:one]).not_to have_key(:on_complete)
       # But other keys should still be present
-      expect(config[:one]).to have_key(:with)
+      expect(trigger.config[:one]).to have_key(:with)
     end
   end
 end

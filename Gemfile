@@ -24,9 +24,10 @@ gem 'dicom'
 gem 'diffy'
 gem 'jquery-fileupload-rails', '0.4.7'
 gem 'jquery-rails'
+gem 'json', '< 3' # json 3.0 breaks ActiveSupport::JSON.decode's call to JSON.parse
 gem 'kramdown'
 gem 'kramdown-parser-gfm'
-gem 'mail', '>= 2.8.0', '< 2.9.0'
+gem 'mail', '>= 2.9.1'
 gem 'mime-types'
 gem 'mini_portile2', '>= 2.8.2'
 gem 'net-smtp'
@@ -38,16 +39,16 @@ gem 'pg', '~> 1.4', '>= 1.4.3'
 # is lower or has different dependencies.
 # For this to work, Procfile must call puma with `bundle exec`
 gem 'minitest', '~> 5.1' # minitest 6 is incompatible with rails 7.2.x
-gem 'puma', '~> 7.2.1'
+gem 'puma', '~> 8.0'
 
-gem 'rails', '~> 7.0', '<7.3'
+gem 'rails', '~> 8.1.0'
 
 gem 'redcap', git: 'https://github.com/consected/redcap.git'
 # for development, replace with with:
 # gem 'redcap', path: '../redcap'
 
 gem 'rqrcode'
-gem 'rubyzip', '~> 2.3.0'
+gem 'rubyzip', '~> 3.6'
 gem 'simple_token_authentication', '~> 1.0', git: 'https://github.com/philayres/simple_token_authentication.git'
 gem 'stringio', '>= 3.1.2'
 gem 'strong_password', '~> 0.0.5'
@@ -78,6 +79,7 @@ group :development, :test do
   gem 'ruby_parser'
   gem 'sassc-embedded'
   gem 'spring'
+  gem 'stackprof', require: false
   # gem 'spring-commands-parallel-tests'
 end
 
@@ -85,11 +87,12 @@ group :test do
   gem 'capybara'
   gem 'database_cleaner'
   gem 'rails-controller-testing'
-  gem 'selenium-webdriver', '4.28.0'
+  gem 'selenium-webdriver', '4.39.0'
   gem 'shoulda-matchers', '~> 5.1'
   gem 'simplecov'
   gem 'simplecov-console'
   gem 'spring-commands-rspec'
+  gem 'test-prof', '~> 1.0'
   gem 'webmock'
 end
 

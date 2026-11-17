@@ -11,6 +11,13 @@ Report type: |
   - *regular_report*: typically returns a table, or whatever other formatting is specified in the option `view_options.view_as`
   - *search*: displays the result as a master record list (NOTE: the SQL must return a `master_id` column)
 
+  A result column named `search_reports_<report_id>_<field>` runs another report
+  as a master-record search, independently of its report type and button options.
+  The full search-attribute name is used, including underscores.
+  Ordinary columns configured as `url` can also open embedded reports in a modal.
+  See
+  [Search another report from a result cell](/help/admin_reference/reports/search_report_results.md).
+
 Searchable: |
   present the report as a search tab on the user home page.
 

@@ -39,9 +39,7 @@ describe 'page layout resource type rendering', js: true, driver: $browser_drive
     @admin, @admin_password = create_admin
 
     ms = Master.no_temporary_masters
-    if ms.count == 0 || ms.first.nil? || ms.first.id < 1
-      create_data_set_outside_tx
-    end
+    create_data_set_outside_tx if ms.count == 0 || ms.first.nil? || ms.first.id < 1
 
     @master = Master.no_temporary_masters.first
     @master_id = @master.id
@@ -133,9 +131,7 @@ describe 'page layout resource type rendering', js: true, driver: $browser_drive
         resources:
       #{resource_list}
     YAML
-    if initial_show
-      options_yaml += "view_options:\n  initial_show: true\n"
-    end
+    options_yaml += "view_options:\n  initial_show: true\n" if initial_show
     Admin::PageLayout.create!(
       current_admin: @admin,
       app_type_id: @app_type.id,
@@ -149,13 +145,7 @@ describe 'page layout resource type rendering', js: true, driver: $browser_drive
 
   # Navigate to the master record search result and expand it so tabs are rendered
   def expand_test_master
-    visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{@master_id}"
-    dismiss_modal
-    finish_page_loading
-    expect(page).to have_css("#master-#{@master_id}")
-    expect(page).not_to have_css('.alert')
-    expand_master_record(master_id: @master_id)
-    finish_page_loading
+    navigate_to_master(@master_id)
   end
 
   # -------------------------------------------------------------------
@@ -167,6 +157,7 @@ describe 'page layout resource type rendering', js: true, driver: $browser_drive
       set_up_feature
       setup_dm_resource
       create_resource_panel(resources: ['dynamic_model__test_rr_dms'])
+      SetupHelper.reload_configs
       Rails.application.routes_reloader.reload!
     end
 
@@ -228,6 +219,7 @@ describe 'page layout resource type rendering', js: true, driver: $browser_drive
       set_up_feature
       setup_ei_resource
       create_resource_panel(resources: ['test_rr_ext_ids'])
+      SetupHelper.reload_configs
       Rails.application.routes_reloader.reload!
     end
 

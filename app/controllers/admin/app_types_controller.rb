@@ -104,7 +104,7 @@ class Admin::AppTypesController < AdminController
   end
 
   def components_panel
-    html = Rails.cache.fetch(helpers.partial_cache_key('index_admin_components', force_user_or_admin: current_admin)) do
+    html = Rails.cache.fetch(components_panel_cache_key) do
       render_to_string partial: 'admin/app_types/components'
     end
     render html: html.html_safe, layout: false
@@ -126,6 +126,18 @@ class Admin::AppTypesController < AdminController
   end
 
   private
+
+  # Panel components missing from partial_cache_key whose saves don't clear Rails.cache either
+  def components_panel_extra_key_classes
+    [Report, Classification::GeneralSelection, Classification::ItemFlagName, Classification::Protocol,
+     Admin::RoleDescription, NfsStore::Filter::Filter]
+  end
+
+  def components_panel_cache_key
+    latest = components_panel_extra_key_classes.map { |k| k.maximum(:updated_at)&.strftime('%s%6N') }
+    base_key = helpers.partial_cache_key('index_admin_components', force_user_or_admin: current_admin)
+    "#{base_key}-#{Digest::SHA256.hexdigest(latest.join('-'))[0, 16]}"
+  end
 
   def permitted_params
     %i[name label default_schema_name disabled]

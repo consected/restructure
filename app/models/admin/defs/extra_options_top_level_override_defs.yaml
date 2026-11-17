@@ -1,5 +1,15 @@
+# Canonical schema
+# _override: <Hash(key: Any)>
+# All keys are optional. Keys are the same top-level option-type keys as any other
+# dynamic definition option type (label, show_if, field_options, etc.).
+#
 # Keys to be applied to all dynamic definitions. These
 # definitions will take precedence by replacing the later key definitions.
 _override:
   key1: applied to all dynamic definitions
   key2: applied to all dynamic definitions
+
+# Notes:
+# - Applied last, after _default, _merge_default and _merge_override, using a shallow
+#   merge - each key here fully replaces the same key in every option type's value.
+# - Has the highest precedence of the four _default. / _merge_. / _override directives.

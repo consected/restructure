@@ -13,18 +13,43 @@
 8. **Create new files and edit directly in the editor**; avoid using command line file operations to generate source code
 9. **Never update CHANGELOG.md directly** - the release process will handle this based on commit messages and pull request titles
 10. **You have permission to use interactive debugging tools** (e.g., `interactive_debug_session`, `debugger`) to pause execution and inspect state, either in Rspec tests or if we are collaborating on a development server.
+11. **Workspaces are isolated environments for each feature branch** - the database, file system, test environment and other resources are separate, ensuring changes in one branch do not affect others. This is controlled by the environment variable `TEST_ENV_SET`, which is normally set when opening a new terminal. There is no need to check the database for other workspace connections.
+12. **Always tell subagents to read these instructions first**
 
+### Assisted Permissions
+
+Notwithstanding restrictions instructed by a human supervisor or an agent
+coordinator, agents have the following assisted permissions:
+
+- In general agents are expected to be able to read, write and delete files within the workspace.
+- Agents are allowed to write, edit and delete specs to cover proposed changes, address coverage gaps and resolve incorrectly implemented tests.
+- Agents are allowed to make changes to the code and configuration where necessary to support the specs or to fix issues identified by the specs.
+- Agents are allowed to make changes to code and configuration where instructed to do so, or to prototype solutions that aren't supported by specs.
+- Agents are allowed to create, edit and delete temporary files as needed for testing, debugging, or prototyping solutions. Any files in `tmp/agent-tmp` should be considered temporary and can be safely removed at any time.
+- Agents may commit and rebase as required to maintain a clean and up-to-date feature branch.
+- Agents may read rvm, gem, and bundle files to understand the configuration and code dependencies.
+- Agents may read Ruby, Rails, Node.js, and other JS dependencies from local
+sources or github repositories.
 
 ### Critical Rules for Running Terminal Commands
+
+**Before running any commands in the terminal**
+
 1. **Never set environment variables inline** - use app-scripts instead or `export` them in the terminal before running commands
-2. **Always wait for commands to complete before proceeding** - load the `execute/awaitTerminal` tool first
+2. **Always wait for commands to complete before proceeding** - for long-running commands (such as rspec tests), don't poll - call the `get_terminal_output` once so you can be notified automatically when the command exits
 3. **Never redirect scripts stdout or stderr to /dev/null or /tmp**
-4. **Never run commands in the background** - all commands exit when complete with success or failure codes
+4. If creating long text files (e.g., PR body, issue body), **write them directly to a temporary or session file** rather than using command line tools that may escape characters or truncate output
+
+NOTE: It is no longer necessary to source the workspace directly using:`source app-scripts/source-workspace-env.sh`
+
+
+`app-scripts/headless_rspec.sh` and `app-scripts/not_headless_rspec.sh` automatically run `app-scripts/check_rspec_processes.sh` and refuse to start (exit 1) if another RSpec process is using this workspace; do not call the check separately for them. Before any direct `bundle exec rspec` call, run `app-scripts/check_rspec_processes.sh` and do not start the new run if it exits with status 1; inspect the reported workspace, PID, and test-environment values first.
 
 ### Git and GitHub Usage
 
-- Use `git` and `gh` CLI tools for version control and repository management.
+- Use `git` and `gh` CLI tools for version control and repository management unless MCP tools are enabled.
 - Before starting work, add a tag `start-<feature-name>-<issue-number>` then create a features/bug branch `<feature-name>-<issue-number>`.
+- Add a label `WIP` to the GitHub issue, to indicate to others that this is being worked on.
 - Commit messages should be short (1 line) and clear, typically starting with one of the past tense verbs (Added, Fixed, Changed, Removed, Refactored, Updated) and ending with a suffix like ` - fixes #123` or ` - resolves #123` to reference related issues.
 
 ### Creating a Pull Request
@@ -38,9 +63,12 @@ If requested to create a PR, follow these steps:
 NOTE: Only a human user will merge branches after code review; AI agents should not merge branches.
 
 ### Testing Conventions
+- App specs import or resume their definitions lazily in `before(:all)` and suspend them in `after(:all)`; keep new app schemas registered in `SetupHelper::LAZY_APP_SCHEMAS`.
 - When fixing implementation bugs, **always write new Rspec or Jasmine tests** to demonstrate the bug, before fixing it.
 - Check for reusable support methods in `spec/support/` before writing new test code.
 - After writing tests, always add comments to the top of the spec files explaining the purpose of the tests.
+
+NOTE: The test database can be cleaned or mutated if required, without additional authorization.
 
 ### Ruby on Rails Conventions
 
@@ -69,7 +97,7 @@ For general Rspec standards refer to: [Rspec project coding standards](instructi
 For Rspec System Specs Refer to: [Rspec System Specs project coding standards](instructions/rspec-system-spec.instructions.md)
 
 ### Command Line Usage
-- Create a directory `./tmp/agent-tmp` in the workspace root
+- Create a directory `./tmp/agent-tmp` in the workspace root or the sandbox environment if applicable
 - Use `./tmp/agent-tmp` for all temporary files and logs
 - DO NOT set environment variables or prefix commands with `VAR=VALUE`; use the appropriate app-scripts instead or `export VAR=value` in the terminal before running commands
 - DO NOT run commands in the background using `&` or `nohup` unless absolutely necessary, and if so, ensure output is redirected to a file in `./tmp/agent-tmp` or '/tmp' for later analysis
@@ -98,6 +126,15 @@ app-scripts/clean-test-db.sh
 
 # Clean test assets and cache
 app-scripts/clean-test-assets-and-cache.sh
+
+# Extract an app config YAML. Analyse all models from a previous error run
+app-scripts/inspect_app_config.rb --config 'db/app_configs/app_config.yaml' --diff --errors tmp/agent-tmp/config_errors_app.log
+
+# Extract an app config YAML. Inspect a single model
+app-scripts/inspect_app_config.rb --config 'db/app_configs/app_config.yaml' --diff play_ipa_initial_call
+
+# Extract an app config YAML. Show just show_if and labels for models matching "phone_screen"
+app-scripts/inspect_app_config.rb --config 'db/app_configs/app_config.yaml' --sections show_if,labels phone_screen
 ```
 
 #### Why These Rules Exist

@@ -5,15 +5,23 @@ class SaveTriggers::SaveTriggersBase
   attr_accessor :config, :user, :item, :master, :model_defs, :this_config, :in_master
 
   def initialize(config, item)
+    # Normalize first to produce a locally owned plain-Ruby copy.
+    # This prevents any mutations from affecting shared/memoized option config
+    # data (e.g. the memoized @option_configs hash on definition objects).
+    config = normalize_trigger_config(config)
+
+    # Now safely extract and delete lifecycle hooks from the owned copy.
+    on_complete_triggers, on_failure_triggers = extract_lifecycle_hooks(config)
+
     self.config = config
     raise FphsException, 'save_trigger configuration must be a Hash' unless config.is_a?(Hash) || config.is_a?(Array)
 
     raise FphsException, 'save_trigger item must be set' unless item
 
-    # Extract lifecycle hooks before subclasses process the config.
-    # This ensures on_complete and on_failure are automatically available
-    # to all trigger types including future implementations.
-    extract_lifecycle_hooks(config)
+    # Normalize extracted lifecycle hooks so lifecycle dispatch uses the same
+    # plain Ruby hashes/arrays as the main trigger config.
+    @on_complete_triggers = normalize_trigger_config(on_complete_triggers)
+    @on_failure_triggers = normalize_trigger_config(on_failure_triggers)
 
     self.item = item
     self.master = item.master if item.respond_to? :master
@@ -182,13 +190,18 @@ class SaveTriggers::SaveTriggersBase
 
     execute_lifecycle_triggers(on_complete) if on_complete.present?
     result
-  rescue StandardError
-    begin
-      execute_lifecycle_triggers(on_failure) if on_failure.present?
-    rescue StandardError => inner_e
-      Rails.logger.error "[SaveTrigger] on_failure trigger itself raised an error: #{inner_e.message}"
+  rescue StandardError => e
+    if on_failure.present?
+      prev_exception = Thread.current[:active_save_trigger_exception]
+      Thread.current[:active_save_trigger_exception] = e
+      begin
+        execute_lifecycle_triggers(on_failure)
+      ensure
+        Thread.current[:active_save_trigger_exception] = prev_exception
+      end
+    else
+      raise
     end
-    raise
   end
 
   #
@@ -205,20 +218,56 @@ class SaveTriggers::SaveTriggersBase
   # Perform the trigger with lifecycle hooks.
   # Calls #perform, then fires on_complete triggers on success,
   # or on_failure triggers if an exception is raised.
-  # The original exception is re-raised after on_failure triggers execute.
   # @return [Object] the result of #perform
   def perform_with_lifecycle
     result = perform
     fire_on_complete_triggers
     result
-  rescue StandardError
-    fire_on_failure_triggers
-    raise
+  rescue StandardError => e
+    if @on_failure_triggers.present?
+      prev_exception = Thread.current[:active_save_trigger_exception]
+      Thread.current[:active_save_trigger_exception] = e
+      begin
+        fire_on_failure_triggers
+      ensure
+        Thread.current[:active_save_trigger_exception] = prev_exception
+      end
+    else
+      raise
+    end
   end
 
   def self.config_def(if_extras: nil); end
 
   private
+
+  def normalize_trigger_config(value)
+    return nil if value.nil?
+
+    case value
+    when Array
+      # Build a new array; never use map! which would mutate the source array.
+      value.map { |entry| normalize_trigger_config(entry) }
+    when Hash
+      # Build and return a fresh hash; never mutate the source hash in-place
+      # (value.clear + value.merge! would corrupt shared/memoized configs).
+      value.each_with_object({}) do |(key, nested_value), result|
+        result[key.to_sym] = normalize_trigger_config(nested_value)
+      end
+    else
+      if value.respond_to?(:filtered_hash)
+        normalize_trigger_config(value.filtered_hash)
+      elsif value.respond_to?(:conditions)
+        normalize_trigger_config(value.conditions)
+      elsif value.respond_to?(:symbolize_keys) && !value.is_a?(String)
+        normalize_trigger_config(value.symbolize_keys)
+      elsif value.respond_to?(:to_h) && !value.is_a?(String)
+        normalize_trigger_config(value.to_h)
+      else
+        value
+      end
+    end
+  end
 
   #
   # Extract on_complete and on_failure from the config hash for lifecycle processing.
@@ -229,10 +278,15 @@ class SaveTriggers::SaveTriggersBase
   # continue to function correctly.
   # @param [Hash | Array] trigger_config
   def extract_lifecycle_hooks(trigger_config)
-    return unless trigger_config.is_a?(Hash)
+    return [nil, nil] unless trigger_config.is_a?(Hash)
 
-    @on_complete_triggers = trigger_config.delete(:on_complete)
-    @on_failure_triggers = trigger_config.delete(:on_failure)
+    on_complete = trigger_config.delete(:on_complete)
+    on_complete ||= trigger_config.delete('on_complete')
+
+    on_failure = trigger_config.delete(:on_failure)
+    on_failure ||= trigger_config.delete('on_failure')
+
+    [on_complete, on_failure]
   end
 
   #
@@ -246,15 +300,11 @@ class SaveTriggers::SaveTriggersBase
 
   #
   # Fire on_failure triggers using calc_triggers dispatch.
-  # Errors within on_failure triggers are logged but do not prevent
-  # the original exception from being re-raised.
   # @return [void]
   def fire_on_failure_triggers
     return unless @on_failure_triggers.present?
 
     execute_lifecycle_triggers(@on_failure_triggers)
-  rescue StandardError => e
-    Rails.logger.error "[SaveTrigger] on_failure trigger itself raised an error: #{e.message}"
   end
 
   #

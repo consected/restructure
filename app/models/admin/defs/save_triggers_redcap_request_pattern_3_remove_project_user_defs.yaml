@@ -1,0 +1,18 @@
+# Pattern 3: remove_project_user
+redcap_request:
+  request_3:
+    study: Test
+    project_name: Test API
+    local_data: remove_user_response
+    method: remove_project_user
+    post_data:
+      username: "{{item.username}}"
+    on_complete:
+      - redcap_request:
+          request_3a:
+            study: Test
+            project_name: Test API
+            local_data: remove_user_refreshed_users_response
+            method: project_users
+            post_data:
+              force_reload: true

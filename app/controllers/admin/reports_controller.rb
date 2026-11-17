@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Admin::ReportsController < AdminController
+  include DefinitionVersionsController
+
   SearchAttrBrowserCacheSeconds = 48.hours.to_i
 
   helper_method :embedded_report, :search_attrs_params_hash

@@ -3,12 +3,12 @@
 require 'rails_helper'
 
 RSpec.describe Classification::SelectionOptionsHandler, type: :model do
-  AlNameGenTestSo = 'Gen Test ELT'
+  AlNameGenTestSo = 'Gen Test ELT SO'
   include ModelSupport
   include GeneralSelectionSupport
 
   before :context do
-    SetupHelper.setup_al_gen_tests AlNameGenTestSo, 'elt', 'player_contact'
+    SetupHelper.setup_al_gen_tests AlNameGenTestSo, 'elt_so', 'player_contact'
   end
 
   before :example do
@@ -222,15 +222,15 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
 
     create_item name: 'User',
                 value: 'user',
-                item_type: 'activity_log__player_contact_elt_select_who',
+                item_type: 'activity_log__player_contact_elt_so_select_who',
                 disabled: false
 
     create_item name: 'User 1',
                 value: 'user 1',
-                item_type: 'activity_log__player_contact_elt_select_who',
+                item_type: 'activity_log__player_contact_elt_so_select_who',
                 disabled: false
 
-    al_def = ActivityLog::PlayerContactElt.definition
+    al_def = ActivityLog::PlayerContactEltSo.definition
     cleanup_matching_activity_logs(al_def.item_type, al_def.rec_type, al_def.process_name, excluding_id: al_def.id)
 
     al_def.extra_log_types = <<~END_DEF
@@ -267,20 +267,20 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
     al_def.save!
     al_def.force_option_config_parse
 
-    expect(al_def.resource_name).to eq 'activity_log__player_contact_elts'
+    expect(al_def.resource_name).to eq 'activity_log__player_contact_elt_sos'
 
-    setup_access :activity_log__player_contact_elts, resource_type: :table, access: :create, user: @user
-    setup_access :activity_log__player_contact_elt__step_3, resource_type: :activity_log_type, user: @user
+    setup_access :activity_log__player_contact_elt_sos, resource_type: :table, access: :create, user: @user
+    setup_access :activity_log__player_contact_elt_so__step_3, resource_type: :activity_log_type, user: @user
 
     expect(player_contact.current_user).to eq @user
-    expect(player_contact.current_user.has_access_to?(:create, :activity_log_type, :activity_log__player_contact_elt__step_3))
+    expect(player_contact.current_user.has_access_to?(:create, :activity_log_type, :activity_log__player_contact_elt_so__step_3))
     sleep 2
-    al = player_contact.activity_log__player_contact_elts.create!(select_call_direction: 'one',
-                                                                  select_who: 'user',
-                                                                  extra_log_type: 'step_3',
-                                                                  select_record_id_from_player_contacts: player_contact.id,
-                                                                  tag_select_allowed: ['def', 'ghi'],
-                                                                  tag_select_record_id_from_player_contacts: [player_contact.id, player_contact3.id])
+    al = player_contact.activity_log__player_contact_elt_sos.create!(select_call_direction: 'one',
+                                                                     select_who: 'user',
+                                                                     extra_log_type: 'step_3',
+                                                                     select_record_id_from_player_contacts: player_contact.id,
+                                                                     tag_select_allowed: ['def', 'ghi'],
+                                                                     tag_select_record_id_from_player_contacts: [player_contact.id, player_contact3.id])
 
     ActivityLog.refresh_outdated unless al.extra_log_type_config
     expect(al.extra_log_type_config).not_to be nil
@@ -341,15 +341,15 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
 
     create_item name: 'User',
                 value: 'user',
-                item_type: 'activity_log__player_contact_elt_select_who',
+                item_type: 'activity_log__player_contact_elt_so_select_who',
                 disabled: false
 
     create_item name: 'User 1',
                 value: 'user 1',
-                item_type: 'activity_log__player_contact_elt_select_who',
+                item_type: 'activity_log__player_contact_elt_so_select_who',
                 disabled: false
 
-    al_def = ActivityLog::PlayerContactElt.definition
+    al_def = ActivityLog::PlayerContactEltSo.definition
     cleanup_matching_activity_logs(al_def.item_type, al_def.rec_type, al_def.process_name, excluding_id: al_def.id)
 
     al_def.extra_log_types = <<~END_DEF
@@ -395,20 +395,20 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
     al_def.save!
     al_def.force_option_config_parse
 
-    expect(al_def.resource_name).to eq 'activity_log__player_contact_elts'
+    expect(al_def.resource_name).to eq 'activity_log__player_contact_elt_sos'
 
-    setup_access :activity_log__player_contact_elts, resource_type: :table, access: :create, user: @user
-    setup_access :activity_log__player_contact_elt__step_3, resource_type: :activity_log_type, user: @user
+    setup_access :activity_log__player_contact_elt_sos, resource_type: :table, access: :create, user: @user
+    setup_access :activity_log__player_contact_elt_so__step_3, resource_type: :activity_log_type, user: @user
 
     expect(player_contact.current_user).to eq @user
     sleep 2
-    al = player_contact.activity_log__player_contact_elts.create!(select_call_direction: 'rcone',
-                                                                  select_who: 'user',
-                                                                  extra_log_type: 'step_3',
-                                                                  select_record_id_from_player_contacts: player_contact.id,
-                                                                  tag_select_allowed: ['rcdef', 'rcghi'],
-                                                                  tag_select_record_id_from_player_contacts: [player_contact.id, player_contact3.id],
-                                                                  select_result: 'r-two')
+    al = player_contact.activity_log__player_contact_elt_sos.create!(select_call_direction: 'rcone',
+                                                                     select_who: 'user',
+                                                                     extra_log_type: 'step_3',
+                                                                     select_record_id_from_player_contacts: player_contact.id,
+                                                                     tag_select_allowed: ['rcdef', 'rcghi'],
+                                                                     tag_select_record_id_from_player_contacts: [player_contact.id, player_contact3.id],
+                                                                     select_result: 'r-two')
 
     ActivityLog.refresh_outdated unless al.extra_log_type_config
     expect(al.extra_log_type_config).not_to be nil
@@ -472,7 +472,7 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
 
     create_item name: 'User',
                 value: 'user',
-                item_type: 'activity_log__player_contact_elt_select_who',
+                item_type: 'activity_log__player_contact_elt_so_select_who',
                 disabled: false
 
     # Create an additional user and assign a role to them
@@ -482,7 +482,7 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
     create_user_role(role_name, user: role_user, app_type: role_user.app_type)
     @user = original_user
 
-    al_def = ActivityLog::PlayerContactElt.definition
+    al_def = ActivityLog::PlayerContactEltSo.definition
     cleanup_matching_activity_logs(al_def.item_type, al_def.rec_type, al_def.process_name, excluding_id: al_def.id)
 
     al_def.extra_log_types = <<~END_DEF
@@ -509,14 +509,14 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
     al_def.save!
     al_def.force_option_config_parse
 
-    setup_access :activity_log__player_contact_elts, resource_type: :table, access: :create, user: @user
-    setup_access :activity_log__player_contact_elt__step_user_role, resource_type: :activity_log_type, user: @user
+    setup_access :activity_log__player_contact_elt_sos, resource_type: :table, access: :create, user: @user
+    setup_access :activity_log__player_contact_elt_so__step_user_role, resource_type: :activity_log_type, user: @user
 
     expect(player_contact.current_user).to eq @user
     sleep 2
-    al = player_contact.activity_log__player_contact_elts.create!(select_call_direction: 'one',
-                                                                  select_who: role_user.email,
-                                                                  extra_log_type: 'step_user_role')
+    al = player_contact.activity_log__player_contact_elt_sos.create!(select_call_direction: 'one',
+                                                                     select_who: role_user.email,
+                                                                     extra_log_type: 'step_user_role')
 
     ActivityLog.refresh_outdated unless al.extra_log_type_config
     expect(al.extra_log_type_config).not_to be nil
@@ -538,7 +538,7 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
 
     create_item name: 'User',
                 value: 'user',
-                item_type: 'activity_log__player_contact_elt_select_who',
+                item_type: 'activity_log__player_contact_elt_so_select_who',
                 disabled: false
 
     # Create an additional user and assign a role to them
@@ -548,7 +548,7 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
     create_user_role(role_name, user: role_user, app_type: role_user.app_type)
     @user = original_user
 
-    al_def = ActivityLog::PlayerContactElt.definition
+    al_def = ActivityLog::PlayerContactEltSo.definition
     cleanup_matching_activity_logs(al_def.item_type, al_def.rec_type, al_def.process_name, excluding_id: al_def.id)
 
     al_def.extra_log_types = <<~END_DEF
@@ -572,8 +572,8 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
     al_def.save!
     al_def.force_option_config_parse
 
-    setup_access :activity_log__player_contact_elts, resource_type: :table, access: :create, user: @user
-    setup_access :activity_log__player_contact_elt__step_user_role, resource_type: :activity_log_type, user: @user
+    setup_access :activity_log__player_contact_elt_sos, resource_type: :table, access: :create, user: @user
+    setup_access :activity_log__player_contact_elt_so__step_user_role, resource_type: :activity_log_type, user: @user
 
     Classification::SelectionOptionsHandler.reset!
 
@@ -601,7 +601,7 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
 
     create_item name: 'User',
                 value: 'user',
-                item_type: 'activity_log__player_contact_elt_select_who',
+                item_type: 'activity_log__player_contact_elt_so_select_who',
                 disabled: false
 
     # Create an additional user and assign a role to them
@@ -611,7 +611,7 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
     create_user_role(role_name, user: role_user, app_type: role_user.app_type)
     @user = original_user
 
-    al_def = ActivityLog::PlayerContactElt.definition
+    al_def = ActivityLog::PlayerContactEltSo.definition
     cleanup_matching_activity_logs(al_def.item_type, al_def.rec_type, al_def.process_name, excluding_id: al_def.id)
 
     al_def.extra_log_types = <<~END_DEF
@@ -635,14 +635,14 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
     al_def.save!
     al_def.force_option_config_parse
 
-    setup_access :activity_log__player_contact_elts, resource_type: :table, access: :create, user: @user
-    setup_access :activity_log__player_contact_elt__step_user_role, resource_type: :activity_log_type, user: @user
+    setup_access :activity_log__player_contact_elt_sos, resource_type: :table, access: :create, user: @user
+    setup_access :activity_log__player_contact_elt_so__step_user_role, resource_type: :activity_log_type, user: @user
 
     expect(player_contact.current_user).to eq @user
     sleep 2
-    al = player_contact.activity_log__player_contact_elts.create!(select_call_direction: 'one',
-                                                                  select_who: role_user.email,
-                                                                  extra_log_type: 'step_user_role')
+    al = player_contact.activity_log__player_contact_elt_sos.create!(select_call_direction: 'one',
+                                                                     select_who: role_user.email,
+                                                                     extra_log_type: 'step_user_role')
 
     ActivityLog.refresh_outdated unless al.extra_log_type_config
     expect(al.extra_log_type_config).not_to be nil

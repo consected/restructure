@@ -1,0 +1,27 @@
+# Pattern 1: The four selection types
+# @runnable: true
+# @instance: activity_log
+# @expect: true
+
+# all - every field condition must be satisfied by a single matching record
+all:
+  this:
+    extra_log_type: primary
+    select_who: user
+
+# any - at least one field condition must be satisfied (each field tested independently)
+any:
+  addresses:
+    city: portland
+    zip: 'no such zip'
+
+# not_any - none of the field conditions may be satisfied
+not_any:
+  addresses:
+    city: 'no such city'
+
+# not_all - the combined set of field conditions must NOT all be satisfied together
+not_all:
+  addresses:
+    city: portland
+    zip: 'no such zip'

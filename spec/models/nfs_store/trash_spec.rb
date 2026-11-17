@@ -13,7 +13,7 @@ RSpec.describe 'Trash archive files', type: :model do
   end
 
   def check
-    expect(@activity_log.class.resource_name).to eq 'activity_log__player_contact_phones'
+    expect(@activity_log.class.resource_name).to eq nfs_al_rn
     expect(@activity_log).to eq @container.parent_item
     expect(@activity_log.extra_log_type).to eq :step_1
     expect(@activity_log.resource_name).to eq @activity_log.extra_log_type_config.resource_name
@@ -43,7 +43,7 @@ RSpec.describe 'Trash archive files', type: :model do
         id: sf.id,
         container_id: @container.id,
         retrieval_type: :stored_file,
-        activity_log_type: 'activity_log__player_contact_phone',
+        activity_log_type: nfs_al_type,
         activity_log_id: @activity_log.id
 
       }
@@ -58,7 +58,7 @@ RSpec.describe 'Trash archive files', type: :model do
 
     # Upload the generated zip
     delfn = 'test-name-trash.zip'
-    upload_file delfn, File.read(download.zip_file_path)
+    upload_file delfn, File.read(NfsStore::Archive::ZipFileGenerator.zip_retrieved_items(download.all_action_items).path)
     sf = @container.stored_files.where(file_name: delfn).first
     expect(sf).not_to be nil
     expect(sf.file_name).to eq delfn
@@ -84,7 +84,7 @@ RSpec.describe 'Trash archive files', type: :model do
         id: sf.id,
         container_id: @container.id,
         retrieval_type: :stored_file,
-        activity_log_type: 'activity_log__player_contact_phone',
+        activity_log_type: nfs_al_type,
         activity_log_id: @activity_log.id
 
       }
@@ -99,7 +99,7 @@ RSpec.describe 'Trash archive files', type: :model do
 
     # Upload the generated zip
     delfn = 'test-name-replace.zip'
-    upload_file delfn, File.read(download.zip_file_path)
+    upload_file delfn, File.read(NfsStore::Archive::ZipFileGenerator.zip_retrieved_items(download.all_action_items).path)
     sf = @container.stored_files.where(file_name: delfn).first
     expect(sf).not_to be nil
     expect(sf.file_name).to eq delfn

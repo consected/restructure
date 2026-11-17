@@ -142,7 +142,7 @@ RSpec.describe 'Pages template config library version resolution', type: :reques
     dm.update_tracker_events
     DynamicModel.define_models
     Application.refresh_dynamic_defs
-    setup_access "dynamic_model__#{table_name}".to_sym, user: @user
+    setup_access :"dynamic_model__#{table_name}", user: @user
     dm
   end
 
@@ -203,7 +203,7 @@ RSpec.describe 'Pages template config library version resolution', type: :reques
   # otherwise swallowed by option_configs and only logged, so it would not appear
   # in the response body).
   def page_template_text
-    HandlebarsPrecompiler.cleanup_public_dir
+    HandlebarsPrecompiler.cleanup_compiled_output
 
     log_io = StringIO.new
     previous_logger = Rails.logger
@@ -217,8 +217,8 @@ RSpec.describe 'Pages template config library version resolution', type: :reques
     expect(response).to have_http_status(:ok)
 
     text = +response.body
-    response.body.scan(%r{/handlebars-test/multi/([\w.\-]+\.js)}).flatten.uniq.each do |fn|
-      path = HandlebarsPrecompiler::MULTI_PUBLIC_DIR.join(fn)
+    response.body.scan(%r{/handlebars-test/gen-(\w+)/multi/([\w.-]+\.js)}).uniq.each do |key, fn|
+      path = HandlebarsPrecompiler.multi_dir(key).join(fn)
       text << "\n" << File.read(path) if File.exist?(path)
     end
     text

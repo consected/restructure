@@ -1,0 +1,9 @@
+# Pattern 1: Update the latest matching reference
+update_reference:
+  player_contact:
+    first:
+      player_contacts:
+        update: return_result
+    with:
+      data: '{{cell_phone}}'
+      rec_type: phone

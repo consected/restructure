@@ -8,6 +8,20 @@ module Redcap
     # During setup, use `WebMock.allow_net_connect!` in rails_helper.rb
     # @param [true|nil] mocks - mock the requests
     # @param [String] only_project - only set up a specific project
+    def setup_redcap_project_admin_configs_once(**)
+      @projects = setup_redcap_project_admin_configs(**)
+      @project = @projects.first
+      @projects
+    end
+
+    def restub_redcap_mocks
+      return if ENV['NO_REDCAP_MOCKS'] == 'true'
+
+      reset_mocks
+      projects = redcap_project_configs(mocks: false)
+      projects&.each { |project| stub_redcap_project_admin_requests(project) }
+    end
+
     def setup_redcap_project_admin_configs(mocks: true, only_project: nil)
       setup_file_store
 
@@ -19,37 +33,17 @@ module Redcap
       projects.each do |p|
         next unless only_project.nil? || p[:name] == only_project
 
-        if mocks
-          if p[:name].in?(['metadata'])
-            @metadata_project = p
-            stub_request_repeat_instrument_field_project p[:server_url], p[:api_key]
-            stub_request_repeat_instrument_field_metadata p[:server_url], p[:api_key]
-          elsif p[:name].in?(['longitudinal'])
-            @longitudinal_project = p
-            stub_request_longitudinal_field_project p[:server_url], p[:api_key]
-            stub_request_longitudinal_field_metadata p[:server_url], p[:api_key]
-            stub_request_longitudinal_field_instruments p[:server_url], p[:api_key]
+        stub_redcap_project_admin_requests(p) if mocks
 
-          elsif p[:name] == 'save_trigger'
-            stub_request_project_save_trigger p[:server_url], p[:api_key]
-            stub_request_survey_link_save_trigger p[:server_url], p[:api_key]
-            stub_request_import_record_save_trigger p[:server_url], p[:api_key]
-            stub_request_metadata p[:server_url], p[:api_key]
-          else
-            stub_request_project p[:server_url], p[:api_key]
-            stub_request_metadata p[:server_url], p[:api_key]
-          end
-          stub_request_project_users p[:server_url], p[:api_key]
-          stub_request_instruments p[:server_url], p[:api_key]
-          stub_request_remove_project_user p[:server_url], p[:api_key]
-        end
+        expect(@admin.email).to eq @admin.matching_user&.email
+        pa = Redcap::ProjectAdmin.active.find_by(name: p[:name], study: DefaultStudy, server_url: p[:server_url])
+        pa ||= Redcap::ProjectAdmin.create! current_admin: @admin,
+                                            study: DefaultStudy,
+                                            name: p[:name],
+                                            api_key: p[:api_key],
+                                            server_url: p[:server_url]
 
-        pa = Redcap::ProjectAdmin.create! current_admin: @admin,
-                                          study: DefaultStudy,
-                                          name: p[:name],
-                                          api_key: p[:api_key],
-                                          server_url: p[:server_url]
-
+        pa.current_admin = @admin
         pa.data_options.run_jobs_as_user = @user.email
         pa.save!
         container = pa.file_store
@@ -59,31 +53,59 @@ module Redcap
         expect(Dir.exist?(cpath)).to be true
         cpath = "#{NfsStore::Manage::Filesystem.nfs_store_directory}/gid601/app-type-#{app_type_id}/containers/#{container.id} -- #{p[:name]}"
         expect(Dir.exist?(cpath)).to be true
-        setup_file_store pa.job_admin
-        setup_file_store @admin
+        job_admin = pa.job_admin
+        setup_file_store job_admin if job_admin && job_admin.id != @admin.id
       end
 
-      pcount = 4
-      pcount = 1 if only_project
+      pcount = projects.count { |project| only_project.nil? || project[:name] == only_project }
 
       expect(Redcap::ProjectAdmin.active.count).to eq pcount
       projects
     end
 
+    def stub_redcap_project_admin_requests(project)
+      case project[:name]
+      when 'metadata'
+        @metadata_project = project
+        stub_request_repeat_instrument_field_project project[:server_url], project[:api_key]
+        stub_request_repeat_instrument_field_metadata project[:server_url], project[:api_key]
+      when 'longitudinal'
+        @longitudinal_project = project
+        stub_request_longitudinal_field_project project[:server_url], project[:api_key]
+        stub_request_longitudinal_field_metadata project[:server_url], project[:api_key]
+        stub_request_longitudinal_field_instruments project[:server_url], project[:api_key]
+      when 'save_trigger'
+        stub_request_project_save_trigger project[:server_url], project[:api_key]
+        stub_request_survey_link_save_trigger project[:server_url], project[:api_key]
+        stub_request_import_record_save_trigger project[:server_url], project[:api_key]
+        stub_request_metadata project[:server_url], project[:api_key]
+      else
+        stub_request_project project[:server_url], project[:api_key]
+        stub_request_metadata project[:server_url], project[:api_key]
+      end
+
+      stub_request_project_users project[:server_url], project[:api_key]
+      stub_request_instruments project[:server_url], project[:api_key]
+      stub_request_remove_project_user project[:server_url], project[:api_key]
+    end
+
     def setup_file_store(admin = nil)
       # Create a matching user for the admin
       @app_type = Admin::AppType.active.find_by(name: 'ref-data')
+      SetupHelper.setup_ref_data_app_nfs
 
-      admin ||= @admin
-      user = User.active.find_by_email(admin.email)
-      if user
-        @user = user
-        @user.app_type = @app_type
-      else
-        @user, = create_user nil, '', email: admin.email, app_type: @app_type
+      @admin = admin if admin
+      @user = @admin&.matching_user
+
+      unless @user
+        admin, = create_admin(with_matching_user: true)
+        @admin = admin
       end
-      setup_access :app_type, resource_type: :general, access: :read, user: @user
-      @user.save!
+      user = @user
+
+      setup_access :app_type, resource_type: :general, access: :read, user: @user, app_type: @app_type
+      @user.app_type_id = @app_type.id
+      @user.save! if @user.changed?
       expect(@user.can?(:app_type)).to be_truthy
       expect(@user.app_type.id).to eq @app_type.id
 
@@ -527,7 +549,7 @@ module Redcap
         .to_return(status: 200, body:, headers: {})
     end
 
-    def stub_request_project_xml(server_url, api_key, body: nil)
+    def stub_request_project_xml(server_url, api_key, body: nil, definition_only: false)
       body ||= File.read('spec/fixtures/redcap/q2_demo_project.xml')
 
       stub_request(:post, server_url)
@@ -538,7 +560,7 @@ module Redcap
             'exportSurveyFields' => 'true',
             'format' => 'json',
             'returnFormat' => 'json',
-            'returnMetadataOnly' => 'false',
+            'returnMetadataOnly' => definition_only ? 'true' : 'false',
             'token' => api_key
           }
         )
@@ -723,7 +745,11 @@ module Redcap
     # Set up the appropriate dynamic model for the narrow record data.
     # The spec/migrations/20210212065538_create_rc_sample_responses_qoezsq.rb migration
     # handles the creation of the table
-    def create_dynamic_model_for_sample_response(survey_fields: nil, disable: nil)
+    # @param [String|nil] foreign_key_through_external_id - resource name of an external
+    #   identifier to associate the master through (e.g. 'scantrons'), instead of master_id.
+    #   Adds an `ext_survey_id` foreign key column used to look up the master via that
+    #   external identifier's association (regression coverage for issue #1477).
+    def create_dynamic_model_for_sample_response(survey_fields: nil, disable: nil, foreign_key_through_external_id: nil)
       j = {
         default: {
           db_configs: {
@@ -781,16 +807,35 @@ module Redcap
       field_list = data_sample_response_fields(type).dup
       field_list << 'disabled' if disable
 
+      fkey_name = nil
+      schema_name = nil
+      if foreign_key_through_external_id
+        j[:default][:db_configs][:ext_survey_id] = { type: 'integer' }
+        j[:_configurations] = { foreign_key_through_external_id: }
+        field_list << 'ext_survey_id'
+        fkey_name = :ext_survey_id
+        # Use the dedicated dynamic_test schema for test-only tables, per repo convention.
+        tn = 'rc_sample_ext_id_responses'
+        schema_name = 'dynamic_test'
+      end
+
       options = String.yaml_dump(j)
 
-      @dynamic_model = DynamicModel.create! current_admin: @admin,
-                                            name: @project[:name],
-                                            table_name: tn,
-                                            primary_key_name: :id,
-                                            foreign_key_name: nil,
-                                            category: :test,
-                                            field_list: field_list.join(' '),
-                                            options:
+      @dynamic_model = DynamicModel.active.find_by(name: @project[:name],
+                                                   table_name: tn,
+                                                   field_list: field_list.join(' '),
+                                                   options:,
+                                                   schema_name:,
+                                                   foreign_key_name: fkey_name)
+      @dynamic_model ||= DynamicModel.create! current_admin: @admin,
+                                              name: @project[:name],
+                                              table_name: tn,
+                                              primary_key_name: :id,
+                                              foreign_key_name: fkey_name,
+                                              schema_name:,
+                                              category: :test,
+                                              field_list: field_list.join(' '),
+                                              options:
     end
 
     def setup_file_fields(alt_name = nil)

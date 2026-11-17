@@ -37,6 +37,7 @@ describe '2FA setup page idle timeout', js: true, driver: $browser_driver do
   after(:all) do
     change_setting('TwoFactorAuthDisabledForUser', true)
     change_setting('TwoFactorAuthDisabledForAdmin', true)
+    change_setting('TwoFactorAuthIdleTimeout', DefaultSettings::TwoFactorAuthIdleTimeout)
   end
 
   def reach_2fa_setup_page
@@ -135,6 +136,7 @@ describe '2FA setup page idle timeout - admin', js: true, driver: $browser_drive
 
   after(:all) do
     change_setting('TwoFactorAuthDisabledForAdmin', true)
+    change_setting('TwoFactorAuthIdleTimeout', DefaultSettings::TwoFactorAuthIdleTimeout)
   end
 
   def reach_admin_2fa_setup_page
@@ -184,7 +186,7 @@ describe '2FA setup page idle timeout - admin', js: true, driver: $browser_drive
     # Verify the admin setup page is no longer accessible without re-authenticating
     visit '/admins/show_otp'
     expect(current_path).not_to eq('/admins/show_otp'),
-                                  'Expected /admins/show_otp to redirect away after session timeout'
+                                'Expected /admins/show_otp to redirect away after session timeout'
   end
 
   it 'does not time out when valid setup OTP is submitted before timeout for admin' do

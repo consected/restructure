@@ -17,6 +17,25 @@
 # and the additional overrides defined below. These overrides are either at the level of the
 # model, and used for every variable, or may be specified for each field.
 # Derived variables may capture their definitions from the variables they reference.
+# Canonical schema
+# _data_dictionary: <Hash(
+#   study: String (required),
+#   domain: String (required),
+#   prevent_update: Boolean,
+#   source_name: String,
+#   source_type: String,
+#   form_name: String,
+#   storage_type: String,
+#   db_or_fs: String,
+#   schema_or_path: String,
+#   table_or_file: String,
+#   is_derived_var: Boolean,
+#   owner_email: String,
+#   fields: Hash(field_name: DataDictionaryFieldOverride),
+#   derived_var_options: Hash
+# )>
+# Keys are optional unless marked (required).
+#
 _data_dictionary:
   # Required
   study: the study name (case sensitive)
@@ -37,6 +56,7 @@ _data_dictionary:
   owner_email: email address of the owner of this data set
 
   # Override any data dictionary values for each field
+  # DataDictionaryFieldOverride accepts the same keys as the model-level entry above
   fields:
     field_name:
       attribute: override value
@@ -49,3 +69,9 @@ _data_dictionary:
       optionally provide a domain to match items to, 
       otherwise the domain of the matched item must match the new item
     name_regex_replace: optionally replace parts of a variable name - for example "_etl$"
+
+# Notes:
+# - Matching an existing datadic_variables record is by source_name, source_type,
+#   form_name, variable_name and (optionally) owner; if the bulk of the definition
+#   matches, nothing is changed, otherwise it is updated from the dynamic model.
+# - Unrecognized keys produce a warning.

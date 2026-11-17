@@ -228,6 +228,7 @@ module GeneralDataConcerns
   end
 
   def as_json(extras = {})
+    extras = extras.dup
     self.current_user ||= extras[:current_user] if extras[:current_user]
     if extras[:force_plain_json]
       extras = {}

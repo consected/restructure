@@ -139,7 +139,11 @@ module AppExceptionHandler
   end
 
   def routing_error_handler(error)
-    msg = 'The request URL does not exist.'
+    msg = if Rails.env.production?
+            'The request URL does not exist.'
+          else
+            "The request URL does not exist: #{request.original_fullpath}"
+          end
     code = 404
     return_and_log_error error, msg, code, log_level: Settings::LogLevel[__method__]
   end
@@ -159,7 +163,8 @@ module AppExceptionHandler
   def bad_auth_token(error)
     msg = 'The information could not be submitted. Copy any important text from the fields or text editors ' \
           'of your form, then open this page in a new tab, edit the form and re-enter any missing information.'
-    code = 422
+    code = 403
+    response.headers['X-ReStructure-Error'] = 'invalid-authenticity-token'
     return_and_log_error error, msg, code, log_level: Settings::LogLevel[__method__]
   end
 

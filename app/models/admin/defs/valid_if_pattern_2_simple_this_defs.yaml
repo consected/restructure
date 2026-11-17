@@ -1,0 +1,7 @@
+# Pattern 2: Simple current-item validation
+valid_if:
+  on_save:
+    all:
+      this:
+        status: active
+        invalid_error_message: Status must be active

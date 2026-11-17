@@ -34,6 +34,14 @@ module ExceptionExtensions
     res = from_caller if res.empty?
     res.join("\n")
   end
+
+  def self.puts_or_tmp_log(msg)
+    puts msg and return if Rails.env.development?
+
+    puts msg if ENV['PUTS_TMP_LOG']
+    msg = "#{Time.now} #{msg}\n"
+    File.write('tmp/test_tmp.log', msg, mode: 'a')
+  end
 end
 
 Exception.include ExceptionExtensions

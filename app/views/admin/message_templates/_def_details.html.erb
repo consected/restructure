@@ -1,0 +1,85 @@
+<%
+  # Classification derived from docs/admin_reference/message_templates/0_introduction.md
+  user_account_layout_names = ['general server notification']
+  user_account_content_names = [
+    'server password expiration reminder',
+    'server registration confirmation',
+    'server password reset instructions',
+    'server password changed'
+  ]
+  ui_template_names = [
+    'ui user login', 'ui admin login', 'ui new user registration',
+    'ui new user registration recaptcha error', 'ui resend confirmation code',
+    'ui user change password', 'ui user forgot password', 'ui admin change password',
+    'ui admin forgot password', 'ui resend unlock code', 'ui 2fa setup',
+    'ui user preferences caption', 'ui first login', 'ui user credential text'
+  ]
+
+  name = object_instance.name.to_s
+  category = object_instance.category.to_s
+  message_type = object_instance.message_type.to_s
+  template_type = object_instance.template_type.to_s
+
+  info_page_suffix_match = category.match(/\A(?<prefix>.*?)\s*-\s*info[\s-]page\z/i)
+
+  # UI templates may use either a plain text or dialog (markdown) editor - the
+  # "ui " name prefix is what identifies them, not the message type.
+  html_snippet_prefixes = ['ui page css - ', 'ui page js - ']
+  is_ui_template = template_type == 'content' && %w[plain dialog].include?(message_type) &&
+                   name.start_with?('ui ') && html_snippet_prefixes.none? { |p| name.start_with?(p) }
+%>
+<dl class="dl-horizontal">
+  <dt>Message type</dt>
+  <dd><%= message_type.presence || '(none)' %></dd>
+  <dt>Template type</dt>
+  <dd><%= template_type.presence || '(none)' %></dd>
+  <dt>Category</dt>
+  <dd><%= category.presence || '(none)' %></dd>
+</dl>
+
+<% if %w[email sms].include?(message_type) %>
+  <h5>Message Notification</h5>
+  <% if user_account_layout_names.include?(name) || user_account_content_names.include?(name) %>
+    <p>This is a <strong>user account notification</strong> template, sent automatically when account events occur (password reset, registration, etc).</p>
+  <% elsif template_type == 'layout' %>
+    <p>This is a <strong>layout</strong> template. It provides the common styling / wrapper for messages, substituting the matching <strong>content</strong> template at <code>{{main_content}}</code>.</p>
+    <p class="<%= 'text-warning' unless object_instance.template.to_s.include?('{{main_content}}') %>">
+      <%= object_instance.template.to_s.include?('{{main_content}}') ? 'Contains' : 'Missing' %> the <code>{{main_content}}</code> placeholder.
+    </p>
+  <% elsif template_type == 'content' %>
+    <p>This is a <strong>content</strong> template, combined into a layout template at send time. May use <code>{{data_attribute}}</code> substitutions.</p>
+  <% end %>
+  <p class="help-block"><%= message_type == 'email' ? 'HTML formatted (layout may include a &lt;style&gt; block).' : 'Plain text formatted.' %></p>
+
+<% elsif is_ui_template %>
+  <h5>UI Template</h5>
+  <% if ui_template_names.include?(name) %>
+    <p>Configures a specific, documented UI message block: <strong><%= name %></strong>. This block only appears in the UI when defined.</p>
+  <% else %>
+    <p>Configures a UI message block: <strong><%= name %></strong>. This name is not in the currently documented list of UI template names - confirm where it is used before relying on it.</p>
+  <% end %>
+  <p class="help-block"><%= message_type == 'dialog' ? 'Uses the dialog (markdown) editor.' : 'Uses plain text.' %></p>
+
+<% elsif message_type == 'dialog' %>
+  <h5>Dialog Template</h5>
+  <% if info_page_suffix_match %>
+    <p>This is a <strong>private info page</strong>. Only authenticated users may view it.</p>
+    <p><label>path</label> <code>{{base_url}}/info_pages/<%= info_page_suffix_match[:prefix].parameterize %>__<%= name.parameterize %></code></p>
+  <% elsif category == 'public' && template_type == 'content' %>
+    <p>This is a <strong>public info page</strong>. Anyone may view it, whether signed in or not.</p>
+    <p><label>path</label> <code>{{base_url}}/info_pages/<%= name.parameterize %></code></p>
+  <% else %>
+    <p>This is a <strong>dialog</strong> template, displayed as an instructive info block within dynamic definition forms. Only the <strong>content</strong> template type is used.</p>
+  <% end %>
+
+<% elsif message_type == 'plain' && template_type == 'content' %>
+  <% if name.start_with?('ui page css - ') %>
+    <h5>HTML Markup Snippet</h5>
+    <p>Plain CSS placed in a <code>&lt;style&gt;</code> block in the page <code>&lt;head&gt;</code> for app type <strong><%= name.delete_prefix('ui page css - ') %></strong>.</p>
+  <% elsif name.start_with?('ui page js - ') %>
+    <h5>HTML Markup Snippet</h5>
+    <p>Plain Javascript placed in a <code>&lt;script&gt;</code> block in the page <code>&lt;head&gt;</code> for app type <strong><%= name.delete_prefix('ui page js - ') %></strong>.</p>
+  <% else %>
+    <p>A <strong>plain</strong> content template. UI template blocks are only recognised by the app when their name starts with <code>ui </code> - this name does not follow that convention.</p>
+  <% end %>
+<% end %>

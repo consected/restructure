@@ -9,16 +9,24 @@ require 'rails_helper'
 # - Verifies create_reference from standalone source to mastered target with in: none/master (issue #1062)
 # - Verifies this_has_no_master_association config attribute forces standalone resolution (issue #1062)
 
-AlNameGenTestCr = 'Gen Test ELT Save'
+AlNameGenTestCr = 'Gen Test ELT Save CR'
 
 RSpec.describe SaveTriggers::CreateReference, type: :model do
   include ModelSupport
   include ActivityLogSupport
 
+  before :context do
+    SetupHelper.setup_al_player_contact_phones
+    SetupHelper.setup_al_gen_tests AlNameGenTestCr, 'elt_save_cr', 'player_contact'
+  end
+
+  before :example do
+    # Isolate parsed references mutated by add_reference_def_to.
+    ActivityLog::PlayerContactPhone.definition.option_configs(force: true)
+  end
+
   describe 'creating a referenced model from an activity log' do
     before :example do
-      SetupHelper.setup_al_player_contact_phones
-      SetupHelper.setup_al_gen_tests AlNameGenTestCr, 'elt_save_test', 'player_contact'
       create_user
       @master = create_master
       @player_contact_prev = @master.player_contacts.create! data: '(617)123-1234 prev', rec_type: :phone, rank: 5, source: 'nflpa2'
@@ -294,25 +302,12 @@ RSpec.describe SaveTriggers::CreateReference, type: :model do
 
   describe 'creating a referenced activity log from an activity log' do
     before :context do
-      SetupHelper.setup_al_gen_tests 'Gen Test ELT', 'elt', 'player_contact'
-    end
-
-    before :example do
-      al_name = 'Gen Test ELT'
+      SetupHelper.setup_al_gen_tests 'Gen Test ELT CR', 'elt_cr', 'player_contact'
 
       create_admin
-      create_user
-      @master = create_master
-
-      setup_access :player_contacts, user: @user
-      setup_access :addresses, user: @user
-      setup_access :activity_log__player_contact_phones, user: @user
-
-      @activity_log = al = ActivityLog.active.where(name: al_name).first
+      al = ActivityLog.active.find_by!(name: 'Gen Test ELT CR')
       @working_data = '(111)222-3333 ext 12312312'
       @working_data2 = '(111)222-3333 ext 7654321'
-
-      raise "Activity Log #{al_name} not set up" if al.nil?
 
       al.extra_log_types = <<~END_DEF
         mr_ref_pc:
@@ -334,7 +329,7 @@ RSpec.describe SaveTriggers::CreateReference, type: :model do
           editable_if:
             always: true
           references:
-            activity_log__player_contact_elt:
+            activity_log__player_contact_elt_cr:
               from: this
               add: one_to_this
               also_disable_record: true
@@ -346,7 +341,7 @@ RSpec.describe SaveTriggers::CreateReference, type: :model do
           save_trigger:
             on_create:
               create_reference:
-                activity_log__player_contact_elt:
+                activity_log__player_contact_elt_cr:
                   force_create: true
                   in: this
                   with:
@@ -365,7 +360,7 @@ RSpec.describe SaveTriggers::CreateReference, type: :model do
           editable_if:
             always: true
           references:
-            activity_log__player_contact_elt:
+            activity_log__player_contact_elt_cr:
               from: this
               add: one_to_this
               also_disable_record: true
@@ -377,7 +372,7 @@ RSpec.describe SaveTriggers::CreateReference, type: :model do
           save_trigger:
             on_create:
               create_reference:
-                activity_log__player_contact_elt:
+                activity_log__player_contact_elt_cr:
                   force_create: true
                   in: this
                   with:
@@ -394,17 +389,48 @@ RSpec.describe SaveTriggers::CreateReference, type: :model do
                         data: data
                         rec_type: rec_type
 
+        mr_ref_pc_before_save_test:
+          label: Reference Player Contact Before Save Test
+          fields:
+            - select_call_direction
+            - select_who
+          references:
+            player_contacts:
+              from: this
+              add: one_to_this
+
+          save_trigger:
+            before_save:
+              create_reference:
+                player_contacts:
+                  in: this
+                  with:
+                    data: '(555)555-5555'
+                    rec_type: phone
+                    rank: 10
+
       END_DEF
 
       al.current_admin = @admin
-      al.save!
-      al = @activity_log
+      al.save! if al.changed?
+    end
 
+    before :example do
+      create_admin
+      create_user
+      @master = create_master
+
+      setup_access :player_contacts, user: @user
+      setup_access :addresses, user: @user
+      setup_access :activity_log__player_contact_phones, user: @user
+
+      @activity_log = al = ActivityLog.active.find_by!(name: 'Gen Test ELT CR')
       setup_access al.resource_name, resource_type: :table, user: @user
 
       setup_option_config 0, 'Reference Player Contact', %w[select_call_direction select_who]
       setup_option_config 1, 'Reference Activity Log', %w[select_call_direction select_who disabled]
       setup_option_config 2, 'Reference Activity Log 2', %w[select_call_direction select_who disabled]
+      setup_option_config 3, 'Reference Player Contact Before Save Test', %w[select_call_direction select_who]
     end
 
     it 'creates an embedded_item when creating another record' do
@@ -430,10 +456,10 @@ RSpec.describe SaveTriggers::CreateReference, type: :model do
       }
 
       # Check we can create the basic activity log
-      al_pc = ActivityLog::PlayerContactElt.new(select_call_direction: 'from staff',
-                                                extra_log_type: 'mr_ref_pc',
-                                                select_who: 'abc',
-                                                master: @master)
+      al_pc = ActivityLog::PlayerContactEltCr.new(select_call_direction: 'from staff',
+                                                  extra_log_type: 'mr_ref_pc',
+                                                  select_who: 'abc',
+                                                  master: @master)
       al_pc.save!
 
       expect(@master.current_user).to eq @user
@@ -451,16 +477,16 @@ RSpec.describe SaveTriggers::CreateReference, type: :model do
       expect(al_pc.embedded_item).to eq pc
 
       # Now create the activity log with create_reference defined
-      al_cr = ActivityLog::PlayerContactElt.new(select_call_direction: 'from staff',
-                                                extra_log_type: 'mr_ref_al',
-                                                select_who: 'abc',
-                                                master: @master)
+      al_cr = ActivityLog::PlayerContactEltCr.new(select_call_direction: 'from staff',
+                                                  extra_log_type: 'mr_ref_al',
+                                                  select_who: 'abc',
+                                                  master: @master)
       al_cr.save!
       al_cr.clear_embedded_item_memo
 
       expect(al_cr.model_references.length).to eq 1
       ei = al_cr.embedded_item
-      expect(ei).to be_a ActivityLog::PlayerContactElt
+      expect(ei).to be_a ActivityLog::PlayerContactEltCr
       ei.clear_model_reference_memo
       expect(ei.extra_log_type).to eq :mr_ref_pc
 
@@ -472,19 +498,31 @@ RSpec.describe SaveTriggers::CreateReference, type: :model do
       # Now create the activity log with create_reference with_result defined
       @master.player_contacts.create!(pc_hash_2)
 
-      al_cr = ActivityLog::PlayerContactElt.new(select_call_direction: 'from staff',
-                                                extra_log_type: 'mr_ref_al2',
-                                                select_who: 'abc',
-                                                master: @master)
+      al_cr = ActivityLog::PlayerContactEltCr.new(select_call_direction: 'from staff',
+                                                  extra_log_type: 'mr_ref_al2',
+                                                  select_who: 'abc',
+                                                  master: @master)
       al_cr.save!
       expect(al_cr.model_references.length).to eq 1
-      expect(al_cr.embedded_item).to be_a ActivityLog::PlayerContactElt
+      expect(al_cr.embedded_item).to be_a ActivityLog::PlayerContactEltCr
       expect(al_cr.embedded_item.extra_log_type).to eq :mr_ref_pc
 
       pc2 = PlayerContact.find_by(pc_hash_2.merge(rank: 10))
       expect(pc2).not_to be nil
 
       expect(al_cr.embedded_item.embedded_item).to eq pc2
+    end
+
+    it 'raises when create_reference in: this is invoked from a real before_save trigger (issue #1384)' do
+      # End-to-end regression: drives the guard through the real before_save callback
+      # chain (a genuine .create! call), rather than manually setting
+      # in_before_save_trigger and calling #perform in isolation.
+      expect do
+        ActivityLog::PlayerContactEltCr.create!(select_call_direction: 'from staff',
+                                                extra_log_type: 'mr_ref_pc_before_save_test',
+                                                select_who: 'abc',
+                                                master: @master)
+      end.to raise_error(FphsException, /create_reference with in: this can not run within a before_save trigger/)
     end
   end
 
@@ -533,8 +571,6 @@ RSpec.describe SaveTriggers::CreateReference, type: :model do
     end
 
     before :example do
-      SetupHelper.setup_al_player_contact_phones
-      SetupHelper.setup_al_gen_tests AlNameGenTestCr, 'elt_save_test', 'player_contact'
       create_user
       @master = create_master
       @player_contact = @master.player_contacts.create! data: '(617)123-1234 b', rec_type: :phone, rank: 10
@@ -627,8 +663,6 @@ RSpec.describe SaveTriggers::CreateReference, type: :model do
     end
 
     before :example do
-      SetupHelper.setup_al_player_contact_phones
-      SetupHelper.setup_al_gen_tests AlNameGenTestCr, 'elt_save_test', 'player_contact'
       create_user
       @master = create_master
       @player_contact = @master.player_contacts.create! data: '(617)123-1234 b', rec_type: :phone, rank: 10
@@ -1032,6 +1066,48 @@ RSpec.describe SaveTriggers::CreateReference, type: :model do
       expect(created_item.master_id).to eq @master.id
       expect(source_record.save_trigger_results['created_references'].last).to be_nil
       expect(source_record.save_trigger_results['created_results'].last).to eq true
+    end
+  end
+
+  # Issue #1384 - create_reference with in: this/referring_record needs @item's own id
+  # (to set from_record_id on the new ModelReference), which doesn't exist yet when run
+  # from a before_save trigger.
+  describe 'invoked from a before_save trigger (issue #1384)' do
+    before :example do
+      create_user
+      @master = create_master
+      @player_contact = @master.player_contacts.create! data: '(617)123-1234 b', rec_type: :phone, rank: 10
+      @al = create_item master: @master
+      add_reference_def_to(@al, [{ player_contacts: { from: 'this', add: 'many' } }])
+      setup_access @al.resource_name, resource_type: :activity_log_type, access: :create, user: @user
+    end
+
+    it 'raises for in: this instead of silently creating an orphaned reference' do
+      config = {
+        player_contact: {
+          in: 'this',
+          with: { data: random_phone_number, rec_type: :phone, rank: 5 }
+        }
+      }
+
+      @al.in_before_save_trigger = true
+      @trigger = SaveTriggers::CreateReference.new(config, @al)
+
+      expect { @trigger.perform }.to raise_error(FphsException, /before_save/)
+    end
+
+    it 'raises for in: referring_record instead of silently creating an orphaned reference' do
+      config = {
+        player_contact: {
+          in: 'referring_record',
+          with: { data: random_phone_number, rec_type: :phone, rank: 5 }
+        }
+      }
+
+      @al.in_before_save_trigger = true
+      @trigger = SaveTriggers::CreateReference.new(config, @al)
+
+      expect { @trigger.perform }.to raise_error(FphsException, /before_save/)
     end
   end
 end

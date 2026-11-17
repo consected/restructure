@@ -9,6 +9,7 @@
 # - set_browser_cache sets Cache-Control with private and max-age directives
 # - set_browser_cache sets Expires header computed from max_age
 # - set_browser_cache adds immutable directive when requested
+# - set_browser_cache adds must-revalidate when requested
 # - set_browser_cache does not add immutable by default
 
 require 'rails_helper'
@@ -57,6 +58,13 @@ RSpec.describe ControllerUtils, type: :controller do
       subject.send(:set_browser_cache, max_age: 30)
 
       expect(response.headers['Cache-Control']).not_to include('immutable')
+    end
+
+    it 'adds must-revalidate when requested' do
+      get :index
+      subject.send(:set_browser_cache, max_age: 3600, must_revalidate: true)
+
+      expect(response.headers['Cache-Control']).to include('must-revalidate')
     end
   end
 end

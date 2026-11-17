@@ -35,7 +35,7 @@ RSpec.describe 'OptionConfigs::ExtraOptions#clean_references_def', type: :model 
   include ActivityLogSupport
   include ModelSupport
 
-  before :example do
+  before_all do
     SetupHelper.setup_al_player_contact_phones
     create_user
     create_master
@@ -48,7 +48,10 @@ RSpec.describe 'OptionConfigs::ExtraOptions#clean_references_def', type: :model 
     setup_access :activity_log__player_contact_phones, user: @user
     setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type, user: @user
     setup_access :activity_log__player_contact_phone__blank_log, resource_type: :activity_log_type, user: @user
+  end
 
+  before :each do
+    SetupHelper.setup_al_player_contact_phones
     @al = create_item
   end
 
@@ -106,6 +109,26 @@ RSpec.describe 'OptionConfigs::ExtraOptions#clean_references_def', type: :model 
     expect(refitem[:no_such_reference_type]).to eq(from: 'this', add: 'many')
     expect(config.config_warnings).to be_blank
     expect(config.config_errors).to be_blank
+  end
+
+  it 'clears stale unresolved-reference tracking when a previously missing class resolves' do
+    reference_class = OptionConfigs::ExtraOptionConfigs::References
+    allow(ModelReference).to receive(:to_record_class_for_type).and_wrap_original do |original, model_name|
+      model_name == :late_reference_target ? nil : original.call(model_name)
+    end
+
+    config.references = { late_reference_target: { from: 'this', add: 'many' } }
+    config.clean_references_def
+    expect(config.unresolved_model_references[reference_class]).to include(:late_reference_target)
+
+    allow(ModelReference).to receive(:to_record_class_for_type).and_wrap_original do |original, model_name|
+      model_name == :late_reference_target ? PlayerContact : original.call(model_name)
+    end
+    config.references = { late_reference_target: { from: 'this', add: 'many' } }
+    config.clean_references_def
+
+    expect(config.unresolved_model_references).not_to have_key(reference_class)
+    expect(config.unresolved_model_references?).to be false
   end
 
   # Helper shared by the two definition-missing examples below.

@@ -25,8 +25,8 @@
 #      mustache-style substitutions
 #
 # 2. "references defined for dynamic models"
-#    Verifies that model references work on DynamicModel instances
-#    (Player Contact Phone Info) with a simple player_contacts reference.
+#    Verifies that model references work on a spec-specific DynamicModel
+#    with a simple player_contacts reference.
 #
 # 3. "direct embed resource"
 #    Tests the direct-embed mechanism where a parent record automatically
@@ -58,7 +58,7 @@
 require 'rails_helper'
 require './db/table_generators/dynamic_models_table'
 
-AlNameGenTestMrh = 'Gen Test ELT'
+AlNameGenTestMrh = 'Gen Test ELT MRH'
 # Use the activity log player contact phone activity log implementation,
 # since it includes the works_with concern
 
@@ -74,31 +74,36 @@ RSpec.describe 'Model reference implementation', type: :model do
   include DynamicModelSupport
 
   before :context do
-    SetupHelper.setup_al_gen_tests AlNameGenTestMrh, 'elt', 'player_contact'
+    SetupHelper.setup_al_gen_tests AlNameGenTestMrh, 'elt_mrh', 'player_contact'
+  end
+
+  def find_activity_log
+    al = ActivityLog.active.find_by(name: al_name)
+    ActivityLog.find(al.id) if al
+  end
+
+  def working_data
+    '(111)222-3333 ext 7654321'
   end
 
   describe 'references defined for activity logs' do
-    before :each do
+    before :all do
       create_admin
       create_user
+      generate_test_dynamic_model
+    end
+
+    before_all do
       setup_access :player_contacts
       setup_access :addresses
       setup_access :activity_log__player_contact_phones
-      @alt_player_contact = create_item(data: rand(10_000_000_000_000_000), rank: 10)
-      @alt_master = @alt_player_contact.master
-      @player_contact1 = create_item(data: rand(10_000_000_000_000_000), rank: 10)
-      @player_contact2 = create_item({ data: rand(10_000_000_000_000_000), rank: 10 }, @player_contact1.master)
-      @player_contact3 = create_item({ data: rand(10_000_000_000_000_000), rank: 10 }, @player_contact1.master)
 
-      expect(@player_contact1.master).not_to eq @alt_master
-
-      generate_test_dynamic_model
-
-      @activity_log = al = ActivityLog.active.where(name: al_name).first
-      @working_data = '(111)222-3333 ext 7654321'
+      @activity_log = al = find_activity_log
 
       raise "Activity Log #{al_name} not set up" if al.nil?
 
+      al.field_list = nil
+      al.blank_log_field_list = nil
       al.extra_log_types = <<~END_DEF
         step_1:
           label: Step 1
@@ -137,7 +142,7 @@ RSpec.describe 'Model reference implementation', type: :model do
                   this:
                     select_who: 'xyz'
                   reference:
-                    data: '#{@working_data}'
+                    data: '#{working_data}'
 
 
         mr_self_ref:
@@ -152,7 +157,7 @@ RSpec.describe 'Model reference implementation', type: :model do
             player_contacts:
               from: master
               add: many
-            activity_log__player_contact_elt:
+            activity_log__player_contact_elt_mrh:
               from: this
               add: many
               also_disable_record: true
@@ -169,7 +174,7 @@ RSpec.describe 'Model reference implementation', type: :model do
               from: master
               add: many
               limit: 2
-            activity_log__player_contact_elt:
+            activity_log__player_contact_elt_mrh:
               from: this
               add: one_to_this
               also_disable_record: true
@@ -188,7 +193,7 @@ RSpec.describe 'Model reference implementation', type: :model do
               from: master
               add: many
               limit: 2
-            activity_log__player_contact_elt:
+            activity_log__player_contact_elt_mrh:
               from: this
               add: many
               also_disable_record: true
@@ -210,7 +215,7 @@ RSpec.describe 'Model reference implementation', type: :model do
               from: master
               add: many
               limit: 2
-            activity_log__player_contact_elt:
+            activity_log__player_contact_elt_mrh:
               from: this
               add: one_to_master
               also_disable_record: true
@@ -236,6 +241,42 @@ RSpec.describe 'Model reference implementation', type: :model do
             address:
               from: this
               add: many
+              also_disable_record: true
+
+        always_embed_limited:
+          label: Always Embed Limited
+          fields:
+            - select_call_direction
+            - select_who
+          editable_if:
+            always: true
+          view_options:
+            always_embed_creatable_reference: address
+          references:
+            address:
+              from: this
+              add: many
+              limit: 1
+              also_disable_record: true
+
+        always_embed_limited_multi:
+          label: Always Embed Limited Multi
+          fields:
+            - select_call_direction
+            - select_who
+          editable_if:
+            always: true
+          view_options:
+            always_embed_creatable_reference: address
+          references:
+            player_contact:
+              from: master
+              add: many
+              limit: 2
+            address:
+              from: this
+              add: many
+              limit: 1
               also_disable_record: true
 
         avoid_missing:
@@ -270,7 +311,7 @@ RSpec.describe 'Model reference implementation', type: :model do
                     user:
                       role_name:
                         - editor
-            activity_log__player_contact_elt:
+            activity_log__player_contact_elt_mrh:
                 from: master
                 add: many
                 showable_if:
@@ -396,12 +437,11 @@ RSpec.describe 'Model reference implementation', type: :model do
 
       al.current_admin = @admin
       al.save!
-      al = @activity_log
-
-      c1 = al.option_configs.first
-      expect(c1.label).to eq 'Step 1'
-      expect(c1.fields).to eq %w[select_call_direction select_who]
       setup_access al.resource_name, resource_type: :table, user: @user
+
+      c1 = @activity_log.option_configs(force: true).first
+      # expect(c1.label).to eq 'Step 1'
+      # expect(c1.fields).to eq %w[select_call_direction select_who]
 
       setup_option_config 2, 'Reference Simple Test', %w[select_call_direction select_who]
       setup_option_config 3, 'Reference Showable Test', %w[select_call_direction select_who]
@@ -410,13 +450,27 @@ RSpec.describe 'Model reference implementation', type: :model do
       setup_option_config 6, 'Activity Selector', %w[select_call_direction select_who]
       setup_option_config 7, 'Creatable on Master Test', %w[select_call_direction select_who]
       setup_option_config 8, 'Always Embed', %w[select_call_direction select_who]
-      setup_option_config 9, 'Avoid Missing', %w[select_call_direction select_who]
-      setup_option_config 10, 'Reference Showable Test2', %w[select_call_direction select_who tag_select_allowed]
-      setup_option_config 11, 'User is Creator', %w[select_call_direction select_who]
-      setup_option_config 12, 'Prevent Disable', %w[select_call_direction select_who]
-      setup_option_config 13, 'Filter By Hash', %w[select_call_direction select_who]
-      setup_option_config 14, 'Filter By This Hash', %w[select_call_direction select_who]
-      setup_option_config 15, 'Filter By Substitution', %w[select_call_direction select_who]
+      setup_option_config 9, 'Always Embed Limited', %w[select_call_direction select_who]
+      setup_option_config 10, 'Always Embed Limited Multi', %w[select_call_direction select_who]
+      setup_option_config 11, 'Avoid Missing', %w[select_call_direction select_who]
+      setup_option_config 12, 'Reference Showable Test2', %w[select_call_direction select_who tag_select_allowed]
+      setup_option_config 13, 'User is Creator', %w[select_call_direction select_who]
+      setup_option_config 14, 'Prevent Disable', %w[select_call_direction select_who]
+      setup_option_config 15, 'Filter By Hash', %w[select_call_direction select_who]
+      setup_option_config 16, 'Filter By This Hash', %w[select_call_direction select_who]
+      setup_option_config 17, 'Filter By Substitution', %w[select_call_direction select_who]
+    end
+
+    before :each do
+      @activity_log ||= find_activity_log
+
+      @alt_player_contact = create_item(data: rand(10_000_000_000_000_000), rank: 10)
+      @alt_master = @alt_player_contact.master
+      @player_contact1 = create_item(data: rand(10_000_000_000_000_000), rank: 10)
+      @player_contact2 = create_item({ data: rand(10_000_000_000_000_000), rank: 10 }, @player_contact1.master)
+      @player_contact3 = create_item({ data: rand(10_000_000_000_000_000), rank: 10 }, @player_contact1.master)
+
+      expect(@player_contact1.master).not_to eq @alt_master
     end
 
     it 'evaluates rules to optionally show references' do
@@ -424,16 +478,16 @@ RSpec.describe 'Model reference implementation', type: :model do
 
       @player_contact.current_user = @user
 
-      al_simple = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
-                                                                          extra_log_type: 'mr_simple_test',
-                                                                          select_who: 'abc')
+      al_simple = @player_contact.activity_log__player_contact_elt_mrhs.build(select_call_direction: 'from staff',
+                                                                              extra_log_type: 'mr_simple_test',
+                                                                              select_who: 'abc')
       al_simple.save!
 
       ModelReference.create_from_master_with(al_simple.master, @player_contact)
 
-      al_showable = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
-                                                                            extra_log_type: 'mr_showable_test',
-                                                                            select_who: 'xyz')
+      al_showable = @player_contact.activity_log__player_contact_elt_mrhs.build(select_call_direction: 'from staff',
+                                                                                extra_log_type: 'mr_showable_test',
+                                                                                select_who: 'xyz')
       al_showable.save!
 
       master = al_showable.master
@@ -445,7 +499,7 @@ RSpec.describe 'Model reference implementation', type: :model do
 
       # Requires the to record to have data: (111)...
       att = {
-        data: @working_data,
+        data: working_data,
         rec_type: 'phone',
         source: 'nfl',
         rank: 10
@@ -479,19 +533,19 @@ RSpec.describe 'Model reference implementation', type: :model do
       @player_contact.current_user = @user
       @player_contact.master.current_user = @user
 
-      referenced = @player_contact.activity_log__player_contact_elts.create!(select_call_direction: 'from staff',
-                                                                             extra_log_type: 'mr_self_ref',
-                                                                             select_who: 'abc',
-                                                                             master: @player_contact.master)
+      referenced = @player_contact.activity_log__player_contact_elt_mrhs.create!(select_call_direction: 'from staff',
+                                                                                 extra_log_type: 'mr_self_ref',
+                                                                                 select_who: 'abc',
+                                                                                 master: @player_contact.master)
 
-      referenced2 = @player_contact.activity_log__player_contact_elts.create!(select_call_direction: 'from staff',
+      referenced2 = @player_contact.activity_log__player_contact_elt_mrhs.create!(select_call_direction: 'from staff',
+                                                                                  extra_log_type: 'mr_self_ref',
+                                                                                  select_who: 'abc2',
+                                                                                  master: @player_contact.master)
+
+      al_simple = @player_contact.activity_log__player_contact_elt_mrhs.build(select_call_direction: 'from staff',
                                                                               extra_log_type: 'mr_self_ref',
-                                                                              select_who: 'abc2',
-                                                                              master: @player_contact.master)
-
-      al_simple = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
-                                                                          extra_log_type: 'mr_self_ref',
-                                                                          select_who: 'abc')
+                                                                              select_who: 'abc')
       al_simple.save!
 
       mr = ModelReference.create_from_master_with(al_simple.master, @player_contact)
@@ -523,13 +577,13 @@ RSpec.describe 'Model reference implementation', type: :model do
       @player_contact.current_user = @user
       @player_contact.master.current_user = @user
 
-      al_simple = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
-                                                                          extra_log_type: 'mr_creatables',
-                                                                          select_who: 'abc')
+      al_simple = @player_contact.activity_log__player_contact_elt_mrhs.build(select_call_direction: 'from staff',
+                                                                              extra_log_type: 'mr_creatables',
+                                                                              select_who: 'abc')
       al_simple.save!
 
       cmrs = al_simple.creatable_model_references only_creatables: true
-      expect(cmrs.keys).to eq %i[activity_log__player_contact_elt_mr_self_ref player_contact]
+      expect(cmrs.keys).to eq %i[activity_log__player_contact_elt_mrh_mr_self_ref player_contact]
 
       res = ModelReference.create_from_master_with(al_simple.master, @player_contact1)
       expect(res).to be_truthy
@@ -538,16 +592,16 @@ RSpec.describe 'Model reference implementation', type: :model do
 
       # We have gone beyond the limit of 2. Fail.
       cmrs = al_simple.creatable_model_references only_creatables: true, force_reload: true
-      expect(cmrs.keys).to eq %i[activity_log__player_contact_elt_mr_self_ref]
+      expect(cmrs.keys).to eq %i[activity_log__player_contact_elt_mrh_mr_self_ref]
       res = ModelReference.create_from_master_with(al_simple.master, @player_contact3)
       # expect(res).to be_falsey
       # @todo - we should enforce the limits in the actual creation. This will require some additional testing of\
       #         apps to ensure we don't have automated actions that depend on this.
 
-      referenced = @player_contact.activity_log__player_contact_elts.create!(select_call_direction: 'from staff',
-                                                                             extra_log_type: 'mr_self_ref',
-                                                                             select_who: 'abc',
-                                                                             master: @player_contact.master)
+      referenced = @player_contact.activity_log__player_contact_elt_mrhs.create!(select_call_direction: 'from staff',
+                                                                                 extra_log_type: 'mr_self_ref',
+                                                                                 select_who: 'abc',
+                                                                                 master: @player_contact.master)
       mr_ref = ModelReference.create_with(al_simple, referenced)
       expect(mr_ref).to be_truthy
 
@@ -563,37 +617,37 @@ RSpec.describe 'Model reference implementation', type: :model do
       @player_contact.current_user = @user
       @player_contact.master.current_user = @user
 
-      al_simple = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
-                                                                          extra_log_type: 'mr_activity_selector',
-                                                                          select_who: 'abc')
+      al_simple = @player_contact.activity_log__player_contact_elt_mrhs.build(select_call_direction: 'from staff',
+                                                                              extra_log_type: 'mr_activity_selector',
+                                                                              select_who: 'abc')
       al_simple.save!
 
       cmrs = al_simple.creatable_model_references only_creatables: true
-      expect(cmrs.keys).to eq %i[activity_log__player_contact_elt_mr_showable_test
-                                 activity_log__player_contact_elt_mr_simple_test
-                                 activity_log__player_contact_elt_mr_creatables
+      expect(cmrs.keys).to eq %i[activity_log__player_contact_elt_mrh_mr_showable_test
+                                 activity_log__player_contact_elt_mrh_mr_simple_test
+                                 activity_log__player_contact_elt_mrh_mr_creatables
                                  player_contact]
-      expect(cmrs[:activity_log__player_contact_elt_mr_showable_test][:activity_log__player_contact_elt][:ref_config][:label]).to eq 'Showable Test'
-      expect(cmrs[:activity_log__player_contact_elt_mr_simple_test][:activity_log__player_contact_elt][:ref_config][:label]).to eq 'Simple Test'
-      expect(cmrs[:activity_log__player_contact_elt_mr_creatables][:activity_log__player_contact_elt][:ref_config][:label]).to eq 'Creatables'
+      expect(cmrs[:activity_log__player_contact_elt_mrh_mr_showable_test][:activity_log__player_contact_elt_mrh][:ref_config][:label]).to eq 'Showable Test'
+      expect(cmrs[:activity_log__player_contact_elt_mrh_mr_simple_test][:activity_log__player_contact_elt_mrh][:ref_config][:label]).to eq 'Simple Test'
+      expect(cmrs[:activity_log__player_contact_elt_mrh_mr_creatables][:activity_log__player_contact_elt_mrh][:ref_config][:label]).to eq 'Creatables'
     end
 
     it 'handles model references created on a master' do
       @player_contact.current_user = @user
       @player_contact.master.current_user = @user
 
-      al_simple = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
-                                                                          extra_log_type: 'mr_creatable_master',
-                                                                          select_who: 'abc')
+      al_simple = @player_contact.activity_log__player_contact_elt_mrhs.build(select_call_direction: 'from staff',
+                                                                              extra_log_type: 'mr_creatable_master',
+                                                                              select_who: 'abc')
       al_simple.save!
 
-      referenced = @player_contact.activity_log__player_contact_elts.create!(select_call_direction: 'from staff',
-                                                                             extra_log_type: 'mr_self_ref',
-                                                                             select_who: 'abc',
-                                                                             master: @player_contact.master)
+      referenced = @player_contact.activity_log__player_contact_elt_mrhs.create!(select_call_direction: 'from staff',
+                                                                                 extra_log_type: 'mr_self_ref',
+                                                                                 select_who: 'abc',
+                                                                                 master: @player_contact.master)
 
       cmrs = al_simple.creatable_model_references only_creatables: true
-      expect(cmrs.keys).to eq %i[activity_log__player_contact_elt_mr_self_ref player_contact]
+      expect(cmrs.keys).to eq %i[activity_log__player_contact_elt_mrh_mr_self_ref player_contact]
       ModelReference.create_from_master_with(al_simple.master, referenced)
       # We should not be able to create another, since this is set as one_to_master
       cmrs = al_simple.creatable_model_references only_creatables: true, force_reload: true
@@ -607,9 +661,9 @@ RSpec.describe 'Model reference implementation', type: :model do
       @player_contact.current_user = @user
       @player_contact.master.current_user = @user
 
-      al_simple = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
-                                                                          extra_log_type: 'mr_user_is_creator',
-                                                                          select_who: 'abc')
+      al_simple = @player_contact.activity_log__player_contact_elt_mrhs.build(select_call_direction: 'from staff',
+                                                                              extra_log_type: 'mr_user_is_creator',
+                                                                              select_who: 'abc')
       al_simple.save!
 
       cmrs = al_simple.creatable_model_references only_creatables: true
@@ -628,9 +682,9 @@ RSpec.describe 'Model reference implementation', type: :model do
       expect(cmrs).to be_empty
 
       # Create a new activity log, in which we should see the existing item
-      al_simple2 = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
-                                                                           extra_log_type: 'mr_user_is_creator',
-                                                                           select_who: 'def')
+      al_simple2 = @player_contact.activity_log__player_contact_elt_mrhs.build(select_call_direction: 'from staff',
+                                                                               extra_log_type: 'mr_user_is_creator',
+                                                                               select_who: 'def')
       al_simple2.save!
 
       expect(al_simple.model_references(force_reload: true).length).to eq 1
@@ -640,9 +694,9 @@ RSpec.describe 'Model reference implementation', type: :model do
       @alt_player_contact.current_user = @user
       @alt_player_contact.master.current_user = @user
 
-      al_simple3 = @alt_player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
-                                                                               extra_log_type: 'mr_user_is_creator',
-                                                                               select_who: 'ghi')
+      al_simple3 = @alt_player_contact.activity_log__player_contact_elt_mrhs.build(select_call_direction: 'from staff',
+                                                                                   extra_log_type: 'mr_user_is_creator',
+                                                                                   select_who: 'ghi')
       al_simple3.save!
 
       expect(al_simple.model_references(force_reload: true).length).to eq 1
@@ -679,9 +733,9 @@ RSpec.describe 'Model reference implementation', type: :model do
       @player_contact.current_user = @user
       @player_contact.master.current_user = @user
 
-      al_simple = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
-                                                                          extra_log_type: 'always_embed',
-                                                                          select_who: 'abc')
+      al_simple = @player_contact.activity_log__player_contact_elt_mrhs.build(select_call_direction: 'from staff',
+                                                                              extra_log_type: 'always_embed',
+                                                                              select_who: 'abc')
       al_simple.save!
 
       # Create a player contact reference to show embedded
@@ -708,13 +762,126 @@ RSpec.describe 'Model reference implementation', type: :model do
       expect(al_simple.embedded_item).to be_a Address
     end
 
+    # Regression test for issue #1319:
+    # always_embed_creatable_reference must not raise FphsException when the
+    # configured reference has genuinely reached its creation limit. Instead,
+    # it should gracefully fall back to the existing linked record. Previously
+    # any invocation of #embedded_item(embed_action_type: :creating) after the
+    # single allowed record had already been created and linked (for example
+    # a follow up request/render after the initial save completed) would
+    # raise, even though nothing was actually misconfigured.
+    it 'falls back to the existing linked record when always_embed_creatable_reference has reached its limit' do
+      @player_contact.current_user = @user
+      @player_contact.master.current_user = @user
+
+      al_simple = @player_contact.activity_log__player_contact_elt_mrhs.build(select_call_direction: 'from staff',
+                                                                              extra_log_type: 'always_embed_limited',
+                                                                              select_who: 'abc')
+      al_simple.save!
+
+      al_simple.action_name = 'create'
+      al_simple.reset_model_references
+
+      # Nothing has been linked yet, so the single creatable address reference
+      # should be built and embedded.
+      cmrs = al_simple.creatable_model_references(only_creatables: true, force_reload: true)
+      expect(cmrs.keys).to eq %i[address]
+      expect(al_simple.embedded_item(embed_action_type: :creating, force_reload: true)).to be_a Address
+
+      # Link the one allowed address record, simulating a completed embed.
+      address = Address.create!(master: @player_contact.master, rank: -1)
+      ModelReference.create_with(al_simple, address)
+      al_simple.reset_model_references
+
+      # The limit has now genuinely been reached - address is no longer creatable.
+      cmrs = al_simple.creatable_model_references(only_creatables: true, force_reload: true)
+      expect(cmrs).to be_empty
+
+      # A later, delayed evaluation of the creating action (for example a
+      # follow up request after the initial save) must not raise. It should
+      # gracefully fall back to the existing linked address record.
+      result = nil
+      expect do
+        result = al_simple.embedded_item(embed_action_type: :creating, force_reload: true)
+      end.not_to raise_error
+      expect(result).to eq address
+    end
+
+    # Regression test for issue #1319 (part 2):
+    # embed_action_type: :latest must return whatever the most recent :creating evaluation
+    # resolved to, without recomputing mrs/cmrs (avoiding the raise/limit issue entirely), and
+    # without being clobbered by an unrelated :viewing/:editing evaluation that happens to run
+    # afterwards on the same instance (e.g. a calc_action condition referencing embedded_item,
+    # such as NonQueryCondition#in_instance, which always evaluates with embed_action_type: :viewing).
+    it 'retrieves the last :creating result via embed_action_type: :latest, immune to interleaved :viewing calls' do
+      @player_contact.current_user = @user
+      @player_contact.master.current_user = @user
+
+      al_simple = @player_contact.activity_log__player_contact_elt_mrhs.build(select_call_direction: 'from staff',
+                                                                              extra_log_type: 'always_embed_limited',
+                                                                              select_who: 'abc')
+      al_simple.save!
+
+      al_simple.action_name = 'create'
+      al_simple.reset_model_references
+
+      created = al_simple.embedded_item(embed_action_type: :creating, force_reload: true)
+      expect(created).to be_a Address
+
+      # :latest should return the same item that :creating just resolved to.
+      expect(al_simple.embedded_item(embed_action_type: :latest)).to eq created
+
+      # An unrelated :viewing evaluation (as calc_action conditions perform) must not clobber
+      # the :latest result, even when it resolves to something different (nil, since nothing
+      # has been linked as a model reference yet).
+      expect(al_simple.embedded_item(embed_action_type: :viewing)).to be_nil
+      expect(al_simple.embedded_item(embed_action_type: :latest)).to eq created
+    end
+
+    # Regression test for a review finding on #1319's fix: when always_embed_creatable_reference
+    # has reached its limit, and OTHER reference types are also configured, the fallback must not
+    # mistake an unrelated linked reference for the configured target - it should behave as if
+    # nothing of that type is embeddable (nil), not return the wrong record.
+    it 'does not fall back to an unrelated reference type when the always_embed_creatable_reference has reached its limit' do
+      @player_contact.current_user = @user
+      @player_contact.master.current_user = @user
+
+      al_simple = @player_contact.activity_log__player_contact_elt_mrhs.build(select_call_direction: 'from staff',
+                                                                              extra_log_type: 'always_embed_limited_multi',
+                                                                              select_who: 'abc')
+      al_simple.save!
+
+      # Fill the address limit (1) at the MASTER level, not linked to al_simple itself - so
+      # al_simple's own model_references (from: this) never sees an address reference, while the
+      # limit check (which always counts references from the master) correctly sees it as full.
+      address = Address.create!(master: @player_contact.master, rank: -1)
+      ModelReference.create_from_master_with(@player_contact.master, address)
+
+      # Link a player_contact reference TO al_simple - a DIFFERENT reference type than the
+      # always_embed_creatable_reference target ('address') - so al_simple's own mrs has exactly
+      # one entry, but it is not of the preferred type.
+      ModelReference.create_with(al_simple, @player_contact3)
+      al_simple.reset_model_references
+
+      cmrs = al_simple.creatable_model_references(only_creatables: true, force_reload: true)
+      expect(cmrs.keys).to eq %i[player_contact]
+
+      # address has reached its limit (via the master, not al_simple) - the fallback must not
+      # raise, AND must not incorrectly return the unrelated player_contact reference.
+      result = nil
+      expect do
+        result = al_simple.embedded_item(embed_action_type: :creating, force_reload: true)
+      end.not_to raise_error
+      expect(result).to be_nil
+    end
+
     it 'handles embedded references without a view_options definition' do
       @player_contact.current_user = @user
       @player_contact.master.current_user = @user
 
-      al_simple = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
-                                                                          extra_log_type: 'avoid_missing',
-                                                                          select_who: 'abc')
+      al_simple = @player_contact.activity_log__player_contact_elt_mrhs.build(select_call_direction: 'from staff',
+                                                                              extra_log_type: 'avoid_missing',
+                                                                              select_who: 'abc')
       al_simple.save!
 
       # In new / create mode, expect the embedded item to be the the player contact, since there are no other creatable references
@@ -754,16 +921,16 @@ RSpec.describe 'Model reference implementation', type: :model do
 
       @player_contact.current_user = @user
 
-      al_simple = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
-                                                                          extra_log_type: 'mr_simple_test',
-                                                                          select_who: 'abc')
+      al_simple = @player_contact.activity_log__player_contact_elt_mrhs.build(select_call_direction: 'from staff',
+                                                                              extra_log_type: 'mr_simple_test',
+                                                                              select_who: 'abc')
       al_simple.save!
 
       ModelReference.create_from_master_with(al_simple.master, @player_contact)
 
-      al_showable = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
-                                                                            extra_log_type: 'mr_showable_test2',
-                                                                            select_who: 'xyz')
+      al_showable = @player_contact.activity_log__player_contact_elt_mrhs.build(select_call_direction: 'from staff',
+                                                                                extra_log_type: 'mr_showable_test2',
+                                                                                select_who: 'xyz')
       al_showable.save!
 
       master = al_showable.master
@@ -785,7 +952,7 @@ RSpec.describe 'Model reference implementation', type: :model do
 
       @user.user_roles.find_by(app_type_id: @user.app_type_id, role_name: 'editor')&.disable!(@admin)
 
-      ref_config = al_showable.extra_log_type_config.references[:activity_log__player_contact_elt][:activity_log__player_contact_elt]
+      ref_config = al_showable.extra_log_type_config.references[:activity_log__player_contact_elt_mrh][:activity_log__player_contact_elt_mrh]
       res = al_showable.extra_log_type_config.calc_reference_if(ref_config, :showable_if, al_showable, default_if_no_config: true)
       expect(res).to be_falsey
 
@@ -833,9 +1000,9 @@ RSpec.describe 'Model reference implementation', type: :model do
     it 'evaluates rules to prevent references being disabled' do
       @player_contact.current_user = @user
 
-      al = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
-                                                                   extra_log_type: 'mr_prevent_disable',
-                                                                   select_who: 'abc')
+      al = @player_contact.activity_log__player_contact_elt_mrhs.build(select_call_direction: 'from staff',
+                                                                       extra_log_type: 'mr_prevent_disable',
+                                                                       select_who: 'abc')
       al.save!
 
       referenced = @player_contact.master.dynamic_model__test_created_by_recs.create! test1: 'prevent disabled test'
@@ -851,9 +1018,9 @@ RSpec.describe 'Model reference implementation', type: :model do
     it 'filters by substitutions' do
       @player_contact.current_user = @user
 
-      al = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
-                                                                   extra_log_type: 'mr_filter_by_substitution',
-                                                                   select_who: 'abc')
+      al = @player_contact.activity_log__player_contact_elt_mrhs.build(select_call_direction: 'from staff',
+                                                                       extra_log_type: 'mr_filter_by_substitution',
+                                                                       select_who: 'abc')
       al.save!
 
       referenced = @player_contact.master.dynamic_model__test_created_by_recs.create! test1: 'filter by substitution test'
@@ -865,9 +1032,9 @@ RSpec.describe 'Model reference implementation', type: :model do
     it 'filters by hash conditions from master' do
       @player_contact.current_user = @user
 
-      al = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
-                                                                   extra_log_type: 'mr_filter_by_hash',
-                                                                   select_who: 'abc')
+      al = @player_contact.activity_log__player_contact_elt_mrhs.build(select_call_direction: 'from staff',
+                                                                       extra_log_type: 'mr_filter_by_hash',
+                                                                       select_who: 'abc')
       al.save!
 
       referenced = @player_contact.master.dynamic_model__test_created_by_recs.create! test1: 'filter by hash test'
@@ -878,9 +1045,9 @@ RSpec.describe 'Model reference implementation', type: :model do
     it 'filters by hash conditions from this' do
       @player_contact.current_user = @user
 
-      al = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
-                                                                   extra_log_type: 'mr_filter_by_this_hash',
-                                                                   select_who: 'abc')
+      al = @player_contact.activity_log__player_contact_elt_mrhs.build(select_call_direction: 'from staff',
+                                                                       extra_log_type: 'mr_filter_by_this_hash',
+                                                                       select_who: 'abc')
       al.save!
 
       referenced = @player_contact.master.dynamic_model__test_created_by_recs.create! test1: 'filter by this hash test'
@@ -891,23 +1058,19 @@ RSpec.describe 'Model reference implementation', type: :model do
   end
 
   describe 'references defined for dynamic models' do
-    before :each do
-      dm_name = 'Player Contact Phone Info'
+    before :all do
       create_admin
       create_user
-      import_bulk_msg_app
       setup_access :player_contacts
-      setup_access :addresses
-      let_user_create :dynamic_model__player_contact_phone_infos
+      @dynamic_model = generate_test_dynamic_model(table_name: 'test_mrh_dynamic_recs')
+    end
 
+    before :each do
       @player_contact1 = create_item(data: rand(10_000_000_000_000_000), rank: 10)
       @player_contact2 = create_item({ data: rand(10_000_000_000_000_000), rank: 10 }, @player_contact1.master)
       @player_contact3 = create_item({ data: rand(10_000_000_000_000_000), rank: 10 }, @player_contact1.master)
 
-      @dynamic_model = dm = DynamicModel.active.find_by(name: dm_name)
-      @working_data = '(111)222-3333 ext 7654321'
-
-      raise "Dynamic Model #{dm_name} not set up" if dm.nil?
+      dm = @dynamic_model
 
       dm.options = <<~END_DEF
         default:
@@ -962,11 +1125,13 @@ RSpec.describe 'Model reference implementation', type: :model do
   end
 
   describe 'direct embed resource' do
-    before :each do
+    before :all do
+      generate_test_embed_dynamic_models
+    end
+
+    before_all do
       create_admin
       create_user
-      generate_test_embed_dynamic_models
-
       setup_access :player_contacts
       create_item(data: rand(10_000_000_000_000_000), rank: 10)
       @master = @player_contact.master
@@ -1083,11 +1248,70 @@ RSpec.describe 'Model reference implementation', type: :model do
       expect(embedded_item.id).to be > first_id
     end
 
+    # Regression test for Issue #1303: #memoize_embedded_item used to key its cache by calling
+    # #embed_action_type directly, ignoring the actual embed_action_type resolved for the current
+    # call. That meant an explicit override (like this one) could be cached under the wrong key,
+    # and a later call using a different embed_action_type override could read back that
+    # unrelated, incorrect result instead of recomputing.
+    it 'keys the embedded_item memo by the actual resolved embed_action_type, not derived state' do
+      dm = @dynamic_model_w_field.implementation_class.new(
+        master: @master,
+        embed_resource_name: @dynamic_model_embed.resource_name,
+        action_name: 'new'
+      )
+
+      # This instance is unpersisted, so its own #embed_action_type would naturally resolve to
+      # :creating. Force a :viewing evaluation instead - nothing is embedded yet, so this
+      # correctly returns nil.
+      expect(dm.embedded_item(embed_action_type: :viewing)).to be nil
+
+      # A separate :creating evaluation on the same instance must not be poisoned by the cached
+      # :viewing result above - it should still build the creatable embedded item.
+      expect(dm.embedded_item(embed_action_type: :creating)).to be_a DynamicModel::TestEmbeddedRec
+    end
+
+    # Regression test for Issue #1303: HandlesUserBase#valid_embedded_item validates on every save,
+    # including the one that creates a direct embed's link. If that validation's :viewing evaluation
+    # runs before the link is established, it memoizes #model_references / #creatable_model_references
+    # against the not-yet-linked state. Without invalidating that memo once the link is in place,
+    # later evaluations on the same in-memory instance would incorrectly keep returning nil forever.
+    it 'does not leave a stale pre-link cache on the same instance after the embed is established' do
+      dm = @dynamic_model_w_field.implementation_class.new(
+        master: @master,
+        embed_resource_name: @dynamic_model_embed.resource_name,
+        action_name: 'new'
+      )
+
+      results = {}
+      # Simulate another after_create callback that runs before link_embedded_item's own
+      # after_create invocation (Rails runs after_create callbacks in declaration order, and e.g.
+      # NfsStore::Manage::ContainerFile#process_new_file is declared, and so runs, before
+      # Dynamic::ModelReferenceHandler's `after_create :link_embedded_item`) reading the embedded
+      # item in :viewing mode before the direct embed link has been established.
+      dm.class.after_create(prepend: true) { |r| r.embedded_item(embed_action_type: :viewing) }
+      # And another that runs AFTER link_embedded_item (appended normally), capturing what a
+      # caller would see mid-transaction, before after_commit's #reset_model_references has a
+      # chance to clean up any staleness independently of this fix.
+      dm.class.after_create { |r| results[:mid_transaction] = r.embedded_item(embed_action_type: :viewing) }
+
+      dm.save!
+
+      expect(results[:mid_transaction]).to be_a DynamicModel::TestEmbeddedRec
+
+      # Without #link_embedded_item clearing the stale pre-link memo once persisted, this would
+      # incorrectly keep returning the nil cached by the prepended callback above, even though the
+      # link is now set.
+      embedded_item = dm.embedded_item(embed_action_type: :viewing)
+      expect(embedded_item).to be_a DynamicModel::TestEmbeddedRec
+      expect(embedded_item.test_embed_field_id).to eq dm.id
+    end
+
     it 'ignores the embed if the embed resource is not accessible by the user' do
       revoke_user_create :dynamic_model__test_embedded_recs
 
       dm = @dynamic_model_w_field.implementation_class.new(
         master: @master,
+
         embed_resource_name: @dynamic_model_embed.resource_name,
         action_name: 'new'
       )

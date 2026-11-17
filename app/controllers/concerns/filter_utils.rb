@@ -28,6 +28,7 @@ module FilterUtils
       p.delete(:failed)
       p.delete(:ids)
       filter_name = p.delete(:filter_name)
+      non_column_filter_keys.each { |k| p.delete(k) }
 
       likes = ['']
       p.each do |k, v|
@@ -59,6 +60,17 @@ module FilterUtils
     end
 
     pm
+  end
+
+  #
+  # Override to exclude additional non-database-column keys from the hash used to build
+  # the `where` clause in #filtered_primary_model, while still leaving them present in the
+  # #filter_params result returned to other callers (e.g. so the filter dropdown UI can
+  # still reflect the current selection for a virtual filter handled separately - see
+  # Admin::DynamicModelsController#filtered_in_current_app_type for an example).
+  # @return [Array<Symbol>]
+  def non_column_filter_keys
+    []
   end
 
   #
@@ -139,7 +151,10 @@ module FilterUtils
       return @filter_params
     end
 
-    fpp[:disabled] ||= 'enabled' if has_disabled_field
+    # Only default to 'enabled' on first page load (no filter params in URL).
+    # When params[:filter] exists, the user has interacted with filters and
+    # an absent disabled key means they chose "All".
+    fpp[:disabled] ||= 'enabled' if has_disabled_field && !params[:filter]
 
     res = fpp || {}
     res = filter_defaults.merge(res)

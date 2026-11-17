@@ -15,6 +15,9 @@
 module HandlebarsPrecompilerHelper
   extend ActiveSupport::Concern
 
+  # Registration line of a compiled template or partial. The CLI may quote names with single or double quotes
+  TEMPLATE_REGISTRATION_REGEX = /^(?:Handlebars\.partials|templates)\[(['"])(.+?)\1\]/
+
   # JavaScript wrapper used by Handlebars CLI to register compiled templates
   COMPILED_HEAD = <<~ENDJS
     (function() {
@@ -39,17 +42,58 @@ module HandlebarsPrecompilerHelper
 
   # Get public directory for compiled templates or partials.
   # @param is_partial [Boolean] whether this is for partials
-  # @return [Pathname] path to public directory for compiled files
+  # @return [Pathname] path to the current generation's compiled-output directory
   def handlebars_public_dir(is_partial:)
-    is_partial ? HandlebarsPrecompiler::PARTIALS_PUBLIC_DIR : HandlebarsPrecompiler::TEMPLATES_PUBLIC_DIR
+    key = handlebars_generation_key
+    is_partial ? HandlebarsPrecompiler.partials_compiled_dir(key) : HandlebarsPrecompiler.templates_compiled_dir(key)
   end
 
   # Get URL relative path for templates or partials.
   # @param is_partial [Boolean] whether this is for partials
-  # @return [String] URL relative path
+  # @return [String] URL relative path, embedding the current generation key
   def handlebars_url_path(is_partial:)
     subdir = is_partial ? 'partials' : 'templates'
-    "#{HandlebarsPrecompiler::URL_RELATIVE_PATH}#{subdir}/"
+    "#{HandlebarsPrecompiler::URL_RELATIVE_PATH}gen-#{handlebars_generation_key}/#{subdir}/"
+  end
+
+  # Non-user-specific generation key (issue #1362), memoized per request/helper instance so
+  # it stays stable even if a dynamic definition is touched mid-request. Identical for every
+  # user; rotates only on server_cache_version change or a dynamic-definition/config update.
+  # @return [String] 13-character hex string (truncated SHA256)
+  def handlebars_generation_key
+    @handlebars_generation_key ||= HandlebarsPrecompiler.generation_key
+  end
+
+  # Whether the option-type-agnostic result-template ids (the bare and "dynamic_model__"-
+  # stripped ids in common_templates/_search_results_template.html.erb) should be emitted
+  # for this option_type_config. Those two ids do not vary per option_type_config, so a
+  # def_record with more than one option_type_config must only emit them once (issue #1379)
+  # - otherwise the same id gets queued in the same request with differing content on each
+  # iteration, which write_handlebars_template can only ever compile one version of.
+  # @param option_type_config_name [String, Symbol, nil] the current iteration's option type
+  # @param default_option_type_name [String, Symbol, nil] the def_record's default option type
+  # @return [Boolean]
+  def emit_option_type_agnostic_handlebars_ids?(option_type_config_name, default_option_type_name)
+    option_type_config_name.blank? || option_type_config_name.to_s == default_option_type_name.to_s
+  end
+
+  # Opportunistically sweep old compiled-Handlebars generations (and stale FileLock lock
+  # files - issue #1362 S7 fix) the first time THIS request notices the current
+  # generation's directory doesn't exist yet (issue #1362) - i.e. a rotation happened
+  # since the last request that checked. Checked at most once per request (memoized).
+  # Locked with on_contention: :skip and a zero wait: this is a pure disk-space
+  # optimisation, so if another process is already sweeping (or holds the lock for any other
+  # reason), this request simply moves on rather than doing redundant work or waiting.
+  def maybe_sweep_old_handlebars_generations
+    return if @handlebars_generation_sweep_checked
+
+    @handlebars_generation_sweep_checked = true
+    return if Dir.exist?(HandlebarsPrecompiler.tmp_generation_dir(handlebars_generation_key))
+
+    HandlebarsPrecompiler::FileLock.acquire('generation-sweep', wait: 0, on_contention: :skip) do
+      HandlebarsPrecompiler.sweep_old_generations
+      HandlebarsPrecompiler.sweep_stale_lock_files
+    end
   end
 
   # Generate a cache key scoped to the current user context.
@@ -74,7 +118,7 @@ module HandlebarsPrecompilerHelper
       user_type = u&.class&.name
       user_id = u&.id
       app_type_id = u&.app_type_id if u.respond_to?(:app_type_id)
-      userrole, uac = app_type_access_control_timestamps(app_type_id)
+      userrole, uac = HandlebarsPrecompiler.app_type_access_control_timestamps(app_type_id)
 
       # app_type_id is included directly (not just via the userrole/uac timestamps) so that
       # two different app_type contexts can never collide even if neither has any
@@ -87,19 +131,30 @@ module HandlebarsPrecompilerHelper
   # Extract item_updates logic for cache key generation.
   # @return [String] concatenated timestamps of dynamic definitions
   def handlebars_item_updates_key
-    @handlebars_item_updates_key ||= begin
-      cs = [Admin::MessageTemplate, DynamicModel, ActivityLog, ExternalIdentifier,
-            Admin::ConfigLibrary, Admin::PageLayout, Admin::AppConfiguration]
-      cs.map { |c| c.reorder(updated_at: :desc).limit(1).pluck(:updated_at)&.first.to_i.to_s }.join('-')
-    end
+    @handlebars_item_updates_key ||= HandlebarsPrecompiler.item_updates_key
   end
 
   # Generate filename for compiled output.
+  #
+  # When +source+ is given, the filename is content-addressed: a digest of the actual
+  # preprocessed template source (32 hex chars - issue #1362 S5, widened from a truncated
+  # 13-char/52-bit digest, since a collision there would mean one user's compiled output
+  # is served to another), so identical content (from any user/app_type) shares one
+  # compiled file, and differing content never collides. Compiled output is a pure function
+  # of the source, so this is strictly more precise than keying on assumed inputs
+  # (app_type/user/role) - it splits exactly when content differs and shares whenever it
+  # does not. Every template id is content-addressed when a source is given (issue #1362
+  # S4) - see content_addressing_safety_spec.rb / the option-3 fix in
+  # _search_results_resources_panel.html.erb for why this is safe even for
+  # master_main_inner.
+  # Without +source+, falls back to the per-user/app_type handlebars_cache_key, as before.
   # @param template_id [String] the template identifier
-  # @return [String] safe filename with cache key suffix
-  def handlebars_compiled_filename(template_id)
+  # @param source [String, nil] preprocessed template source, for content addressing
+  # @return [String] safe filename with cache key or content digest suffix
+  def handlebars_compiled_filename(template_id, source = nil)
     safe_id = template_id.to_s.gsub(/[^a-zA-Z0-9_-]/, '_')
-    "#{safe_id}-#{handlebars_cache_key}.js"
+    key = source ? Digest::SHA256.hexdigest(source)[0..31] : handlebars_cache_key
+    "#{safe_id}-#{key}.js"
   end
 
   # Preprocess handlebars source to convert shorthand syntax to CLI-compatible format.
@@ -130,15 +185,45 @@ module HandlebarsPrecompilerHelper
     result
   end
 
-  def read_handlebars_template(template_id, is_partial: false)
-    public_dir = handlebars_public_dir(is_partial:)
-    safe_id = template_id.to_s.gsub(/[^a-zA-Z0-9_-]/, '_')
-    effective_id = is_partial ? safe_id.sub(/-partial\z/, '') : safe_id
-    compiled_filename = handlebars_compiled_filename(effective_id)
-    compiled_file = public_dir.join(compiled_filename)
-    raise FphsException, "Compiled Handlebars template not found: #{compiled_file}" unless File.exist?(compiled_file)
+  # Read an already-compiled Handlebars file from its recorded URL-relative path (as
+  # returned by #write_handlebars_template / recorded by handlebars_template_tag), rather
+  # than recomputing the filename from a template id - the only way to correctly locate a
+  # content-addressed compiled file, since its name depends on source we may not have here.
+  #
+  # The path is treated as an opaque (generation, type, filename) identifier rather than a
+  # literal servable URL (issue #1362): individual compiled templates/partials no longer
+  # live under HandlebarsPrecompiler::PUBLIC_DIR, and are scoped by generation, so the
+  # "gen-<key>" and "partials/"/"templates/" segments are used to pick the correct actual
+  # (tmp-based) directory - which may be an OLDER, still-retained generation, not
+  # necessarily the current one.
+  # @param compiled_file_path [String] URL-relative path, e.g.
+  #   "/handlebars-test/gen-abc123def4567/templates/x.js"
+  # @return [String, nil] compiled file content, or nil if the file is unexpectedly missing
+  def read_compiled_handlebars_file(compiled_file_path)
+    relative = compiled_file_path.to_s.delete_prefix(HandlebarsPrecompiler::URL_RELATIVE_PATH)
+    gen_segment, subdir, filename = relative.split('/', 3)
+    key = gen_segment.to_s.delete_prefix('gen-')
+    base_dir = if subdir == 'partials'
+                 HandlebarsPrecompiler.partials_compiled_dir(key)
+               else
+                 HandlebarsPrecompiler.templates_compiled_dir(key)
+               end
+    file = base_dir.join(File.basename(filename.to_s))
 
-    File.read(compiled_file)
+    unless File.exist?(file)
+      # A generation can be swept, or a non-web process's boot-time cleanup can wipe the
+      # tmp dirs, in the narrow window between write_handlebars_template confirming this
+      # file exists and this read (issue #1362 S6 fix). Degrade rather than raise and fail
+      # the whole page/bundle over one template: the front-end already tolerates an
+      # individual missing template (see _fpa.js's "Template not found" console.log guard),
+      # and a subsequent page load recompiles it fresh. Returns nil (not '') so the caller
+      # can tell a genuine miss apart from a legitimately empty compiled file and avoid
+      # persisting a degraded multi bundle (see #write_multiple_handlebars_templates).
+      Rails.logger.warn "HandlebarsPrecompiler: compiled file missing at read time, omitting from bundle: #{file}"
+      return nil
+    end
+
+    File.read(file)
   end
 
   # Write a template to temp file for batch compilation.
@@ -150,6 +235,8 @@ module HandlebarsPrecompilerHelper
   # @yield Block that returns template content if content is nil
   # @return [String] relative URL path to the compiled file (for javascript_include_tag)
   def write_handlebars_template(template_id, content = nil, is_partial: false, &)
+    maybe_sweep_old_handlebars_generations
+
     dir = handlebars_temp_dir(is_partial:)
     public_dir = handlebars_public_dir(is_partial:)
     url_path = handlebars_url_path(is_partial:)
@@ -162,30 +249,43 @@ module HandlebarsPrecompilerHelper
     effective_id = is_partial ? safe_id.sub(/-partial\z/, '') : safe_id
     temp_file = dir.join("#{effective_id}.handlebars")
 
+    # A given id can only ever be queued/compiled ONCE per request: #compile_handlebars_templates
+    # reads whichever content currently sits at +temp_file+, and the Handlebars runtime can
+    # only register one function per id anyway (Handlebars.templates[id] is a single slot).
+    # If this id was already written earlier in this same request - even with DIFFERENT
+    # content (e.g. two dynamic models/embeds sharing the same derived template id) - reuse
+    # the ALREADY-WRITTEN content's filename rather than recomputing one from this call's
+    # (different) content: returning a filename addressed to content that is never actually
+    # written/compiled left it permanently missing, which made
+    # #write_multiple_handlebars_templates discard the whole page's multi-bundle rather than
+    # just this one template. NOTE: this early return never captures +content+ from a block,
+    # so handlebars_template_tag blocks must stay free of side effects other callers rely on.
+    if File.exist?(temp_file)
+      existing_processed = File.read(temp_file)
+      compiled_filename = handlebars_compiled_filename(effective_id, existing_processed)
+      return "#{url_path}#{compiled_filename}"
+    end
+
+    # Content must be resolved BEFORE the filename can be computed, since the filename is
+    # a digest of the source for content-addressed (non-excluded) template ids.
+    content ||= capture(&) if block_given?
+    # Use placeholder for empty/blank templates - they still need to be registered
+    # in Handlebars.templates even if they render nothing
+    content = ' ' if content.blank?
+    processed = preprocess_handlebars_source(content)
+
     # Use the effective_id (without -partial suffix for partials) for the compiled filename
     # Templates and partials are stored in separate subdirectories to avoid name collisions
-    compiled_filename = handlebars_compiled_filename(effective_id)
+    compiled_filename = handlebars_compiled_filename(effective_id, processed)
     compiled_file = public_dir.join(compiled_filename)
     relative_path = "#{url_path}#{compiled_filename}"
 
     # Skip if compiled file already exists (avoid recompilation)
     return relative_path if File.exist?(compiled_file)
 
-    # Skip if temp file already written (deduplication within same request)
-    return relative_path if File.exist?(temp_file)
-
-    # Get content from block if not provided
-    content ||= capture(&) if block_given?
-
-    # Use placeholder for empty/blank templates - they still need to be registered
-    # in Handlebars.templates even if they render nothing
-    content = ' ' if content.blank?
-
     # Ensure directory exists before writing
     FileUtils.mkdir_p(dir)
 
-    # Preprocess and write to temp file
-    processed = preprocess_handlebars_source(content)
     File.write(temp_file, processed)
 
     relative_path
@@ -198,7 +298,7 @@ module HandlebarsPrecompilerHelper
   # @return [String] 13-character hex string (truncated SHA256)
   def access_control_version
     @access_control_version ||= begin
-      userrole, uac = app_type_access_control_timestamps(current_user_or_admin_app_type_id)
+      userrole, uac = HandlebarsPrecompiler.app_type_access_control_timestamps(current_user_or_admin_app_type_id)
 
       Digest::SHA256.hexdigest("#{userrole}-#{uac}-#{handlebars_cache_key}")[0..12]
     end
@@ -209,7 +309,8 @@ module HandlebarsPrecompilerHelper
   # access_control_version — stable across login sessions for effective browser caching.
   # Skips all I/O if the output file already exists.
   # @param requested_handlebars_templates [Array<Hash>] template info hashes with :id, :is_partial keys
-  # @return [Array(String, Array, Array)] URL path, template IDs, partial IDs
+  # @return [Array(String, Array, Array, Boolean)] URL path, template IDs, partial IDs,
+  #   and whether the complete bundle is available
   def write_multiple_handlebars_templates(requested_handlebars_templates)
     handlebars_partial_ids = []
     handlebars_template_ids = []
@@ -225,29 +326,53 @@ module HandlebarsPrecompilerHelper
     app_type_id = u&.app_type_id if u.respond_to? :app_type_id
     req_digest = Digest::SHA256.hexdigest([handlebars_template_ids, handlebars_partial_ids].join(','))
     filename = "requested-templates-#{u&.id}-#{app_type_id}-#{req_digest}-#{access_control_version}.js"
-    url_path = HandlebarsPrecompiler::URL_RELATIVE_PATH
-    multi_file = HandlebarsPrecompiler::MULTI_PUBLIC_DIR.join(filename)
+    url_path = "#{HandlebarsPrecompiler::URL_RELATIVE_PATH}gen-#{handlebars_generation_key}/"
+    multi_file = HandlebarsPrecompiler.multi_dir(handlebars_generation_key).join(filename)
 
     if File.exist?(multi_file)
       Rails.logger.info { "Serving existing multi file: #{filename}" }
     else
-      template_html = requested_handlebars_templates.map do |template_info|
-        read_handlebars_template(template_info[:id], is_partial: template_info[:is_partial])
-      end
+      # Locked to avoid duplicate assembly if another request wants the exact same bundle
+      # concurrently (issue #1362) - re-checks existence once acquired/attempted, since the
+      # other request may have just finished while this one waited.
+      HandlebarsPrecompiler::FileLock.acquire(filename, wait: Settings::HandlebarsLockWaitSeconds) do
+        unless File.exist?(multi_file)
+          # Read via the compiled_file_path already recorded by handlebars_template_tag at
+          # write time, rather than recomputing the filename from id - recomputation is not
+          # possible for content-addressed templates, since their filename depends on
+          # source we don't have here.
+          template_html = requested_handlebars_templates.map do |template_info|
+            read_compiled_handlebars_file(template_info[:compiled_file_path])
+          end
 
-      # Add initialization header to ensure Handlebars.partials exists before partials register themselves
-      # The CLI-compiled partials assume Handlebars.partials already exists
-      init_header = <<~JS
-        (function() {
-          Handlebars.partials = Handlebars.partials || {};
-          Handlebars.templates = Handlebars.templates || {};
-        })();
-      JS
-      File.write(multi_file, (init_header + template_html.join("\n")).html_safe)
-      Rails.logger.info { "Generated multi file: #{filename}" }
+          if template_html.any?(&:nil?)
+            # Do not persist a degraded bundle (issue #1362 should-fix): filename depends
+            # only on the requested template set/access version, not on whether every read
+            # succeeded, so writing a partial bundle here would serve the SAME broken
+            # content to every future request for this exact set until the generation
+            # rotates. Skipping the write lets a later request retry from scratch once the
+            # missing compiled file reappears.
+            Rails.logger.warn "HandlebarsPrecompiler: skipping multi-file assembly for #{filename}, " \
+                              'one or more compiled templates were missing'
+          else
+            # Add initialization header to ensure Handlebars.partials exists before partials
+            # register themselves. The CLI-compiled partials assume Handlebars.partials
+            # already exists
+            init_header = <<~JS
+              (function() {
+                Handlebars.partials = Handlebars.partials || {};
+                Handlebars.templates = Handlebars.templates || {};
+              })();
+            JS
+            FileUtils.mkdir_p(HandlebarsPrecompiler.multi_dir(handlebars_generation_key))
+            atomic_write(multi_file, (init_header + template_html.join("\n")).html_safe)
+            Rails.logger.info { "Generated multi file: #{filename}" }
+          end
+        end
+      end
     end
 
-    ["#{url_path}multi/#{filename}", handlebars_template_ids, handlebars_partial_ids]
+    ["#{url_path}multi/#{filename}", handlebars_template_ids, handlebars_partial_ids, File.exist?(multi_file)]
   end
 
   # Compile all templates from temp directories in a single CLI call per type.
@@ -260,6 +385,19 @@ module HandlebarsPrecompilerHelper
   end
 
   private
+
+  # Write +content+ to +path+ atomically: writes to a temp file in the same directory
+  # then renames into place, so a concurrent reader can never observe partial content,
+  # and a failed write can never corrupt a pre-existing good file at +path+.
+  # @param path [Pathname, String] destination file path
+  # @param content [String] content to write
+  def atomic_write(path, content)
+    tmp_path = "#{path}.#{Process.pid}-#{SecureRandom.hex(4)}.tmp"
+    File.write(tmp_path, content)
+    File.rename(tmp_path, path)
+  ensure
+    FileUtils.rm_f(tmp_path) if tmp_path && File.exist?(tmp_path)
+  end
 
   # Resolve the current user or admin, if any.
   # Safe to call outside a request/session context (e.g. rake tasks, console,
@@ -278,34 +416,20 @@ module HandlebarsPrecompilerHelper
     u&.app_type_id if u.respond_to?(:app_type_id)
   end
 
-  # Look up the latest updated_at timestamps for Admin::UserRole and
-  # Admin::UserAccessControl scoped to a given app_type_id. Used to derive
-  # cache keys that must change whenever access control for that app_type changes.
-  # Includes app_type_id: nil rows too (global/shared roles and access controls that
-  # apply across all app types via role_name matching), matching the scoping pattern
-  # used elsewhere for this purpose (see UserAndRoles#where_user_and_role and
-  # PageLayoutsHelper#page_layout_panels) — otherwise a change to a global role/access
-  # control would not be reflected in any app_type-scoped cache key.
-  # @param app_type_id [Integer, nil] the app_type to scope the queries to
-  # @return [Array(String, String)] [userrole_timestamp, uac_timestamp] as epoch-integer strings
-  def app_type_access_control_timestamps(app_type_id)
-    userrole = Admin::UserRole.where(app_type_id: [app_type_id, nil])
-                              .reorder(updated_at: :desc)
-                              .limit(1)
-                              .pluck(:updated_at)
-                              &.first.to_i.to_s
-
-    uac = Admin::UserAccessControl.where(app_type_id: [app_type_id, nil])
-                                  .reorder(updated_at: :desc)
-                                  .limit(1)
-                                  .pluck(:updated_at)
-                                  &.first.to_i.to_s
-
-    [userrole, uac]
-  end
-
   # Compile templates or partials from their respective temp directory.
   # Uses request-specific temp directory to prevent race conditions.
+  #
+  # Duplicate-compile avoidance (issue #1362) happens in two layers:
+  #   1. A cheap, lock-free existence re-check (#reject_already_compiled) - the temp files
+  #      here may have been written seconds ago, and another process could have compiled
+  #      the same content-addressed output since. This alone closes most of the window.
+  #   2. A FileLock around the remaining, still-missing set, keyed by exactly which
+  #      templates are pending - so two requests needing the SAME missing set (the common
+  #      case: many users sharing identical access, all logging in after a deploy)
+  #      serialize against each other. The lock is re-checked (step 1 again) once acquired,
+  #      since the holder we waited behind may have just finished. This is an optimisation
+  #      only - see HandlebarsPrecompiler::FileLock - so contention still runs the CLI
+  #      unlocked rather than blocking or skipping the work.
   # @param is_partial [Boolean] true for partials, false for templates
   def compile_handlebars_templates_for_type(is_partial:)
     dir = handlebars_temp_dir(is_partial:)
@@ -317,12 +441,58 @@ module HandlebarsPrecompilerHelper
     return if file_list.empty?
 
     type_name = is_partial ? 'partials' : 'templates'
+    temp_output = HandlebarsPrecompiler::TMP_DIR.join("compiled_#{type_name}_#{handlebars_request_id}.js")
+
+    file_list = reject_already_compiled(file_list, is_partial:)
+
+    if file_list.any?
+      lock_name = compile_lock_name(file_list, is_partial:)
+      HandlebarsPrecompiler::FileLock.acquire(lock_name, wait: Settings::HandlebarsLockWaitSeconds) do
+        file_list = reject_already_compiled(file_list, is_partial:)
+
+        compile_and_split_pending(file_list, is_partial:, type_name:, temp_output:) if file_list.any?
+      end
+    end
+
+    # Clean up request-specific temp directory, regardless of whether this call
+    # performed the compile, skipped via the pre-filter, or lost the lock race.
+    cleanup_temp_files(dir, temp_output)
+  end
+
+  # Drop any file whose content-addressed compiled output already exists - a cheap,
+  # lock-free defense against redundant compiles (issue #1362).
+  # @param file_list [Array<String>] paths to pending .handlebars temp files
+  # @param is_partial [Boolean] whether these are partials
+  # @return [Array<String>] file_list with already-compiled entries removed
+  def reject_already_compiled(file_list, is_partial:)
+    public_dir = handlebars_public_dir(is_partial:)
+    file_list.reject do |file|
+      template_name = File.basename(file, '.handlebars')
+      source = File.read(file)
+      File.exist?(public_dir.join(handlebars_compiled_filename(template_name, source)))
+    end
+  end
+
+  # Deterministic lock name for a batch compile: a digest of the sorted set of pending
+  # template names, so two requests needing the exact same missing templates serialize
+  # against each other without needing per-file locks.
+  # @param file_list [Array<String>] paths to pending .handlebars temp files
+  # @param is_partial [Boolean] whether these are partials
+  # @return [String] lock name
+  def compile_lock_name(file_list, is_partial:)
+    names = file_list.map { |f| File.basename(f, '.handlebars') }.sort
+    digest = Digest::SHA256.hexdigest(names.join(','))[0..12]
+    "compile-#{is_partial ? 'partials' : 'templates'}-#{digest}"
+  end
+
+  # Run the CLI batch compile and split its output, for a confirmed-still-pending set of
+  # templates. Split out of #compile_handlebars_templates_for_type only so the FileLock
+  # block above stays readable; error handling/messages are unchanged from before locking
+  # was introduced.
+  def compile_and_split_pending(file_list, is_partial:, type_name:, temp_output:)
     Rails.logger.info do
       "Compiling Handlebars #{type_name}: #{file_list.size} files (request: #{handlebars_request_id})"
     end
-
-    # Compile to a request-specific temporary output file
-    temp_output = HandlebarsPrecompiler::TMP_DIR.join("compiled_#{type_name}_#{handlebars_request_id}.js")
 
     # Build CLI command for batch compilation
     handlebars_cmd = HandlebarsPrecompiler::HANDLEBARS_CLI.split
@@ -362,9 +532,6 @@ module HandlebarsPrecompilerHelper
 
     # Split combined output into individual files
     split_compiled_output(temp_output, is_partial:)
-
-    # Clean up request-specific temp directory
-    cleanup_temp_files(dir, temp_output)
   end
 
   # Split the combined CLI output into individual compiled JS files.
@@ -389,21 +556,46 @@ module HandlebarsPrecompilerHelper
     # Ensure public directory exists
     FileUtils.mkdir_p(public_dir)
 
+    # Fail loudly if the CLI produced output but none of it could be parsed, such as when
+    # its output format changes. Otherwise no files are written and the page silently
+    # requests missing bundles (issue #1543).
+    unless template_parts.any? { |part| part.match?(TEMPLATE_REGISTRATION_REGEX) } || full_content.strip.empty?
+      raise FphsException, 'Handlebars CLI output not recognized: no template registrations could be parsed'
+    end
+
     # Write each template to its own file in the appropriate subdirectory
     template_parts.each do |part|
       next if part.strip.empty?
 
       # Extract template name from the registration line
-      name_match = part.match(/^(?:Handlebars\.partials|templates)\['(.+?)'\]/)
+      # The CLI may quote names with either single or double quotes (issue #1543)
+      name_match = part.match(TEMPLATE_REGISTRATION_REGEX)
       next unless name_match
 
-      template_name = name_match[1]
+      template_name = name_match[2]
 
       # Wrap in IIFE and write to file
       content = "#{COMPILED_HEAD}#{part}\n})();"
-      compiled_filename = handlebars_compiled_filename(template_name)
+      # Re-read the preprocessed source this template was compiled from (still on disk -
+      # cleanup runs after this method) so the compiled filename matches EXACTLY what
+      # #write_handlebars_template already decided/returned for the same source.
+      # Sanitized the same way every other path built from a template id in this file is
+      # (issue #1362 S11 fix) - template_name here comes from parsing the CLI's own output
+      # rather than a value we generated, so it must not be trusted verbatim in a path.
+      safe_template_name = template_name.to_s.gsub(/[^a-zA-Z0-9_-]/, '_')
+      source_path = handlebars_temp_dir(is_partial:).join("#{safe_template_name}.handlebars")
+      # The source can vanish (cleanup racing ahead, or a non-web process wiping tmp dirs)
+      # between the CLI batch-compiling it and this re-read (issue #1362 should-fix). Skip
+      # just this one entry rather than raising and losing the WHOLE batch, including
+      # other, unrelated templates compiled in the same CLI call.
+      unless File.exist?(source_path)
+        Rails.logger.warn "HandlebarsPrecompiler: #{template_name} source file missing, skipping: #{source_path}"
+        next
+      end
+      source = File.read(source_path)
+      compiled_filename = handlebars_compiled_filename(template_name, source)
       output_path = public_dir.join(compiled_filename)
-      File.write(output_path, content)
+      atomic_write(output_path, content)
     end
   end
 

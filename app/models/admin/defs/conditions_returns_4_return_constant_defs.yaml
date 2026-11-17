@@ -1,0 +1,11 @@
+# Pattern 4: Returning a fixed value when a condition matches
+# @runnable: true
+# @instance: activity_log
+# @return: needs review
+
+# return_constant returns the literal value it is given when the surrounding
+# conditions match, which makes a set of conditions usable as a simple lookup.
+all:
+  this:
+    extra_log_type: primary
+    return_constant: 'needs review'

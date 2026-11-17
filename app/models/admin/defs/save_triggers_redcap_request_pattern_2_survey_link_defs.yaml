@@ -1,0 +1,20 @@
+# Pattern 2: survey_link (chained after Pattern 1)
+redcap_request:
+  request_2:
+    study: Test
+    project_name: Test API
+    local_data: link_response
+    method: survey_link
+    force_not_editable_save: true
+    data_field: econsent_rc_link
+    data_field_format: txt
+    post_data:
+      instrument: research_form
+      record_id: "{{save_trigger_results.import_response.first}}"
+    success_if:
+      all:
+        this:
+          save_trigger_results:
+            element: link_response
+            condition: "<> LENGTH"
+            value: 0

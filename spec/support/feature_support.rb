@@ -97,7 +97,6 @@ module FeatureSupport
       visit '/users/sign_in'
       finish_page_loading
       finish_form_formatting
-      have_css('#new_user')
 
       if all('#new_user').empty?
         # Avoid a weird race condition
@@ -116,10 +115,9 @@ module FeatureSupport
         click_button 'Log in'
       end
 
-      # Check if 2FA form appears (it shouldn't if we disabled it correctly)
-      # Wait a bit to see if 2FA form shows up
-      sleep 2
-      if has_selector?('.login-2fa-block', visible: true, wait: 1)
+      # Wait for either the 2FA form or completed login state.
+      has_css?('.login-2fa-block, .nav a[data-do-action="show-user-options"]', visible: true, wait: 5)
+      if has_selector?('.login-2fa-block', visible: true, wait: 0)
         puts_debug 'WARNING: 2FA form appeared even though we disabled it!'
         # Handle it anyway
         within '#new_user' do
@@ -153,7 +151,11 @@ module FeatureSupport
 
       break if just_signed_in
 
-      sleep 35 unless @user.two_factor_auth_disabled
+      unless @user.two_factor_auth_disabled
+        # sleep 35
+        # Avoid the need for a sleep to allow OTP to reset
+        reset_last_otp_timestamp
+      end
       puts_debug 'Attempting another login'
     end
 
@@ -163,20 +165,25 @@ module FeatureSupport
     finish_page_loading
   end
 
+  # Avoid the need for a sleep to allow OTP to reset
+  def reset_last_otp_timestamp(user = @user)
+    user.update_column(:consumed_timestep, nil)
+  end
+
   def logout
     finish_page_loading
     dismiss_modal
     dismiss_all_alerts
     sleep 1
 
-    have_css('.navbar-right a[data-do-action="show-user-options"]')
+    expect(page).to have_css('.navbar-right a[data-do-action="show-user-options"]', wait: 10)
     user_menu = find('.navbar-right a[data-do-action="show-user-options"]')
     page.execute_script('arguments[0].scrollIntoView(true);', user_menu)
     sleep 0.3
     user_menu.click
 
-    have_css('.navbar-right li.dropdown.open .dropdown-menu')
-    expect(page).to have_css('.dropdown-menu a[data-do-action="user-logout"]')
+    expect(page).to have_css('.navbar-right li.dropdown.open .dropdown-menu', wait: 10)
+    expect(page).to have_css('.dropdown-menu a[data-do-action="user-logout"]', wait: 10)
 
     logout_link = find('.dropdown-menu a[data-do-action="user-logout"]')
     page.execute_script('arguments[0].scrollIntoView(true);', logout_link)
@@ -187,9 +194,15 @@ module FeatureSupport
     dismiss_all_alerts
   end
 
+  # Waits (with retry) until form formatting and collapse transitions have completed
   def finish_form_formatting
-    have_no_css('.formatting-block')
-    have_no_css('.collapsing')
+    expect(page).to have_no_css('.formatting-block', wait: 10)
+    expect(page).to have_no_css('.collapsing', wait: 10)
+  end
+
+  # Navigate to the master record search result and expand it so tabs are rendered
+  def expand_test_master
+    navigate_to_master(@master_id)
   end
 
   # Navigate to a master record by ID
@@ -241,7 +254,7 @@ module FeatureSupport
       force_modal_hide
     else
       finish_form_formatting
-      have_css('button[data-dismiss="modal"]')
+      expect(page).to have_css('button[data-dismiss="modal"]', wait: 10)
       b = all('button[data-dismiss="modal"]', wait: false)
       b.first.click if b && !b.empty?
       # wait for the modal to fade out before continuing
@@ -257,9 +270,19 @@ module FeatureSupport
     has_css?('.modal[style~="display: none"]')
   end
 
+  def set_notes_field_format(markdown: false, app_type: @app_type, admin: @admin)
+    app_type.app_configurations.where(name: 'notes field format').update_all(disabled: true)
+    Admin::AppConfiguration.create!(
+      name: 'notes field format',
+      value: markdown ? 'markdown' : 'plain',
+      app_type: app_type,
+      current_admin: admin
+    )
+  end
+
   def open_player_element(el, items)
     dismiss_modal
-    have_css('.player-info-header')
+    expect(page).to have_css('.player-info-header', wait: 10)
     if items.length > 1 # it opens automatically if there is only one result
       el.find('.player-info-header').click
     else
@@ -271,7 +294,7 @@ module FeatureSupport
     # Wait for the master record to load
 
     expect(page).to have_css("##{h}.loaded-master-main")
-    have_css("##{h}.collapse.in")
+    expect(page).to have_css("##{h}.collapse.in", wait: 10)
     find "##{h}.collapse.in"
     h
   end
@@ -285,8 +308,8 @@ module FeatureSupport
     expect(page).not_to have_css('.collapse.collapsing')
   end
 
-  def expect_tracker_to_be_expanded(master_id)
-    expect(page).to have_css "#trackers-#{master_id}.collapse.in"
+  def expect_tracker_to_be_expanded(master_id, wait: 15)
+    expect(page).to have_css "#trackers-#{master_id}.collapse.in", wait: wait
   end
 
   def all_master_record_panels
@@ -294,14 +317,13 @@ module FeatureSupport
   end
 
   def all_master_record_expanders
-    has_css?(ResultsMasterExpander)
     all(ResultsMasterExpander)
   end
 
   #
   # Expand a master record by its index in the results list (0-based)
   def expand_master(index)
-    has_css?('.results-panel')
+    expect(page).to have_css('.results-panel', wait: 10)
     finish_form_formatting
     els = all_master_record_expanders
     el = els[index]
@@ -333,10 +355,22 @@ module FeatureSupport
     tab_link = all(scoped_selector, visible: :all, wait: 0).first
     expect(tab_link).not_to be nil
     scroll_into_view(tab_link)
-    tab_link.click if tab_link['aria-expanded'] != 'true'
+
+    target = tab_link['data-target']
+
+    # Avoid clicking again if the panel is already open, or already in the process
+    # of opening: Bootstrap adds `.collapsing` to the target while its collapse
+    # animation is in progress, and `.ajax-running` is added to the clicked link
+    # itself while its `data-remote` request (e.g. for the tracker tab) is in flight.
+    already_expanded_or_expanding = target.present? &&
+                                    page.has_css?("#{target}.collapse.in, #{target}.collapsing", visible: :all, wait: 0)
+    ajax_in_flight = tab_link['class'].to_s.include?('ajax-running')
+
+    tab_link.click if tab_link['aria-expanded'] != 'true' && !already_expanded_or_expanding && !ajax_in_flight
+
+    finish_page_loading
 
     # Wait for the target panel to fully expand (Bootstrap collapse animation)
-    target = tab_link['data-target']
     return unless target.present?
 
     target_selector = "#{target}.collapse.in"
@@ -376,7 +410,7 @@ module FeatureSupport
     if all('.tracker-tree-results').empty?
       # Click the tab
       c = 'a[data-panel-tab="tracker"]'
-      have_css(c)
+      expect(page).to have_css(c, wait: 10)
       find(c).click
     end
     expect(page).to have_css '.tracker-tree-results'
@@ -502,16 +536,14 @@ module FeatureSupport
                       end
 
       3.times do |attempt|
-        begin
-          if item_selector.is_a?(Array)
-            find(*item_selector, wait: 5).click
-          else
-            find(item_selector, wait: 5).click
-          end
-          break
-        rescue Selenium::WebDriver::Error::StaleElementReferenceError
-          raise if attempt == 2
+        if item_selector.is_a?(Array)
+          find(*item_selector, wait: 5).click
+        else
+          find(item_selector, wait: 5).click
         end
+        break
+      rescue Selenium::WebDriver::Error::StaleElementReferenceError
+        raise if attempt == 2
       end
     end
 

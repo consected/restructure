@@ -26,6 +26,8 @@ RSpec.describe 'REDCap User Report - Issue #1258', type: :model do
   let(:seed_module) { Seeds::ReportRedcapUsers }
 
   before :all do
+    # Other specs disable all reports and setup does not re-enable an existing report, so re-enable it here
+    Report.where(short_name: 'redcap_users', item_type: 'z-admin').update_all(disabled: false)
     Seeds::ReportRedcapUsers.setup
   end
 

@@ -52,7 +52,7 @@ describe('substitutions', function () {
       yaml_array: "- first\n- second\n"
     };
 
-    const expected_text = '<p>YAML hash 4560. YAML array first</p>'
+    const expected_text = '<p>YAML hash 4560. YAML top-level array first</p>'
     const res = _fpa.substitution.substitute(text, use_data);
     expect(res).toEqual(expected_text)
 

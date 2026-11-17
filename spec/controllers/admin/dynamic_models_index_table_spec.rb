@@ -11,6 +11,19 @@ require 'rails_helper'
 # Additional tests for issue #1066:
 # - Show resolved definition versioning in definition details
 # - Show the edited record id in the Edit Entry title
+#
+# Additional tests for issue #1354 (index page slow to load with many dynamic models):
+# - batch_jobs_column and view_sql_column now detect presence via a quick text scan of
+#   the resolved options text (OptionConfigs::ExtraOptions.prepare_options_text), instead
+#   of running the full option_configs parse for every row
+# - batch_jobs_column now renders a boolean indicator, rather than the batch_trigger frequency
+# - the scan is scoped to the _configurations: block only, so a field/label elsewhere in the
+#   config happening to be named batch_trigger/view_sql is not treated as a false positive
+#
+# Additional follow-up UI tweaks:
+# - "Batch jobs" column header renamed to "Batch job?"
+# - Position column removed from index_params
+# - Added an id filter dropdown
 RSpec.describe Admin::DynamicModelsController, type: :controller do
   include ModelSupport
   include DynamicModelSupport
@@ -32,20 +45,27 @@ RSpec.describe Admin::DynamicModelsController, type: :controller do
   end
 
   describe 'index_params' do
-    it 'does not include schema_name, table_key_name, primary_key_name, foreign_key_name, or result_order' do
-      removed_columns = %i[schema_name table_key_name primary_key_name foreign_key_name result_order]
+    it 'does not include schema_name, table_key_name, primary_key_name, foreign_key_name, result_order, or position' do
+      removed_columns = %i[schema_name table_key_name primary_key_name foreign_key_name result_order position]
       result = controller.send(:index_params)
       removed_columns.each do |col|
         expect(result).not_to include(col), "Expected index_params not to include #{col}"
       end
     end
 
-    it 'includes id, category, name, table_name, resource_name, position, and admin_id' do
-      required_columns = %i[id category name table_name resource_name position admin_id]
+    it 'includes id, category, name, table_name, resource_name, and admin_id' do
+      required_columns = %i[id category name table_name resource_name admin_id]
       result = controller.send(:index_params)
       required_columns.each do |col|
         expect(result).to include(col), "Expected index_params to include #{col}"
       end
+    end
+  end
+
+  describe 'filters and filters_on' do
+    it 'includes an id filter dropdown' do
+      expect(controller.send(:filters_on)).to include(:id)
+      expect(controller.send(:filters)).to have_key(:id)
     end
   end
 
@@ -58,7 +78,7 @@ RSpec.describe Admin::DynamicModelsController, type: :controller do
     it 'includes batch_jobs column' do
       result = controller.send(:extra_index_columns)
       expect(result).to have_key(:batch_jobs_column)
-      expect(result[:batch_jobs_column]).to eq('Batch jobs')
+      expect(result[:batch_jobs_column]).to eq('Batch job?')
     end
 
     it 'includes "Is a view?" column' do
@@ -75,45 +95,120 @@ RSpec.describe Admin::DynamicModelsController, type: :controller do
   end
 
   describe 'batch_jobs_column' do
-    it 'returns empty string when dynamic model has no batch_trigger configured' do
-      dm = DynamicModel.active.first
-      next unless dm
+    it 'returns unchecked when dynamic model has no batch_trigger configured' do
+      suffix = Array.new(8) { ('a'..'z').to_a.sample }.join
+      dm = DynamicModel.create!(
+        current_admin: @admin,
+        name: "test no batch trigger #{suffix}",
+        table_name: "test_no_batch_trigger_#{suffix}_recs",
+        schema_name: 'dynamic_test',
+        category: 'test',
+        disabled: true,
+        options: "default:\n  label: Test"
+      )
 
-      # Ensure no batch_trigger is configured
-      allow(dm).to receive(:configurations).and_return(nil)
       result = controller.send(:batch_jobs_column, dm)
-      expect(result).to eq('')
+      expect(result).to include('val-unchecked')
     end
 
-    it 'returns a status indicator when batch_trigger is configured' do
-      dm = DynamicModel.active.first
-      next unless dm
+    it 'returns checked when batch_trigger is configured' do
+      suffix = Array.new(8) { ('a'..'z').to_a.sample }.join
+      dm = DynamicModel.create!(
+        current_admin: @admin,
+        name: "test batch trigger #{suffix}",
+        table_name: "test_batch_trigger_#{suffix}_recs",
+        schema_name: 'dynamic_test',
+        category: 'test',
+        disabled: true,
+        options: "_configurations:\n  batch_trigger:\n    frequency: 1 hour\ndefault:\n  label: Test"
+      )
 
-      allow(dm).to receive(:configurations).and_return({ batch_trigger: { frequency: '1 hour' } })
       result = controller.send(:batch_jobs_column, dm)
-      expect(result).to be_present
+      expect(result).to include('val-checked')
+    end
+
+    it 'returns unchecked without running the full option_configs parse (issue #1354)' do
+      suffix = Array.new(8) { ('a'..'z').to_a.sample }.join
+      dm = DynamicModel.create!(
+        current_admin: @admin,
+        name: "test no full parse #{suffix}",
+        table_name: "test_no_full_parse_#{suffix}_recs",
+        schema_name: 'dynamic_test',
+        category: 'test',
+        disabled: true,
+        options: "default:\n  label: Test"
+      )
+
+      expect(dm).not_to receive(:option_configs)
+      controller.send(:batch_jobs_column, dm)
+    end
+
+    it 'returns unchecked when "batch_trigger" only appears as a field/label name, not a real _configurations key' do
+      suffix = Array.new(8) { ('a'..'z').to_a.sample }.join
+      dm = DynamicModel.create!(
+        current_admin: @admin,
+        name: "test false positive batch trigger #{suffix}",
+        table_name: "test_fp_batch_trigger_#{suffix}_recs",
+        schema_name: 'dynamic_test',
+        category: 'test',
+        disabled: true,
+        options: "default:\n  label: Test\n  fields:\n    - batch_trigger\n  labels:\n    batch_trigger: \"Not a real trigger\"\n"
+      )
+
+      result = controller.send(:batch_jobs_column, dm)
+      expect(result).to include('val-unchecked')
     end
   end
 
   describe 'view_sql_column' do
     it 'returns unchecked when dynamic model has no view_sql configured' do
-      dm = DynamicModel.active.first
-      next unless dm
+      suffix = Array.new(8) { ('a'..'z').to_a.sample }.join
+      dm = DynamicModel.create!(
+        current_admin: @admin,
+        name: "test no view sql #{suffix}",
+        table_name: "test_no_view_sql_#{suffix}_recs",
+        schema_name: 'dynamic_test',
+        category: 'test',
+        disabled: true,
+        options: "default:\n  label: Test"
+      )
 
-      allow(dm).to receive(:configurations).and_return(nil)
       result = controller.send(:view_sql_column, dm)
       # Should render an unchecked boolean field
       expect(result).to include('val-unchecked')
     end
 
     it 'returns checked when dynamic model has view_sql configured' do
-      dm = DynamicModel.active.first
-      next unless dm
+      suffix = Array.new(8) { ('a'..'z').to_a.sample }.join
+      dm = DynamicModel.create!(
+        current_admin: @admin,
+        name: "test view sql #{suffix}",
+        table_name: "test_view_sql_#{suffix}_recs",
+        schema_name: 'dynamic_test',
+        category: 'test',
+        disabled: true,
+        options: "_configurations:\n  view_sql: |\n    select id, master_id from player_infos\n"
+      )
 
-      allow(dm).to receive(:configurations).and_return({ view_sql: 'SELECT 1' })
       result = controller.send(:view_sql_column, dm)
       # Should render a checked boolean field
       expect(result).to include('val-checked')
+    end
+
+    it 'returns unchecked when "view_sql" only appears as a field/label name, not a real _configurations key' do
+      suffix = Array.new(8) { ('a'..'z').to_a.sample }.join
+      dm = DynamicModel.create!(
+        current_admin: @admin,
+        name: "test false positive view sql #{suffix}",
+        table_name: "test_fp_view_sql_#{suffix}_recs",
+        schema_name: 'dynamic_test',
+        category: 'test',
+        disabled: true,
+        options: "default:\n  label: Test\n  fields:\n    - view_sql\n  labels:\n    view_sql: \"Not a real view_sql config\"\n"
+      )
+
+      result = controller.send(:view_sql_column, dm)
+      expect(result).to include('val-unchecked')
     end
   end
 

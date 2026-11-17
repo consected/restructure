@@ -105,7 +105,7 @@ describe 'notes field with format: plain displays newlines', js: true, driver: $
       # path for all notes fields, even those with field-level format: plain.
       # Use the string form with spaces as that is how the config name is stored.
       add_app_config @app_type, 'notes field format', 'markdown'
-
+      SetupHelper.reload_configs
       Rails.application.routes_reloader.reload!
     end
 

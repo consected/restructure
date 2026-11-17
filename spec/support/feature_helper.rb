@@ -9,17 +9,62 @@ module FeatureHelper
     debugger
   end
 
+  # Ensure that the app is set to use markdown for notes fields.
+  # This is important for tests that rely on rich text editors (often notes or details fields).
+  def set_up_markdown_notes(app_type: nil)
+    @app_type = app_type if app_type
+    @app_type.app_configurations.where(name: 'notes field format').update_all(disabled: true)
+    Admin::AppConfiguration.create!(
+      name: 'notes field format',
+      value: 'markdown',
+      app_type: @app_type,
+      current_admin: @admin
+    )
+  end
+
   def scroll_into_view(element)
     page.execute_script('arguments[0].scrollIntoView(true);', element)
+  end
+
+  UI_BUSY_SCRIPT = <<~JS
+    (function() {
+      if (!window.jQuery) return false;
+      return jQuery.active > 0 ||
+        jQuery(':animated').length > 0 ||
+        jQuery('.ajax-running, .formatting-block, .collapsing').length > 0;
+    })()
+  JS
+
+  # Wait until AJAX requests, jQuery animations (such as the app's animated scrolling after results load)
+  # and formatting / collapse transitions have finished, and the page has then stayed idle for a short period.
+  # Clicks made while the page is scrolling or re-rendering can land on the wrong element or be undone.
+  # Does not fail on timeout - the caller's expectations report the actual problem.
+  def wait_for_ui_to_settle(timeout: 10, quiet_period: 1.2, interval: 0.15)
+    deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + timeout
+    quiet_since = nil
+
+    loop do
+      now = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      return if now > deadline
+
+      if page.evaluate_script(UI_BUSY_SCRIPT)
+        quiet_since = nil
+      else
+        quiet_since ||= now
+        return if now - quiet_since >= quiet_period
+      end
+
+      sleep interval
+    end
   end
 
   def scroll_to(el_selector, options = {})
     options[:check_it] = true if options[:check_it].nil?
 
     puts "FeatureHelper#scroll_to: Scrolling to #{el_selector}"
-    if all(el_selector).present?
+    if all(el_selector, visible: false).present?
 
-      run_script = "document.querySelectorAll('#{el_selector.gsub("'", '"')}')[0].scrollTop += 100;"
+      run_script = "_fpa.utils.scrollTo('#{el_selector.gsub("'", '"')}');"
       begin
         page.execute_script run_script
       rescue StandardError => e
@@ -28,7 +73,7 @@ module FeatureHelper
       end
     end
 
-    expect(page).to have_selector(el_selector.to_s, visible: true) if options[:check_it]
+    expect(find(el_selector).visible?).to be true if options[:check_it]
   end
 
   def force_modal_hide
@@ -36,7 +81,7 @@ module FeatureHelper
     begin
       page.execute_script run_script
     rescue StandardError => e
-      puts "Failed to run the scroll_to javascript: #{run_script}."
+      puts "Failed to run the force_modal_hide javascript: #{run_script}."
       puts e.backtrace.join("\n")
     end
   end

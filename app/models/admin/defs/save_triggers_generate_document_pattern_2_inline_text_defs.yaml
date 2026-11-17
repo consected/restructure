@@ -1,0 +1,9 @@
+# Pattern 2: Inline content_template_text with a layout and extra_substitutions
+generate_document:
+  content_template_text: '<p>Report: {{extra_substitutions.report_title}}</p>'
+  layout_template: standard report layout
+  extra_substitutions:
+    report_title: 'Monthly Summary'
+  container:
+    from_this: model_reference
+  filename: 'generated-report-{{id}}.html'

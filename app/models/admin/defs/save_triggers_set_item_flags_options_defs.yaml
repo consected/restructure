@@ -1,9 +1,33 @@
 # Save Trigger: Set Item Flags options
-        set_item_flags:
-          - first: 'set flags on the first matching reference with this configuration, specifying {update: return_result}',
-          if: if_extras
-          force_not_editable_save: 'true allows the update to succeed even if the referenced item is set as not_editable',
-          flags: 'list of flag-name ids or names, or exclude if the existing set of flags should be used to add or remove items from'
-          add_flags: 'list of flag-name ids or names to add to the list'
-          remove_flags: 'list of flag-name ids or names to remove from the list'
+# Canonical schema
+# set_item_flags: <SetItemFlagsEntry>
+#
+# Value type
+# SetItemFlagsEntry: <Hash(
+#   first: ReferenceLookup (required),
+#   if: Condition,
+#   force_not_editable_save: Boolean,
+#   flags: Scalar | Array(Scalar) | Hash,
+#   add_flags: Scalar | Array(Scalar) | Hash,
+#   remove_flags: Scalar | Array(Scalar) | Hash,
+#   on_complete: TriggerTaskList,
+#   on_failure: TriggerTaskList
+# )>
+# Keys are optional unless marked (required). At least one of flags, add_flags or
+# remove_flags must also be set.
+#
+# ReferenceLookup type (first) - identifies which reference to update
+# ReferenceLookup: <Hash(reference_name: Hash(update: 'return_result'))>
+#
+# Pattern 1: Set the full flag list (save_triggers_set_item_flags_pattern_1_replace_defs.yaml)
+# Pattern 2: Add and remove specific flags (save_triggers_set_item_flags_pattern_2_add_remove_defs.yaml)
+# See save_trigger_set_item_flags.md for the worked examples.
+
 #!defs(save_triggers_lifecycle_hooks_defs.yaml)
+
+# Notes:
+# - first: must resolve to an existing reference - an absent or unresolvable first: raises
+#   'No reference found to set flags on'.
+# - At least one of flags, add_flags or remove_flags must be set, or the trigger raises
+#   'Must use one option of flags, add_flags or remove_flags'.
+# - flags: replaces the whole flag list; add_flags:/remove_flags: adjust the existing list instead.

@@ -27,8 +27,8 @@ RSpec.describe NfsStore::Process::ProcessHandler, type: :model do
 
   it 'can access the underlying activity log to get the pipeline definition' do
     al = @activity_log
-    expect(al).to be_a ActivityLog::PlayerContactPhone
-    expect(al.resource_name).to eq 'activity_log__player_contact_phone__step_1'
+    expect(al).to be_a nfs_al_class
+    expect(al.resource_name).to eq nfs_al_step_rn(:step_1)
     expect(al.extra_log_type_config.nfs_store).to be_a Hash
 
     pl = al.extra_log_type_config.nfs_store[:pipeline]
@@ -48,7 +48,7 @@ RSpec.describe NfsStore::Process::ProcessHandler, type: :model do
     ul = upload_file 'dicom1.dcm', dicom_content
     sf = ul.stored_file
 
-    expect(sf.container.parent_item).to be_a ActivityLog::PlayerContactPhone
+    expect(sf.container.parent_item).to be_a nfs_al_class
 
     ph = NfsStore::Process::ProcessHandler.new sf
 
@@ -100,7 +100,7 @@ RSpec.describe NfsStore::Process::ProcessHandler, type: :model do
     sf = ul.stored_file
     sf.current_user = @user
     al = sf.container.parent_item
-    expect(al).to be_a ActivityLog::PlayerContactPhone
+    expect(al).to be_a nfs_al_class
     expect(al.extra_log_type_config.nfs_store).to be_a Hash
 
     ph = NfsStore::Process::ProcessHandler.new(sf, use_pipeline: { user_file_actions: 're_identify' })
@@ -375,6 +375,28 @@ RSpec.describe NfsStore::Process::ProcessHandler, type: :model do
                                "Expected original user but got #{result_user&.email} (id: #{result_user&.id})"
         expect(result_user).not_to eq(User.batch_user)
       end
+    end
+  end
+
+  describe '#set_processing_flags / #clear_processing_flags' do
+    it 'skips a file with no accessible retrieval_path instead of raising, and still flags others in the batch' do
+      upload_file('inaccessible.txt', 'irrelevant')
+      upload_file('accessible.txt', 'irrelevant')
+      sf_inaccessible = @container.stored_files.find_by!(file_name: 'inaccessible.txt')
+      sf_accessible = @container.stored_files.find_by!(file_name: 'accessible.txt')
+
+      # Stand-in for a user with no role granting access to this particular file -
+      # retrieval_path returns nil rather than raising.
+      allow(sf_inaccessible).to receive(:retrieval_path).and_return(nil)
+
+      handler = NfsStore::Process::ProcessHandler.new([sf_inaccessible, sf_accessible])
+      flag_path_accessible = "#{sf_accessible.retrieval_path}.__processing__"
+
+      expect { handler.set_processing_flags }.not_to raise_error
+      expect(File.exist?(flag_path_accessible)).to be true
+
+      expect { handler.clear_processing_flags }.not_to raise_error
+      expect(File.exist?(flag_path_accessible)).to be false
     end
   end
 end

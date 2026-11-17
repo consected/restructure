@@ -25,6 +25,29 @@ describe 'API authentication failure logging', type: :request do
     # Cleanup
   end
 
+  describe 'API token auth detection' do
+    it 'prefers query params and falls back to headers for API auth checks' do
+      request = ActionDispatch::Request.new(
+        Rack::MockRequest.env_for('/?user_email=user@example.com&user_token=abc123')
+      )
+
+      expect(ApiTokenHeaderAuth.user_email_from_request(request)).to eq('user@example.com')
+      expect(ApiTokenHeaderAuth.user_token_from_request(request)).to eq('abc123')
+      expect(ApiTokenHeaderAuth.api_token_authentication_present?(request)).to be(true)
+
+      request = ActionDispatch::Request.new(
+        Rack::MockRequest.env_for('/',
+          'HTTP_X_USER_EMAIL' => 'header@example.com',
+          'HTTP_X_USER_TOKEN' => 'header-token'
+        )
+      )
+
+      expect(ApiTokenHeaderAuth.user_email_from_request(request)).to eq('header@example.com')
+      expect(ApiTokenHeaderAuth.user_token_from_request(request)).to eq('header-token')
+      expect(ApiTokenHeaderAuth.api_token_authentication_present?(request)).to be(true)
+    end
+  end
+
   describe 'failed API authentication attempts' do
     it 'logs a warn message when API request has a bad user_token' do
       # Arrange: Stub Rails.logger to capture warn calls
@@ -92,8 +115,11 @@ describe 'API authentication failure logging', type: :request do
     end
 
     it 'does not log sensitive tokens in the warn message' do
-      # Arrange: Verify filtered params configuration
-      expect(Rails.application.config.filter_parameters).to include(:user_token)
+      # Arrange: Verify that user_token is covered by the parameter filter.
+      # Rails 7.2+ compiles symbol entries into a single regex, so we verify
+      # actual filtering behaviour rather than checking for a specific symbol.
+      filter = ActiveSupport::ParameterFilter.new(Rails.application.config.filter_parameters)
+      expect(filter.filter({ 'user_token' => 'test_value' })['user_token']).to eq('[FILTERED]')
 
       allow(Rails.logger).to receive(:warn).and_call_original
 

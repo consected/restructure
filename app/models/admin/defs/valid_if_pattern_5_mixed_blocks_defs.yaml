@@ -1,0 +1,13 @@
+# Pattern 5: Mixed validation blocks
+valid_if:
+  on_save:
+    all:
+      this:
+        status: active
+        invalid_error_message: Status must be active
+      user_exists:
+        invalid_error_message: This email address does not exist as a user of the system
+        no_masters: {}
+        users:
+          email:
+            this: email

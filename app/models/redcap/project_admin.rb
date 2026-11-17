@@ -38,13 +38,31 @@ module Redcap
     Statuses = {
       schedule_run_set_configured: 'scheduled run configured',
       scheduled_run_successful: 'scheduled run successful',
+      scheduled_run_completed_with_errors: 'scheduled run completed with errors',
       scheduled_run_failed: 'scheduled run failed',
       manual_run_successful: 'manual run successful',
+      manual_run_completed_with_errors: 'manual run completed with errors',
       manual_run_failed: 'manual run failed',
       stopped_manually: 'stopped manually',
       changes_detected: 'changes detected',
       request_failed: 'request failed',
-      invalid_metadata: 'invalid metadata'
+      invalid_metadata: 'invalid metadata',
+      records_request_job_set_up: 'records request job set up',
+      retrieving_records: 'retrieving records',
+      validating_records: 'validating records',
+      storing_records: 'storing records',
+      checking_deleted_records: 'checking for deleted records',
+      records_unchanged_since_last_pull: 'records unchanged since last successful pull'
+    }.freeze
+
+    StorageStageStatusKeys = {
+      'retrieve_validate_store' => :retrieving_records,
+      'retrieve' => :retrieving_records,
+      'skipped (from cache)' => :records_unchanged_since_last_pull,
+      'summarize_fields' => :validating_records,
+      'validate' => :validating_records,
+      'disable_deleted_records' => :checking_deleted_records,
+      'store' => :storing_records
     }.freeze
 
     JobQueue = 'redcap'
@@ -127,13 +145,13 @@ module Redcap
                                                  captured_project_info.present? &&
                                                  valid_metadata? &&
                                                  (
-                                                    saved_change_to_server_url? ||
-                                                    saved_change_to_api_key? ||
-                                                    saved_change_to_name? ||
-                                                    !data_dictionary_ready? ||
-                                                    force_refresh ||
-                                                    request_latest_config
-                                                  )
+                                                   saved_change_to_server_url? ||
+                                                   saved_change_to_api_key? ||
+                                                   saved_change_to_name? ||
+                                                   !data_dictionary_ready? ||
+                                                   force_refresh ||
+                                                   request_latest_config
+                                                 )
                                              }
 
     after_save :capture_project_users, if: lambda {
@@ -244,6 +262,11 @@ module Redcap
     #     Time in seconds to cache metadata requests. Default is 60 seconds. Set to 0 to disable caching.
     # record_export_cache_time: <Integer seconds>
     #     Time in seconds to cache record requests. Default is 60 seconds. Set to 0 to disable caching.
+    # internal_project_token: <String>
+    #     A secret, per-project token required (in addition to a valid user_email/user_token) to authorize
+    #     requests to the REDCap Data Entry Trigger endpoint (Redcap::ProjectUserRequestsController#data_entry_trigger).
+    #     Automatically generated the first time the project is saved if not already set. Never regenerated
+    #     automatically thereafter, since it is embedded in the Data Entry Trigger URL configured in REDCap.
     # export_only_updated_records: always | manual | nil
     #     If set, override the setting `dateRangeBegin` passed to the REDCap API and set it with the
     #     max(created_at, updated_at) for the table. This exports only records updated since the last retrieval.
@@ -253,8 +276,20 @@ module Redcap
     #     - nil/blank: disabled (exports all records)
     #     NOTE: returned subsets must be handled correctly by deleted record handling to avoid incorrectly
     #     marking excluded records as deleted.
+    # continue_on_record_error: true | false | nil
+    #     If true, an exception raised while persisting or triggering a single record during `store`
+    #     (for example a before_save or after_commit save trigger) is caught and recorded in `errors` as
+    #     `{ id:, errors:, action: :create_or_update }`, allowing the pull to continue processing the
+    #     remaining records instead of aborting the entire run.
+    #     - A failure during the before_save phase means the record's transaction was rolled back and the
+    #       record was NOT persisted; it is not counted in #created_ids/#updated_ids.
+    #     - A failure during the after_commit phase (e.g. create_reference, add_tracker, generate_document)
+    #       means the record WAS already committed; it IS counted in #created_ids/#updated_ids, even though
+    #       the failing trigger's own action did not complete.
+    #     Default (false/nil): an unhandled exception aborts the entire pull (fail-fast, current behavior).
 
     ValidExportOnlyUpdatedRecordsValues = [nil, '', 'always', 'manual', 'scheduled'].freeze
+    ValidContinueOnRecordErrorValues = [nil, '', true, false].freeze
 
     configure :data_options, with: %i[add_multi_choice_summary_fields
                                       handle_deleted_records
@@ -267,7 +302,9 @@ module Redcap
                                       metadata_export_cache_time
                                       record_export_cache_time
                                       export_only_updated_records
-                                      server_time_zone]
+                                      server_time_zone
+                                      continue_on_record_error
+                                      internal_project_token]
 
     validate :data_options, lambda {
       return if data_options.handle_deleted_records.in?(ValidHandleDeletedRecordsValues)
@@ -288,9 +325,61 @@ module Redcap
 
       errors.add(:data_options, "server_time_zone '#{tz}' is not a valid time zone identifier")
     }
+
+    validate :data_options, lambda {
+      return if data_options.continue_on_record_error.in?(ValidContinueOnRecordErrorValues)
+
+      errors.add(:data_options, "continue_on_record_error must be one of: #{ValidContinueOnRecordErrorValues}")
+    }
     #
     # A hash digest of the data dictionary, allowing any changes to indicate that an update is required
     configure_attributes :data_dictionary_version
+
+    #
+    # This project's secret internal_project_token, used to authorize requests to the REDCap
+    # Data Entry Trigger endpoint. Generated and persisted (via #save_options/#update_columns,
+    # bypassing validations/callbacks, matching #set_data_dictionary_version's pattern) the first
+    # time it is accessed, if not already set; never regenerated once set.
+    # NOTE: deliberately NOT a before_validation/before_save callback - OptionsHandler tracks
+    # whether #config_text has changed since the record was loaded by comparing it against a
+    # snapshot taken once at initialization (#orig_config_text). Since a new record's initial
+    # snapshot is taken before any before_validation callback runs, generating this value in a
+    # callback would permanently desynchronize that snapshot from the persisted value, causing
+    # #update_options to discard unrelated, not-yet-saved data_options changes on every
+    # subsequent save for the lifetime of the object.
+    # @return [String]
+    def internal_project_token
+      token = data_options.internal_project_token
+      return token if token.present?
+
+      token = SecureRandom.hex(20)
+      data_options.internal_project_token = token
+      if persisted?
+        save_options
+        update_columns(options:)
+        # Keep OptionsHandler's staleness snapshot in sync with the value we just wrote directly,
+        # so a later #save! on this same instance doesn't see config_text as "changed elsewhere"
+        # and reload (discarding) any other unsaved data_options changes.
+        self.orig_config_text = config_text
+      end
+      token
+    end
+
+    #
+    # Securely compare a token supplied by a caller (e.g. the REDCap Data Entry Trigger request)
+    # against this project's internal_project_token, to protect against timing attacks.
+    # Read-only: does not generate a token if one has not already been set.
+    # @param [String] token
+    # @return [Boolean]
+    def matches_internal_project_token?(token)
+      expected = data_options.internal_project_token
+      return false if expected.blank? || token.blank?
+
+      ActiveSupport::SecurityUtils.secure_compare(
+        ::Digest::SHA256.hexdigest(expected.to_s),
+        ::Digest::SHA256.hexdigest(token.to_s)
+      )
+    end
 
     #
     # Initialize with default request options for records and metadata
@@ -352,10 +441,13 @@ module Redcap
     end
 
     #
-    # Override accessor for the attribute, to symbolize keys before return
+    # Override accessor for the attribute, to symbolize keys before return.
+    # Uses the non-mutating #symbolize_keys (not #symbolize_keys!): mutating the JSONB attribute's
+    # Hash in place makes ActiveRecord's dirty tracking see it as "changed" on every read, even
+    # though nothing semantically changed.
     # @return [Hash | nil]
     def captured_project_info
-      super&.symbolize_keys!
+      super&.symbolize_keys
     end
 
     #
@@ -369,15 +461,15 @@ module Redcap
     end
 
     #
-    # In the background, download the full XML project archive,
+    # In the background, download the XML project archive,
     # and store it to the file_store container.
-    def dump_archive
+    def dump_archive(definition_only: false)
       jobclass = Redcap::CaptureProjectArchiveJob
-      jobs = self.class.existing_jobs(jobclass, self)
+      jobs = archive_jobs(jobclass, definition_only:)
       return if jobs.count > 0
 
-      jobclass.perform_later(self)
-      record_job_request('setup job: project_xml')
+      jobclass.perform_later(self, definition_only:)
+      record_job_request(archive_job_action(definition_only), result: { requested: true, definition_only: })
     end
 
     #
@@ -487,6 +579,23 @@ module Redcap
       update_columns(status: Statuses[key], updated_at: DateTime.now)
     end
 
+    def update_status_for_storage_stage(stage)
+      key = StorageStageStatusKeys[stage]
+      update_status(key) if key
+    end
+
+    #
+    # The full REDCap Data Entry Trigger URL for this project, to be entered in REDCap's
+    # Project Setup > Additional customizations > Data Entry Trigger "URL of website" field.
+    # The `<user API token>` portion must be substituted by an admin with the real API token
+    # of the user configured to submit these requests (see #data_entry_trigger_setup_info).
+    # @return [String]
+    def data_entry_trigger_url
+      "#{Settings::BaseUrl}/redcap/project_user_requests/data_entry_trigger.json" \
+        "?user_email=#{CGI.escape(Settings::RedcapDetUserEmail)}&user_token=<user API token>" \
+        "&internal_project_token=#{internal_project_token}"
+    end
+
     #
     # Lookup existing jobs, based on the jobclass being run, and the global id record
     # referenced in the arguments. Returns a scoped query, typically checked with something
@@ -501,6 +610,16 @@ module Redcap
                                   failed: false
     end
 
+    def archive_jobs(jobclass, definition_only:)
+      jobs = self.class.existing_jobs(jobclass, self)
+      pattern = '%definition_only: true%'
+      definition_only ? jobs.where('handler LIKE ?', pattern) : jobs.where.not('handler LIKE ?', pattern)
+    end
+
+    def archive_job_action(definition_only)
+      definition_only ? 'setup job: project definition' : 'setup job: project_xml'
+    end
+
     #
     # When multiple active project admins match the same dynamic_model_table
     # we want to pick the one that actually captures data. Prefer a project admin
@@ -511,6 +630,59 @@ module Redcap
     def self.preferred_active(table_names)
       ordered = active.where(dynamic_model_table: table_names).order(id: :desc)
       ordered.where.not(frequency: 'never').first || ordered.first
+    end
+
+    #
+    # Find an active project admin matching a REDCap project_id, tolerating differences in the
+    # supplied server_url. Used to identify the project associated with REDCap API callers that only
+    # know their own project_id and REDCap base URL, such as project_id-based job requests and the
+    # Data Entry Trigger endpoint.
+    # Matching is attempted, in order:
+    #  - exact server_url match
+    #  - protocol + host match only (tolerating path differences, e.g. a caller sending
+    #    https://redcap.partners.org/redcap/ when the project stores .../redcap/api/)
+    # @param [String | Integer] project_id - REDCap project_id (captured_project_info['project_id'])
+    # @param [String] server_url - the caller's REDCap base URL
+    # @return [Redcap::ProjectAdmin, nil]
+    def self.find_active_by_redcap_project(project_id, server_url)
+      by_project_id = active
+                      .where("captured_project_info ->> 'project_id' = ?", project_id.to_s)
+                      .reorder('')
+                      .order(updated_at: :desc)
+
+      found = by_project_id.where(server_url:).first
+      return found if found
+      return if server_url.blank?
+
+      uri = URI.parse(server_url)
+      return unless uri.scheme.present? && uri.host.present?
+
+      request_scheme = uri.scheme.downcase
+      request_host = uri.host.downcase
+
+      by_project_id.find do |project_admin|
+        stored_uri = URI.parse(project_admin.server_url.to_s)
+        stored_uri.scheme.present? &&
+          stored_uri.host.present? &&
+          stored_uri.scheme.downcase == request_scheme &&
+          stored_uri.host.downcase == request_host
+      rescue URI::InvalidURIError
+        false
+      end
+    rescue URI::InvalidURIError
+      nil
+    end
+
+    #
+    # Find an active project admin by its internal_project_token alone. Used by the Data Entry
+    # Trigger endpoint's GET "test" flow, which REDCap calls with only the params embedded in the
+    # configured URL (no project_id/redcap_url).
+    # @param [String] token
+    # @return [Redcap::ProjectAdmin, nil]
+    def self.find_active_by_internal_project_token(token)
+      return if token.blank?
+
+      active.find { |project_admin| project_admin.matches_internal_project_token?(token) }
     end
 
     #
@@ -753,6 +925,32 @@ module Redcap
                    Statuses[:manual_run_failed],
                    Statuses[:request_failed]
                  ])
+    end
+
+    #
+    # Check if the most recent run completed but with some individual record errors
+    # recorded (see Redcap::DataRecords#errors), rather than a fully successful or
+    # failed run
+    # @return [Boolean]
+    def completed_with_errors?
+      status.in?([
+                   Statuses[:scheduled_run_completed_with_errors],
+                   Statuses[:manual_run_completed_with_errors]
+                 ])
+    end
+
+    #
+    # The status key (see Statuses) to use after a run completes without raising,
+    # based on whether any per-record errors were recorded.
+    # @param [Boolean] errors_present
+    # @param [true | false] is_manual_pull
+    # @return [Symbol]
+    def self.completed_status(errors_present:, is_manual_pull:)
+      if is_manual_pull
+        errors_present ? :manual_run_completed_with_errors : :manual_run_successful
+      else
+        errors_present ? :scheduled_run_completed_with_errors : :scheduled_run_successful
+      end
     end
 
     #

@@ -26,11 +26,19 @@ Rails.application.routes.draw do
 
   namespace :admin do
     resources :master_records, only: %i[index show]
-    resources :external_identifiers, except: %i[show destroy]
+    resources :external_identifiers, except: %i[show destroy] do
+      collection do
+        get :schema_reference
+      end
+      member do
+        get :versions
+      end
+    end
     get :external_identifier_details, to: 'external_identifiers#details'
     resources :reports, except: %i[show destroy] do
       member do
         get :preview
+        get :versions
       end
     end
     get :report_search_attr_definer, to: 'reports#search_attr_definer'
@@ -41,6 +49,9 @@ Rails.application.routes.draw do
     end
     resources :external_identifier_details, except: [:destroy]
     resources :dynamic_models, except: %i[show destroy] do
+      collection do
+        get :schema_reference
+      end
       member do
         post :update_config_from_table
         post :run_batch_now
@@ -56,12 +67,19 @@ Rails.application.routes.draw do
     resources :manage_admins, except: %i[show destroy]
     resources :accuracy_scores, except: %i[show destroy]
     resources :activity_logs, except: %i[show destroy] do
+      collection do
+        get :schema_reference
+      end
       member do
         get :versions
       end
     end
     resources :app_configurations, except: %i[show destroy]
-    resources :message_templates, except: %i[show destroy]
+    resources :message_templates, except: %i[show destroy] do
+      member do
+        get :versions
+      end
+    end
     resources :message_notifications, except: %i[show destroy] do
       member do
         get :attachment
@@ -138,6 +156,7 @@ Rails.application.routes.draw do
         post :request_latest_rc_configs
         post :request_records
         post :request_archive
+        post :request_archive_definition
         post :request_users
         post :request_data_collection_instruments
         post :request_logs
@@ -155,6 +174,10 @@ Rails.application.routes.draw do
         post :request_archive
         post :request_users
         get 'download_field_file/:field_name/:record_id', to: 'download_field_file'
+      end
+      collection do
+        get :data_entry_trigger
+        post :data_entry_trigger
       end
     end
   end
@@ -185,6 +208,9 @@ Rails.application.routes.draw do
 
   resources :masters, only: %i[show index new create] do
     resources :tracker_histories, only: [:index]
+    scope module: :messaging do
+      resources :message_notifications, only: [:show], constraints: { id: /\d+/ }
+    end
     resources :player_infos, except: [:destroy]
     resources :player_contacts, except: [:destroy]
     resources :pro_infos, only: %i[show index], constraints: { id: /\d+/ }
@@ -223,10 +249,12 @@ Rails.application.routes.draw do
   if Settings::AllowUsersToRegister
     devise_for :users,
                only: %i[sessions confirmations passwords registrations],
-               controllers: { registrations: 'users/registrations' }
+               controllers: { registrations: 'users/registrations' },
+               failure_app: ApiAwareFailureApp
   else
     devise_for :users,
-               only: %i[sessions]
+               only: %i[sessions],
+               failure_app: ApiAwareFailureApp
     as :user do
       get '/users/edit' => 'users/registrations#edit', as: :edit_user_registration
       put '/users' => 'users/registrations#update', as: :user_registration
@@ -271,6 +299,7 @@ Rails.application.routes.draw do
     end
     resources :chunk, only: %i[create show update]
     post 'downloads/multi', to: 'downloads#multi'
+    get 'downloads/prepared/:token', to: 'downloads#prepared', as: :prepared_download
     get 'downloads/in/:activity_log_type/:activity_log_id/:download_path', to: 'downloads#show_from_activity_log',
                                                                            constraints: { download_path: /.*/ },
                                                                            format: false

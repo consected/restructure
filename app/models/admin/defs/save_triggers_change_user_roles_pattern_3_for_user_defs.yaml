@@ -1,0 +1,8 @@
+# Pattern 3: Change the roles of a different user, resolved via for_user
+change_user_roles:
+  add_role_names:
+    - app_type: data-requests
+      role_name: nfs_store group 600
+      for_user:
+        this:
+          created_by_user_id: return_value

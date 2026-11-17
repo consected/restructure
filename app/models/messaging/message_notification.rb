@@ -8,6 +8,7 @@ module Messaging
     StatusInProgress = 'in progress'
     StatusFailed = 'failed'
     ValidImportance = %w[Promotional Transactional].freeze
+    ValidMessageTypes = %w[email sms].freeze
 
     include WorksWithItem
 
@@ -22,9 +23,11 @@ module Messaging
     # No minimum on recipient_user_ids, since recipient_data may be used instead
     validates :recipient_user_ids, length: { maximum: MaxRecipients }, if: :app_type
     validates :layout_template_name, presence: true
+    validates :message_type, presence: true, inclusion: { in: ValidMessageTypes }
+    validates :subject, presence: true, if: :email?
+    validates :importance, inclusion: { in: ValidImportance }, allow_blank: true
 
-    # The type of message - either email or sms currently
-    validates :message_type, presence: true
+    validate :layout_template_valid?
     validate :content_template_specified?
     validate :item_type_valid?, if: :app_type
 
@@ -35,11 +38,13 @@ module Messaging
     before_save :set_recipient_data
 
     before_save :set_from_email_address
+    after_commit :create_tracker_entry_for_status, if: :trackable_tracker_status_change?
 
     scope :unhandled, -> { where status: nil }
     scope :limited_index, -> { limit 50 }
 
-    attr_accessor :generated_text, :disabled, :admin_id, :for_item, :on_complete_config, :ignore_no_recipients
+    attr_accessor :generated_text, :disabled, :admin_id, :for_item, :on_complete_config, :ignore_no_recipients,
+                  :no_tracker_entry
     attr_writer :extra_substitutions_data, :batch_user
 
     #
@@ -63,12 +68,10 @@ module Messaging
     end
 
     #
-    # Set the importance of the message, checking the value is valid
+    # Set the importance of the message, normalizing case if present
     # @param [String] value - one of ValidImportance (currently Promotional | Transactional)
     def importance=(value)
-      value = value.to_s.capitalize
-      raise FphsException, "Incorrect importance: #{value}" unless value.in?(ValidImportance)
-
+      value = value.to_s.capitalize if value.present?
       super
     end
 
@@ -217,7 +220,8 @@ module Messaging
     # @param [UserBase] for_item - typically an activity log item
     # @param [Hash] on_complete_config - the on_complete configuration from the activity log definition
     def handle_notification_now(logger: Rails.logger, for_item: nil, on_complete_config: {}, alt_batch_user: nil,
-                                ignore_no_recipients: nil)
+                                ignore_no_recipients: nil, no_tracker_entry: nil)
+      self.no_tracker_entry ||= no_tracker_entry
       logger.info "MessageNotification: handling item #{id}"
       update! status: StatusInProgress
 
@@ -303,6 +307,15 @@ module Messaging
       @recipient_emails = nil
     end
 
+    def create_tracker_entry?
+      !no_tracker_entry
+    end
+
+    # User-directed alerts are internal and must not be added to participant history.
+    def targets_end_users?
+      Array(recipient_user_ids).flatten.compact.present? || role_name.present?
+    end
+
     #
     # The message notification works with an underlying item (likely an activity log implementation)
     # Handle setting of the item and use of the actual class referenced
@@ -368,6 +381,14 @@ module Messaging
 
     private
 
+    def trackable_tracker_status_change?
+      saved_change_to_status? && [StatusComplete, StatusFailed].include?(status) && create_tracker_entry?
+    end
+
+    def create_tracker_entry_for_status
+      MessageNotificationTracker.create_for(self)
+    end
+
     #
     # If we have been passed recipient records, use these to generate each message for sending
     def generate_and_send_for_recipient_records
@@ -414,13 +435,32 @@ module Messaging
     end
 
     #
-    # Validation to check if the content template text or name is set/
-    # Sets error if not set
+    # Validation to check if the layout template exists for the message type
+    # Sets error if not found
+    # @return [Boolean]
+    def layout_template_valid?
+      applicable = layout_template_name.present? && message_type.present? && message_type.to_s.in?(ValidMessageTypes)
+      return false unless applicable
+      return false if layout_template
+
+      errors.add :layout_template_name, "is not a valid layout template for #{message_type}: '#{layout_template_name}'"
+    end
+
+    #
+    # Validation to check if the content template text or name is set and valid
+    # Sets error if not set or template not found
     # @return [Boolean]
     def content_template_specified?
-      return if content_template_text || content_template_name
+      if content_template_name.present?
+        return false unless message_type.present? && message_type.to_s.in?(ValidMessageTypes)
 
-      errors.add :content_template_name, 'or content template text must be set'
+        unless content_template
+          errors.add :content_template_name,
+                     "is not a valid content template for #{message_type}: '#{content_template_name}'"
+        end
+      elsif content_template_text.blank?
+        errors.add :content_template_name, 'or content template text must be set'
+      end
     end
 
     #

@@ -8,7 +8,6 @@ RSpec.describe 'Scantron', type: :model do
 
   describe 'Scantron' do
     before :each do
-      seed_database
       create_user
       setup_access :scantrons
       create_master

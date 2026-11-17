@@ -140,7 +140,7 @@ Then set up the database.
 It is highly recommended to use a consistent version of Postgres client on all machines. Currently we are using Postgres 12.
 To ensure `psql` and all `rails db:schema:dump` works as expected, set the path to Postgres 12 binaries explicitly.
 
-    export PATH=/usr/lib/postgresql/15/bin:${PATH}
+    export PATH=/usr/lib/postgresql/18/bin:${PATH}
 
 Now create a development environment database
 
@@ -286,7 +286,7 @@ If building with the environment variable `ALLOW_EMPTY_UNRELEASED` set to any va
 Rspec tests are available. To set up a test database, first get a dump of the current
 development database structure (if you have made migrations)
 
-    export PATH=/usr/lib/postgresql/15/bin:${PATH}
+    export PATH=/usr/lib/postgresql/18/bin:${PATH}
     FPHS_POSTGRESQL_SCHEMA=ml_app,ref_data FPHS_LOAD_APP_TYPES=1 bundle exec rails db:schema:dump
 
 To allow easier DB authentication for tests, make entries into the `~/.pgpass` file

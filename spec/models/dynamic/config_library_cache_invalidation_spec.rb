@@ -29,6 +29,8 @@
 #   AC6: ApplicationJob calls Application.refresh_dynamic_defs before each job
 #   AC7: Existing cache invalidation for direct definition edits still works
 #   AC9: Standard versioned definitions trigger full regen via touch
+#   AC10: ActivityLog definitions refresh through their extra_log_types attribute
+#   AC10: ActivityLog definitions refresh through their extra_log_types attribute
 
 require 'rails_helper'
 
@@ -41,6 +43,14 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
 
     # Use hex suffix to avoid validation "Name must not contain numbers preceded by an underscore"
     @rand_id = SecureRandom.hex(4)
+    @library_v1_options = <<~YAML
+      _definitions_lib:
+        cache_label: &cache_label Original Label
+    YAML
+    @library_v2_options = <<~YAML
+      _definitions_lib:
+        cache_label: &cache_label Refreshed Label
+    YAML
 
     # Create a YAML config library that will be referenced by a dynamic model
     @config_library = Admin::ConfigLibrary.create!(
@@ -48,7 +58,7 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
       name: "cachelib#{@rand_id}",
       category: "cachecat#{@rand_id}",
       format: 'yaml',
-      options: "label_config:\n  label: Original Label"
+      options: @library_v1_options
     )
 
     # Create a second, independent YAML config library (not referenced by our test definition)
@@ -82,7 +92,13 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
       primary_key_name: :id,
       foreign_key_name: :master_id,
       category: :test,
-      options: "# @library cachecat#{@rand_id} cachelib#{@rand_id}\n_configurations:\n  use_current_version: true\n  default:\n    label: Test CL Cache"
+      options: <<~YAML
+        # @library cachecat#{@rand_id} cachelib#{@rand_id}
+        _configurations:
+          use_current_version: true
+        default:
+          label: *cache_label
+      YAML
     )
 
     # Create another DynamicModel that does NOT reference any config library
@@ -115,11 +131,34 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
 
     # Ensure models are generated and caches are primed
     DynamicModel.refresh_outdated
+    @activity_log = ActivityLog.create!(
+      current_admin: @admin,
+      name: "activity log cache #{@rand_id}",
+      item_type: 'player_contact',
+      rec_type: 'email',
+      process_name: "cache#{@rand_id}",
+      schema_name: 'dynamic_test',
+      category: :test,
+      action_when_attribute: 'created_at',
+      extra_log_types: <<~YAML
+        # @library cachecat#{@rand_id} cachelib#{@rand_id}
+        _configurations:
+          use_current_version: true
+        cache_step:
+          label: *cache_label
+          fields:
+            - data
+      YAML
+    )
+    ActivityLog.refresh_outdated
+    @activity_log.reload
+    @activity_log.force_option_config_parse
     # Prime the up_to_date? memoization so subsequent calls return true
     DynamicModel.instance_variable_set(:@prev_latest_update, DynamicModel.latest_stored_update)
   end
 
   after :all do
+    @activity_log&.disable!(@admin)
     change_setting('AllowDynamicMigrations', false)
   end
 
@@ -195,8 +234,12 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
 
       # Capture and bump config library timestamp 60s forward via SQL
       cl_original_time = Admin::ConfigLibrary.where(id: @config_library.id).pick(:updated_at)
+      cl_original_options = Admin::ConfigLibrary.where(id: @config_library.id).pick(:options)
       future_time = cl_original_time + 60.seconds
-      Admin::ConfigLibrary.where(id: @config_library.id).update_all(updated_at: future_time)
+      Admin::ConfigLibrary.where(id: @config_library.id).update_all(
+        options: @library_v2_options,
+        updated_at: future_time
+      )
 
       # Spy on generate_model to verify it is NOT called (lightweight path)
       generate_called_for = []
@@ -210,9 +253,21 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
       original_logger = Rails.logger
       Rails.logger = test_logger
 
-      DynamicModel.refresh_outdated
+      begin
+        DynamicModel.refresh_outdated
 
-      Rails.logger = original_logger
+        cached_definition = DynamicModel.definition_cache[@dm.id]
+        expect(cached_definition.option_type_config_for(:default).label).to eq('Refreshed Label')
+      ensure
+        Rails.logger = original_logger
+        Admin::ConfigLibrary.where(id: @config_library.id).update_all(
+          options: cl_original_options,
+          updated_at: cl_original_time
+        )
+        cached_definition = DynamicModel.definition_cache[@dm.id]
+        cached_definition.reload
+        cached_definition.force_option_config_parse
+      end
 
       # The lightweight path should have been taken
       expect(log_output.string).to include('Refreshing config library dependents')
@@ -220,9 +275,52 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
 
       # generate_model should NOT have been called
       expect(generate_called_for).to be_empty
+    end
+  end
 
-      # Restore timestamp
-      Admin::ConfigLibrary.where(id: @config_library.id).update_all(updated_at: cl_original_time)
+  # ---------------------------------------------------------------------------
+  # AC10: ActivityLog uses its own option_configs_attr in the lightweight path
+  # ---------------------------------------------------------------------------
+  describe 'ActivityLog lightweight path' do
+    before do
+      ActivityLog.instance_variable_set(:@prev_latest_update, nil)
+      ActivityLog.instance_variable_set(:@prev_latest_def_update, nil)
+      ActivityLog.instance_variable_set(:@config_library_only_change, nil)
+      ActivityLog.instance_variable_set(:@latest_def_update, nil)
+    end
+
+    it 'refreshes the cached definition when extra_log_types references a changed library' do
+      cl_original_time = Admin::ConfigLibrary.where(id: @config_library.id).pick(:updated_at)
+      Admin::ConfigLibrary.where(id: @config_library.id).update_all(options: @library_v1_options)
+
+      cached_definition = ActivityLog.definition_cache[@activity_log.id]
+      cached_definition.reload
+      cached_definition.force_option_config_parse
+      ActivityLog.definition_cache[@activity_log.id] = cached_definition
+
+      expect(ActivityLog.up_to_date?).to be_nil
+      expect(ActivityLog.up_to_date?).to be true
+
+      future_time = cl_original_time + 60.seconds
+      Admin::ConfigLibrary.where(id: @config_library.id).update_all(
+        options: @library_v2_options,
+        updated_at: future_time
+      )
+
+      begin
+        ActivityLog.refresh_outdated
+
+        cached_definition = ActivityLog.definition_cache[@activity_log.id]
+        expect(cached_definition.option_type_config_for(:cache_step).label).to eq('Refreshed Label')
+      ensure
+        Admin::ConfigLibrary.where(id: @config_library.id).update_all(
+          options: @library_v1_options,
+          updated_at: cl_original_time
+        )
+        cached_definition = ActivityLog.definition_cache[@activity_log.id]
+        cached_definition.reload
+        cached_definition.force_option_config_parse
+      end
     end
   end
 
@@ -240,8 +338,9 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
       # but the @dm_versioned definition will be touched (standard versioned).
       # We need to re-prime after the touch so that only the config library
       # timestamp change is detected by the lightweight path.
+      original_options = @config_library.options
       @config_library.current_admin = @admin
-      @config_library.update!(options: "label_config:\n  label: Selective Refresh #{rand(1_000_000)}")
+      @config_library.update!(options: @library_v2_options)
 
       # Re-prime to absorb the def timestamp change from touch on @dm_versioned,
       # but leave the config library timestamp change undetected.
@@ -272,6 +371,9 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
       # Only definitions with @library references should be refreshed
       expect(refreshed_table_names).to include(@dm_table_name)
       expect(refreshed_table_names).not_to include(@dm_no_lib_table)
+
+      @config_library.current_admin = @admin
+      @config_library.update!(options: original_options)
     end
   end
 

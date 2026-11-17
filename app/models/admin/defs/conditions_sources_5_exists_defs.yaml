@@ -1,0 +1,12 @@
+# Pattern 5: Checking whether a related record exists
+# @runnable: true
+# @instance: referred_activity_log
+# @expect: true
+
+# `exists` returns true when the special record source resolves to a record, and
+# false when it does not. Use `exists: false` to require the absence of one.
+# It may be used with any of the non-query record sources, such as
+# referring_record, top_referring_record, reference, parent and embedded_item.
+all:
+  referring_record:
+    exists: true

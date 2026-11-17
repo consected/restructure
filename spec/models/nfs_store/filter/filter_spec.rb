@@ -113,7 +113,7 @@ RSpec.describe NfsStore::Filter::Filter, type: :model do
     create_filter('^/fghi')
     create_filter('^fid\/{{id}} - id file')
 
-    fs = NfsStore::Filter::Filter.generate_filters_for 'activity_log__player_contact_phone', user: @user
+    fs = NfsStore::Filter::Filter.generate_filters_for nfs_al_type, user: @user
 
     expect(fs.length).to be > 10
     expect(fs).to include 'fid\/.+ - id file'

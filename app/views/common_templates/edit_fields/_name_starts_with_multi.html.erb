@@ -32,10 +32,10 @@ end
 options = field_options_for(form_object_instance, field_name_sym)
 options[:include_blank] = true unless options.has_key?(:include_blank)
 
-html_options = {
+html_options = html_options_for_field_options(options, {
   multiple: 'multiple',
   data: {attr_name: field_name_sym, object_name: form_object_item_type_us}
-}
+})
 %>
 <%= edit_field_label(form, field_name_sym, labels, opt) %>
 <% if gs_fallback %>

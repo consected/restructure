@@ -17,7 +17,20 @@ module NfsStore
     include SecureView::Previewing
 
     before_action :set_download!, only: %i[show show_from_activity_log search_doc search_doc_from_activity_log]
+    skip_before_action :find_container, only: :prepared
     before_action :setup_selected_items, only: %i[create trash]
+
+    # A blocked symlink is a deliberate safety response for actions that *serve file
+    # bytes*, not an application error - give those a friendly result rather than falling
+    # through to FsExceptionHandler's generic error page/message. Mutating actions (trash,
+    # move, rename, trigger_file_action) are deliberately excluded: they must still surface
+    # as a real, logged error, since a silent-looking "success" response would leave a user
+    # believing a tampered file had been removed/renamed/moved when it was not. Declared
+    # after FsBaseController's inclusion of FsExceptionHandler so it takes precedence for
+    # this specific (sub)class of exception.
+    SymlinkBlockedMessage = 'Symbolic link file not returned.'
+    ByteServingActions = %w[show show_from_activity_log search_doc search_doc_from_activity_log multi].freeze
+    rescue_from FsException::SymlinkBlocked, with: :render_symlink_blocked
 
     #
     # Request download of a single file for download or view
@@ -60,10 +73,10 @@ module NfsStore
     # Handle the request for a user action to be triggered, such as rename or trash a file
     # or multiple files.
     def create
-      do_action = @commit.split(':').first&.id_underscore
-      do_action = ValidActions.select { |va| va == do_action&.to_sym }.first
-      if do_action
-        send do_action
+      @do_action = @commit.split(':').first&.id_underscore
+      @do_action = ValidActions.select { |va| va == @do_action&.to_sym }.first
+      if @do_action
+        send @do_action
       else
         not_found
       end
@@ -72,37 +85,31 @@ module NfsStore
     #
     # Download multiple files as a zip file
     def multi
-      selected_items = secure_params[:selected_items]
+      selected_items_info = normalized_selected_items
 
-      unless selected_items.is_a?(Array) && !selected_items.empty?
-        raise FsException::Download, 'No items were selected for download'
-      end
-
-      selected_items_info = selected_items.map do |s|
-        h = JSON.parse(s)
-        {
-          id: h['id'].to_i,
-          container_id: h['container_id'].to_i,
-          retrieval_type: h['retrieval_type'].to_sym,
-          activity_log_type: h['activity_log_type'],
-          activity_log_id: h['activity_log_id'].to_i
-        }
-      end
+      raise FsException::Download, 'No items were selected for download' if selected_items_info.blank?
 
       container_ids = selected_items_info.map { |s| s[:container_id] }.uniq
 
       @download = Download.new multiple_items: true, container_ids: container_ids
       @download.current_user = current_user
 
-      retrieved_files = @download.retrieve_files_from selected_items_info
+      retrieved_files = @download.retrieve_files_from(selected_items_info, zip: !download_check_request?)
+      return render_download_check(@download, normalized_selected_items, multi: true) if download_check_request?
+
       if retrieved_files&.length&.> 0
-        filename = "#{@download.container.name} - #{retrieved_files.length} #{'file'.pluralize(retrieved_files.length)}.zip"
-        @download.save!
-        send_file @download.zip_file_path, filename: filename
-        # Do not attempt to cleanup the temp file by unlinking, since this will cause the out of band download to fail
+        send_retrieved_files @download, retrieved_files
       else
         redirect_to nfs_store_browse_path(@container)
       end
+    end
+
+    # Serve a prepared archive only to the authenticated user who requested it.
+    def prepared
+      path = PreparedDownload.new.available_path(user_id: current_user.id, token: params[:token])
+      return head :not_found unless path
+
+      send_file path, filename: 'prepared-download.zip', type: 'application/zip'
     end
 
     #
@@ -143,6 +150,38 @@ module NfsStore
 
     private
 
+    # Friendly, format-aware response for a blocked symlink, scoped to byte-serving
+    # actions only (see ByteServingActions) - a request with an ambiguous/non-JSON Accept
+    # header gets an actual small text file explaining why (rather than an error page),
+    # verified empirically to be the default Rails picks for a bare `*/*`/no-format
+    # request; an explicit `Accept: application/json` caller gets a structured, non-error
+    # body it can key off of to show its own inline message instead of a generic failure
+    # toast. Any other action (trash/move/rename/trigger_file_action, all dispatched
+    # through #create) falls through to the normal logged FsException::Action handling.
+    def render_symlink_blocked(error)
+      return fs_app_exception_handler(error) unless serving_file_bytes?
+
+      Rails.logger.warn(
+        "Blocked symlink retrieval attempt: #{error.message} " \
+        "(user_id=#{current_user&.id}, container_id=#{@container&.id}, action=#{action_name}/#{@do_action})"
+      )
+
+      respond_to do |type|
+        type.any do
+          send_data SymlinkBlockedMessage, filename: 'symbolic-link-blocked.txt', type: 'text/plain',
+                                           disposition: 'attachment'
+        end
+        type.json do
+          render json: { blocked: true, reason: 'symbolic_link', message: SymlinkBlockedMessage },
+                 status: :conflict
+        end
+      end
+    end
+
+    def serving_file_bytes?
+      action_name.in?(ByteServingActions) || (action_name == 'create' && @do_action == :download)
+    end
+
     def trash
       setup_action Trash
       trashed_files = @action.trash_all @selected_items_info
@@ -173,20 +212,44 @@ module NfsStore
     def download
       setup_action Download
       @download = @action
-      retrieved_files = @download.retrieve_files_from @selected_items_info
+      retrieved_files = @download.retrieve_files_from(@selected_items_info, zip: !download_check_request?)
+      return render_download_check(@download, normalized_selected_items, multi: false) if download_check_request?
+
       if retrieved_files&.present?
-        filename = "#{@download.container.name} - #{retrieved_files.length} #{'file'.pluralize(retrieved_files.length)}.zip"
-        @download.save!
-        send_file @download.zip_file_path, filename: filename
-        # Do not attempt to cleanup the temp file by unlinking, since this will cause the out of band download to fail
+        send_retrieved_files @download, retrieved_files
       else
         redirect_to nfs_store_browse_path(@container)
       end
     end
 
+    def download_check_request?
+      params[:check_only].to_s == 'true' && request.format.json?
+    end
+
+    def render_download_check(download, selected_items, multi:)
+      return render json: { action: 'download' } unless download.background_required?
+
+      download.save!
+      activity_log_type = @activity_log.class.name.ns_underscore if @activity_log
+      NfsStorePrepareDownloadJob.perform_later(
+        user_id: current_user.id,
+        app_type_id: current_user.app_type_id,
+        selected_items: selected_items.map do |item|
+          item.to_h.transform_keys(&:to_s).merge('retrieval_type' => item[:retrieval_type].to_s)
+        end,
+        container_id: multi ? nil : @container.id,
+        activity_log_type: multi ? nil : activity_log_type,
+        activity_log_id: multi ? nil : @activity_log&.id,
+        multi: multi
+      )
+      message = 'Your files are being prepared. We will email you a download link ' \
+                'when they are ready.'
+      render json: { action: 'background', message: }
+    end
+
     def secure_params
-      params.require(:nfs_store_download).permit(:container_id, :activity_log_id, :activity_log_type, :new_path,
-                                                 :new_name, selected_items: [])
+      params.expect(nfs_store_download: [:container_id, :activity_log_id, :activity_log_type, :new_path,
+                                         :new_name, :selected_items_json, { selected_items: [] }])
     end
 
     # Handle find container differently for multi container actions
@@ -199,17 +262,36 @@ module NfsStore
 
     def setup_selected_items
       @commit = params[:commit]
-      selected_items = secure_params[:selected_items]
+      selected_items = normalized_selected_items
 
-      unless selected_items.is_a?(Array) && !selected_items.empty?
+      if selected_items.blank?
         redirect_to nfs_store_browse_path(@container)
         return
       end
 
-      @selected_items_info = selected_items.map do |s|
-        h = JSON.parse(s)
-        { id: h['id'].to_i, retrieval_type: h['retrieval_type'].to_sym }
+      @selected_items_info = selected_items.map { |item| item.slice(:id, :retrieval_type) }
+    end
+
+    def normalized_selected_items
+      permitted_params = secure_params
+      selected_items = if permitted_params[:selected_items_json].present?
+                         JSON.parse(permitted_params[:selected_items_json])
+                       else
+                         permitted_params[:selected_items]&.map { |item| JSON.parse(item) }
+                       end
+      return unless selected_items.is_a?(Array) && selected_items.all?(Hash)
+
+      selected_items.map do |item|
+        {
+          id: item['id'].to_s.to_i,
+          container_id: item['container_id'].to_s.to_i,
+          retrieval_type: item['retrieval_type'].to_s.to_sym,
+          activity_log_type: item['activity_log_type'],
+          activity_log_id: item['activity_log_id'].to_s.to_i
+        }
       end
+    rescue JSON::ParserError, TypeError
+      nil
     end
 
     def setup_action(action_class)
@@ -225,6 +307,20 @@ module NfsStore
         render json: action_files
       else
         redirect_to nfs_store_browse_path(@container)
+      end
+    end
+
+    #
+    # Send the retrieved files for download. A single file is sent as the original file under its own
+    # name; multiple files are sent as a zip file.
+    # The temp zip file is not unlinked, since this will cause the out of band download to fail
+    def send_retrieved_files(download, retrieved_files)
+      download.save!
+      if download.single_file?
+        send_file download.single_file_path, filename: download.single_file_name
+      else
+        filename = "#{download.container.name} - #{retrieved_files.length} #{'file'.pluralize(retrieved_files.length)}.zip"
+        send_file download.zip_file_path, filename: filename
       end
     end
 

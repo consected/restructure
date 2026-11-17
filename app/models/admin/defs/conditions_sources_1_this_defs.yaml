@@ -1,0 +1,12 @@
+# Pattern 1: Testing the current record with `this`
+# @runnable: true
+# @instance: activity_log
+# @expect: true
+
+# `this` refers to the record the condition is being evaluated for. It is not
+# joined into the database query - each field is compared in memory against the
+# in-progress (unsaved) attribute values, so it also works during validation.
+all:
+  this:
+    extra_log_type: primary
+    select_who: user

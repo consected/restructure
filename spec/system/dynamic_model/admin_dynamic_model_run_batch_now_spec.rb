@@ -29,7 +29,7 @@ describe 'admin dynamic model run batch now button', js: true, driver: $browser_
       saved_user = @user
 
       create_user(nil, '', email: 'batch_test_user@test.com', app_type: @app_type)
-      @batch_user = @user
+      @batch_user = User.find_by(email: 'batch_test_user@test.com')
 
       # Restore admin login variables so admin_sign_in_with_2fa works correctly
       @good_email = saved_good_email

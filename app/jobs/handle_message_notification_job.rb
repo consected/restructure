@@ -6,12 +6,13 @@ class HandleMessageNotificationJob < ApplicationJob
   queue_as :default
 
   def perform(message_notification, for_item: nil, on_complete_config: nil, alt_batch_user: nil,
-              ignore_no_recipients: nil)
+              ignore_no_recipients: nil, no_tracker_entry: nil)
     Rails.logger.info "Performing job on #{message_notification.inspect}"
     message_notification.handle_notification_now logger: Delayed::Worker.logger,
                                                  for_item:,
                                                  on_complete_config:,
                                                  alt_batch_user:,
-                                                 ignore_no_recipients:
+                                                 ignore_no_recipients:,
+                                                 no_tracker_entry:
   end
 end

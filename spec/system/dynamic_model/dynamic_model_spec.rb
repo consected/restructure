@@ -42,6 +42,8 @@ describe 'dynamic models fields and views', js: true, driver: $browser_driver do
     @app_type = @user.app_type
     expect(@app_type).not_to be nil
     expect(@user.two_factor_setup_required?).to be_falsey
+
+    set_notes_field_format(markdown: false)
   end
 
   describe 'dynamic model fields for a default view' do
@@ -53,6 +55,7 @@ describe 'dynamic models fields and views', js: true, driver: $browser_driver do
       expect(@user.has_access_to?(:access, :general, :app_type, alt_app_type_id: @app_type.id))
       setup_access resource_name, user: @user, app_type: @app_type
       expect(@user.has_access_to?(:create, :table, resource_name)).to be_truthy
+      SetupHelper.reload_configs
       Rails.application.routes_reloader.reload!
     end
 
@@ -250,6 +253,7 @@ describe 'dynamic models fields and views', js: true, driver: $browser_driver do
       expect(@user.has_access_to?(:access, :general, :app_type, alt_app_type_id: @app_type.id))
       setup_access @resource_name, user: @user, app_type: @app_type
       expect(@user.has_access_to?(:create, :table, @resource_name)).to be_truthy
+      SetupHelper.reload_configs
       Rails.application.routes_reloader.reload!
     end
 
@@ -636,6 +640,7 @@ describe 'dynamic models fields and views', js: true, driver: $browser_driver do
       expect(@user.has_access_to?(:access, :general, :app_type, alt_app_type_id: @app_type.id))
       setup_access @resource_name, user: @user, app_type: @app_type
       expect(@user.has_access_to?(:create, :table, @resource_name)).to be_truthy
+      SetupHelper.reload_configs
       Rails.application.routes_reloader.reload!
     end
 
@@ -892,6 +897,7 @@ describe 'dynamic models fields and views', js: true, driver: $browser_driver do
       expect(@user.has_access_to?(:access, :general, :app_type, alt_app_type_id: @app_type.id))
       setup_access @resource_name, user: @user, app_type: @app_type
       expect(@user.has_access_to?(:create, :table, @resource_name)).to be_truthy
+      SetupHelper.reload_configs
       Rails.application.routes_reloader.reload!
     end
 

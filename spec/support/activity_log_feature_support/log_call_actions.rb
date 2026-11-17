@@ -71,6 +71,7 @@ module LogCallActions
 
   def add_free_text_notes(text)
     within phone_log_block_css do
+      expect(page).to have_css("[data-edit-field-name='notes'] .custom-editor", wait: 10)
       edit_rich_text_editor_field 'notes', text
     end
   end

@@ -21,6 +21,7 @@ RSpec.describe AdminApiDefinitionsHelper, type: :helper do
 
   before(:all) do
     SetupHelper.feature_setup
+    @api_fields_dynamic_model = DynamicModel.find_by!(table_name: 'test_created_by_recs')
   end
 
   describe '#api_base_path' do
@@ -152,7 +153,7 @@ RSpec.describe AdminApiDefinitionsHelper, type: :helper do
 
     it 'includes type information for each field' do
       dm = DynamicModel.active_model_configurations.find(&:table_or_view_ready?)
-      next unless dm
+      expect(dm).not_to be_nil
 
       fields = helper.api_fields(dm)
       fields.each do |f|
@@ -163,7 +164,7 @@ RSpec.describe AdminApiDefinitionsHelper, type: :helper do
 
     it 'excludes the contactid standard field' do
       dm = DynamicModel.active_model_configurations.find(&:table_or_view_ready?)
-      next unless dm
+      expect(dm).not_to be_nil
 
       fields = helper.api_fields(dm)
       field_names = fields.map { |f| f[:name] }
@@ -174,7 +175,7 @@ RSpec.describe AdminApiDefinitionsHelper, type: :helper do
   describe '#api_fields_list' do
     it 'generates an HTML unordered list of fields' do
       dm = DynamicModel.active_model_configurations.find(&:table_or_view_ready?)
-      next unless dm
+      expect(dm).not_to be_nil
 
       html = helper.api_fields_list(dm)
       expect(html).to include('<ul class="api-panel__fields-list">')
@@ -187,8 +188,7 @@ RSpec.describe AdminApiDefinitionsHelper, type: :helper do
     end
 
     it 'returns an empty list when no fields are available' do
-      dm = DynamicModel.active_model_configurations.find { |d| !d.table_or_view_ready? }
-      next unless dm
+      dm = instance_double(DynamicModel, table_or_view_ready?: false)
 
       html = helper.api_fields_list(dm)
       expect(html).to include('<ul')
@@ -198,7 +198,7 @@ RSpec.describe AdminApiDefinitionsHelper, type: :helper do
 
     it 'excludes standard fields' do
       dm = DynamicModel.active_model_configurations.find(&:table_or_view_ready?)
-      next unless dm
+      expect(dm).not_to be_nil
 
       html = helper.api_fields_list(dm)
       AdminApiDefinitionsHelper::STANDARD_FIELDS.each do |sf|
@@ -209,27 +209,28 @@ RSpec.describe AdminApiDefinitionsHelper, type: :helper do
 
   describe '#api_fields_yaml' do
     it 'generates YAML-like field listing' do
-      dm = DynamicModel.active_model_configurations.find(&:table_or_view_ready?)
-      next unless dm
+      dm = @api_fields_dynamic_model
+      expect(dm.table_or_view_ready?).to be(true)
+      expect(helper.api_fields(dm)).not_to be_empty
 
       yaml = helper.api_fields_yaml(dm)
       expect(yaml).to include('type:')
     end
 
     it 'returns empty string when no fields are available' do
-      dm = DynamicModel.active_model_configurations.find { |d| !d.table_or_view_ready? }
-      next unless dm
+      dm = instance_double(DynamicModel, table_or_view_ready?: false)
 
       yaml = helper.api_fields_yaml(dm)
       expect(yaml).to eq('')
     end
 
     it 'includes one entry per field with name and type' do
-      dm = DynamicModel.active_model_configurations.find(&:table_or_view_ready?)
-      next unless dm
+      dm = @api_fields_dynamic_model
+      expect(dm.table_or_view_ready?).to be(true)
 
       yaml = helper.api_fields_yaml(dm)
       fields = helper.api_fields(dm)
+      expect(fields).not_to be_empty
       fields.each do |f|
         expect(yaml).to include("#{f[:name]}:")
         expect(yaml).to include("type: #{f[:type]}")
@@ -254,8 +255,10 @@ RSpec.describe AdminApiDefinitionsHelper, type: :helper do
       expect(curl).to include('curl -XGET')
       expect(curl).to include('{{base_url}}')
       expect(curl).to include('{{app_type_id}}')
-      expect(curl).to include('{{user_email}}')
-      expect(curl).to include('{{api_token}}')
+      expect(curl).to include('-H "X-User-Email: {{user_email}}"')
+      expect(curl).to include('-H "X-User-Token: {{api_token}}"')
+      expect(curl).not_to include('user_email={{user_email}}')
+      expect(curl).not_to include('user_token={{api_token}}')
     end
 
     it 'includes body in POST examples' do
@@ -308,6 +311,10 @@ RSpec.describe AdminApiDefinitionsHelper, type: :helper do
       yaml = helper.api_save_trigger_example(dm)
       expect(yaml).to include('force_not_editable_save: true')
       expect(yaml).to include("'Content-Type': 'application/json'")
+      expect(yaml).to include("'X-User-Email': '{{constants.api_user_email}}'")
+      expect(yaml).to include("'X-User-Token': '{{constants.api_shared_secret}}'")
+      expect(yaml).not_to include('&user_email={{constants.api_user_email}}')
+      expect(yaml).not_to include('&user_token={{constants.api_shared_secret}}')
     end
 
     it 'explicitly sets method: post on the create_record action' do
@@ -594,8 +601,10 @@ RSpec.describe AdminApiDefinitionsHelper, type: :helper do
       expect(result).to include('/reports/test__api_test_report.json')
       expect(result).to include('{{base_url}}')
       expect(result).to include('{{app_type_id}}')
-      expect(result).to include('{{user_email}}')
-      expect(result).to include('{{api_token}}')
+      expect(result).to include('-H "X-User-Email: {{user_email}}"')
+      expect(result).to include('-H "X-User-Token: {{api_token}}"')
+      expect(result).not_to include('user_email={{user_email}}')
+      expect(result).not_to include('user_token={{api_token}}')
     end
 
     it 'uses the provided format extension in the path' do
@@ -640,6 +649,14 @@ RSpec.describe AdminApiDefinitionsHelper, type: :helper do
     it 'includes the search attributes in the trigger URL' do
       yaml = helper.api_report_save_trigger_example(report_double, sa: 'last_name=smith')
       expect(yaml).to include('last_name=smith')
+    end
+
+    it 'uses headers for report save trigger authentication' do
+      yaml = helper.api_report_save_trigger_example(report_double, sa: 'q=1')
+      expect(yaml).to include("'X-User-Email': '{{constants.api_user_email}}'")
+      expect(yaml).to include("'X-User-Token': '{{constants.api_shared_secret}}'")
+      expect(yaml).not_to include('&user_email={{constants.api_user_email}}')
+      expect(yaml).not_to include('&user_token={{constants.api_shared_secret}}')
     end
   end
 

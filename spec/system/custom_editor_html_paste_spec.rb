@@ -37,21 +37,12 @@ describe 'custom editor', js: true, driver: $browser_driver do
       app_type: app_type,
       current_admin: @admin
     )
-
+    SetupHelper.reload_configs
     # Set up access controls for player_infos
     setup_access :player_infos
     setup_access :player_infos, user: @user
 
     puts "end #{Time.now} custom editor setup"
-  end
-
-  after(:all) do
-    # Reset the notes field format (set to empty to restore default)
-    app_type = Admin::AppType.active.where(name: 'zeus').first
-    if app_type
-      ac = app_type.app_configurations.active.where(name: 'notes field format').first
-      ac&.update!(disabled: true, current_admin: @admin)
-    end
   end
 
   #############################################################################
@@ -532,6 +523,7 @@ describe 'custom editor', js: true, driver: $browser_driver do
         editor.click
         sleep 0.3
 
+        expect(page).to have_css('.btn-toolbar[data-role="editor-toolbar"]', visible: true, wait: 10)
         toolbar = find('.btn-toolbar[data-role="editor-toolbar"]', match: :first)
         bullet_button = toolbar.find("[data-edit='insertunorderedlist']")
         bullet_button.click
@@ -555,6 +547,7 @@ describe 'custom editor', js: true, driver: $browser_driver do
         editor.click
         sleep 0.3
 
+        expect(page).to have_css('.btn-toolbar[data-role="editor-toolbar"]', visible: true, wait: 10)
         toolbar = find('.btn-toolbar[data-role="editor-toolbar"]', match: :first)
         number_button = toolbar.find("[data-edit='insertorderedlist']")
         number_button.click
@@ -798,6 +791,7 @@ describe 'custom editor', js: true, driver: $browser_driver do
       # Set up access
       setup_access :"dynamic_model__#{@dm_table_name}", user: @user
 
+      SetupHelper.reload_configs
       # Force routes reload
       DynamicModel.routes_reload
 

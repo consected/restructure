@@ -94,6 +94,16 @@ normal will suffice. Remember to drop and create all test databases when it come
 
     RAILS_ENV=test FPHS_LOAD_APP_TYPES=1 bundle exec rake db:migrate
 
+## Check for an existing RSpec run
+
+Before starting another RSpec process, check for runs already using this workspace:
+
+    app-scripts/check_rspec_processes.sh
+
+The command exits with status 1 and lists the PID, working directory, `TEST_ENV_SET`, and `TEST_ENV_NUMBER` when a matching process is found. Do not start another run until that process has been investigated. A status of 0 means no workspace-scoped RSpec process was found.
+
+`app-scripts/headless_rspec.sh` and `app-scripts/not_headless_rspec.sh` run this check automatically and exit with status 1 without starting RSpec if a process is found. Call the check manually only before direct `rspec` calls.
+
 ## Running single test
 
 Single tests can be run as usual with rspec:

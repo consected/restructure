@@ -8,7 +8,8 @@ module ViewHandlers
 
     included do
       validate :dates_sensible, unless: :ignore_configurable_valid_if
-      validates :source, 'validates/source' => true, presence: true, if: :uses_and_has_rank?
+      validates :source, 'validates/source' => true, presence: true, if: :uses_and_has_rank?,
+                         unless: :ignore_configurable_valid_if
 
       # If the class is a dynamic definition, add a singular association, allowing a single
       # subject info to be requested for a Master. Substitutions for example use this to get

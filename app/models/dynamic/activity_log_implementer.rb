@@ -4,6 +4,7 @@ module Dynamic
   module ActivityLogImplementer
     extend ActiveSupport::Concern
     include GeneralDataConcerns
+    include Dynamic::ActivityLogSyncHandler
 
     included do
       belongs_to :master, inverse_of: assoc_inverse
@@ -42,11 +43,6 @@ module Dynamic
 
       def is_activity_log
         true
-      end
-
-      # get the attributes that are common between the parent item and the new logged item
-      def fields_to_sync
-        attribute_names & parent_class.attribute_names - %w[id master_id user_id created_at updated_at item_id]
       end
 
       # gets the class names that this activity log model can be used with, from the admin definition

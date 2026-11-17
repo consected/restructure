@@ -1,2 +1,15 @@
 # creatable_if options
-  creatable_if: 'ref: ** conditions reference **'
+# Canonical schema
+# creatable_if: <Condition>
+#
+# Condition type - see conditions.md for the full syntax
+# Condition: <Hash(always: Boolean) | Hash(never: Boolean) | Hash(selection_type: record_source: field_conditions)>
+#
+# Pattern 1: Always creatable (extra_options_creatable_if_pattern_1_always_defs.yaml)
+# Pattern 2: Never creatable (extra_options_creatable_if_pattern_2_never_defs.yaml)
+# Pattern 3: Creatable only when conditions are met (extra_options_creatable_if_pattern_3_conditional_defs.yaml)
+# See creatable_if.md for the worked examples.
+
+# Notes:
+# - creatable_if must be a Hash using the standard conditional-actions syntax.
+# - This commonly interacts with view_options.hide_unless_creatable and with references.creatable_if.

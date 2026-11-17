@@ -70,9 +70,7 @@ RSpec.describe 'Global page template historical version emission', type: :reques
     change_setting('DisableVDef', false)
 
     # Create EI table once (it cannot be created inside a transaction that rolls back).
-    unless Admin::MigrationGenerator.table_exists?(EI_NAME)
-      TableGenerators.external_identifiers_table(EI_NAME, true, EI_ATTR)
-    end
+    TableGenerators.external_identifiers_table(EI_NAME, true, EI_ATTR, skip_if_exists: true)
   end
 
   after(:all) do
@@ -205,7 +203,7 @@ RSpec.describe 'Global page template historical version emission', type: :reques
   # by clearing the precompiled Handlebars cache first (so stale disk files do
   # not mask a change in the emitted config blocks).
   def page_template_text
-    HandlebarsPrecompiler.cleanup_public_dir
+    HandlebarsPrecompiler.cleanup_compiled_output
 
     # Clear all_versions memoization so changed definitions are re-read from DB.
     DynamicModel.all_versions_memo      = {}

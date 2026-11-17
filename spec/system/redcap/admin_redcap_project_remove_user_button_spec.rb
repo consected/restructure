@@ -43,8 +43,9 @@ describe 'admin REDCap project remove user button', js: true, driver: $browser_d
     end
 
     expect(page).to have_content(project.name, wait: 10)
+    expect(page).to have_css('.nav-tabs a[aria-controls="def-users-block"]', visible: true, wait: 10)
     find('.nav-tabs a[aria-controls="def-users-block"]', visible: true).click
-    expect(page).to have_css('.admin-options-ref-users-block', wait: 10)
+    expect(page).to have_css('.admin-options-ref-users-block', visible: true, wait: 10)
   end
 
   it 'shows a delete icon only for users that are not disabled' do
@@ -99,12 +100,10 @@ describe 'admin REDCap project remove user button', js: true, driver: $browser_d
     finish_page_loading
 
     # Wait for the background job to complete and refresh the stored user list
-    start_time = Time.now
-    loop do
-      break if Redcap::ProjectUser.find_by(redcap_project_admin: project, username: username).disabled
-      break if (Time.now - start_time) > 10
-
-      sleep 0.5
+    page.document.synchronize(10) do
+      unless Redcap::ProjectUser.find_by(redcap_project_admin: project, username: username).disabled
+        raise Capybara::ExpectationNotMet, "User '#{username}' not yet disabled"
+      end
     end
 
     expect(Redcap::ProjectUser.find_by(redcap_project_admin: project, username: username).disabled).to be(true),

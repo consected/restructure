@@ -129,8 +129,8 @@ Rails.application.config.to_prepare do
   Warden::Manager.send(:before_failure) do |env|
     # Log failed API authentication attempts
     request = Rack::Request.new(env)
-    user_token = request.params['user_token']
-    user_email = request.params['user_email']
+    user_token = ApiTokenHeaderAuth.user_token_from_request(request)
+    user_email = ApiTokenHeaderAuth.user_email_from_request(request)
     app_type = request.params['use_app_type']
 
     # Only log if this appears to be an API request

@@ -22,7 +22,11 @@ module Dynamic
       # skip_save_trigger: Prevent save triggers from running
       # save_trigger_results: Results from stored locally by save triggers
       # trigger_variables: Variables set by the set_variables save trigger
-      attr_accessor :skip_save_trigger, :save_trigger_results, :trigger_variables, :option_type
+      # in_before_save_trigger: true while a before_save trigger is being processed for this
+      #   record - lets a trigger (e.g. update_this) detect it's targeting the very record
+      #   currently being saved, so it can avoid a reentrant save (see issue #1384)
+      attr_accessor :skip_save_trigger, :save_trigger_results, :trigger_variables, :option_type,
+                    :in_before_save_trigger
     end
 
     class_methods do
@@ -77,7 +81,7 @@ module Dynamic
       def option_type_attr_name
         return unless respond_to?(:definition)
 
-        definition.option_type_attr_name
+        definition&.option_type_attr_name
       end
 
       def default_option_type_name
@@ -169,11 +173,11 @@ module Dynamic
     def can_add_reference?
       return @can_add_reference unless @can_add_reference.nil?
 
-      @can_add_reference = false
       dopt = option_type_config
       return unless dopt
 
-      return unless dopt.add_reference_if.is_a?(Hash) && dopt.add_reference_if.first
+      add_reference_if = dopt.add_reference_if
+      return unless condition_config_present?(add_reference_if)
 
       res = dopt.calc_if(:add_reference_if, self)
       @can_add_reference = !!res
@@ -197,7 +201,7 @@ module Dynamic
         return
       end
 
-      return unless doptif.is_a?(Hash) && doptif.first && respond_to?(:master)
+      return unless condition_config_present?(doptif) && respond_to?(:master)
 
       # Generate an old version of the object prior to changes
       old_obj = dup
@@ -220,6 +224,21 @@ module Dynamic
       end
 
       res
+    end
+
+    def condition_config_present?(config)
+      return false if config.nil?
+
+      if config.respond_to?(:conditions)
+        # IfCondition/EditableIf/etc. wrapper objects — check the inner conditions Hash
+        config.conditions.present?
+      elsif config.is_a?(Hash)
+        config.first.present?
+      else
+        # Guard against unexpected non-nil scalar values (String, Integer, etc.)
+        Rails.logger.error "Unexpected condition config type: #{config.class.name} - #{config.inspect}"
+        false
+      end
     end
 
     # If access has changed since an initial check, reset the cached results
@@ -352,8 +371,39 @@ module Dynamic
     # Handle actions that must be performed before on save save triggers
     def handle_before_save_triggers
       self.save_trigger_results ||= {}
-      option_type_config&.calc_save_trigger_if self, alt_on: :before_save unless skip_save_trigger
+
+      # Defense in depth for issue #1384: a save_trigger action (existing or future)
+      # that calls save/update!/save! on `this` while its own before_save pass is
+      # still running would corrupt this save's dirty-tracking, silently breaking
+      # on_create/on_update/on_disable dispatch. Several trigger types already guard
+      # against this themselves with a clearer message (see update_this,
+      # pull_external_data, redcap_request, notify, create_reference) - this catches
+      # any other/future trigger that doesn't.
+      if in_before_save_trigger
+        raise FphsException,
+              "#{self.class.name} attempted to save/update the record being saved from within " \
+              'its own before_save trigger - this is not supported (issue #1384); use ' \
+              'assign_attributes instead of save/update!, or defer the write to on_create/on_update'
+      end
+
+      return true if skip_save_trigger
+
+      # Only worth the cost of a second validation pass below if there's actually a
+      # before_save trigger configured to run one.
+      has_before_save_config = option_type_config&.save_trigger&.before_save.present?
+
+      self.in_before_save_trigger = true
+      option_type_config&.calc_save_trigger_if self, alt_on: :before_save
+
+      # Attribute changes assigned directly by a before_save trigger (e.g. update_this on
+      # `this`) bypass Rails' validate phase, since before_save always runs after it -
+      # re-validate once now that all before_save triggers have finished mutating this
+      # record (issue #1384).
+      raise ActiveRecord::RecordInvalid, self if has_before_save_config && !valid?
+
       true
+    ensure
+      self.in_before_save_trigger = false
     end
 
     #
@@ -401,16 +451,17 @@ module Dynamic
         next unless attribute_names.include?(name.to_s)
 
         init_value = config[:preset_value]
-        if init_value
+        unless init_value.nil?
           res = FieldDefaults.calculate_default self, init_value, ignore_missing: current_admin_sample
           send "#{name}=", res
         end
 
         init_value = config[:blank_preset_value]
-        if init_value
-          res = FieldDefaults.calculate_default self, init_value, ignore_missing: current_admin_sample
-          send "#{name}=", res if attributes[name.to_s].blank?
-        end
+        next if init_value.nil?
+
+        res = FieldDefaults.calculate_default self, init_value, ignore_missing: current_admin_sample
+        current_value = attributes[name.to_s]
+        send "#{name}=", res if current_value.blank? && current_value != false
       end
     end
 
@@ -429,7 +480,7 @@ module Dynamic
         next unless attribute_names.include?(name.to_s) || @option_type_attr_name.to_s == name.to_s
 
         init_value = config[:active_value]
-        if init_value
+        unless init_value.nil?
           res = FieldDefaults.calculate_default self, init_value, ignore_missing: current_admin_sample
           send "#{name}=", res
         end
@@ -439,7 +490,7 @@ module Dynamic
     def set_option_type_attr_name
       return unless self.class.respond_to? :definition
 
-      @option_type_attr_name = self.class.definition.option_type_attr_name
+      @option_type_attr_name = self.class.definition&.option_type_attr_name
     end
   end
 end

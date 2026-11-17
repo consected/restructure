@@ -6,7 +6,6 @@ describe Classification::SubProcess do
   include SubProcessSupport
   describe "definition" do
     before :each do
-      seed_database
       create_user
       create_admin
       create_master

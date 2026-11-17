@@ -245,6 +245,8 @@ class Admin::ServerInfo
       end
     end
 
+    @configuration_failed_reason += Dynamic::DefinitionLoadIssues.messages
+
     @configuration_failed_reason
   end
 

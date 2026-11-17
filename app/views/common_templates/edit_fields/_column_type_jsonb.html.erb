@@ -29,7 +29,12 @@ rescue StandardError
 end
 data ||= ''
 
-gs = String.yaml_dump(data) if data
+# A blank/absent value must render as an empty textarea, while a real empty Hash/Array
+# must still round-trip correctly. Dynamic::FieldEditAs::ColTypeJson.display_value
+# distinguishes these (an explicit type check rather than #present?, since #present?
+# is false for both {} and [] as well as for a blank value) - see its documentation
+# for the display/save cycle this protects.
+gs = Dynamic::FieldEditAs::ColTypeJson.display_value(data)
 options = field_options_for(form_object_instance, field_name_sym)
 
 html_options = {
