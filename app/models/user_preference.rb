@@ -63,6 +63,8 @@ class UserPreference < UserBase
   def as_json(extras = {})
     extras[:methods] ||= []
     extras[:methods] << :timezone_iana
+    extras[:methods] << :def_version
+    extras[:methods] << :vdef_version
     # Call #serializable_hash rather than super, since we don't want to return
     # all the unnecessary attributes / methods provided by GeneralDataConcerns#as_json
     serializable_hash(extras)
