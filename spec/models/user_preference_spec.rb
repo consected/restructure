@@ -43,6 +43,10 @@ RSpec.describe UserPreference, type: :model do
   end
 
   describe 'use' do
+    it 'includes the current definition version in its JSON representation' do
+      expect(@user_preference.as_json).to include('def_version' => nil, 'vdef_version' => 'v')
+    end
+
     it 'allows access to data as json' do
       # Simple check for operation - ensure the JSON returns at least all the model attributes
       json = @user_preference.to_json
