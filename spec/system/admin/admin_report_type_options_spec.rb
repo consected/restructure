@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Covers the admin-facing report type labels, searchable label, auto toggle,
-# and generated options skeleton for issue #1522.
+# generated options skeleton, and recoverable unknown option keys for issue #1522.
 
 require 'rails_helper'
 
@@ -65,6 +65,20 @@ describe 'admin report type options', js: true, driver: $browser_driver do # rub
     select_admin_field('report_type', 'report')
     expect(page).to have_css('.report-auto-options.hidden', visible: :all)
     expect(find('#report_auto', visible: :all)).to be_checked
+  end
+
+  it 'shows unknown report option keys in the info panel without blocking edit' do
+    report = create_test_report('Unknown options', report_type: 'report')
+    @reports << report
+    report.update!(options: "view_options:\n  bad_attr: 1")
+
+    visit '/admin/reports'
+    finish_page_loading
+    open_report_edit_form(report)
+
+    expect(page).to have_css('.report-item-options-test', text: 'invalid')
+    expect(page).to have_css('.config-error-block')
+    expect(page).to have_text('Unrecognized configuration params in OptionConfigs::ReportOptions::ViewOptions: bad_attr')
   end
 
   it 'pre-fills a new report form with the all-null non-legacy options skeleton' do

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# Covers the new report type's rendered button contexts, auto-submit classes,
-# visibility options, and commit routes independently from legacy types.
+# Covers the new report type's buttons and commit routes, including execution
+# with unrecognized option keys, independently from legacy types.
 
 require 'rails_helper'
 
@@ -190,6 +190,21 @@ RSpec.describe 'Report type report buttons', type: :request do
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.css('.admin-view.report-criteria')).not_to be_empty
     expect(response.body).not_to include('Failure in criteria view')
+  end
+
+  it 'runs a report when an unrecognized view option is present' do
+    report = create_report(options: {
+                             view_options: { hide_result_count: true, bad_attr: 1 }
+                           })
+
+    get report_path(report), params: {
+      commit: 'table', part: 'results', search_attrs: { master_id: @master.id }
+    }
+
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.css('.report-results-table-block table.report-table')).not_to be_empty
+    expect(report.report_options.view_options.hide_result_count).to be(true)
+    expect(report.report_options.config_errors.first[:offending_keys]).to eq([:bad_attr])
   end
 
   it 'returns master results, a table, and count-only results for commits regardless of button visibility' do

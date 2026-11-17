@@ -99,6 +99,12 @@ module OptionConfigs
     end
     private_class_method :validate_auto_submit_flags!
 
+    # Keep persisted report options loadable so unrecognized keys can be reported in admin.
+    def setup_from_hash_config(preserve_unrecognized: true)
+      super
+    end
+    protected :setup_from_hash_config
+
     #
     # Returns the options text version specific to this report
     # @return [String] options text
