@@ -82,17 +82,82 @@ _nfs_store.fs_browser = function ($outer) {
 
 
   var submit_download_form = function ($this) {
-
     var btn = $('#container-browse-download-in-form-' + container_id);
-
     var form = btn.parents('form').first();
+    if (form.data('download-check-running')) return;
+    form.data('download-check-running', true);
     form.removeAttr("data-remote");
     form.removeData("remote");
+    _fpa.form_utils.set_json_array_param(
+      form, '.container-file-selector', 'nfs_store_download[selected_items_json]', false
+    );
     _fpa.form_utils.set_auth_tokens(form);
 
+    var $submitter;
+    if (btn.attr('name')) {
+      $submitter = $('<input type="hidden">').attr('name', btn.attr('name')).val(btn.val());
+      form.append($submitter);
+    }
+    var $checkOnly = $('<input type="hidden" name="check_only" value="true">').appendTo(form);
+    var remove_check_fields = function () {
+      $checkOnly.remove();
+      if ($submitter) $submitter.remove();
+      form.removeData('download-check-running');
+    };
+    var submit_download = function () {
+      $checkOnly.remove();
+      try {
+        form[0].submit();
+      } finally {
+        if ($submitter) $submitter.remove();
+        form.removeData('download-check-running');
+      }
+    };
+    var blocked_symlink_response = function (xhr) {
+      var error = xhr && xhr.responseJSON;
+      if (!error && xhr && xhr.responseText) {
+        try {
+          error = JSON.parse(xhr.responseText);
+        } catch (_parse_error) {
+          return false;
+        }
+      }
+      return xhr && xhr.status === 409 && error && error.blocked && error.reason === 'symbolic_link';
+    };
     $('body').addClass('prevent-page-transition');
-    btn.click();
+
+    $.ajax({
+      type: form.attr('method') || 'POST',
+      url: form.attr('action'),
+      data: form.serialize(),
+      dataType: 'json',
+      global: false
+    }).done(function (data) {
+      $checkOnly.remove();
+      if (data.action === 'background') {
+        remove_check_fields();
+        $('body').removeClass('prevent-page-transition');
+        _fpa.flash_notice(data.message);
+        return;
+      }
+      if (data.action === 'download') {
+        submit_download();
+        return;
+      }
+      remove_check_fields();
+      $('body').removeClass('prevent-page-transition');
+      _fpa.flash_notice('The download request could not be processed.', 'danger');
+    }).fail(function (xhr) {
+      if (blocked_symlink_response(xhr)) {
+        submit_download();
+        return;
+      }
+      remove_check_fields();
+      $('body').removeClass('prevent-page-transition');
+      _fpa.flash_notice('The download request could not be processed. Please try again.', 'danger');
+    });
   };
+
 
 
   var submit_action_form = function ($this, action, extra_params) {
@@ -117,6 +182,9 @@ _nfs_store.fs_browser = function ($outer) {
     }
 
 
+    _fpa.form_utils.set_json_array_param(
+      form, '.container-file-selector', 'nfs_store_download[selected_items_json]', false
+    );
     form.attr('data-remote', 'true');
     form[0].app_callback = function () {
       window.setTimeout(function () {
@@ -333,7 +401,8 @@ _nfs_store.fs_browser = function ($outer) {
     folder_action($(this), e, true);
   }).on('shown.bs.collapse', '.container-browser .container-folder-items', function (e) {
     folder_action($(this), e, false);
-  }).on('click', '.container-browse-download', function () {
+  }).on('click', '.container-browse-download', function (e) {
+    e.preventDefault();
     var target = $($(this).attr('data-target-browser'));
     submit_download_form(target);
     disable_submit(target, true);

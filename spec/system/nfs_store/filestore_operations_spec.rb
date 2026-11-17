@@ -509,6 +509,76 @@ describe 'Filestore file operations', js: true, driver: $browser_driver, type: :
   end
 
   describe 'File download' do
+    def latest_action_id(model_class)
+      model_class.where(user_id: @user.id).maximum(:id) || 0
+    end
+
+    def wait_for_new_action(model_class, previous_action_id)
+      Timeout.timeout(Capybara.default_max_wait_time) do
+        loop do
+          action = model_class.where(user_id: @user.id)
+                              .where('id > ?', previous_action_id)
+                              .order(created_at: :desc, id: :desc)
+                              .first
+          return action if action
+
+          sleep 0.1
+        end
+      end
+    end
+
+    def action_file_names(action, items_field)
+      items = action.public_send(items_field)
+      items = JSON.parse(items) if items.is_a?(String)
+      items.map { |item| item['file_name'] || item[:file_name] }.sort
+    end
+
+    # Guards against stale selections being resent across repeated actions (issue #1551).
+    it 'uses only each current selection across repeated downloads and a trash action' do
+      navigate_to_master(@master.id)
+      expand_phone_log_tab
+      wait_for_filestore_container
+
+      filenames = %w[A B C D].map { |file| "selection-sequence-#{file}-#{SecureRandom.hex(4)}.txt" }
+      file_paths = filenames.map.with_index do |filename, index|
+        create_temp_test_file(filename:, content: "File #{index + 1}")
+      end
+      upload_multiple_files_to_filestore(file_paths)
+      filenames.each { |filename| expect(file_exists_in_browser?(filename)).to be(true) }
+      expect(has_error_alert?).to be(false), "Unexpected error after upload: #{error_alert_text}"
+
+      select_multiple_files_in_browser(filenames.first(2))
+      previous_download_id = latest_action_id(NfsStore::Download)
+      click_download_button
+      expect(has_error_alert?).to be(false), "Unexpected error: #{error_alert_text}"
+      first_download = wait_for_new_action(NfsStore::Download, previous_download_id)
+      expect(action_file_names(first_download, :retrieved_items)).to match_array(filenames.first(2))
+
+      # Keep A selected, deselect B, and select C for the next download.
+      select_file_in_browser(filenames[1])
+      select_file_in_browser(filenames[2])
+      previous_download_id = latest_action_id(NfsStore::Download)
+      click_download_button
+      expect(has_error_alert?).to be(false), "Unexpected error: #{error_alert_text}"
+      second_download = wait_for_new_action(NfsStore::Download, previous_download_id)
+      expect(action_file_names(second_download, :retrieved_items)).to match_array([filenames[0], filenames[2]])
+
+      # Deselect A and C, then select only D for trash.
+      select_file_in_browser(filenames[0])
+      select_file_in_browser(filenames[2])
+      select_file_in_browser(filenames[3])
+      previous_trash_id = latest_action_id(NfsStore::Trash)
+      open_filestore_menu
+      click_send_to_trash_menu_item
+      expect(has_error_alert?).to be(false), "Unexpected error: #{error_alert_text}"
+      trash_action = wait_for_new_action(NfsStore::Trash, previous_trash_id)
+      expect(action_file_names(trash_action, :trashed_items)).to eq([filenames[3]])
+
+      refresh_filestore_list
+      expect(file_exists_in_browser?(filenames[3])).to be(false)
+      filenames.first(3).each { |filename| expect(file_exists_in_browser?(filename)).to be(true) }
+    end
+
     it 'downloads a single file' do
       # Navigate to the master record
       navigate_to_master(@master.id)
@@ -534,10 +604,15 @@ describe 'Filestore file operations', js: true, driver: $browser_driver, type: :
       # Click the download button
       # Note: In headless mode, the download happens but we can't easily verify
       # the file was saved. We verify that the button click doesn't cause errors.
-      click_download_button
+      # A single selected file is delivered directly under its own name, not packed into a zip (issue #1553)
+      with_browser_download_dir do |dir|
+        click_download_button
+        expect(has_error_alert?).to be(false), "Unexpected error: #{error_alert_text}"
 
-      # Verify no error occurred
-      expect(has_error_alert?).to be(false), "Unexpected error: #{error_alert_text}"
+        downloaded = wait_for_downloaded_file(dir)
+        expect(File.basename(downloaded)).to eq(filename)
+        expect(File.read(downloaded)).to eq(content)
+      end
     end
 
     it 'downloads multiple files as a zip' do
@@ -568,10 +643,81 @@ describe 'Filestore file operations', js: true, driver: $browser_driver, type: :
 
       # Click the download button
       # When multiple files are selected, they download as a zip archive
-      click_download_button
+      # Multiple files are still delivered as a zip containing each file (issue #1553)
+      with_browser_download_dir do |dir|
+        click_download_button
+        expect(has_error_alert?).to be(false), "Unexpected error: #{error_alert_text}"
 
-      # Verify no error occurred
-      expect(has_error_alert?).to be(false), "Unexpected error: #{error_alert_text}"
+        downloaded = wait_for_downloaded_file(dir)
+        expect(File.basename(downloaded)).to end_with('2 files.zip')
+        entries = Zip::File.open(downloaded) { |zip| zip.entries.map { |e| File.basename(e.name) } }
+        expect(entries).to match_array([file1_name, file2_name])
+      end
+    end
+  end
+
+  # Purpose: ensure large selections queue an archive, notify the user, and serve the prepared link.
+  describe 'Large background downloads' do
+    it 'queues a selected archive, emails its prepared link, and serves the archive' do
+      previous_max_files = Settings::NfsStoreBackgroundDownloadMaxFiles
+      previous_max_bytes = Settings::NfsStoreBackgroundDownloadMaxBytes
+      change_setting('NfsStoreBackgroundDownloadMaxFiles', 1)
+      change_setting('NfsStoreBackgroundDownloadMaxBytes', 100_000_000)
+      archive_path = nil
+      user_download_dir = nil
+      previous_delay_jobs = Delayed::Worker.delay_jobs
+      previous_download_job_id = Delayed::Job.where(queue: 'nfs_store_downloads').maximum(:id) || 0
+      Delayed::Worker.delay_jobs = true
+
+      begin
+        expect(User.find(@user.id).app_type_valid?).to be(true)
+        navigate_to_master(@master.id)
+        expand_phone_log_tab
+        wait_for_filestore_container
+
+        filenames = ["background-a-#{SecureRandom.hex(4)}.txt", "background-b-#{SecureRandom.hex(4)}.txt"]
+        files = filenames.map.with_index do |filename, index|
+          create_temp_test_file(filename:, content: "Background file #{index + 1}")
+        end
+        upload_multiple_files_to_filestore(files)
+        filenames.each { |filename| expect(file_exists_in_browser?(filename)).to be(true) }
+        select_multiple_files_in_browser(filenames)
+
+        click_download_button
+        expect(page).to have_css('.flash .alert-info', text: 'being prepared')
+
+        queued_job = Delayed::Job.where(queue: 'nfs_store_downloads')
+                                 .where('id > ?', previous_download_job_id)
+                                 .order(:id).last
+        expect(queued_job).not_to be_nil
+        queued_job.invoke_job
+        queued_job.destroy!
+
+        notification = Messaging::MessageNotification.where(user_id: @user.id,
+                                                              content_template_name: 'server prepared download ready')
+                                                      .order(:id).last
+        expect(notification).not_to be_nil
+        expect(notification.generated_content).to include("use_app_type=#{@user.app_type_id}")
+        user_download_dir = File.dirname(NfsStore::PreparedDownload.new.path_for(user_id: @user.id, token: 'A' * 43))
+        archive_path = Dir.glob(File.join(user_download_dir, '*.zip')).first
+        expect(archive_path).to be_present
+
+        token = File.basename(archive_path, '.zip')
+        download_url = "/nfs_store/downloads/prepared/#{token}?use_app_type=#{@user.app_type_id}&no_redirect=true"
+        with_browser_download_dir do |directory|
+          visit download_url
+          downloaded = wait_for_downloaded_file(directory)
+          expect(Zip::File.open(downloaded) { |zip| zip.entries.map { |entry| File.basename(entry.name) } })
+            .to match_array(filenames)
+        end
+      ensure
+        change_setting('NfsStoreBackgroundDownloadMaxFiles', previous_max_files)
+        change_setting('NfsStoreBackgroundDownloadMaxBytes', previous_max_bytes)
+        Delayed::Worker.delay_jobs = previous_delay_jobs
+        Delayed::Job.where(queue: 'nfs_store_downloads').where('id > ?', previous_download_job_id).delete_all
+        FileUtils.rm_f(archive_path) if archive_path
+        FileUtils.rm_rf(user_download_dir) if user_download_dir
+      end
     end
   end
 

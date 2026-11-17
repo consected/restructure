@@ -148,6 +148,7 @@ module NfsStore
           container_id: container.id,
           id: id,
           file_name: retrieved_file.file_name,
+          file_size: retrieved_file.file_size,
           parent_name: retrieved_file.container.parent_sub_dir || "master-id-#{retrieved_file.container.master_id}",
           container_name: retrieved_file.container.directory_name,
           container_path: retrieved_file.container_path(no_filename: true),

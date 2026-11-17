@@ -14,6 +14,7 @@
 #   default_country_code: String,
 #   from_user_email: FromUserEmailValue,
 #   ignore_no_recipients: Boolean,
+#   no_tracker_entry: Boolean | Template | ConditionalHash,
 #   layout_template: String (required),
 #   content_template: String,
 #   content_template_text: String | Hash,
@@ -132,6 +133,13 @@
 
           "from_user_email(alternative)": 'string email address'
           ignore_no_recipients: nil (default) | true - don't raise an error if no recipients are specified or found in the role
+          no_tracker_entry: |
+            (optional) true to prevent otherwise eligible participant notifications sent by this trigger from automatically creating a tracker entry.
+            Supports a boolean, a {{{substitution}}} (triple curly, to return a boolean rather than a string), or a conditional reference such as {this: {skip_tracker: return_value}}.
+            Example: no_tracker_entry: true
+            Notifications addressed to end users through role/users are internal alerts and never create participant tracker entries.
+            Emails/phones are tracked against their real master or matching participant contact; phone_records are tracked against each resolved recipient master.
+            Temporary holding masters are never tracker targets.
 
           layout_template: 'name of layout template'  # required - see Notes
           content_template: 'name of content template'  # one of content_template / content_template_text is required
@@ -191,6 +199,8 @@
 #   fails validation.
 # - type determines the delivery channel (email or sms). role/users resolve to User records
 #   and are notified via whichever channel type specifies, using their associated contact info.
+# - role/users notifications are internal user alerts and never create participant tracker
+#   entries; emails/phones/phone_records are participant-addressed modes and may be tracked.
 # - Recipients are resolved by whichever of role/users, phones, phone_records or emails is
 #   present first (see the precedence order above) - combining more than one form in the same
 #   entry is redundant, since only the first match is used.

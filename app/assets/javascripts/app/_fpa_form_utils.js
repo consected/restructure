@@ -3,6 +3,59 @@ _fpa.form_utils = {
   // convenience calling them individually on an ad-hoc basis around the code base does
   // not make this a good choice.
 
+  /**
+   * Serialize checked values into a JSON hidden field.
+   * @param {jQuery|Element} form Form containing the checkboxes.
+   * @param {string} checkbox_selector Selector for checked checkboxes.
+   * @param {string} field_name Name of the hidden JSON field.
+   * @param {boolean} restore_checkbox_names Whether to restore checkbox names asynchronously.
+   * @returns {boolean} Whether all checked values could be serialized.
+   */
+  set_json_array_param: function (form, checkbox_selector, field_name, restore_checkbox_names) {
+    var $form = $(form);
+    $form.find('input[type="hidden"]').filter(function () {
+      return $(this).attr('name') === field_name;
+    }).remove();
+
+    var $checked = $form.find(checkbox_selector).filter(':checked:not(:disabled)');
+    var values = [];
+    var invalid_value = false;
+
+    $checked.each(function () {
+      try {
+        values.push(JSON.parse($(this).val()));
+      } catch (error) {
+        invalid_value = true;
+        return false;
+      }
+    });
+
+    if (invalid_value) return false;
+
+    $form.append($('<input>', {
+      type: 'hidden',
+      name: field_name,
+      value: JSON.stringify(values)
+    }));
+
+    if (restore_checkbox_names) {
+      var original_names = [];
+      $checked.each(function () {
+        var $checkbox = $(this);
+        var name = $checkbox.attr('name');
+        if (name !== undefined) original_names.push({ checkbox: this, name: name });
+      }).removeAttr('name');
+
+      window.setTimeout(function () {
+        original_names.forEach(function (item) {
+          $(item.checkbox).attr('name', item.name);
+        });
+      }, 0);
+    }
+
+    return true;
+  },
+
   set_field_errors: function (block, obj) {
     const invalid_error_prefix = 'invalid_error_message: ';
     if (!obj) {

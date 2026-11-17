@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
 require 'timeout'
+require 'time'
 #
 # Provides database level functionality to support dynamic migration generation
 # and functions that are used to access features of the database across the application.
 class Admin::MigrationGenerator
   DefaultSchemaOwner = Settings::DefaultSchemaOwner
   DefaultMigrationSchema = Settings::DefaultMigrationSchema
+  MIGRATION_TIMESTAMP_MUTEX = Mutex.new
 
   attr_accessor :db_migration_schema, :table_name, :all_implementation_fields,
                 :table_comments, :no_master_association, :prev_table_name, :belongs_to_model,
@@ -74,6 +76,25 @@ class Admin::MigrationGenerator
   # @return [String]
   def self.current_database
     connection.current_database
+  end
+
+  def self.next_migration_timestamp(dirname)
+    MIGRATION_TIMESTAMP_MUTEX.synchronize do
+      current_time = Time.now
+      previous_time = @last_migration_timestamp && Time.strptime(@last_migration_timestamp, '%Y%m%d%H%M%S')
+      existing_times = if Dir.exist?(dirname)
+                         Dir.glob('*.rb', base: dirname).filter_map do |filename|
+                           timestamp = filename[/\A(\d{14})_/, 1]
+                           Time.strptime(timestamp, '%Y%m%d%H%M%S') if timestamp
+                         end
+                       else
+                         []
+                       end
+      timestamps = [current_time]
+      timestamps << (previous_time + 1) if previous_time
+      timestamps << (existing_times.max + 1) if existing_times.any?
+      @last_migration_timestamp = timestamps.max.strftime('%Y%m%d%H%M%S')
+    end
   end
 
   #
@@ -694,24 +715,16 @@ class Admin::MigrationGenerator
     dirname = db_migration_dirname export_type
 
     # Ensure we don't get overlapping migration version numbers or class names
-    migtime = Time.now.to_fs(:number)
     cname = nil
     version ||= migration_version
     cname_us = "#{mode}_#{name}_#{version}"
     raise FphsException, "Error in naming of migration #{cname_us}" if cname_us != cname_us.id_underscore
 
-    while Dir.glob("#{migtime}*", base: dirname).length > 0
-      sleep 1.5
-
-      migtime = Time.now.to_fs(:number)
-    end
-
+    migtime = self.class.next_migration_timestamp(dirname)
     filepath = "#{dirname}/#{migtime}_#{cname_us}.rb"
 
     FileUtils.mkdir_p dirname
     File.write(filepath, mig_text)
-    # Cheat way to ensure multiple migrations can not have the same timestamp during app type loads
-    sleep 1.2
     @do_migration = filepath
     filepath
   end

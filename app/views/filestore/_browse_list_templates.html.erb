@@ -69,9 +69,8 @@
     {{#if id}}
       <input type="checkbox" 
              id="nfs_store_download-selected_items-{{id}}-{{retrieval_type}}"
-             name="nfs_store_download[selected_items][]"
              title="select item for download"
-             class="ff ignore-field-change"
+             class="ff ignore-field-change container-file-selector"
              value="{&quot;id&quot;: {{id}}, &quot;retrieval_type&quot;: &quot;{{retrieval_type}}&quot;}"
       >        
     {{else}}

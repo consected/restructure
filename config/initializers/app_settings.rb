@@ -146,6 +146,10 @@ class Settings
   # title tag page title, appears in tab or browser heading
   PageTitle = ENV['PAGE_TITLE'].presence || DefaultSettings::PageTitle
 
+  NfsStoreBackgroundDownloadMaxFiles = (ENV['NFS_STORE_BACKGROUND_DOWNLOAD_MAX_FILES'].presence || 100).to_i
+  NfsStoreBackgroundDownloadMaxBytes = (ENV['NFS_STORE_BACKGROUND_DOWNLOAD_MAX_BYTES'].presence || 20.megabytes).to_i
+  NfsStorePreparedDownloadsTtlHours = (ENV['NFS_STORE_PREPARED_DOWNLOADS_TTL_HOURS'].presence || 24).to_i
+
   # Registration Settings
   # Since passwords have generated upon user creation, we must suppress generating a password
   # with the user (self) registration feature.
@@ -234,6 +238,11 @@ class Settings
 
   def self.nfs_store_default_app_type_id
     (ENV['NFS_STORE_DEFAULT_APP_TYPE_ID'].presence || Array(OnlyLoadAppTypes).first || Admin::AppType.active.first&.id || 1).to_i
+  end
+
+  def self.nfs_store_prepared_downloads_dir
+    ENV['FILESTORE_PREPARED_DOWNLOADS_DIR'].presence ||
+      File.join(NfsStore::Manage::Filesystem.temp_directory, 'prepared_downloads')
   end
 
   # Allow-list mapping of resource names => fully qualified class name strings for
@@ -386,6 +395,11 @@ class Settings
   # Set the priority listing for the country select
   DefaultCountrySelect = (ENV['DEFAULT_COUNTRY_SELECT'].presence&.split || %w[US CA DE]).freeze
 
+  DefaultPhoneCountryCode = (ENV['FPHS_DEFAULT_PHONE_COUNTRY_CODE'].presence || '1').delete_prefix('+').gsub(/[^0-9]/, '').presence || '1'
+  DefaultPhoneCountryCode.freeze
+  DefaultPhoneTrunkNumber = (ENV['FPHS_DEFAULT_PHONE_TRUNK_NUMBER'].presence || '1').delete_prefix('+').gsub(/[^0-9]/, '').presence || '1'
+  DefaultPhoneTrunkNumber.freeze
+
   # Countries for which GDPR specific terms of use should be shown
   GdprCountryCodes = %w[AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SE SK SI ES SE GB].freeze
 
@@ -421,6 +435,6 @@ class Settings
     DefaultDateFormat DefaultTimeFormat DefaultDateTimeFormat
     nfs_store_default_app_type_id
     admin_nfs_role
-    DefaultCountrySelect GdprCountryCodes
+    DefaultCountrySelect DefaultPhoneCountryCode DefaultPhoneTrunkNumber GdprCountryCodes
   ].freeze
 end

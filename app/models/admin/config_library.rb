@@ -5,8 +5,69 @@ class Admin::ConfigLibrary < Admin::AdminBase
   include AdminHandler
   include Dynamic::VersionHandler
 
+  DEPENDENCY_REFRESH_ATTRIBUTES = %w[options name category format disabled].freeze
+  PENDING_DEPENDENCY_REFRESH_IDS = Set.new
+  PENDING_DEPENDENCY_REFRESH_IDS_MUTEX = Mutex.new
+
+  def self.queue_dependency_refresh(library_id)
+    PENDING_DEPENDENCY_REFRESH_IDS_MUTEX.synchronize do
+      PENDING_DEPENDENCY_REFRESH_IDS.add(library_id)
+    end
+  end
+
+  def self.consume_dependency_refresh(library_id)
+    PENDING_DEPENDENCY_REFRESH_IDS_MUTEX.synchronize do
+      PENDING_DEPENDENCY_REFRESH_IDS.delete?(library_id)
+    end
+  end
+
+  def self.clear_dependency_refresh(library_id)
+    PENDING_DEPENDENCY_REFRESH_IDS_MUTEX.synchronize do
+      PENDING_DEPENDENCY_REFRESH_IDS.delete(library_id)
+    end
+  end
+
   def self.valid_formats
     %w[yaml html markdown sql]
+  end
+
+  def self.defer_dependency_refresh(library)
+    Admin::AppTypeImport.collect_after_import(:config_library_dependency_refresh, library) do |libraries|
+      refresh_dependencies_for(libraries)
+    end
+  end
+
+  def self.refresh_dependencies_for(libraries)
+    libraries = Array(libraries).compact.select { |library| library.format.to_s == 'yaml' }.uniq
+    return if libraries.empty?
+
+    dependants = []
+    [
+      [ActivityLog, OptionConfigs::ActivityLogOptions],
+      [DynamicModel, OptionConfigs::DynamicModelOptions],
+      [ExternalIdentifier, OptionConfigs::ExternalIdentifierOptions]
+    ].each do |definition_class, options_class|
+      definition_class.active.each do |definition|
+        referenced_libraries = options_class.config_libraries(definition)
+        changed_libraries = libraries.select { |library| referenced_libraries.include?(library) }
+        dependants << [definition, changed_libraries] if changed_libraries.any?
+      end
+    end
+
+    dependants.each do |definition, changed_libraries|
+      # Touch versioned definitions so existing instances retain their library version boundary.
+      if definition.uses_current_definition_version?
+        definition.force_option_config_parse
+        definition.class.definition_cache[definition.id] = definition
+      else
+        current_admin = changed_libraries.lazy.map(&:current_admin).find(&:present?)
+        definition.current_admin ||= current_admin
+        definition.touch
+        definition.force_option_config_parse
+      end
+    end
+
+    dependants.map(&:first).map(&:class).uniq.each(&:reset_active_model_configurations!)
   end
 
   validates :name, presence: true
@@ -15,7 +76,9 @@ class Admin::ConfigLibrary < Admin::AdminBase
   validate :unique_library
   validate :valid_options
 
-  after_commit :refresh_dependencies
+  after_save :mark_dependency_refresh_required
+  after_commit :refresh_dependencies, if: :dependency_refresh_required?
+  after_rollback :reset_dependency_refresh_required
 
   def self.content_named(category, name, format: nil)
     find_active_library!(category, name, format:).options
@@ -164,43 +227,31 @@ class Admin::ConfigLibrary < Admin::AdminBase
     errors.add :name, "and format must be unique. Name: #{name}, category: #{category}, format: #{self.format}"
   end
 
+  def mark_dependency_refresh_required
+    return unless saved_change_to_id? ||
+                  saved_changes.keys.any? { |attribute| DEPENDENCY_REFRESH_ATTRIBUTES.include?(attribute) }
+
+    self.class.queue_dependency_refresh(id)
+  end
+
+  def dependency_refresh_required?
+    self.class.consume_dependency_refresh(id)
+  end
+
   def refresh_dependencies
-    return unless self.format.to_s == 'yaml'
+    return unless format.to_s == 'yaml'
 
-    ms = []
-
-    ActivityLog.active.each do |a|
-      cl = OptionConfigs::ActivityLogOptions.config_libraries a
-      ms << a if cl.include? self
+    if Admin::AppTypeImport.import_in_progress?
+      self.class.defer_dependency_refresh(self)
+    else
+      self.class.refresh_dependencies_for([self])
     end
+  end
 
-    DynamicModel.active.each do |a|
-      cl = OptionConfigs::DynamicModelOptions.config_libraries a
-      ms << a if cl.include? self
-    end
+  def reset_dependency_refresh_required
+    return if self.class.connection.transaction_open?
 
-    ExternalIdentifier.active.each do |a|
-      cl = OptionConfigs::ExternalIdentifierOptions.config_libraries a
-      ms << a if cl.include? self
-    end
-
-    ms.each do |m|
-      # Touch the definition to create a new version history entry,
-      # so that instances created before and after this library change
-      # resolve to the correct library content via versioned definitions.
-      # Skip the touch when versioning is disabled globally (DisableVDef)
-      # or when the definition uses use_current_version (always uses latest).
-      if m.uses_current_definition_version?
-        m.force_option_config_parse
-        m.class.definition_cache[m.id] = m
-      else
-        m.current_admin ||= current_admin
-        m.touch
-        m.force_option_config_parse
-      end
-    end
-
-    ms.map(&:class).uniq.each(&:reset_active_model_configurations!)
+    self.class.clear_dependency_refresh(id)
   end
 
   def valid_options

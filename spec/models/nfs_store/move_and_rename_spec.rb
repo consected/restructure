@@ -98,7 +98,7 @@ RSpec.describe 'Move and rename stored files', type: :model do
     download.retrieve_files_from all_sf_dl
 
     # Upload the generated zip
-    u = upload_file 'test-name.zip', File.read(download.zip_file_path)
+    u = upload_file 'test-name.zip', File.read(NfsStore::Archive::ZipFileGenerator.zip_retrieved_items(download.all_action_items).path)
 
     delfn = 'test-name.zip'
 

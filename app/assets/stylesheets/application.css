@@ -15,6 +15,7 @@
  * The version distributed here is therefore not the 'default' bootstrap
  *= require bootstrap
  *= require bootstrap-theme
+ *= require shared/message_notification_iframe
  *= require app/nfs_store/application
  *= require app/secure_view/secure_view
  *

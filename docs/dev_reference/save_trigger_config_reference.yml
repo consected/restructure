@@ -15,6 +15,7 @@
 #
 # Key types:
 #   boolean              — true or false
+#   boolean_or_dynamic   — a boolean, {{substitution}}, or conditional Hash
 #   string               — a string (or symbol)
 #   string_or_array      — a string, or an array of strings
 #   string_or_hash       — a string or Hash (commonly used where {{substitution}} templates
@@ -368,6 +369,9 @@ trigger_types:
       ignore_no_recipients:
         type: boolean
         description: Suppress errors when no recipients can be resolved
+      no_tracker_entry:
+        type: boolean_or_dynamic
+        description: Suppress automatic tracker-entry creation for the notification
       layout_template:
         type: string_or_hash
         description: Name of the layout template wrapping the notification body

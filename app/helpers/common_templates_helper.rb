@@ -1,6 +1,27 @@
 # frozen_string_literal: true
 
 module CommonTemplatesHelper
+  FIELD_OPTIONS_NON_HTML_KEYS = %i[
+    include_blank include_hidden prompt selected value index divider
+    blank_value preset_value blank_preset_value active_value default_value
+    no_downcase capitalize
+    view_original_case view_with_formats format config edit_as calculate_with
+    use_app_type show_expanded keep_label
+  ].freeze
+
+  def html_options_for_field_options(field_options, html_options = {})
+    pass_through_options = field_options.except(*FIELD_OPTIONS_NON_HTML_KEYS)
+    # An array disables choice values; a boolean disables the select element.
+    pass_through_options.delete(:disabled) if pass_through_options[:disabled].is_a?(Array)
+
+    merged = html_options.deep_merge(pass_through_options)
+    # Configured classes extend, rather than replace, the partial's default classes
+    if html_options[:class].present? && pass_through_options[:class].present?
+      merged[:class] = "#{html_options[:class]} #{pass_through_options[:class]}"
+    end
+    merged
+  end
+
   def handle_set_related_field(object_instance, field_name)
     object_instance.set_related_fields[field_name] if object_instance.respond_to?(:set_related_fields)
   end

@@ -81,9 +81,9 @@ _fpa.reports = {
     block.find('td[data-col-type^="search_reports_"]').not('.attached_report_search').each(function () {
       var dct = $(this).attr('data-col-type');
       if (!$(this).hasClass('attached_report_search') && dct.match(/search_reports_[0-9]+_.+/)) {
-        var dct_parts = dct.split('_', 4);
+        var dct_parts = dct.split('_');
 
-        var dct_field = dct_parts[3];
+        var dct_field = dct_parts.slice(3).join('_');
         var dct_report = dct_parts[2];
         var dct_search = $(this).html().trim();
 
@@ -318,6 +318,41 @@ _fpa.reports = {
     if (dct_action == 'download files') {
       var $f = $('<form id="itemselection-for-report" method="post" action="/nfs_store/downloads/multi" target="download_files"><input type="hidden" name="nfs_store_download[container_id]" value="multi"><input name="authenticity_token" type="hidden" class="set-auth-token" value="" /></form>');
       _fpa.form_utils.set_auth_tokens($f);
+      $f.on('submit', function (e) {
+        e.preventDefault();
+        _fpa.form_utils.set_json_array_param(
+          $f, '.report-file-selector', 'nfs_store_download[selected_items_json]', true
+        );
+        _fpa.form_utils.set_auth_tokens($f);
+        var $checkOnly = $('<input type="hidden" name="check_only" value="true">').appendTo($f);
+        $.ajax({
+          type: $f.attr('method') || 'POST',
+          url: $f.attr('action'),
+          data: $f.serialize(),
+          dataType: 'json',
+          global: false
+        }).done(function (data) {
+          $checkOnly.remove();
+          if (data.action === 'background') {
+            _fpa.flash_notice(data.message);
+          } else if (data.action === 'download') {
+            $f.removeAttr('target');
+            $f[0].submit();
+          } else {
+            _fpa.flash_notice('The download request could not be processed.', 'danger');
+          }
+        }).fail(function (xhr) {
+          $checkOnly.remove();
+          var blocked_symlink = xhr && xhr.status === 409 && xhr.responseJSON &&
+            xhr.responseJSON.blocked && xhr.responseJSON.reason === 'symbolic_link';
+          if (blocked_symlink) {
+            $f.removeAttr('target');
+            $f[0].submit();
+            return;
+          }
+          _fpa.flash_notice('The download request could not be processed. Please try again.', 'danger');
+        });
+      });
     }
     else if (dct_action == 'add to list') {
       var $f = $(`<form id="itemselection-for-report" method="post" action="/reports/${report_id}/add_to_list.json" class="report-add-to-list" data-remote="true"><input type="hidden" name="add_to_list[list_name]" value="${extra_val}"></form>`);

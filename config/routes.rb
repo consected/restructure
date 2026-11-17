@@ -208,6 +208,9 @@ Rails.application.routes.draw do
 
   resources :masters, only: %i[show index new create] do
     resources :tracker_histories, only: [:index]
+    scope module: :messaging do
+      resources :message_notifications, only: [:show], constraints: { id: /\d+/ }
+    end
     resources :player_infos, except: [:destroy]
     resources :player_contacts, except: [:destroy]
     resources :pro_infos, only: %i[show index], constraints: { id: /\d+/ }
@@ -296,6 +299,7 @@ Rails.application.routes.draw do
     end
     resources :chunk, only: %i[create show update]
     post 'downloads/multi', to: 'downloads#multi'
+    get 'downloads/prepared/:token', to: 'downloads#prepared', as: :prepared_download
     get 'downloads/in/:activity_log_type/:activity_log_id/:download_path', to: 'downloads#show_from_activity_log',
                                                                            constraints: { download_path: /.*/ },
                                                                            format: false

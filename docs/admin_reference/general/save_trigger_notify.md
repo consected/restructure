@@ -1,4 +1,5 @@
 # `notify`
+
 ## Send a Notification
 
 Send a notification (email, SMS, etc.) using a configured message template when this trigger fires.
@@ -32,6 +33,46 @@ Values held on the record but not yet saved are therefore visible to
 !defs(save_triggers_notify_options_defs.yaml)
 ```
 
+Completed and failed notifications addressed to participants automatically create tracker
+entries by default. Notifications sent to end users through `role:` or `users:` are internal
+alerts and never create participant tracker entries. Set `no_tracker_entry: true` to prevent
+an otherwise eligible entry; the value may also be resolved from a `{{{substitution}}}` (triple
+curly, so a boolean is returned rather than a string) or conditional reference.
+
+Participant notifications associated with a real master are tracked against that master.
+Without a real master, raw `emails:` and `phones:` are matched to participant contacts, while
+list-style `phone_records:` are tracked against each resolved recipient master using the
+referenced record or a matching contact. Temporary holding masters are never tracker targets.
+
+### Backfilling existing notifications
+
+After deploying this tracker-entry feature, run the task once to add history for existing
+completed and failed notifications:
+
+```sh
+bundle exec rake message_notifications:backfill_tracker_entries
+```
+
+The task is safe to rerun: it skips each notification/master target that already has an
+entry, so a run interrupted partway through can complete the remaining targets. The
+optional `batch_size` defaults to `250`; the optional `from_id` resumes inclusively from a
+notification ID:
+
+```sh
+bundle exec rake 'message_notifications:backfill_tracker_entries[500,12345]'
+```
+
+The task requires the active `General > Notification > Sent/Failed` tracker records. If
+any part is missing or disabled, run `rails db:seed` or migration `20261027120000` first.
+The seed repairs an incomplete hierarchy while leaving an already complete active hierarchy
+alone. Invalid contact-resource configuration is reported as a backfill failure; the task
+continues processing other notifications and exits non-zero at the end. Notifications opted out
+with `no_tracker_entry: true` cannot be distinguished from older participant notifications
+that have no tracker history, so they may also receive entries during the backfill. User-
+addressed notifications are ignored and counted in the task summary. List recipients and
+notifications on temporary holding masters follow the same targeting rules as live
+notifications; holding masters themselves are not tracker targets.
+
 ### Pattern 1: Email notification to a role
 
 ```yaml
@@ -61,7 +102,6 @@ Values held on the record but not yet saved are therefore visible to
 ```yaml
 !defs(save_triggers_notify_pattern_5_attachments_defs.yaml)
 ```
-
 
 ## Inline Image Handling
 

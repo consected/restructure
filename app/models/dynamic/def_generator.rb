@@ -23,8 +23,8 @@ module Dynamic
       after_commit :clean_schema, if: -> { @regenerate }
       after_commit :other_regenerate_actions
       after_commit :handle_disabled, if: -> { disabled }
-      after_update_commit -> { self.class.routes_reload }, if: -> { saved_change_to_disabled? }
-      after_create_commit -> { self.class.routes_reload }
+      after_update_commit :reload_routes_after_definition_change, if: -> { saved_change_to_disabled? }
+      after_create_commit :reload_routes_after_definition_change
       attr_accessor :force_regenerate
     end
 
@@ -202,7 +202,9 @@ module Dynamic
     #
     # Handle reloading of routes on regeneration
     def routes_load
-      self.class.routes_load
+      Admin::AppTypeImport.run_now_or_after_import([:dynamic_definition_routes_load, self.class]) do
+        self.class.routes_load
+      end
     end
 
     #
@@ -332,7 +334,9 @@ module Dynamic
       return if disabled
 
       self.class.prev_latest_update = updated_at
-      self.class.preload
+      Admin::AppTypeImport.run_now_or_after_import([:dynamic_definition_preload, self.class]) do
+        self.class.preload
+      end
       Rails.logger.info 'Reloading column definitions'
       implementation_class.reset_column_information
 
@@ -341,7 +345,15 @@ module Dynamic
       end
 
       Rails.logger.info 'Refreshing item types'
-      Classification::GeneralSelection.item_types refresh: true
+      Admin::AppTypeImport.run_now_or_after_import(:general_selection_item_types_refresh) do
+        Classification::GeneralSelection.item_types refresh: true
+      end
+    end
+
+    def reload_routes_after_definition_change
+      Admin::AppTypeImport.run_now_or_after_import(:dynamic_definition_routes_reload) do
+        self.class.routes_reload
+      end
     end
 
     # After disabling an item, clean up any mess

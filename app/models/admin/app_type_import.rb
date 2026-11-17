@@ -2,13 +2,34 @@
 
 class Admin
   class AppTypeImport
+    IMPORT_SCOPE_KEY = :admin_app_type_import_scope
+    DEFERRED_ACTION_MAX_PASSES = 100
+    DynamicDefinitionKeys = %w[associated_external_identifiers associated_dynamic_models
+                               valid_associated_activity_logs].freeze
+
+    # A save on another request thread is not during this import, so its refreshes run immediately.
+    ImportScope = Struct.new(:depth, :prevent_migrations, :deferred_actions, :collections) do
+      def initialize
+        super(0, [], {}, {})
+      end
+
+      def collect_after_import(key, value, &action)
+        identity = (value.id if value.respond_to?(:id)) || value.object_id
+        (collections[key] ||= {})[identity] = value
+        deferred_actions[key] ||= proc do
+          values = collections.delete(key)&.values || []
+          action.call(values)
+        end
+      end
+    end
+
     attr_accessor :import_results, :admin, :app_type,
                   :config_text, :format, :force_update,
                   :dry_run, :name, :skip_fail,
                   :dyn_cname,
                   :id_list, :found_with_conditions,
                   :config_item, :import_failures,
-                  :current_key, :new_id
+                  :current_key, :new_id, :dynamic_definition_retries
 
     #
     # Import an app type configuration from a yaml or json file
@@ -25,8 +46,13 @@ class Admin
     def self.import_config(config_text, admin,
                            name: nil, format: :json, force_update: nil, dry_run: nil, skip_fail: nil,
                            prevent_migrations: false)
-      @@import_config_in_progress = true
-      @@prevent_migrations = prevent_migrations
+      scope = current_import_scope
+      unless scope
+        scope = ImportScope.new
+        ActiveSupport::IsolatedExecutionState[IMPORT_SCOPE_KEY] = scope
+      end
+      scope.depth += 1
+      scope.prevent_migrations << prevent_migrations
       importer = new(config_text, admin,
                      name:,
                      format:,
@@ -38,19 +64,91 @@ class Admin
     rescue StandardError, FphsException => e
       [importer, e]
     ensure
-      @@import_config_in_progress = false
-      @@prevent_migrations = false
+      if scope
+        begin
+          if scope.depth == 1
+            begin
+              drain_deferred_actions(scope)
+            ensure
+              clear_import_cache
+            end
+          end
+        ensure
+          scope.prevent_migrations.pop
+          scope.depth -= 1
+          ActiveSupport::IsolatedExecutionState.delete(IMPORT_SCOPE_KEY) if scope.depth.zero?
+        end
+      end
     end
 
     def self.import_in_progress?
-      @@import_config_in_progress ||= nil
-      @@import_config_in_progress == true
+      scope = current_import_scope
+      scope&.depth&.positive? || false
     end
 
     def self.prevent_migrations?
-      @@prevent_migrations ||= nil
-      @@prevent_migrations == true
+      scope = current_import_scope
+      scope&.prevent_migrations&.last == true
     end
+
+    def self.run_now_or_after_import(key, &action)
+      raise ArgumentError, 'A block is required' unless action
+
+      scope = current_import_scope
+      if scope&.depth&.positive?
+        # The first block registered for a key wins for the current import.
+        scope.deferred_actions[key] ||= action
+      else
+        action.call
+      end
+    end
+
+    def self.collect_after_import(key, value, &action)
+      raise ArgumentError, 'A block is required' unless action
+
+      scope = current_import_scope
+      if scope&.depth&.positive?
+        scope.collect_after_import(key, value, &action)
+      else
+        action.call([value])
+      end
+    end
+
+    def self.drain_deferred_actions(scope)
+      passes = 0
+      loop do
+        actions = scope.deferred_actions
+        scope.deferred_actions = {}
+        break if actions.empty?
+
+        passes += 1
+        if passes > DEFERRED_ACTION_MAX_PASSES
+          Rails.logger.error(
+            "Stopped draining deferred app type import actions after #{DEFERRED_ACTION_MAX_PASSES} passes"
+          )
+          scope.deferred_actions.clear
+          scope.collections.clear
+          break
+        end
+
+        actions.each do |key, deferred_action|
+          deferred_action.call
+        rescue StandardError, FphsException => e
+          Rails.logger.error "Failed deferred app type import action #{key.inspect}: #{e.message}"
+        end
+      end
+    end
+
+    def self.clear_import_cache
+      Rails.cache.clear
+    rescue StandardError => e
+      Rails.logger.error "Failed to clear Rails cache after app type import: #{e.message}"
+    end
+
+    def self.current_import_scope
+      ActiveSupport::IsolatedExecutionState[IMPORT_SCOPE_KEY]
+    end
+    private_class_method :current_import_scope
 
     #
     # Make a cleaner set of exception message and backtrace strings for display
@@ -152,12 +250,7 @@ class Admin
       self.skip_fail = original_skip_fail
       import_config_sub_items 'associated_config_libraries', %w[name category format]
 
-      import_config_sub_items 'associated_external_identifiers', ['name']
-
-      import_config_sub_items 'associated_dynamic_models', ['table_name']
-
-      import_config_sub_items 'valid_associated_activity_logs',
-                              %w[item_type rec_type process_name]
+      import_dynamic_definitions_with_retries
 
       import_config_sub_items 'associated_general_selections', %w[item_type value]
 
@@ -201,6 +294,24 @@ class Admin
       raise ActiveRecord::Rollback if dry_run
 
       new_id
+    end
+
+    # DynamicDefinitionRetries owns pass sequencing while this importer supplies each pass.
+    def import_dynamic_definitions_with_retries
+      retries = DynamicDefinitionRetries.new(self)
+      self.dynamic_definition_retries = retries
+      retries.run { import_dynamic_definitions }
+    ensure
+      self.dynamic_definition_retries = nil
+    end
+
+    def import_dynamic_definitions
+      import_config_sub_items 'associated_external_identifiers', ['name']
+
+      import_config_sub_items 'associated_dynamic_models', ['table_name']
+
+      import_config_sub_items 'valid_associated_activity_logs',
+                              %w[item_type rec_type process_name]
     end
 
     #
@@ -314,36 +425,60 @@ class Admin
       acs.each { |v| v['updated_at'] ||= '1970-01-01T00:00:00Z' }
       # Ensure we apply them in the correct order (although this doesn't account for other types of resource)
       acs.sort! { |a, b| a['updated_at'] <=> b['updated_at'] }
+      retries = dynamic_definition_retries
       acs.each do |ci|
         self.config_item = ci
         item_changes = nil
+        item_failed = false
         next if config_item['disabled']
+        next unless process_dynamic_definition_item?(retries, key, config_item, lookup_existing_with_fields)
 
         user = app_type_item_user(config_item['user_email'])
         next if user == :unknown
 
         app_type_item = find_app_type_item(lookup_existing_with_fields, filter_on:, compare_blanks_on:)
+        next unless process_dynamic_definition_item?(
+          retries, key, config_item, lookup_existing_with_fields, app_type_item:
+        )
+
         new_vals = new_values_from_config(lookup_existing_with_fields, add_vals)
         new_vals[:user] = user if user
 
         new_vals[:disabled] = true if disable_if_disabled_user && (user&.disabled? || app_type_item&.user&.disabled?)
 
         begin
-          app_type_item, item_changes = create_or_update(app_type_item, new_vals)
+          app_type_item, item_changes = perform_item_import(app_type_item, new_vals, retries)
         rescue StandardError, FphsException => e
           fres = identifier_hash(app_type_item, found_with_conditions)
           fres['exception!'] = self.class.clean_exception(e)
           Rails.logger.warn fres
-          raise unless skip_fail
+          raise unless retries ? retries.skip_fail : skip_fail
 
+          item_failed = true
           failures << fres
         end
 
         id_list << app_type_item.id if app_type_item && id_list
+        retries&.record(
+          key,
+          config_item,
+          lookup_existing_with_fields:,
+          changed: item_changes.present?,
+          failed: item_failed,
+          app_type_item:
+        )
         results << item_changes if item_changes
       end
       import_failures[key] = failures if failures.present?
       import_results[key] = results
+    end
+
+    def perform_item_import(app_type_item, new_vals, retries)
+      operation = proc do
+        create_or_update(app_type_item, new_vals,
+                         include_reference_views: retries&.include_reference_views? || false)
+      end
+      retries ? retries.with_item(&operation) : operation.call
     end
 
     #
@@ -351,15 +486,24 @@ class Admin
     # @param [ActiveRecord::Model] app_type_item
     # @param [Hash] new_vals
     # @return [Array]
-    def create_or_update(app_type_item, new_vals)
+    def create_or_update(app_type_item, new_vals, include_reference_views: false)
       if !app_type_item
         app_type_item = item_changes = dyn_cname.create! new_vals
       elsif app_type_item && (
-            app_type_item.updated_at.to_i <= config_item_timestamp.to_i ||
-            force_update ||
-            dyn_def_db_not_defined(app_type_item)
-          )
-        if force_update == :force || dyn_def_db_not_defined(app_type_item)
+        app_type_item.updated_at.to_i <= config_item_timestamp.to_i ||
+        force_update ||
+        dyn_def_db_not_defined(app_type_item, include_reference_views:)
+      )
+        dynamic_definition_missing = nil
+        # Equal timestamps commonly follow a forced import; only re-save when config values differ.
+        if force_update.nil? && app_type_item.updated_at.to_i == config_item_timestamp.to_i
+          dynamic_definition_missing = dyn_def_db_not_defined(app_type_item, include_reference_views:)
+          return [app_type_item, nil] if !dynamic_definition_missing &&
+                                         config_matches_existing_item?(app_type_item, new_vals)
+        end
+
+        if force_update == :force || dynamic_definition_missing ||
+           (dynamic_definition_missing.nil? && dyn_def_db_not_defined(app_type_item, include_reference_views:))
           new_vals['updated_at'] = DateTime.now
         elsif force_update == :changed
         # no change should be made
@@ -500,8 +644,6 @@ class Admin
 
       not_directly_associated = true if key.starts_with? 'associated_'
 
-      # Ensure a clean cache to reload previous items
-      Rails.cache.clear
       self.dyn_cname = nil
 
       if not_directly_associated
@@ -558,8 +700,22 @@ class Admin
     # If this is dynamic def return true if the underlying table / view is not defined
     # @param [ActiveRecord::Model] app_type_item
     # @return [true|false]
-    def dyn_def_db_not_defined(app_type_item)
-      app_type_item.respond_to?(:table_or_view) && !app_type_item.table_or_view
+    def dyn_def_db_not_defined(app_type_item, include_reference_views: false)
+      return false unless app_type_item.respond_to?(:table_or_view)
+      return true unless app_type_item.table_or_view
+
+      include_reference_views && reference_views_missing?(app_type_item)
+    end
+
+    # Reference views can only be created once the referenced definitions exist,
+    # so a definition imported before them must be updated again to complete its views.
+    def reference_views_missing?(app_type_item)
+      return false if app_type_item.disabled || !app_type_item.respond_to?(:reference_views_missing?)
+
+      app_type_item.reference_views_missing?
+    rescue StandardError, FphsException => e
+      Rails.logger.warn "Failed to check reference views for #{app_type_item.class.name} #{app_type_item.id}: #{e}"
+      false
     end
 
     # Clean up user access controls that are not in the id_list
@@ -585,6 +741,33 @@ class Admin
                    current_admin: admin
         end
       end
+    end
+
+    private
+
+    def process_dynamic_definition_item?(retries, key, config_item, lookup_fields, app_type_item: DynamicDefinitionRetries::UNLOOKED_UP_ITEM)
+      return true unless retries
+
+      retries.process?(key, config_item, lookup_existing_with_fields: lookup_fields, app_type_item:)
+    end
+
+    def config_matches_existing_item?(app_type_item, new_vals)
+      values = new_vals.reject { |key, _value| key.to_s == 'current_admin' }
+      disabled_key = values.keys.find { |key| key.to_s == 'disabled' }
+      values[disabled_key] = app_type_item.disabled if disabled_key && !app_type_item.disabled
+
+      if app_type_item.respond_to?(:clean_options_yaml) &&
+         app_type_item.class.respond_to?(:option_configs_attr)
+        option_key = values.keys.find { |key| key.to_s == app_type_item.class.option_configs_attr.to_s }
+        option_value = values[option_key]
+        values[option_key] = option_value.gsub("\r\n", "\n") if option_key && option_value.is_a?(String)
+      end
+
+      app_type_item.assign_attributes(values)
+      # Changed values are saved immediately; assigning identical values leaves the record clean.
+      !app_type_item.changed?
+    rescue StandardError
+      false
     end
   end
 end

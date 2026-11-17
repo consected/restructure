@@ -137,7 +137,7 @@ RSpec.describe 'OptionConfigs::TriggerTypes definitions', type: :model do
     it 'declares the expected allowed_keys' do
       expected = %i[
         type role users emails phones phone_records list_type default_country_code
-        from_user_email ignore_no_recipients layout_template content_template
+        from_user_email ignore_no_recipients no_tracker_entry layout_template content_template
         content_template_text subject calendar_invite attachments extra_substitutions
         importance when on_complete on_failure if app_type user
       ]
@@ -148,6 +148,7 @@ RSpec.describe 'OptionConfigs::TriggerTypes definitions', type: :model do
       expect(type_class.key_type_rules[:type]).to eq(:string_or_hash)
       expect(type_class.key_type_rules[:role]).to eq(:scalar_or_array_or_hash)
       expect(type_class.key_type_rules[:ignore_no_recipients]).to eq(:boolean)
+      expect(type_class.key_type_rules[:no_tracker_entry]).to eq(:boolean_or_dynamic)
     end
   end
 

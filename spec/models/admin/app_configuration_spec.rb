@@ -1,7 +1,87 @@
+# frozen_string_literal: true
+
+# Purpose: Verify app-configuration names are accepted and their values can be resolved.
 require 'rails_helper'
 
 RSpec.describe Admin::AppConfiguration, type: :model do
   include ModelSupport
+
+  describe 'message notification matching configurations' do
+    before :example do
+      create_admin
+      @user, = create_user
+      @app_type = @user.app_type
+    end
+
+    it 'accepts and resolves the resource, country-code, and trunk-number settings' do
+      resources = { email: 'dynamic_model__femfl_contact_emails', phone: 'dynamic_model__femfl_contact_phones' }.to_yaml
+      add_app_config(@app_type, 'message notification contact resources', resources)
+      add_app_config(@app_type, 'default phone country code', '44')
+      add_app_config(@app_type, 'default phone trunk number', '0')
+
+      expect(described_class.configurations).to include(
+        'message notification contact resources',
+        'default phone country code',
+        'default phone trunk number'
+      )
+      expect(described_class.hash_for(:message_notification_contact_resources, @user)).to eq(
+        email: 'dynamic_model__femfl_contact_emails', phone: 'dynamic_model__femfl_contact_phones'
+      )
+      expect(described_class.value_for(:default_phone_country_code, @user)).to eq '44'
+      expect(described_class.value_for(:default_phone_trunk_number, @user)).to eq '0'
+    end
+
+    it 'resolves notification matching settings in user, role, then app precedence' do
+      role_name = 'notification tracker config role'
+      create_user_role(role_name, user: @user, app_type: @app_type)
+      values = {
+        'message notification contact resources' => [
+          { email: 'app_emails', phone: 'app_phones' }.to_yaml,
+          { email: 'role_emails', phone: 'role_phones' }.to_yaml,
+          { email: 'user_emails', phone: 'user_phones' }.to_yaml
+        ],
+        'default phone country code' => %w[1 44 61],
+        'default phone trunk number' => %w[1 0 8]
+      }
+
+      values.each do |name, (app_value, role_value, user_value)|
+        described_class.add_default_config(@app_type, name, app_value, @admin)
+        described_class.create!(
+          current_admin: @admin,
+          app_type: @app_type,
+          role_name:,
+          name:,
+          value: role_value
+        )
+        described_class.add_user_config(@user, @app_type, name, user_value, @admin)
+
+        resolved = described_class.where(name:).scope_user_and_role(@user, @app_type.id).first
+        expect(resolved.value).to eq user_value
+
+        described_class.where(name:, user: @user).each do |configuration|
+          configuration.update!(disabled: true, current_admin: @admin)
+        end
+        resolved = described_class.where(name:).scope_user_and_role(@user, @app_type.id).first
+        expect(resolved.value).to eq role_value
+
+        described_class.where(name:, role_name:).each do |configuration|
+          configuration.update!(disabled: true, current_admin: @admin)
+        end
+        resolved = described_class.where(name:).scope_user_and_role(@user, @app_type.id).first
+        expect(resolved.value).to eq app_value
+      end
+    end
+
+    it 'uses the server phone defaults when a notification has no user or app type' do
+      notification = Messaging::MessageNotification.new(user: nil, app_type: nil)
+      matcher = Messaging::MessageNotificationTracker.new(notification)
+
+      configuration = matcher.send(:matching_configuration)
+
+      expect(configuration[:country_code]).to eq Settings::DefaultPhoneCountryCode
+      expect(configuration[:trunk_number]).to eq Settings::DefaultPhoneTrunkNumber
+    end
+  end
 
   it 'prevents invalid configuration names' do
     user1, = create_user

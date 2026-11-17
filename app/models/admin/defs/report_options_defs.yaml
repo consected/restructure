@@ -249,10 +249,18 @@ column_options:
     # url - link to be opened in a new tab
     #   The content should be formatted using Markdown format
     #       [label for link](/url/path)
+    #   Append #open-embedded-report to an HTML report URL to open its criteria
+    #   and results in a modal instead of a new tab, without a special column name:
+    #       [View player](/reports/12?search_attrs[player_id]=123&search_attrs[no_run]=true#open-embedded-report)
+    #   Add &force_run=true before the fragment to run automatically.
+    #   A regular_report target shows report results; a search target shows master
+    #   records (its SQL must return master_id).
+    #   See /help/admin_reference/reports/search_report_results.md
 
-    # embedded_report - url linking to a report, to be opened in a modal popup for viewing
-    #   The content should be formatted using Markdown format
-    #       [label for link](/url/path)
+    # search_reports_<report_id>_<field> - special result column name, not a
+    #   show_as value. Passes the cell value to the target report's search_attrs[field]
+    #   and opens master records directly, without criteria or buttons.
+    #   The full field name is used, including underscores. SQL must return master_id.
 
     # embedded_block - url linking to a dynamic model, to be opened in a modal popup for viewing or editing
     #   A SQL field definition like this can be used:

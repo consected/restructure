@@ -157,6 +157,18 @@ RSpec.describe CalcActions::ConditionLinter, type: :model do
       expect_clean({ all: { addresses: { exists: true } } })
     end
 
+    it 'accepts protocol, sub process and protocol event names on tracker_history' do
+      expect_clean({ all: { no_masters: {}, tracker_history: { protocol_name: 'P1', sub_process_name: 'Information',
+                                                               protocol_event_name: 'Error' } } })
+    end
+
+    it 'does not accept protocol, sub process or protocol event names on other tables' do
+      expect_notice({ all: { no_masters: {}, addresses: { protocol_name: 'P1' } } }, mentioning: 'protocol_name')
+      expect_notice({ all: { addresses: { sub_process_name: 'Information' } } }, mentioning: 'sub_process_name')
+      expect_notice({ all: { no_masters: {}, addresses: { protocol_event_name: 'Error' } } },
+                    mentioning: 'protocol_event_name')
+    end
+
     it 'checks the field name when the value is a return keyword' do
       expect_notice({ all: { addresses: { city_typo: 'return_value' } } }, mentioning: 'city_typo', mode: :value)
       expect_notice({ all: { masters: { mssid: 'return_value' } } }, mentioning: 'mssid', mode: :value)

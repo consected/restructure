@@ -58,13 +58,80 @@
       "note": ""
     },
     {
+      "warning_type": "File Access",
+      "warning_code": 16,
+      "fingerprint": "15523acb32001135cc924cbca6089e60c58a1a079d2dbb4d9b739ccd934d53ca",
+      "check_name": "SendFile",
+      "message": "Parameter value used in file name",
+      "file": "app/controllers/nfs_store/downloads_controller.rb",
+      "line": 112,
+      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
+      "code": "send_file(PreparedDownload.new.available_path(:user_id => current_user.id, :token => params[:token]), :filename => \"prepared-download.zip\", :type => \"application/zip\")",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "NfsStore::DownloadsController",
+        "method": "prepared"
+      },
+      "user_input": "params[:token]",
+      "confidence": "Weak",
+      "cwe_id": [
+        22
+      ],
+      "note": "False positive: available_path accepts only a strict 43-character URL-safe token, constructs the path for current_user.id via path_for (which validates a positive integer ID), and rejects symlinked user directories/files, non-regular files, and expired files. Invalid or unavailable paths return 404. Request specs cover traversal, malformed tokens, another user, and symlinks."
+    },
+    {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 2,
+      "fingerprint": "1cef53df4485718a49a64f26223c3c198918a9308edad5688b557402351f4e2b",
+      "check_name": "CrossSiteScripting",
+      "message": "Unescaped parameter value",
+      "file": "app/views/messaging/message_notifications/_content.html.erb",
+      "line": 4,
+      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
+      "code": "MessageNotification.find(params[:id]).generate_view(:ignore_missing => :show_tag).gsub(\"<head>\", \"<head><base target=\\\"_blank\\\" />\")",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "Messaging::MessageNotificationsController",
+          "method": "show",
+          "line": 19,
+          "file": "app/controllers/messaging/message_notifications_controller.rb",
+          "rendered": {
+            "name": "messaging/message_notifications/_preview",
+            "file": "app/views/messaging/message_notifications/_preview.html.erb"
+          }
+        },
+        {
+          "type": "template",
+          "name": "messaging/message_notifications/_preview",
+          "line": 22,
+          "file": "app/views/messaging/message_notifications/_preview.html.erb",
+          "rendered": {
+            "name": "messaging/message_notifications/_content",
+            "file": "app/views/messaging/message_notifications/_content.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "messaging/message_notifications/_content"
+      },
+      "user_input": "params[:id]",
+      "confidence": "Weak",
+      "cwe_id": [
+        79
+      ],
+      "note": ""
+    },
+    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "1ef406f7ae232b6060832fc9f74de3c73debb32b49384ef77a63c8e5338379b0",
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/admin/migration_generator.rb",
-      "line": 84,
+      "line": 114,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "connection.execute(\"select table_schema \\\"schema_name\\\", table_name from information_schema.tables\\nwhere table_schema IN (#{quoted_schemas})\\nand table_catalog = '#{current_database}'\\nUNION\\nselect table_schema \\\"schema_name\\\", table_name from information_schema.views\\nwhere table_schema IN (#{quoted_schemas})\\nand table_catalog = '#{current_database}'\\norder by \\\"schema_name\\\", table_name\\n\")",
       "render_path": null,
@@ -83,11 +150,34 @@
     {
       "warning_type": "File Access",
       "warning_code": 16,
+      "fingerprint": "2117a43ea3be966dd0fb596d6a98fe3e836128500f61f750d83fd24b2df625ae",
+      "check_name": "FileAccess",
+      "message": "Model attribute used in file name",
+      "file": "app/jobs/nfs_store_prepare_download_job.rb",
+      "line": 40,
+      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
+      "code": "FileUtils.rm_f(NfsStore::PreparedDownload.new.path_for(:user_id => user_id, :token => NfsStore::PreparedDownload.new.generate_token))",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "NfsStorePrepareDownloadJob",
+        "method": "perform"
+      },
+      "user_input": "NfsStore::PreparedDownload.new.path_for(:user_id => user_id, :token => NfsStore::PreparedDownload.new.generate_token)",
+      "confidence": "Medium",
+      "cwe_id": [
+        22
+      ],
+      "note": "False positive: the job generates one SecureRandom URL-safe token and computes the archive path once. PreparedDownload#path_for enforces the strict 43-character TokenPattern and positive user ID; mkdir, rename, and cleanup reuse that validated per-user path, with only a SecureRandom temp suffix. The request path is never used for writes."
+    },
+    {
+      "warning_type": "File Access",
+      "warning_code": 16,
       "fingerprint": "21ff6d3b4153987a315b6cd13958dbe4b718007c837ac5982fbfd2a6175a302e",
       "check_name": "FileAccess",
       "message": "Model attribute used in file name",
       "file": "app/models/messaging/message_notification.rb",
-      "line": 564,
+      "line": 584,
       "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
       "code": "File.read(NfsStore::Manage::StoredFile.find_by(:nfs_store_container_id => entry[\"container_id\"], :path => entry[\"path\"].to_s, :file_name => entry[\"file_name\"]).retrieval_path)",
       "render_path": null,
@@ -133,7 +223,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/admin/migration_generator.rb",
-      "line": 190,
+      "line": 220,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "connection.execute(\"select\\n  u.view_schema \\\"schemaname\\\",\\n  u.view_name \\\"viewname\\\",\\n  u.table_schema referenced_table_schema,\\n  u.table_name referenced_table_name,\\n  v.view_definition\\nfrom information_schema.view_table_usage u\\njoin information_schema.views v on u.view_schema = v.table_schema\\n  and u.view_name = v.table_name\\nwhere u.table_schema not in ('information_schema', 'pg_catalog')\\n  and u.table_name = '#{table_name}'\\n  and u.table_schema = '#{schema_name}'\\norder by u.view_schema, u.view_name\\n\")",
       "render_path": null,
@@ -207,6 +297,29 @@
       "note": ""
     },
     {
+      "warning_type": "File Access",
+      "warning_code": 16,
+      "fingerprint": "3bae20765adbbeaab3416590367ee0ddf2c5a737fc1b76e98584a65e34c7c41d",
+      "check_name": "FileAccess",
+      "message": "Model attribute used in file name",
+      "file": "app/jobs/nfs_store_prepare_download_job.rb",
+      "line": 34,
+      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
+      "code": "File.rename(\"#{NfsStore::PreparedDownload.new.path_for(:user_id => user_id, :token => NfsStore::PreparedDownload.new.generate_token)}.#{SecureRandom.hex(8)}.tmp\", NfsStore::PreparedDownload.new.path_for(:user_id => user_id, :token => NfsStore::PreparedDownload.new.generate_token))",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "NfsStorePrepareDownloadJob",
+        "method": "perform"
+      },
+      "user_input": "NfsStore::PreparedDownload.new.path_for(:user_id => user_id, :token => NfsStore::PreparedDownload.new.generate_token)",
+      "confidence": "Medium",
+      "cwe_id": [
+        22
+      ],
+      "note": "False positive: the job generates one SecureRandom URL-safe token and computes the archive path once. PreparedDownload#path_for enforces the strict 43-character TokenPattern and positive user ID; mkdir, rename, and cleanup reuse that validated per-user path, with only a SecureRandom temp suffix. The request path is never used for writes."
+    },
+    {
       "warning_type": "Cross-Site Scripting",
       "warning_code": 2,
       "fingerprint": "3d7f081780d3a743085cf1c1177847a56056fa25c3f191bd6c890d88c42d1227",
@@ -267,7 +380,7 @@
       "check_name": "SendFile",
       "message": "Parameter value used in file name",
       "file": "app/controllers/nfs_store/downloads_controller.rb",
-      "line": 43,
+      "line": 56,
       "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
       "code": "send_file(retrieve_file((Download.find_download_by_path(@container, (params[:download_path] or \"#{params[:download_path]}.#{params[:format]}\")).id or params[:download_id].to_i), (Download.find_download_by_path(@container, (params[:download_path] or \"#{params[:download_path]}.#{params[:format]}\")).retrieval_type or params[:retrieval_type]), :for_action => ((:download_or_view or :download))))",
       "render_path": null,
@@ -364,6 +477,29 @@
       "note": ""
     },
     {
+      "warning_type": "File Access",
+      "warning_code": 16,
+      "fingerprint": "6e330b38660d1cee5bef92ac67b5d586a58d2b2dcef99e7797b29ec1f79fa2ae",
+      "check_name": "FileAccess",
+      "message": "Model attribute used in file name",
+      "file": "app/jobs/nfs_store_prepare_download_job.rb",
+      "line": 39,
+      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
+      "code": "FileUtils.rm_f(\"#{NfsStore::PreparedDownload.new.path_for(:user_id => user_id, :token => NfsStore::PreparedDownload.new.generate_token)}.#{SecureRandom.hex(8)}.tmp\")",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "NfsStorePrepareDownloadJob",
+        "method": "perform"
+      },
+      "user_input": "NfsStore::PreparedDownload.new.path_for(:user_id => user_id, :token => NfsStore::PreparedDownload.new.generate_token)",
+      "confidence": "Medium",
+      "cwe_id": [
+        22
+      ],
+      "note": "False positive: the job generates one SecureRandom URL-safe token and computes the archive path once. PreparedDownload#path_for enforces the strict 43-character TokenPattern and positive user ID; mkdir, rename, and cleanup reuse that validated per-user path, with only a SecureRandom temp suffix. The request path is never used for writes."
+    },
+    {
       "warning_type": "Command Injection",
       "warning_code": 14,
       "fingerprint": "735d9b84f6fdd9c36661cd08ce04e8139f00da74b428c97a0c08a0ce012898ff",
@@ -406,13 +542,36 @@
       "note": ""
     },
     {
+      "warning_type": "File Access",
+      "warning_code": 16,
+      "fingerprint": "8470ac35461b8b83251e47ce93d6fae1b40edaf1fbaac61935a48d3e28ed88b4",
+      "check_name": "FileAccess",
+      "message": "Model attribute used in file name",
+      "file": "app/jobs/nfs_store_prepare_download_job.rb",
+      "line": 31,
+      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
+      "code": "FileUtils.mkdir_p(File.dirname(NfsStore::PreparedDownload.new.path_for(:user_id => user_id, :token => NfsStore::PreparedDownload.new.generate_token)), :mode => 488)",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "NfsStorePrepareDownloadJob",
+        "method": "perform"
+      },
+      "user_input": "NfsStore::PreparedDownload.new.path_for(:user_id => user_id, :token => NfsStore::PreparedDownload.new.generate_token)",
+      "confidence": "Weak",
+      "cwe_id": [
+        22
+      ],
+      "note": "False positive: the job generates one SecureRandom URL-safe token and computes the archive path once. PreparedDownload#path_for enforces the strict 43-character TokenPattern and positive user ID; mkdir, rename, and cleanup reuse that validated per-user path, with only a SecureRandom temp suffix. The request path is never used for writes."
+    },
+    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "8aab190043a4006f4d50d665865d8a1a6f412f450c1dcaa0ada8c58202fb9b0e",
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/admin/migration_generator.rb",
-      "line": 168,
+      "line": 198,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "connection.execute(\"SELECT\\n    cols.table_schema \\\"schema_name\\\",\\n    cols.table_name,\\n    cols.column_name,\\n    pg_catalog.col_description(c.oid, cols.ordinal_position::int) AS column_comment\\nFROM\\n    information_schema.columns cols\\nINNER JOIN pg_catalog.pg_class c\\nON\\n  c.oid = ('\\\"' || cols.table_name || '\\\"')::regclass::oid\\n  AND c.relname = cols.table_name\\n\\nWHERE\\n    cols.table_catalog = '#{current_database}' AND\\n    cols.table_schema IN (#{quoted_schemas}) AND\\n    pg_catalog.col_description(c.oid, cols.ordinal_position::int) IS NOT NULL\\n;\\n\")",
       "render_path": null,
@@ -469,7 +628,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/admin/migration_generator.rb",
-      "line": 259,
+      "line": 289,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "connection.execute(\"SELECT * FROM #{tables_and_views.find do\n (tn[\"table_name\"] == \"#{basename}_datadic\")\n end[\"table_name\"]};\\n\")",
       "render_path": null,
@@ -653,50 +812,6 @@
     {
       "warning_type": "Cross-Site Scripting",
       "warning_code": 2,
-      "fingerprint": "cd55ea2ed0e4120c9b0f6a5b0191342ce890fa9eb842e05162e03d095107b10e",
-      "check_name": "CrossSiteScripting",
-      "message": "Unescaped model attribute",
-      "file": "app/views/pages/_admin_status_indicators.html.erb",
-      "line": 11,
-      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
-      "code": "Admin::ServerInfo.new(current_admin).configuration_failed_reason.join(\"<li>\")",
-      "render_path": [
-        {
-          "type": "controller",
-          "class": "Admin::ServerInfoController",
-          "method": "index",
-          "line": 23,
-          "file": "app/controllers/admin/server_info_controller.rb",
-          "rendered": {
-            "name": "admin/server_info/index",
-            "file": "app/views/admin/server_info/index.html.erb"
-          }
-        },
-        {
-          "type": "template",
-          "name": "admin/server_info/index",
-          "line": 18,
-          "file": "app/views/admin/server_info/index.html.erb",
-          "rendered": {
-            "name": "pages/_admin_status_indicators",
-            "file": "app/views/pages/_admin_status_indicators.html.erb"
-          }
-        }
-      ],
-      "location": {
-        "type": "template",
-        "template": "pages/_admin_status_indicators"
-      },
-      "user_input": null,
-      "confidence": "High",
-      "cwe_id": [
-        79
-      ],
-      "note": ""
-    },
-    {
-      "warning_type": "Cross-Site Scripting",
-      "warning_code": 2,
       "fingerprint": "e01acc70f83b4df206d1f1315bd16870e40b80767b6079f2c2d35afa7391117a",
       "check_name": "CrossSiteScripting",
       "message": "Unescaped model attribute",
@@ -775,5 +890,5 @@
       "note": ""
     }
   ],
-  "brakeman_version": "8.0.6"
+  "brakeman_version": "8.1.0"
 }

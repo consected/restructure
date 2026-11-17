@@ -14,18 +14,33 @@
 9. **Never update CHANGELOG.md directly** - the release process will handle this based on commit messages and pull request titles
 10. **You have permission to use interactive debugging tools** (e.g., `interactive_debug_session`, `debugger`) to pause execution and inspect state, either in Rspec tests or if we are collaborating on a development server.
 11. **Workspaces are isolated environments for each feature branch** - the database, file system, test environment and other resources are separate, ensuring changes in one branch do not affect others. This is controlled by the environment variable `TEST_ENV_SET`, which is normally set when opening a new terminal. There is no need to check the database for other workspace connections.
+12. **Always tell subagents to read these instructions first**
 
+### Assisted Permissions
+
+Notwithstanding restrictions instructed by a human supervisor or an agent
+coordinator, agents have the following assisted permissions:
+
+- In general agents are expected to be able to read, write and delete files within the workspace.
+- Agents are allowed to write, edit and delete specs to cover proposed changes, address coverage gaps and resolve incorrectly implemented tests.
+- Agents are allowed to make changes to the code and configuration where necessary to support the specs or to fix issues identified by the specs.
+- Agents are allowed to make changes to code and configuration where instructed to do so, or to prototype solutions that aren't supported by specs.
+- Agents are allowed to create, edit and delete temporary files as needed for testing, debugging, or prototyping solutions. Any files in `tmp/agent-tmp` should be considered temporary and can be safely removed at any time.
+- Agents may commit and rebase as required to maintain a clean and up-to-date feature branch.
+- Agents may read rvm, gem, and bundle files to understand the configuration and code dependencies.
+- Agents may read Ruby, Rails, Node.js, and other JS dependencies from local
+sources or github repositories.
 
 ### Critical Rules for Running Terminal Commands
 
 **Before running any commands in the terminal**
-- Source the workspace with the trusted script:`source app-scripts/source-workspace-env.sh`
-- Always instruct a subagent to do this as well, unless you've told it to read the copilot-instructions file.
 
 1. **Never set environment variables inline** - use app-scripts instead or `export` them in the terminal before running commands
 2. **Always wait for commands to complete before proceeding** - for long-running commands (such as rspec tests), don't poll - call the `get_terminal_output` once so you can be notified automatically when the command exits
 3. **Never redirect scripts stdout or stderr to /dev/null or /tmp**
 4. If creating long text files (e.g., PR body, issue body), **write them directly to a temporary or session file** rather than using command line tools that may escape characters or truncate output
+
+NOTE: It is no longer necessary to source the workspace directly using:`source app-scripts/source-workspace-env.sh`
 
 
 `app-scripts/headless_rspec.sh` and `app-scripts/not_headless_rspec.sh` automatically run `app-scripts/check_rspec_processes.sh` and refuse to start (exit 1) if another RSpec process is using this workspace; do not call the check separately for them. Before any direct `bundle exec rspec` call, run `app-scripts/check_rspec_processes.sh` and do not start the new run if it exits with status 1; inspect the reported workspace, PID, and test-environment values first.
