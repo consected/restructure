@@ -76,3 +76,9 @@ parameter limit. For example:
     nfs_store_download[selected_items_json]=[{"id":123,"retrieval_type":"stored_file"},{"id":45,"retrieval_type":"archived_file"}]
 
 The overall request body remains subject to a 4 MB size limit.
+
+
+Large report selections are prepared in the background when they exceed the configured
+filestore download count or total-size threshold. Users receive an email with an authenticated
+link when the archive is ready. See [Background filestore downloads](../../dev_reference/main/background_filestore_downloads.md)
+for configuration and deployment requirements.

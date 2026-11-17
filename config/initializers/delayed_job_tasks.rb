@@ -10,6 +10,12 @@ Rails.application.configure do
         include DelayedJobExtras
       end
 
+      res = Delayed::Job.lookup_jobs_by(class_name: 'PreparedDownloadsCleanupTask', queue: 'recurring-tasks')
+      if res.empty?
+        Rails.logger.info 'Scheduling the prepared downloads cleanup task'
+        PreparedDownloadsCleanupTask.schedule!
+      end
+
       if Settings.bulk_msg_app
         res = Delayed::Job.lookup_jobs_by(class_name: 'SmsDeliveryStatusRefreshTask', queue: 'recurring-tasks')
         if res.empty?
