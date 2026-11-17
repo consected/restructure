@@ -656,6 +656,71 @@ describe 'Filestore file operations', js: true, driver: $browser_driver, type: :
     end
   end
 
+  # Purpose: ensure large selections queue an archive, notify the user, and serve the prepared link.
+  describe 'Large background downloads' do
+    it 'queues a selected archive, emails its prepared link, and serves the archive' do
+      previous_max_files = Settings::NfsStoreBackgroundDownloadMaxFiles
+      previous_max_bytes = Settings::NfsStoreBackgroundDownloadMaxBytes
+      change_setting('NfsStoreBackgroundDownloadMaxFiles', 1)
+      change_setting('NfsStoreBackgroundDownloadMaxBytes', 100_000_000)
+      archive_path = nil
+      user_download_dir = nil
+      previous_delay_jobs = Delayed::Worker.delay_jobs
+      previous_download_job_id = Delayed::Job.where(queue: 'nfs_store_downloads').maximum(:id) || 0
+      Delayed::Worker.delay_jobs = true
+
+      begin
+        expect(User.find(@user.id).app_type_valid?).to be(true)
+        navigate_to_master(@master.id)
+        expand_phone_log_tab
+        wait_for_filestore_container
+
+        filenames = ["background-a-#{SecureRandom.hex(4)}.txt", "background-b-#{SecureRandom.hex(4)}.txt"]
+        files = filenames.map.with_index do |filename, index|
+          create_temp_test_file(filename:, content: "Background file #{index + 1}")
+        end
+        upload_multiple_files_to_filestore(files)
+        filenames.each { |filename| expect(file_exists_in_browser?(filename)).to be(true) }
+        select_multiple_files_in_browser(filenames)
+
+        click_download_button
+        expect(page).to have_css('.flash .alert-info', text: 'being prepared')
+
+        queued_job = Delayed::Job.where(queue: 'nfs_store_downloads')
+                                 .where('id > ?', previous_download_job_id)
+                                 .order(:id).last
+        expect(queued_job).not_to be_nil
+        queued_job.invoke_job
+        queued_job.destroy!
+
+        notification = Messaging::MessageNotification.where(user_id: @user.id,
+                                                              content_template_name: 'server prepared download ready')
+                                                      .order(:id).last
+        expect(notification).not_to be_nil
+        expect(notification.generated_content).to include("use_app_type=#{@user.app_type_id}")
+        user_download_dir = File.dirname(NfsStore::PreparedDownload.new.path_for(user_id: @user.id, token: 'A' * 43))
+        archive_path = Dir.glob(File.join(user_download_dir, '*.zip')).first
+        expect(archive_path).to be_present
+
+        token = File.basename(archive_path, '.zip')
+        download_url = "/nfs_store/downloads/prepared/#{token}?use_app_type=#{@user.app_type_id}&no_redirect=true"
+        with_browser_download_dir do |directory|
+          visit download_url
+          downloaded = wait_for_downloaded_file(directory)
+          expect(Zip::File.open(downloaded) { |zip| zip.entries.map { |entry| File.basename(entry.name) } })
+            .to match_array(filenames)
+        end
+      ensure
+        change_setting('NfsStoreBackgroundDownloadMaxFiles', previous_max_files)
+        change_setting('NfsStoreBackgroundDownloadMaxBytes', previous_max_bytes)
+        Delayed::Worker.delay_jobs = previous_delay_jobs
+        Delayed::Job.where(queue: 'nfs_store_downloads').where('id > ?', previous_download_job_id).delete_all
+        FileUtils.rm_f(archive_path) if archive_path
+        FileUtils.rm_rf(user_download_dir) if user_download_dir
+      end
+    end
+  end
+
   describe 'Symlink protection' do
     it 'returns a friendly placeholder instead of following a symlink planted at a stored file location' do
       # Navigate to the master record
