@@ -21,6 +21,11 @@ static directory.
 
 ## Operations
 
+- The notification email templates (`server prepared download ready` and
+  `server prepared download failed`) are created by the migration
+  `20261117101500_setup_nfs_store_prepared_download_templates`, which runs the seed
+  `db/seeds/nfs_store_prepared_download_notifications.rb`. If the migration reports a template
+  setup failure, run `bundle exec rails db:seed`.
 - Configure Delayed Job workers to process the dedicated `nfs_store_downloads` queue as well as
   the existing application queues.
 - Web and worker processes must see the same prepared-download directory. Workers need the same
