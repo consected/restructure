@@ -70,6 +70,21 @@ RSpec.describe NfsStorePrepareDownloadJob, type: :job do
     expect(notification).to have_received(:handle_notification_now)
   end
 
+  it "formats the link expiry using the user's date/time and timezone preferences" do
+    stub_download
+    @user.user_preference.update!(timezone: 'Pacific Time (US & Canada)')
+
+    described_class.perform_now(**job_arguments(@user))
+
+    archive_path = Dir.glob(File.join(root, @user.id.to_s, '*.zip')).first
+    expected_expiry = File.mtime(archive_path) + Settings::NfsStorePreparedDownloadsTtlHours.hours
+    expected = Formatter::DateTime.format(expected_expiry, current_user: @user, show_timezone: true,
+                                                           current_timezone: :user)
+    expect(expected).to end_with('Pacific Time (US & Canada)')
+    expect(Messaging::MessageNotification).to have_received(:create!)
+      .with(hash_including(extra_substitutions_data: hash_including(expires_at: expected)))
+  end
+
   it 'emails a failure and leaves no archive when access to the snapshotted app type was revoked' do
     allow(User).to receive(:find_by).and_return(@user)
     allow(@user).to receive(:app_type_valid?).and_return(false)

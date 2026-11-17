@@ -34,7 +34,7 @@ class NfsStorePrepareDownloadJob < ApplicationJob
       File.rename(temporary_path, path)
 
       notify_user(user, :ready, download_link: download_link(token, app_type_id),
-                                expires_at: (File.mtime(path) + Settings::NfsStorePreparedDownloadsTtlHours.hours).to_s)
+                                expires_at: formatted_expiry(user, File.mtime(path)))
     rescue StandardError => e
       FileUtils.rm_f(temporary_path) if temporary_path
       FileUtils.rm_f(path) if path
@@ -94,6 +94,13 @@ class NfsStorePrepareDownloadJob < ApplicationJob
 
   def download_link(token, app_type_id)
     "#{Settings::BaseUrl}/nfs_store/downloads/prepared/#{token}?use_app_type=#{app_type_id}&no_redirect=true"
+  end
+
+  # Format here rather than in the template, since template formatters on nested
+  # extra_substitutions tags don't receive the current user's preferences.
+  def formatted_expiry(user, prepared_at)
+    Formatter::DateTime.format(prepared_at + Settings::NfsStorePreparedDownloadsTtlHours.hours,
+                               current_user: user, show_timezone: true, current_timezone: :user)
   end
 
   def notify_user(user, state, substitutions = {})
