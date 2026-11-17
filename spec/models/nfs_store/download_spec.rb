@@ -37,6 +37,42 @@ RSpec.describe NfsStore::Download, type: :model do
     expect(res.id).to eq @container.stored_files.last.id
   end
 
+  # Regression coverage for issue #1568: files extracted from a zip archive must be found by their download path
+  # so that previewing them (for example DICOM files in nested folders) does not return Not Found.
+  describe 'archived file download paths (issue #1568)' do
+    def upload_zip_with_nested_file(zip_name, relative_file)
+      Dir.mktmpdir do |src|
+        FileUtils.mkdir_p File.join(src, File.dirname(relative_file))
+        File.write File.join(src, relative_file), 'archived content'
+        zip_path = File.join(src, zip_name)
+        Dir.chdir(src) { expect(Kernel.system('zip', '-r', zip_path, File.dirname(relative_file))).to be_truthy }
+        upload_file zip_name, File.binread(zip_path)
+      end
+    end
+
+    it 'finds an archived file in a folder directly inside the archive by its download path' do
+      upload_zip_with_nested_file 'study.zip', 'series1/image.dcm'
+
+      res = NfsStore::Download.find_download_by_path(@container, 'study.zip/series1/image.dcm')
+      expect(res).to be_a NfsStore::Manage::ArchivedFile
+      expect(res.file_name).to eq 'image.dcm'
+    end
+
+    it 'finds an archived file nested more than one folder deep by its download path' do
+      upload_zip_with_nested_file 'study-deep.zip', 'patient1/study2/series3/image.dcm'
+
+      res = NfsStore::Download.find_download_by_path(@container, 'study-deep.zip/patient1/study2/series3/image.dcm')
+      expect(res).to be_a NfsStore::Manage::ArchivedFile
+      expect(res.file_name).to eq 'image.dcm'
+      expect(res.path).to eq 'patient1/study2/series3'
+    end
+
+    it 'returns nil for a path made only of slashes' do
+      expect(NfsStore::Download.find_download_by_path(@container, '/')).to be_nil
+      expect(NfsStore::Download.find_download_by_path(@container, '//')).to be_nil
+    end
+  end
+
   # Regression coverage for issue #1553: a single selected file is sent directly rather than zipped.
   describe 'selected items retrieval (issue #1553)' do
     def selected_item_for(file_name)

@@ -194,6 +194,37 @@ RSpec.describe 'NfsStore downloads of a single selected file (issue #1553)', typ
 end
 
 
+# Purpose: issue #1568 - a file nested more than one folder deep inside an uploaded zip must be found by its
+# download path, so that previewing it returns the preview info rather than Not Found.
+RSpec.describe 'NfsStore downloads of archived files by path (issue #1568)', type: :request do
+  include PlayerContactSupport
+  include ModelSupport
+  include NfsStoreSupport
+
+  before :example do
+    setup_nfs_store
+    setup_container_and_al
+    setup_default_filters
+    sign_in @user
+    allow_any_instance_of(NfsStore::DownloadsController).to receive(:nfs_store_browse_path).and_return('/')
+  end
+
+  it 'returns the preview info for a file nested more than one folder deep inside an archive' do
+    zip_io = Zip::OutputStream.write_buffer do |zos|
+      zos.put_next_entry 'patient1/study2/series3/image.png'
+      zos.write 'archived content'
+    end
+    upload_file 'study-deep.zip', zip_io.string
+    setup_access :view_files_as_image, resource_type: :general, access: :read, user: @user
+
+    get "/nfs_store/downloads/in/#{@activity_log.class.name.ns_underscore}/#{@activity_log.id}/study-deep.zip/patient1/study2/series3/image.png",
+        params: { secure_view: { do: 'info', preview_as: 'png' } }
+
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body['preview_as']).to eq 'png'
+  end
+end
+
 # Purpose: verify AJAX threshold checks choose native or queued downloads without changing legacy requests.
 RSpec.describe 'NfsStore downloads background selection', type: :request do
   include ModelSupport
