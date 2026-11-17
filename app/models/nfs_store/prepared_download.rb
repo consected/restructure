@@ -6,6 +6,7 @@ module NfsStore
   # Encapsulates prepared archive paths, token validation, expiry, and cleanup.
   class PreparedDownload
     TokenPattern = /\A[A-Za-z0-9_-]{43}\z/
+    TemporaryArchivePattern = /\A[A-Za-z0-9_-]{43}\.zip\.[0-9a-f]{16}\.tmp\z/
 
     def initialize(root: nil, ttl_hours: Settings::NfsStorePreparedDownloadsTtlHours)
       @root = root || Settings.nfs_store_prepared_downloads_dir
@@ -69,11 +70,28 @@ module NfsStore
       rescue Errno::ENOENT
         next
       end
+      remove_expired_temporary_prepared_archives(cutoff)
       remove_empty_user_directories
       remove_expired_temporary_archives(cutoff)
     end
 
     private
+
+    def remove_expired_temporary_prepared_archives(cutoff)
+      Dir.glob(File.join(@root, '*', '*.zip.*.tmp')).each do |path|
+        next unless File.basename(path).match?(TemporaryArchivePattern)
+
+        user_directory = File.dirname(path)
+        directory_stat = File.lstat(user_directory)
+        file_stat = File.lstat(path)
+        next if directory_stat.symlink? || file_stat.symlink?
+        next unless directory_stat.directory? && file_stat.file? && file_stat.mtime < cutoff
+
+        FileUtils.rm_f(path)
+      rescue Errno::ENOENT
+        next
+      end
+    end
 
     def remove_empty_user_directories
       Dir.glob(File.join(@root, '*')).each do |directory|

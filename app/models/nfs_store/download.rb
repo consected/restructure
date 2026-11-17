@@ -60,6 +60,8 @@ module NfsStore
     # Keep selections at the configured boundary synchronous; exceed either limit to defer zipping.
     # @return [Boolean]
     def background_required?
+      return false if single_file?
+
       items = all_action_items || []
       items.length > self.class.background_download_max_files ||
         items.sum { |item| item[:file_size].to_i } > self.class.background_download_max_bytes

@@ -233,6 +233,15 @@ RSpec.describe 'NfsStore downloads background selection', type: :request do
     expect(response.parsed_body).to eq('action' => 'download')
   end
 
+  it 'keeps a single oversized file on the native download path' do
+    allow(NfsStore::Download).to receive(:background_download_max_files).and_return(100)
+    allow(NfsStore::Download).to receive(:background_download_max_bytes).and_return(5)
+
+    expect { check_download_request }.not_to have_enqueued_job(NfsStorePrepareDownloadJob)
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body).to eq('action' => 'download')
+  end
+
   it 'saves the audit record and queues an over-threshold selection' do
     allow_any_instance_of(NfsStore::Download).to receive(:background_required?).and_return(true)
 

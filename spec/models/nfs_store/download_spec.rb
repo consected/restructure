@@ -106,6 +106,10 @@ RSpec.describe NfsStore::Download, type: :model do
 
       download.all_action_items = [{ file_size: 1 }, { file_size: 1 }, { file_size: 1 }]
       expect(download).to be_background_required
+
+      allow(NfsStore::Download).to receive(:background_download_max_files).and_return(100)
+      download.all_action_items = [{ file_size: 21 }]
+      expect(download).not_to be_background_required
     end
   end
 end
