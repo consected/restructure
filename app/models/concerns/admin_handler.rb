@@ -285,7 +285,7 @@ module AdminHandler
     logger.info "Admin record added or updated (#{self.class.name}). Invalidating cache"
 
     # Unfortunately we have no way to clear pattern matched keys with memcached so we just clear the whole cache
-    Rails.cache.clear
+    Application.clear_cache_preserving_generation
   end
 
   #
