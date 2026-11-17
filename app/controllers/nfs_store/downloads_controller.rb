@@ -17,6 +17,7 @@ module NfsStore
     include SecureView::Previewing
 
     before_action :set_download!, only: %i[show show_from_activity_log search_doc search_doc_from_activity_log]
+    skip_before_action :find_container, only: :prepared
     before_action :setup_selected_items, only: %i[create trash]
 
     # A blocked symlink is a deliberate safety response for actions that *serve file
@@ -93,12 +94,22 @@ module NfsStore
       @download = Download.new multiple_items: true, container_ids: container_ids
       @download.current_user = current_user
 
-      retrieved_files = @download.retrieve_files_from selected_items_info
+      retrieved_files = @download.retrieve_files_from(selected_items_info, zip: !download_check_request?)
+      return render_download_check(@download, normalized_selected_items, multi: true) if download_check_request?
+
       if retrieved_files&.length&.> 0
         send_retrieved_files @download, retrieved_files
       else
         redirect_to nfs_store_browse_path(@container)
       end
+    end
+
+    # Serve a prepared archive only to the authenticated user who requested it.
+    def prepared
+      path = PreparedDownload.new.available_path(user_id: current_user.id, token: params[:token])
+      return head :not_found unless path
+
+      send_file path, filename: 'prepared-download.zip', type: 'application/zip'
     end
 
     #
@@ -201,12 +212,39 @@ module NfsStore
     def download
       setup_action Download
       @download = @action
-      retrieved_files = @download.retrieve_files_from @selected_items_info
+      retrieved_files = @download.retrieve_files_from(@selected_items_info, zip: !download_check_request?)
+      return render_download_check(@download, normalized_selected_items, multi: false) if download_check_request?
+
       if retrieved_files&.present?
         send_retrieved_files @download, retrieved_files
       else
         redirect_to nfs_store_browse_path(@container)
       end
+    end
+
+    def download_check_request?
+      params[:check_only].to_s == 'true' && request.format.json?
+    end
+
+    def render_download_check(download, selected_items, multi:)
+      return render json: { action: 'download' } unless download.background_required?
+
+      download.save!
+      activity_log_type = @activity_log.class.name.ns_underscore if @activity_log
+      NfsStorePrepareDownloadJob.perform_later(
+        user_id: current_user.id,
+        app_type_id: current_user.app_type_id,
+        selected_items: selected_items.map do |item|
+          item.to_h.transform_keys(&:to_s).merge('retrieval_type' => item[:retrieval_type].to_s)
+        end,
+        container_id: multi ? nil : @container.id,
+        activity_log_type: multi ? nil : activity_log_type,
+        activity_log_id: multi ? nil : @activity_log&.id,
+        multi: multi
+      )
+      message = 'Your files are being prepared. We will email you a download link ' \
+                'when they are ready.'
+      render json: { action: 'background', message: }
     end
 
     def secure_params

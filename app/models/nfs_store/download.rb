@@ -40,18 +40,39 @@ module NfsStore
     # Handle the retrieval of muliple requested files, returning an array of results
     # Each result is a hash referencing the requested id/retrieval_type
     # A single requested file is not zipped; use #single_file? with #single_file_path and #single_file_name
-    # @param selected_items [Hash{id=>Integer, retrieval_type=>Symbol}] a hash of items to retrieve, with each ID qualified by a retrieval type
+    # @param selected_items [Hash{id=>Integer, retrieval_type=>Symbol}] items keyed by ID and retrieval type
+    # @param zip [Boolean] whether to create the synchronous archive for multi-file selections
     # @return [Array(Hash{retrieval_type=>Symbol, id=>Integer, file_name=>String, container_path=>String, retrieval_path=>String})]
     #  id and retrieval_type match the requested item
     #  file_name is the simple file name
     #  container_path represents the local path within the container
     #  retrieval_path is the filesystem path from which the file can be retrieved
-    def retrieve_files_from(selected_items)
+    def retrieve_files_from(selected_items, zip: true)
       setup_items selected_items, :download
 
-      self.zip_file_path = NfsStore::Archive::ZipFileGenerator.zip_retrieved_items all_action_items unless single_file?
+      if zip && !single_file?
+        self.zip_file_path = NfsStore::Archive::ZipFileGenerator.zip_retrieved_items all_action_items
+      end
 
       all_action_items
+    end
+
+    # Keep selections at the configured boundary synchronous; exceed either limit to defer zipping.
+    # @return [Boolean]
+    def background_required?
+      return false if single_file?
+
+      items = all_action_items || []
+      items.length > self.class.background_download_max_files ||
+        items.sum { |item| item[:file_size].to_i } > self.class.background_download_max_bytes
+    end
+
+    def self.background_download_max_files
+      Settings::NfsStoreBackgroundDownloadMaxFiles
+    end
+
+    def self.background_download_max_bytes
+      Settings::NfsStoreBackgroundDownloadMaxBytes
     end
 
     # @return [True, False] true if exactly one item has been retrieved, so it can be sent without zipping

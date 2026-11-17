@@ -192,3 +192,86 @@ RSpec.describe 'NfsStore downloads of a single selected file (issue #1553)', typ
     end
   end
 end
+
+
+# Purpose: verify AJAX threshold checks choose native or queued downloads without changing legacy requests.
+RSpec.describe 'NfsStore downloads background selection', type: :request do
+  include ModelSupport
+
+  around do |example|
+    original_queue_adapter = ActiveJob::Base.queue_adapter
+    ActiveJob::Base.queue_adapter = :test
+    example.run
+  ensure
+    ActiveJob::Base.queue_adapter = original_queue_adapter
+  end
+
+  before do
+    @user, = create_user
+    sign_in @user
+    allow_any_instance_of(NfsStore::DownloadsController).to receive(:nfs_store_browse_path).and_return('/')
+    allow_any_instance_of(NfsStore::Download).to receive(:save!).and_return(true)
+    allow_any_instance_of(NfsStore::Download).to receive(:retrieve_files_from) do |download, _items, **_options|
+      download.all_action_items = [{ file_size: 10 }]
+      download.all_action_items
+    end
+  end
+
+  def check_download_request
+    post '/nfs_store/downloads/multi',
+         params: { check_only: 'true', nfs_store_download: {
+           container_id: 'multi', selected_items_json: [{ id: 1, container_id: 1, retrieval_type: 'stored_file' }].to_json
+         } },
+         headers: { 'ACCEPT' => 'application/json' }
+  end
+
+  it 'returns a native-download action under the threshold without enqueuing a job' do
+    allow_any_instance_of(NfsStore::Download).to receive(:background_required?).and_return(false)
+
+    expect { check_download_request }.not_to have_enqueued_job(NfsStorePrepareDownloadJob)
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body).to eq('action' => 'download')
+  end
+
+  it 'keeps a single oversized file on the native download path' do
+    allow(NfsStore::Download).to receive(:background_download_max_files).and_return(100)
+    allow(NfsStore::Download).to receive(:background_download_max_bytes).and_return(5)
+
+    expect { check_download_request }.not_to have_enqueued_job(NfsStorePrepareDownloadJob)
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body).to eq('action' => 'download')
+  end
+
+  it 'saves the audit record and queues an over-threshold selection' do
+    allow_any_instance_of(NfsStore::Download).to receive(:background_required?).and_return(true)
+
+    expect { check_download_request }.to have_enqueued_job(NfsStorePrepareDownloadJob).on_queue('nfs_store_downloads')
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body['action']).to eq('background')
+  end
+
+  it 'handles the container-browser create endpoint through the same JSON background flow' do
+    container = double(id: 1, master: double)
+    action = double
+    allow_any_instance_of(NfsStore::DownloadsController).to receive(:find_container) do |controller|
+      controller.instance_variable_set(:@container, container)
+      controller.instance_variable_set(:@activity_log, nil)
+    end
+    allow(NfsStore::Download).to receive(:new).and_return(action)
+    allow(action).to receive(:current_user=)
+    allow(action).to receive(:retrieve_files_from).and_return([{ file_size: 10 }])
+    allow(action).to receive(:background_required?).and_return(true)
+    allow(action).to receive(:save!).and_return(true)
+
+    expect do
+      post '/nfs_store/downloads', params: {
+        commit: 'Download', check_only: 'true',
+        nfs_store_download: { container_id: 1,
+          selected_items_json: [{ id: 5, container_id: 1, retrieval_type: 'stored_file' }].to_json }
+      }, headers: { 'ACCEPT' => 'application/json' }
+    end.to have_enqueued_job(NfsStorePrepareDownloadJob).on_queue('nfs_store_downloads')
+
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body['action']).to eq('background')
+  end
+end

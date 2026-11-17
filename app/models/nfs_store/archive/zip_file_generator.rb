@@ -13,18 +13,14 @@ module NfsStore
       end
 
       # Create a zip file based on a list of retrieve items (stored and archived files)
-      # @return [TempFile] zip file object
-      def self.zip_retrieved_items retrieved_items
-        temp_file = Tempfile.new([ZipTempFilePrefix, '.zip'], tmpdir)
-        #This is the tricky part
-        #Initialize the temp file as a zip file
-        Zip::OutputStream.open(temp_file) { |zos| }
+      # @param target_path [String, nil] optional destination path, used by prepared downloads
+      # @return [Tempfile, String] temp file object or the requested destination path
+      def self.zip_retrieved_items(retrieved_items, target_path: nil)
+        temp_file = target_path ? nil : Tempfile.new([ZipTempFilePrefix, '.zip'], tmpdir)
+        zip_path = target_path || temp_file.path
+        FileUtils.mkdir_p(File.dirname(zip_path)) if target_path
 
-
-        multi_containers = retrieved_items.map{|r| r[:container_id]}.uniq.length > 1
-
-        #Add files to the zip file as usual
-        Zip::File.open(temp_file.path, create: true) do |zip|
+        Zip::File.open(zip_path, create: true, compression_level: Zlib::BEST_SPEED) do |zip|
           retrieved_items.each do |f|
             parts = []
             if f[:parent_name].present?
@@ -38,8 +34,7 @@ module NfsStore
             zip.add(File.join(parts), f[:retrieval_path])
           end
         end
-        return temp_file
-
+        target_path || temp_file
       end
 
     end

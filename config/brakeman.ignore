@@ -773,6 +773,121 @@
         89
       ],
       "note": ""
+    },
+    {
+      "warning_type": "File Access",
+      "warning_code": 16,
+      "fingerprint": "15523acb32001135cc924cbca6089e60c58a1a079d2dbb4d9b739ccd934d53ca",
+      "check_name": "SendFile",
+      "message": "Parameter value used in file name",
+      "file": "app/controllers/nfs_store/downloads_controller.rb",
+      "line": 112,
+      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
+      "code": "send_file(PreparedDownload.new.available_path(:user_id => current_user.id, :token => params[:token]), :filename => \"prepared-download.zip\", :type => \"application/zip\")",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "NfsStore::DownloadsController",
+        "method": "prepared"
+      },
+      "user_input": "params[:token]",
+      "confidence": "Weak",
+      "cwe_id": [
+        22
+      ],
+      "note": "False positive: available_path accepts only a strict 43-character URL-safe token, constructs the path for current_user.id via path_for (which validates a positive integer ID), and rejects symlinked user directories/files, non-regular files, and expired files. Invalid or unavailable paths return 404. Request specs cover traversal, malformed tokens, another user, and symlinks."
+    },
+    {
+      "warning_type": "File Access",
+      "warning_code": 16,
+      "fingerprint": "2117a43ea3be966dd0fb596d6a98fe3e836128500f61f750d83fd24b2df625ae",
+      "check_name": "FileAccess",
+      "message": "Model attribute used in file name",
+      "file": "app/jobs/nfs_store_prepare_download_job.rb",
+      "line": 40,
+      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
+      "code": "FileUtils.rm_f(NfsStore::PreparedDownload.new.path_for(:user_id => user_id, :token => NfsStore::PreparedDownload.new.generate_token))",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "NfsStorePrepareDownloadJob",
+        "method": "perform"
+      },
+      "user_input": "NfsStore::PreparedDownload.new.path_for(:user_id => user_id, :token => NfsStore::PreparedDownload.new.generate_token)",
+      "confidence": "Medium",
+      "cwe_id": [
+        22
+      ],
+      "note": "False positive: the job generates one SecureRandom URL-safe token and computes the archive path once. PreparedDownload#path_for enforces the strict 43-character TokenPattern and positive user ID; mkdir, rename, and cleanup reuse that validated per-user path, with only a SecureRandom temp suffix. The request path is never used for writes."
+    },
+    {
+      "warning_type": "File Access",
+      "warning_code": 16,
+      "fingerprint": "3bae20765adbbeaab3416590367ee0ddf2c5a737fc1b76e98584a65e34c7c41d",
+      "check_name": "FileAccess",
+      "message": "Model attribute used in file name",
+      "file": "app/jobs/nfs_store_prepare_download_job.rb",
+      "line": 34,
+      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
+      "code": "File.rename(\"#{NfsStore::PreparedDownload.new.path_for(:user_id => user_id, :token => NfsStore::PreparedDownload.new.generate_token)}.#{SecureRandom.hex(8)}.tmp\", NfsStore::PreparedDownload.new.path_for(:user_id => user_id, :token => NfsStore::PreparedDownload.new.generate_token))",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "NfsStorePrepareDownloadJob",
+        "method": "perform"
+      },
+      "user_input": "NfsStore::PreparedDownload.new.path_for(:user_id => user_id, :token => NfsStore::PreparedDownload.new.generate_token)",
+      "confidence": "Medium",
+      "cwe_id": [
+        22
+      ],
+      "note": "False positive: the job generates one SecureRandom URL-safe token and computes the archive path once. PreparedDownload#path_for enforces the strict 43-character TokenPattern and positive user ID; mkdir, rename, and cleanup reuse that validated per-user path, with only a SecureRandom temp suffix. The request path is never used for writes."
+    },
+    {
+      "warning_type": "File Access",
+      "warning_code": 16,
+      "fingerprint": "6e330b38660d1cee5bef92ac67b5d586a58d2b2dcef99e7797b29ec1f79fa2ae",
+      "check_name": "FileAccess",
+      "message": "Model attribute used in file name",
+      "file": "app/jobs/nfs_store_prepare_download_job.rb",
+      "line": 39,
+      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
+      "code": "FileUtils.rm_f(\"#{NfsStore::PreparedDownload.new.path_for(:user_id => user_id, :token => NfsStore::PreparedDownload.new.generate_token)}.#{SecureRandom.hex(8)}.tmp\")",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "NfsStorePrepareDownloadJob",
+        "method": "perform"
+      },
+      "user_input": "NfsStore::PreparedDownload.new.path_for(:user_id => user_id, :token => NfsStore::PreparedDownload.new.generate_token)",
+      "confidence": "Medium",
+      "cwe_id": [
+        22
+      ],
+      "note": "False positive: the job generates one SecureRandom URL-safe token and computes the archive path once. PreparedDownload#path_for enforces the strict 43-character TokenPattern and positive user ID; mkdir, rename, and cleanup reuse that validated per-user path, with only a SecureRandom temp suffix. The request path is never used for writes."
+    },
+    {
+      "warning_type": "File Access",
+      "warning_code": 16,
+      "fingerprint": "8470ac35461b8b83251e47ce93d6fae1b40edaf1fbaac61935a48d3e28ed88b4",
+      "check_name": "FileAccess",
+      "message": "Model attribute used in file name",
+      "file": "app/jobs/nfs_store_prepare_download_job.rb",
+      "line": 31,
+      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
+      "code": "FileUtils.mkdir_p(File.dirname(NfsStore::PreparedDownload.new.path_for(:user_id => user_id, :token => NfsStore::PreparedDownload.new.generate_token)), :mode => 488)",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "NfsStorePrepareDownloadJob",
+        "method": "perform"
+      },
+      "user_input": "NfsStore::PreparedDownload.new.path_for(:user_id => user_id, :token => NfsStore::PreparedDownload.new.generate_token)",
+      "confidence": "Weak",
+      "cwe_id": [
+        22
+      ],
+      "note": "False positive: the job generates one SecureRandom URL-safe token and computes the archive path once. PreparedDownload#path_for enforces the strict 43-character TokenPattern and positive user ID; mkdir, rename, and cleanup reuse that validated per-user path, with only a SecureRandom temp suffix. The request path is never used for writes."
     }
   ],
   "brakeman_version": "8.0.6"

@@ -318,10 +318,40 @@ _fpa.reports = {
     if (dct_action == 'download files') {
       var $f = $('<form id="itemselection-for-report" method="post" action="/nfs_store/downloads/multi" target="download_files"><input type="hidden" name="nfs_store_download[container_id]" value="multi"><input name="authenticity_token" type="hidden" class="set-auth-token" value="" /></form>');
       _fpa.form_utils.set_auth_tokens($f);
-      $f.on('submit', function () {
+      $f.on('submit', function (e) {
+        e.preventDefault();
         _fpa.form_utils.set_json_array_param(
           $f, '.report-file-selector', 'nfs_store_download[selected_items_json]', true
         );
+        _fpa.form_utils.set_auth_tokens($f);
+        var $checkOnly = $('<input type="hidden" name="check_only" value="true">').appendTo($f);
+        $.ajax({
+          type: $f.attr('method') || 'POST',
+          url: $f.attr('action'),
+          data: $f.serialize(),
+          dataType: 'json',
+          global: false
+        }).done(function (data) {
+          $checkOnly.remove();
+          if (data.action === 'background') {
+            _fpa.flash_notice(data.message);
+          } else if (data.action === 'download') {
+            $f.removeAttr('target');
+            $f[0].submit();
+          } else {
+            _fpa.flash_notice('The download request could not be processed.', 'danger');
+          }
+        }).fail(function (xhr) {
+          $checkOnly.remove();
+          var blocked_symlink = xhr && xhr.status === 409 && xhr.responseJSON &&
+            xhr.responseJSON.blocked && xhr.responseJSON.reason === 'symbolic_link';
+          if (blocked_symlink) {
+            $f.removeAttr('target');
+            $f[0].submit();
+            return;
+          }
+          _fpa.flash_notice('The download request could not be processed. Please try again.', 'danger');
+        });
       });
     }
     else if (dct_action == 'add to list') {

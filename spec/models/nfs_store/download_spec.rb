@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Purpose: verify filestore download retrieval, direct single-file delivery, and background threshold assessment.
 require 'rails_helper'
 require 'securerandom'
 
@@ -88,6 +89,27 @@ RSpec.describe NfsStore::Download, type: :model do
       ensure
         FileUtils.rm_f secret_path
       end
+    end
+  end
+
+  describe '#background_required?' do
+    it 'requires a background download above either configured threshold, but not at the boundary' do
+      allow(NfsStore::Download).to receive(:background_download_max_files).and_return(2)
+      allow(NfsStore::Download).to receive(:background_download_max_bytes).and_return(20)
+      download = described_class.new
+
+      download.all_action_items = [{ file_size: 10 }, { file_size: 10 }]
+      expect(download).not_to be_background_required
+
+      download.all_action_items = [{ file_size: 10 }, { file_size: 11 }]
+      expect(download).to be_background_required
+
+      download.all_action_items = [{ file_size: 1 }, { file_size: 1 }, { file_size: 1 }]
+      expect(download).to be_background_required
+
+      allow(NfsStore::Download).to receive(:background_download_max_files).and_return(100)
+      download.all_action_items = [{ file_size: 21 }]
+      expect(download).not_to be_background_required
     end
   end
 end
