@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [10.2.0] - 2026-11-17
+
 ### From FPHS - PR #1562 - 2026-11-17
 
 - [Changed] large multi-file filestore downloads to be prepared in the background and downloaded from a link in a notification - fixes #1552
