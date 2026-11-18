@@ -21,6 +21,8 @@ require 'rails_helper'
 #   by an explicit scoped invalidation when a definition is saved.
 # - Other AdminHandler-including models retain the original behaviour of
 #   clearing the cache on every save.
+# - Item-type caches are isolated by the shared dynamic-definition token, so a
+#   worker with incomplete generated classes cannot poison another worker's list.
 RSpec.describe AdminHandler, type: :model do
   include ModelSupport
 
@@ -75,6 +77,65 @@ RSpec.describe AdminHandler, type: :model do
     end
   end
 
+  describe 'item type caches' do
+    def item_type_cache_key(class_name, token)
+      "#{class_name}.item_types-#{token}"
+    end
+
+    it 'does not serve a DynamicModel item-type list written by a worker with incomplete classes' do
+      token = Dynamic::DefinitionCacheVersion.token
+      Rails.cache.delete('DynamicModel.item_types')
+      Rails.cache.delete(item_type_cache_key('DynamicModel', token))
+      incomplete_class = double(attribute_names: ['select_incomplete'], model_name: double(to_s: 'CacheTest'))
+      complete_class = double(attribute_names: ['select_complete'], model_name: double(to_s: 'CacheTest'))
+
+      allow(DynamicModel).to receive(:implementation_classes).and_return([incomplete_class])
+      expect(DynamicModel.item_types.map(&:to_s)).to include(a_string_matching(/select_incomplete\z/))
+
+      Dynamic::DefinitionCacheVersion.rotate!
+      allow(DynamicModel).to receive(:implementation_classes).and_return([complete_class])
+
+      expect(DynamicModel.item_types.map(&:to_s)).to include(a_string_matching(/select_complete\z/))
+    end
+
+    it 'does not serve a GeneralSelection item-type list written with stale definition availability' do
+      token = Dynamic::DefinitionCacheVersion.token
+      Rails.cache.delete('Classification::GeneralSelection.item_types')
+      Rails.cache.delete(item_type_cache_key('Classification::GeneralSelection', token))
+      allow(Report).to receive(:item_types).and_return([])
+      allow(ActivityLog).to receive(:item_types).and_return([])
+      allow(DynamicModel).to receive(:item_types).and_return([:select_incomplete], [:select_complete])
+      allow(ExternalIdentifier).to receive(:item_types).and_return([])
+
+      expect(Classification::GeneralSelection.item_types).to include(:select_incomplete)
+
+      Dynamic::DefinitionCacheVersion.rotate!
+
+      expect(Classification::GeneralSelection.item_types).to include(:select_complete)
+    end
+
+    it 'honors explicit refreshes after both item-type caches include the shared token' do
+      token = Dynamic::DefinitionCacheVersion.token
+      Rails.cache.delete(item_type_cache_key('DynamicModel', token))
+      Rails.cache.delete(item_type_cache_key('Classification::GeneralSelection', token))
+      before_class = double(attribute_names: ['select_before_refresh'], model_name: double(to_s: 'CacheTest'))
+      after_class = double(attribute_names: ['select_after_refresh'], model_name: double(to_s: 'CacheTest'))
+      allow(DynamicModel).to receive(:implementation_classes).and_return([before_class], [after_class])
+
+      expect(DynamicModel.item_types.map(&:to_s)).to include(a_string_matching(/select_before_refresh\z/))
+      expect(DynamicModel.item_types(refresh: true).map(&:to_s))
+        .to include(a_string_matching(/select_after_refresh\z/))
+
+      allow(Report).to receive(:item_types) { [] }
+      allow(ActivityLog).to receive(:item_types) { [] }
+      allow(DynamicModel).to receive(:item_types).and_return([:select_before_refresh], [:select_after_refresh])
+      allow(ExternalIdentifier).to receive(:item_types) { [] }
+
+      expect(Classification::GeneralSelection.item_types).to include(:select_before_refresh)
+      expect(Classification::GeneralSelection.item_types(refresh: true)).to include(:select_after_refresh)
+    end
+  end
+
   describe 'dynamic definitions and config libraries' do
     it 'does not clear the Rails cache when a DynamicModel is saved' do
       definition = DynamicModel.active.first!
@@ -111,6 +172,14 @@ RSpec.describe AdminHandler, type: :model do
 
       expect(Rails.cache).not_to receive(:clear)
       definition.update!(label: "#{definition.label} Updated")
+    end
+
+    it 'does not clear the Rails cache when an ActivityLog is saved' do
+      definition = ActivityLog.active.first!
+      definition.current_admin = @admin
+
+      expect(Rails.cache).not_to receive(:clear)
+      definition.update!(main_log_name: "#{definition.main_log_name} Updated")
     end
 
     describe 'caches that previously relied on the whole-cache clear' do
@@ -157,6 +226,33 @@ RSpec.describe AdminHandler, type: :model do
 
       it 'keeps the access control resource names key stable when nothing changed' do
         expect(Admin::UserAccessControl.resource_names_cache_key).to eq(Admin::UserAccessControl.resource_names_cache_key)
+      end
+
+      it 'rebuilds both item-type lists after any dynamic definition save without clearing the whole cache' do
+        expect(Rails.cache).not_to receive(:clear)
+
+        definition_saves.each do |class_name, save_definition|
+          definition_class = class_name.constantize
+          token_before = Dynamic::DefinitionCacheVersion.token
+          incomplete_class = double(attribute_names: ['select_before_save'], model_name: double(to_s: 'CacheTest'))
+          complete_class = double(attribute_names: ['select_after_save'], model_name: double(to_s: 'CacheTest'))
+          allow(definition_class).to receive(:implementation_classes) do
+            Dynamic::DefinitionCacheVersion.token == token_before ? [incomplete_class] : [complete_class]
+          end
+          Rails.cache.delete("#{class_name}.item_types-#{token_before}")
+          Rails.cache.delete("Classification::GeneralSelection.item_types-#{Report.item_types_cache_version}")
+
+          expect(definition_class.item_types.map(&:to_s)).to include(a_string_matching(/select_before_save\z/))
+          expect(Classification::GeneralSelection.item_types.map(&:to_s))
+            .to include(a_string_matching(/select_before_save\z/))
+
+          instance_exec(&save_definition)
+
+          expect(Dynamic::DefinitionCacheVersion.token).not_to eq(token_before)
+          expect(definition_class.item_types.map(&:to_s)).to include(a_string_matching(/select_after_save\z/))
+          expect(Classification::GeneralSelection.item_types.map(&:to_s))
+            .to include(a_string_matching(/select_after_save\z/))
+        end
       end
 
       it 'drops the general selections info block fragment when any dynamic definition is saved' do

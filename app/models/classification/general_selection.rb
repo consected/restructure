@@ -24,12 +24,13 @@ class Classification::GeneralSelection < ActiveRecord::Base
   validate :not_duplicated
 
   def self.item_types(refresh: false)
+    cache_key = "Classification::GeneralSelection.item_types-#{Report.item_types_cache_version}"
     if refresh
-      Rails.cache.delete('Classification::GeneralSelection.item_types')
+      Rails.cache.delete(cache_key)
       Rails.cache.delete(InfoBlockCacheKey)
       Classification::SelectionOptionsHandler.reset!
     end
-    Rails.cache.fetch('Classification::GeneralSelection.item_types') do
+    Rails.cache.fetch(cache_key) do
       BasicItemTypes +
         Report.item_types(refresh: refresh) +
         ActivityLog.item_types(refresh: refresh) +

@@ -24,6 +24,11 @@ class ActivityLog < ActiveRecord::Base
 
   MaxLengthViewName = 63
 
+  # Definition saves rotate the shared cache token, so they do not need a whole-cache clear.
+  def clear_rails_cache_on_save?
+    false
+  end
+
   def resource_name
     full_item_types_name
   end

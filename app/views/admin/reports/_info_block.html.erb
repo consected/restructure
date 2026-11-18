@@ -51,7 +51,18 @@
     </div>
     <div role="tabpanel" class="tab-pane" id="protocol_events">
       <h4>Protocol / Sub Process / Event </h4>
-      <%= Rails.cache.fetch('info-block-protocol-block') { render partial: 'admin/reference_data/protocol_block' }.html_safe %>
+      <% protocol_block_cache_key = [
+        'info-block-protocol-block',
+        @filter_protocol_tree_list,
+        @protocol_tree_list_no_help,
+        Classification::Protocol.count,
+        Classification::Protocol.maximum(:updated_at)&.utc&.iso8601(6),
+        Classification::SubProcess.count,
+        Classification::SubProcess.maximum(:updated_at)&.utc&.iso8601(6),
+        Classification::ProtocolEvent.count,
+        Classification::ProtocolEvent.maximum(:updated_at)&.utc&.iso8601(6)
+      ] %>
+      <%= Rails.cache.fetch(protocol_block_cache_key) { render partial: 'admin/reference_data/protocol_block' }.html_safe %>
     </div>
     <div role="tabpanel" class="tab-pane" id="selection-options">
       <h4>General Selections </h4>

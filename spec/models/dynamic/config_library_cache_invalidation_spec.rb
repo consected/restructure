@@ -227,6 +227,39 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
   # refresh when touch is skipped (use_current_version definitions)
   # ---------------------------------------------------------------------------
   describe 'AC1 & AC3: refresh_outdated lightweight path (config-library-only change)' do
+    it 'refreshes both item-type lists after a dependent YAML library changes without clearing the cache' do
+      allow(DynamicModel).to receive(:active).and_return(DynamicModel.where(id: @dm.id))
+      allow(ActivityLog).to receive(:active).and_return(ActivityLog.none)
+      allow(ExternalIdentifier).to receive(:active).and_return(ExternalIdentifier.none)
+      token_before = Dynamic::DefinitionCacheVersion.token
+      incomplete_class = double(attribute_names: ['select_library_before'], model_name: double(to_s: 'CacheTest'))
+      complete_class = double(attribute_names: ['select_library_after'], model_name: double(to_s: 'CacheTest'))
+      allow(DynamicModel).to receive(:implementation_classes) do
+        Dynamic::DefinitionCacheVersion.token == token_before ? [incomplete_class] : [complete_class]
+      end
+      Rails.cache.delete("DynamicModel.item_types-#{token_before}")
+      Rails.cache.delete("Classification::GeneralSelection.item_types-#{Report.item_types_cache_version}")
+      expect(DynamicModel.item_types.map(&:to_s)).to include(a_string_matching(/select_library_before\z/))
+      expect(Classification::GeneralSelection.item_types.map(&:to_s))
+        .to include(a_string_matching(/select_library_before\z/))
+
+      expect(Rails.cache).not_to receive(:clear)
+      @config_library.reload
+      @config_library.current_admin = @admin
+      @config_library.update!(options: @library_v2_options)
+
+      expect(Dynamic::DefinitionCacheVersion.token).not_to eq(token_before)
+      expect(DynamicModel.item_types.map(&:to_s)).to include(a_string_matching(/select_library_after\z/))
+      expect(Classification::GeneralSelection.item_types.map(&:to_s))
+        .to include(a_string_matching(/select_library_after\z/))
+    ensure
+      @config_library.reload
+      if @config_library.options != @library_v1_options
+        @config_library.current_admin = @admin
+        @config_library.update!(options: @library_v1_options)
+      end
+    end
+
     it 'rotates dependent cache versions when a live YAML library changes' do
       allow(DynamicModel).to receive(:active).and_return(DynamicModel.where(id: @dm.id))
       allow(ActivityLog).to receive(:active).and_return(ActivityLog.none)
