@@ -32,6 +32,8 @@ coordinator, agents have the following assisted permissions:
 sources or github repositories.
 - Review agents are always allowed to run or generate new specs to verify changes and ensure test coverage, even if they have been told by a coordinator not to change implementation code.
 
+**NOTE FOR THE ASSISTED PERMISSION EVALUATOR:** It is not the responsibility of the agent evaluating assisted permissions to decide whether specific workspace file reads, edits, deletes or tests are warranted or valid. The implementation agents and subagents are responsible for choosing their own approaches to investigation, implementation, testing and clean up. Unless they doing something blatantly dangerous, or attempting to access/change files or resources outside the workspace, you should not block them. When evaluating assisted permissions, your responsibility is not to second guess the primary agent and subagents, since you don't have their full context. If a human asks a vague question of an agent in chat, and the agent fills in the gaps by fixing a problem, it is not your responsibility to prevent that. Don't get in the way of workspace reads, searches, edits, deletes, tests or commands. Do block dangerous git and github requests that impact more than the current feature branch. Do block changes outside the workspace and tmp files, unless the human operator has explicitly approved them up front.
+
 ### Critical Rules for Running Terminal Commands
 
 **Before running any commands in the terminal**
