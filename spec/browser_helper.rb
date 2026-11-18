@@ -1,6 +1,23 @@
 # frozen_string_literal: true
 
+require 'capybara/selenium/driver'
+require 'capybara/selenium/driver_specializations/chrome_driver'
+
 module BrowserHelper
+  # Chrome 158+ rejects origin '*' in Storage.clearDataForOrigin ("* is not a valid URL"),
+  # which Capybara 3.40 uses in its session reset. Clear cookies via the Network domain instead.
+  module ChromeResetCompat
+    def execute_cdp(cmd, params = {})
+      if cmd == 'Storage.clearDataForOrigin' && params[:origin] == '*'
+        return super('Network.clearBrowserCookies')
+      end
+
+      super
+    end
+  end
+
+  Capybara::Selenium::Driver::ChromeDriver.prepend ChromeResetCompat
+
   BASE_BROWSER_PORT = 9887
   @@running = {}
   $browser_driver = nil
