@@ -22,9 +22,10 @@
     <%= f.text_field :position, type: :number%>
   </div>
   <br/>
-  <div class="form-group">
+  <div class="form-group report-auto-options <%= 'hidden' if @report.report_type_report? %>">
     <%= f.check_box :auto %>
     <%= form_field_label f, :run_automatically %>
+    <p class="help-block">For legacy report types only. The report type uses context-specific auto_submit_on_load options instead.</p>
   </div>
   <div class="form-group">
     <%= f.check_box :searchable %>

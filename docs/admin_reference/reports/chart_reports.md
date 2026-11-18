@@ -445,13 +445,18 @@ component:
 
 ## Auto-Run Charts
 
-Charts are often configured to run automatically without requiring user input. Set `auto: true` on the report and optionally `hide_criteria_panel: true` to suppress the search form:
+Charts using the new `report` type can submit automatically when the page loads. Set `auto_submit_on_load: true` in `view_options` (and optionally `hide_criteria_panel: true`) instead of setting the legacy `auto: true` field:
 
 ```yaml
-view_options:
-  view_as: chart
-  hide_criteria_panel: true
+report_type: report
+options:
+  view_options:
+    view_as: chart
+    auto_submit_on_load: true
+    hide_criteria_panel: true
 ```
+
+The `auto` field continues to control auto-run behavior for legacy report types; it is ignored for the new `report` type. `force_run=true` also triggers auto-submit on load for a `report` type.
 
 This is useful for dashboard-style charts embedded in page layouts.
 

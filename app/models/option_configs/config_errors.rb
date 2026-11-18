@@ -90,7 +90,8 @@ module OptionConfigs
       # @return [Object, nil] the object instance, or nil when the argument is only a list of option configs
       def notice_object_instance(object_instance_or_config)
         return unless object_instance_or_config.is_a?(OptionsHandler) ||
-                      object_instance_or_config.respond_to?(:option_configs)
+                      object_instance_or_config.respond_to?(:option_configs) ||
+                      object_instance_or_config.respond_to?(:report_options)
 
         object_instance_or_config
       end
@@ -99,6 +100,8 @@ module OptionConfigs
       def notice_option_configs(object_instance, object_instance_or_config)
         if object_instance.nil?
           object_instance_or_config
+        elsif object_instance.respond_to?(:report_options)
+          [object_instance.report_options]
         elsif object_instance.respond_to?(:option_configs)
           object_instance.option_configs(raise_bad_configs: [FphsOptionsParseError, FphsOptionsGeneralError,
                                                              FphsException])
