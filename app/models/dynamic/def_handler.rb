@@ -235,7 +235,7 @@ module Dynamic
       # when defining a new definition record, which
       # is in fact provided by self.use_with_class_names
       def item_types(refresh: false)
-        cname = "#{name}.item_types"
+        cname = "#{name}.item_types-#{Dynamic::DefinitionCacheVersion.token}"
         Rails.cache.delete(cname) if refresh
 
         Rails.cache.fetch(cname) do
