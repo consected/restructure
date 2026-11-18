@@ -26,7 +26,7 @@ coordinator, agents have the following assisted permissions:
 - Agents are allowed to make changes to the code and configuration where necessary to support the specs or to fix issues identified by the specs.
 - Agents are allowed to make changes to code and configuration where instructed to do so, or to prototype solutions that aren't supported by specs. Prototyping may include running `rails runner` or direct `ruby` commands.
 - Agents are allowed to create, edit and delete temporary files as needed for testing, debugging, or prototyping solutions. Any files in `tmp/agent-tmp` should be considered temporary and can be safely removed at any time.
-- Agents may add and remove files, commit, amend and rebase the feature branch as required to maintain a clean and up-to-date branch.
+- Agents may add and remove files, commit (including all staged files without additional scoping), amend and rebase the feature branch as required to maintain a clean and up-to-date branch.
 - Agents may read rvm, gem, and bundle files to understand the configuration and code dependencies.
 - Agents may read Ruby, Rails, Node.js, and other JS dependencies from local
 sources or github repositories.
