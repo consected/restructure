@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
-# Covers the generic conditional-action evaluator against real database records,
-# including table-based checks like item_flags so creatable_if / showable_if
-# conditions can be validated in app configuration.
+# Covers the generic conditional-action evaluator against real database records, including table-based checks,
+# latest associated-record field comparisons and selection behaviour used by app conditions.
 require 'rails_helper'
 
 RSpec.describe 'Calculate conditional actions', type: :model do
@@ -4910,6 +4909,411 @@ RSpec.describe 'Calculate conditional actions', type: :model do
         }
       }
       expect(ConditionalActions.new(not_all_conf, rec).calc_action_if).to be true
+    end
+  end
+
+  describe 'field comparisons with the latest associated record' do
+    generate_test_dynamic_model_before_all
+
+    def field_comparison_condition(selection_type: :all)
+      {
+        selection_type => {
+          player_infos: {
+            first_name: { associated_with: { dynamic_model__test_created_by_recs: :test1 } }
+          }
+        }
+      }
+    end
+
+    def filtered_field_comparison_condition(selection_type: :all, filters: {}, return_field: :test1,
+                                            return_type: 'return_value')
+      {
+        selection_type => {
+          player_infos: {
+            first_name: {
+              associated_with: {
+                dynamic_model__test_created_by_recs: filters.merge(return_field => return_type)
+              }
+            }
+          }
+        }
+      }
+    end
+
+    def create_comparison_records(master, player_name: 'latest', dynamic_values: %w[older latest])
+      player = master.player_infos.create!(first_name: player_name, last_name: 'Compare',
+                                           birth_date: Date.current - 30.years, rank: 10, source: 'nflpa')
+      dynamic_values.each do |value|
+        master.dynamic_model__test_created_by_recs.create!(test1: value, test2: 'Compare', created_by_user_id: @user.id)
+      end
+      player.current_user = @user
+      player
+    end
+
+    it 'compares with the most recently created matching resource record' do
+      master = @al.master
+      master.current_user = @user
+      master.dynamic_model__test_created_by_recs.delete_all
+      create_comparison_records(master)
+
+      expect(ConditionalActions.new(field_comparison_condition, @al).calc_action_if).to be true
+    end
+
+    it 'compares with the latest associated record matching scalar filters' do
+      master = @al.master
+      master.current_user = @user
+      master.dynamic_model__test_created_by_recs.delete_all
+      master.player_infos.delete_all
+      master.player_infos.create!(
+        first_name: 'filtered', last_name: 'Compare', birth_date: Date.current - 30.years, rank: 10, source: 'nflpa'
+      )
+      master.dynamic_model__test_created_by_recs.create!(
+        test1: 'older', test2: 'compare', created_by_user_id: @user.id
+      )
+      master.dynamic_model__test_created_by_recs.create!(
+        test1: 'ignored', test2: 'other', created_by_user_id: @user.id
+      )
+      master.dynamic_model__test_created_by_recs.create!(
+        test1: 'filtered', test2: 'compare', created_by_user_id: @user.id
+      )
+
+      condition = {
+        all: {
+          player_infos: {
+            first_name: { associated_with: { dynamic_model__test_created_by_recs: { test2: 'compare', test1: 'return_value' } } }
+          }
+        }
+      }
+
+      expect(ConditionalActions.new(condition, @al).calc_action_if).to be true
+    end
+
+    it 'supports array filters and return_value_list comparisons' do
+      master = @al.master
+      master.current_user = @user
+      master.dynamic_model__test_created_by_recs.delete_all
+      master.player_infos.delete_all
+      master.player_infos.create!(
+        first_name: 'older', last_name: 'Compare', birth_date: Date.current - 30.years, rank: 10, source: 'nflpa'
+      )
+      master.dynamic_model__test_created_by_recs.create!(
+        test1: 'older', test2: 'compare', created_by_user_id: @user.id
+      )
+      master.dynamic_model__test_created_by_recs.create!(
+        test1: 'newer', test2: 'other', created_by_user_id: @user.id
+      )
+
+      condition = {
+        all: {
+          player_infos: {
+            first_name: {
+              associated_with: {
+                dynamic_model__test_created_by_recs: {
+                  test2: %w[compare other],
+                  test1: 'return_value_list'
+                }
+              }
+            }
+          }
+        }
+      }
+
+      expect(ConditionalActions.new(condition, @al).calc_action_if).to be true
+    end
+
+    it 'does not match when no associated record satisfies the filters or list is empty' do
+      master = @al.master
+      master.current_user = @user
+      master.dynamic_model__test_created_by_recs.delete_all
+      master.player_infos.delete_all
+      master.player_infos.create!(
+        first_name: nil, last_name: 'Compare', birth_date: Date.current - 30.years, rank: 10, source: 'nflpa'
+      )
+      master.dynamic_model__test_created_by_recs.create!(
+        test1: 'value', test2: 'other', created_by_user_id: @user.id
+      )
+
+      condition = {
+        not_any: {
+          player_infos: {
+            first_name: { associated_with: { dynamic_model__test_created_by_recs: { test2: 'compare', test1: 'return_value' } } }
+          }
+        }
+      }
+      expect(ConditionalActions.new(condition, @al).calc_action_if).to be true
+
+      empty_list_condition = {
+        all: {
+          player_infos: {
+            first_name: { associated_with: { dynamic_model__test_created_by_recs: { test2: 'compare', test1: 'return_value_list' } } }
+          }
+        }
+      }
+      expect(ConditionalActions.new(empty_list_condition, @al).calc_action_if).to be false
+    end
+
+    it 'does not match when the referenced resource has no record, even when the compared field is nil' do
+      master = @al.master
+      master.current_user = @user
+      master.dynamic_model__test_created_by_recs.delete_all
+      master.player_infos.create!(first_name: nil, last_name: 'Compare',
+                                  birth_date: Date.current - 30.years, rank: 10, source: 'nflpa')
+
+      condition = {
+        all: {
+          player_infos: {
+            first_name: { associated_with: { dynamic_model__test_created_by_recs: :test1 } }
+          }
+        }
+      }
+
+      expect(ConditionalActions.new(condition, @al).calc_action_if).to be false
+    end
+
+    it 'keeps other reference and query sources independent of associated_with' do
+      condition = {
+        all: {
+          this: { select_who: { this: 'select_who' }, user_id: { user: 'id' } },
+          masters: { id: @al.master_id },
+          player_infos: { first_name: { associated_with: { dynamic_model__test_created_by_recs: :test1 } } }
+        }
+      }
+
+      expect(ConditionalActions.new(condition, @al).calc_action_if).to be false
+    end
+
+    it 'resolves a dynamic resource attached to the master by its foreign key alone' do
+      master = @al.master
+      master.current_user = @user
+      master.dynamic_model__test_created_by_recs.delete_all
+      master.player_infos.create!(first_name: 'latest', last_name: 'Compare',
+                                  birth_date: Date.current - 30.years, rank: 10, source: 'nflpa')
+      dynamic_record = DynamicModel::TestCreatedByRec.new(
+        master_id: master.id,
+        test1: 'latest',
+        test2: 'Compare',
+        created_by_user_id: @user.id
+      )
+      dynamic_record.current_user = @user
+      dynamic_record.save!
+      expect(dynamic_record.master_id).to eq(master.id)
+
+      expect(ConditionalActions.new(field_comparison_condition, @al).calc_action_if).to be true
+    end
+
+    it 'compares with a singular master association' do
+      master = @al.master
+      master.current_user = @user
+      master.player_infos.delete_all
+      player = master.player_infos.create!(first_name: 'singular', last_name: 'Compare',
+                                           birth_date: Date.current - 30.years, rank: 10, source: 'nflpa')
+
+      condition = {
+        all: {
+          player_infos: {
+            id: player.id,
+            first_name: { associated_with: { player_info: :first_name } }
+          }
+        }
+      }
+
+      expect(ConditionalActions.new(condition, @al).calc_action_if).to be true
+
+      master.player_infos.delete_all
+      master.addresses.create!(city: 'Portland', state: 'OR', zip: '98102', rank: 0,
+                               rec_type: 'home', source: 'nflpa')
+      missing_has_one_condition = {
+        all: {
+          addresses: { city: { associated_with: { player_info: :first_name } } }
+        }
+      }
+      expect(ConditionalActions.new(missing_has_one_condition, @al).calc_action_if).to be false
+    end
+
+    it 'treats a missing referenced record as no match in any, not_any and not_all' do
+      master = @al.master
+      master.current_user = @user
+      master.dynamic_model__test_created_by_recs.delete_all
+      master.player_infos.delete_all
+      master.player_infos.create!(first_name: nil, last_name: 'Compare',
+                                  birth_date: Date.current - 30.years, rank: 10, source: 'nflpa')
+
+      expect(ConditionalActions.new(field_comparison_condition(selection_type: :any), @al).calc_action_if).to be false
+      expect(ConditionalActions.new(field_comparison_condition(selection_type: :not_any), @al).calc_action_if).to be true
+      expect(ConditionalActions.new(field_comparison_condition(selection_type: :not_all), @al).calc_action_if).to be true
+    end
+
+    it 'keeps a missing comparison record local to its condition in a mixed any block' do
+      master = @al.master
+      master.current_user = @user
+      master.dynamic_model__test_created_by_recs.delete_all
+      master.player_infos.delete_all
+      master.player_infos.create!(first_name: nil, last_name: 'Compare',
+                                  birth_date: Date.current - 30.years, rank: 10, source: 'nflpa')
+      matching_address = master.addresses.create!(
+        city: 'Portland', state: 'OR', zip: '98101', rank: 0, rec_type: 'home', source: 'nflpa'
+      )
+
+      condition = {
+        any: {
+          player_infos: {
+            first_name: { associated_with: { dynamic_model__test_created_by_recs: :test1 } },
+            last_name: 'not matching'
+          },
+          addresses: { city: matching_address.city }
+        }
+      }
+
+      expect(ConditionalActions.new(condition, @al).calc_action_if).to be true
+    end
+
+    it 'handles a missing comparison record with and_latest_matches' do
+      master = @al.master
+      master.current_user = @user
+      master.dynamic_model__test_created_by_recs.delete_all
+      master.player_infos.delete_all
+      player = master.player_infos.create!(first_name: nil, last_name: 'Compare',
+                                           birth_date: Date.current - 30.years, rank: 10, source: 'nflpa')
+
+      condition = {
+        all: {
+          player_infos: {
+            first_name: { associated_with: { dynamic_model__test_created_by_recs: :test1 } },
+            and_latest_matches: { id: player.id }
+          }
+        }
+      }
+
+      expect(ConditionalActions.new(condition, @al).calc_action_if).to be false
+    end
+
+    it 'uses the latest id only for scalar and filtered comparisons' do
+      master = @al.master
+      master.current_user = @user
+      master.dynamic_model__test_created_by_recs.delete_all
+      master.player_infos.delete_all
+      master.player_infos.create!(first_name: 'older', last_name: 'Compare',
+                                  birth_date: Date.current - 30.years, rank: 10, source: 'nflpa')
+      master.dynamic_model__test_created_by_recs.create!(
+        test1: 'older', test2: 'compare', created_by_user_id: @user.id
+      )
+      master.dynamic_model__test_created_by_recs.create!(
+        test1: 'newer', test2: 'compare', created_by_user_id: @user.id
+      )
+
+      expect(ConditionalActions.new(field_comparison_condition, @al).calc_action_if).to be false
+      filtered = filtered_field_comparison_condition(filters: { test2: 'compare' })
+      expect(ConditionalActions.new(filtered, @al).calc_action_if).to be false
+    end
+
+    it 'evaluates filtered comparisons under all, any, not_any and not_all' do
+      master = @al.master
+      master.current_user = @user
+      master.dynamic_model__test_created_by_recs.delete_all
+      master.player_infos.delete_all
+      master.player_infos.create!(first_name: 'latest', last_name: 'Compare',
+                                  birth_date: Date.current - 30.years, rank: 10, source: 'nflpa')
+      master.dynamic_model__test_created_by_recs.create!(
+        test1: 'latest', test2: 'match', created_by_user_id: @user.id
+      )
+
+      %i[all any].each do |selection_type|
+        conf = filtered_field_comparison_condition(selection_type:, filters: { test2: 'match' })
+        expect(ConditionalActions.new(conf, @al).calc_action_if).to be true
+      end
+      %i[not_any not_all].each do |selection_type|
+        conf = filtered_field_comparison_condition(selection_type:, filters: { test2: 'match' })
+        expect(ConditionalActions.new(conf, @al).calc_action_if).to be false
+      end
+
+      no_match = filtered_field_comparison_condition(selection_type: :not_any, filters: { test2: 'exclude' })
+      expect(ConditionalActions.new(no_match, @al).calc_action_if).to be true
+    end
+
+    it 'supports arrays for return_value and return_value_list, including multiple values and exclusions' do
+      master = @al.master
+      master.current_user = @user
+      master.dynamic_model__test_created_by_recs.delete_all
+      master.player_infos.delete_all
+      master.player_infos.create!(first_name: 'middle', last_name: 'Compare',
+                                  birth_date: Date.current - 30.years, rank: 10, source: 'nflpa')
+      master.dynamic_model__test_created_by_recs.create!(
+        test1: 'old', test2: 'include', created_by_user_id: @user.id
+      )
+      master.dynamic_model__test_created_by_recs.create!(
+        test1: 'middle', test2: 'include', created_by_user_id: @user.id
+      )
+      master.dynamic_model__test_created_by_recs.create!(
+        test1: 'newest', test2: 'exclude', created_by_user_id: @user.id
+      )
+
+      array_scalar = filtered_field_comparison_condition(filters: { test2: %w[include exclude] })
+      expect(ConditionalActions.new(array_scalar, @al).calc_action_if).to be false
+
+      array_list = filtered_field_comparison_condition(
+        filters: { test2: %w[include exclude] }, return_type: 'return_value_list'
+      )
+      expect(ConditionalActions.new(array_list, @al).calc_action_if).to be true
+
+      list_excluding_older_record = filtered_field_comparison_condition(
+        filters: { test2: 'exclude' }, return_type: 'return_value_list'
+      )
+      expect(ConditionalActions.new(list_excluding_older_record, @al).calc_action_if).to be false
+
+      excluding_array = filtered_field_comparison_condition(
+        selection_type: :not_any, filters: { test2: %w[missing exclude] }
+      )
+      expect(ConditionalActions.new(excluding_array, @al).calc_action_if).to be true
+    end
+
+    it 'applies nil filters and treats a filtered has_one association in Ruby' do
+      master = @al.master
+      master.current_user = @user
+      master.player_infos.delete_all
+      master.addresses.delete_all
+      player = master.player_infos.create!(first_name: 'singular', last_name: 'Compare',
+                                           birth_date: Date.current - 30.years, rank: 10, source: 'nflpa')
+      address = master.addresses.create!(city: 'singular', state: 'OR', zip: '98102', rank: 0,
+                                         rec_type: 'home', source: 'nflpa')
+
+      matching_has_one = {
+        all: {
+          addresses: {
+            city: { associated_with: { player_info: { birth_date: Date.current - 30.years, first_name: 'return_value' } } }
+          }
+        }
+      }
+      expect(ConditionalActions.new(matching_has_one, @al).calc_action_if).to be true
+
+      excluding_has_one = {
+        not_any: {
+          addresses: {
+            city: { associated_with: { player_info: { birth_date: Date.current - 40.years, first_name: 'return_value' } } }
+          }
+        }
+      }
+      expect(ConditionalActions.new(excluding_has_one, @al).calc_action_if).to be true
+      expect(address).to be_present
+      expect(player).to be_present
+
+      master.dynamic_model__test_created_by_recs.delete_all
+      master.dynamic_model__test_created_by_recs.create!(
+        test1: 'nil-filter', test2: nil, created_by_user_id: @user.id
+      )
+      master.player_infos.first.update!(first_name: 'nil-filter')
+      nil_filter = filtered_field_comparison_condition(filters: { test2: nil })
+      expect(ConditionalActions.new(nil_filter, @al).calc_action_if).to be true
+    end
+
+    it 'retains any, all and not_any selection behaviour' do
+      master = @al.master
+      master.current_user = @user
+      master.dynamic_model__test_created_by_recs.delete_all
+      create_comparison_records(master)
+
+      expect(ConditionalActions.new(field_comparison_condition(selection_type: :any), @al).calc_action_if).to be true
+      expect(ConditionalActions.new(field_comparison_condition(selection_type: :all), @al).calc_action_if).to be true
+      expect(ConditionalActions.new(field_comparison_condition(selection_type: :not_any), @al).calc_action_if).to be false
     end
   end
 end

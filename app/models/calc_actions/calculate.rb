@@ -32,9 +32,10 @@ module CalcActions
     # We won't use a query join when referring to tables based on these keys
     NonJoinTableNames = %i[this parent embedded_item referring_record top_referring_record this_references parent_references
                            parent_or_this_references user master condition value hide_error invalid_error_message
-                           role_name reference ids_referencing and_latest_matches lookup].freeze
+                           role_name reference ids_referencing and_latest_matches lookup associated_with].freeze
 
     ReturnTypes = %w[return_value return_value_list return_result return_all_results].freeze
+    NoMatchingResourceRecord = Object.new.freeze
 
     included do
       attr_accessor :condition_scope
@@ -124,7 +125,10 @@ module CalcActions
     # @param bool [String] value 'AND' or 'OR' used to replace the BoolTypeString placeholder
     # @return [ActiveQuery::Relation] the final @condition_scope
     def gen_condition_scope(conditions, extra_conditions = [], bool = 'AND')
-      @condition_scope = if conditions.first && conditions.first.last&.length == 0
+      no_matching_resource_record = no_matching_resource_record?(conditions)
+      @condition_scope = if no_matching_resource_record
+                           @base_query.none
+                         elsif conditions.first && conditions.first.last&.length == 0
                            # If no conditions are specified for this table, don't apply it as a where clause
                            # since it always invalidates the query
                            # This typically happens as a result of extra_conditions being
@@ -143,7 +147,7 @@ module CalcActions
         @condition_scope = @condition_scope.where(extra_conditions)
       end
 
-      if @and_latest_matches
+      if @and_latest_matches && !no_matching_resource_record
         tname = @and_latest_matches.first.first
         latest_id = @condition_scope.select("#{tname}.id and_match_res_id").order(and_match_res_id: :desc).first&.and_match_res_id
         @and_latest_matches[tname][:id] = latest_id
@@ -306,38 +310,10 @@ module CalcActions
         from_instance = @current_instance.reference
         val = from_instance && attribute_from_instance(from_instance, val_item_value)
 
+      elsif val_item_key == :associated_with
+        val = associated_with_reference_value(val_item_value)
       elsif val_item_key == :ids_referencing
-        # Get an array of ids for a specified set of "from" items
-        # where the items reference a "target" item, based on a filter
-        # This is different from `this_references` since "from" is unrelated
-        # to the current instance
-        # id:
-        #   ids_referencing:
-        #     target:
-        #       external_items:
-        #         rec_type: val
-        #     from:
-        #       activity_log_items:
-        #         extra_log_type: act1
-        #         return: return_all_results
-        to_record_type = val_item_value[:target].first.first.to_s.singularize
-        filter_by = val_item_value[:target].first.last
-        from_item_def = val_item_value[:from]
-
-        ca = ConditionalActions.new from_item_def, @current_instance
-        from_items = ca.get_this_val
-        unless from_items.present?
-          raise FphsException,
-                'ids_referencing from items was not found - ' \
-                'ensure return: return_all_results is specified and at least one result is returned'
-        end
-
-        refs = from_items.map do |item|
-          item.save_trigger_results = current_instance.save_trigger_results
-          item.current_user = current_instance.current_user
-          ModelReference.find_references(item, to_record_type:, filter_by:, active: true).pluck(:from_record_id)
-        end
-        val = refs.flatten.compact
+        val = generate_ids_referencing_condition(val_item_value)
       elsif val_item_key == :lookup
         val = generate_lookup_condition(val_item_value)
       elsif val_item_key.in? %i[this_references parent_references parent_or_this_references]
@@ -376,6 +352,162 @@ module CalcActions
       end
 
       val
+    end
+
+    #
+    # Get an array of ids for the "from" items that reference a "target" item, based on a filter.
+    # See the `ids_referencing` example in {#generate_match_query_condition}.
+    # @param value [Hash] with :target (resource => filter) and :from (a nested condition returning all results)
+    # @return [Array] ids of the referencing records
+    def generate_ids_referencing_condition(value)
+      to_record_type = value[:target].first.first.to_s.singularize
+      filter_by = value[:target].first.last
+      from_item_def = value[:from]
+
+      ca = ConditionalActions.new from_item_def, @current_instance
+      from_items = ca.get_this_val
+      unless from_items.present?
+        raise FphsException,
+              'ids_referencing from items was not found - ' \
+              'ensure return: return_all_results is specified and at least one result is returned'
+      end
+
+      refs = from_items.map do |item|
+        item.save_trigger_results = current_instance.save_trigger_results
+        item.current_user = current_instance.current_user
+        ModelReference.find_references(item, to_record_type:, filter_by:, active: true).pluck(:from_record_id)
+      end
+      refs.flatten.compact
+    end
+
+    #
+    # Resolve the comparison value for an `associated_with` field condition, using a record
+    # (or records) from a master association of the current master.
+    #   associated_with:
+    #     resource_name: field                  # latest record's field
+    #     resource_name:                        # filtered
+    #       rank: 10
+    #       field: return_value | return_value_list
+    # @param value [Hash] a single resource name, with a field name or filtered field conditions
+    # @return [Object | Array | NoMatchingResourceRecord] the value(s) to compare, or the
+    #   NoMatchingResourceRecord sentinel if nothing matches or the definition is invalid
+    def associated_with_reference_value(value)
+      return NoMatchingResourceRecord unless value.is_a?(Hash) && value.size == 1
+
+      resource_name, comparison = value.first
+      return NoMatchingResourceRecord unless Master.reflect_on_association(resource_name.to_sym)
+
+      if comparison.is_a?(Hash)
+        return NoMatchingResourceRecord unless valid_associated_with_filters?(comparison)
+
+        filtered_associated_field_value(resource_name, comparison)
+      elsif comparison.is_a?(String) || comparison.is_a?(Symbol)
+        latest_associated_field_value(resource_name, comparison)
+      else
+        NoMatchingResourceRecord
+      end
+    end
+
+    #
+    # Get a field value from the latest record (highest id) of a master association
+    # @return [Object | NoMatchingResourceRecord] the field value, or the sentinel if there is no record
+    def latest_associated_field_value(resource_name, field_name)
+      record = latest_master_association_record(resource_name)
+      return NoMatchingResourceRecord unless record
+
+      attribute_from_instance(record, field_name)
+    end
+
+    #
+    # A filtered `associated_with` hash must have exactly one return directive (the compared field),
+    # and all other values must be scalars or arrays of scalars to be used as filters
+    def valid_associated_with_filters?(fields)
+      directives = fields.values.count { |value| record_source_return_directive?(value) }
+      return false unless directives == 1
+
+      fields.all? do |_field, value|
+        record_source_return_directive?(value) ||
+          (!value.is_a?(Hash) && (!value.is_a?(Array) || value.none? { |item| item.is_a?(Hash) || item.is_a?(Array) }))
+      end
+    end
+
+    # Is the value a return_value or return_value_list directive?
+    def record_source_return_directive?(value)
+      value.is_a?(String) || value.is_a?(Symbol) ? value.to_s.in?(%w[return_value return_value_list]) : false
+    end
+
+    #
+    # Filter a master association by equality (arrays are IN) and return the compared field.
+    # return_value gives the latest matching record's value (highest id);
+    # return_value_list gives the values of all matching records.
+    # A singular (has_one) association has its filters applied in Ruby against the single record.
+    # @param field_conditions [Hash] filters, plus one field with a return directive
+    # @return [Object | Array | NoMatchingResourceRecord] the value(s), or the sentinel if nothing matches
+    def filtered_associated_field_value(resource_name, field_conditions)
+      master = master_for_associated_field(resource_name)
+      return NoMatchingResourceRecord unless master
+
+      association = master.public_send(resource_name)
+      field_name, return_type = field_conditions.find { |_field, value| record_source_return_directive?(value) }
+      filters = field_conditions.except(field_name)
+
+      if association.respond_to?(:where)
+        matching_records = association.where(filters).reorder(association.klass.primary_key => :desc)
+        if return_type.to_s == 'return_value_list'
+          values = matching_records.pluck(field_name)
+          return values.empty? ? NoMatchingResourceRecord : values
+        end
+
+        record = matching_records.first
+        return record ? attribute_from_instance(record, field_name) : NoMatchingResourceRecord
+      end
+
+      record = association
+      return NoMatchingResourceRecord unless record && association_matches_filters?(record, filters)
+
+      value = attribute_from_instance(record, field_name)
+      return [value] if return_type.to_s == 'return_value_list'
+
+      value
+    end
+
+    # Does a single record satisfy all filters? Filter values are cast to the attribute type,
+    # as a database query would, and arrays match if any element equals the attribute
+    def association_matches_filters?(record, filters)
+      filters.all? do |field, filter_value|
+        type = record.class.type_for_attribute(field.to_s)
+        actual = record.attributes[field.to_s]
+        expected_values = filter_value.is_a?(Array) ? filter_value : [filter_value]
+        expected_values.map { |expected| type.cast(expected) }.include?(actual)
+      end
+    end
+
+    # The master of the current instance, if the resource name is an association of masters
+    def master_for_associated_field(resource_name)
+      master = @current_instance if @current_instance.is_a?(Master)
+      master ||= @current_instance.master if @current_instance.respond_to?(:master)
+      master if master && Master.reflect_on_association(resource_name.to_sym)
+    end
+
+    # The latest record (highest id) of a master association for the current master.
+    # A singular (has_one) association returns its record, or nil.
+    def latest_master_association_record(resource_name)
+      master = @current_instance if @current_instance.is_a?(Master)
+      master ||= @current_instance.master if @current_instance.respond_to?(:master)
+      return unless master && Master.reflect_on_association(resource_name.to_sym)
+
+      association = master.public_send(resource_name)
+      return association unless association.respond_to?(:reorder)
+
+      association.reorder(association.klass.primary_key => :desc).first
+    end
+
+    # Has any condition value been resolved to NoMatchingResourceRecord?
+    # If so, the condition scope can never match and is replaced with an empty scope.
+    def no_matching_resource_record?(conditions)
+      conditions.any? do |_table, fields|
+        fields.is_a?(Hash) && fields.values.any? { |value| value.equal?(NoMatchingResourceRecord) }
+      end
     end
 
     #

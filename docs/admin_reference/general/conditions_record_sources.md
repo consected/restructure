@@ -23,6 +23,34 @@ against.
 !defs(conditions_sources_2_field_from_this_defs.yaml)
 ```
 
+## Comparing fields with the latest related record
+
+A field condition can compare its value with a field from a record in a resource associated
+with the current master. Write this comparison using the reserved `associated_with` reference
+key, whose value names exactly one Master association. Both collection and singular (`has_one`)
+associations are supported.
+
+```yaml
+!defs(conditions_sources_11_associated_with_defs.yaml)
+```
+
+For a scalar field name, the record with the highest `id` is used. For a `has_one` association,
+its associated record is used. If no record exists, the condition does not match, even when the
+compared field is `nil`.
+
+For a filtered comparison, provide exactly one `return_value` or `return_value_list` entry. The
+entry's key is the field to compare; the other keys are equality filters. Scalar filter values use
+`=`, and arrays use `IN`. Filter values are literals: they are not processed as `{{}}` substitutions.
+Nested hashes and operators are not supported. Filters for a `has_one` association are applied in
+Ruby; collection filters are applied to the association query.
+
+`return_value` uses the matching record with the highest `id`. `return_value_list` compares with
+the field values from **all** matching records. If no record matches the filters, the comparison
+does not match (including when the field's value would otherwise be `nil`).
+
+See [substitutions](substitutions.md) for why this is preferable to using an unordered
+association's `.first` in a field comparison.
+
 ### Previous values
 
 ```yaml
