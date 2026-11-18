@@ -56,6 +56,16 @@ RSpec.describe CalcActions::ConditionLinter, type: :model do
       expect_notice({ all: { missing_association: { id: 1 } } }, mentioning: 'missing_association')
     end
 
+    it 'rejects a table keyed under a field, which the runtime cannot compare' do
+      expect_notice({ all: { player_infos: { birth_date: { addresses: { zip: '02115' } } } } },
+                    mentioning: 'table under a field')
+    end
+
+    it 'still accepts nested selection blocks and plain field values' do
+      expect_clean({ all: { player_infos: { birth_date: { not_any: { addresses: { zip: '1' } } } } } }, mode: :value)
+      expect_clean({ all: { player_infos: { first_name: { condition: '=', value: 'a' } } } })
+    end
+
     it 'rejects reserved keys used as record sources' do
       expect_notice({ all: { this_references: { id: 1 } } }, mentioning: 'this_references')
     end

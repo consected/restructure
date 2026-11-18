@@ -288,6 +288,9 @@ module CalcActions
         cond.each_key { |key| lint_selection(key, cond[key], path, ctx) if selection_key?(key) }
       elsif (reference = cond.keys.find { |key| key.in?(REFERENCE_KEYS) })
         lint_reference(reference, cond[reference], path)
+      elsif (table = cond.keys.find { |key| record_source_name?(key) })
+        add(path, "'#{table}' is a table under a field, which is not a supported comparison - the field cannot be " \
+                  'compared to a record source. Put the table in its own block alongside this one')
       else
         lint_value_config(cond, path, ctx)
       end
@@ -493,6 +496,12 @@ module CalcActions
       reflection.klass
     rescue StandardError
       nil
+    end
+
+    def record_source_name?(key)
+      return false if selection_key?(key) || key.in?(RESERVED_KEYS) || key.in?(NON_JOIN_KEYS)
+
+      Master.reflect_on_association(key).present? || resource_for(key).present?
     end
 
     def join_table?(key)
