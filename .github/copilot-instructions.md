@@ -10,7 +10,7 @@
 5. **If requirements are not clear, ask for clarification before proceeding**
 6. **Never commit directly to `up-develop` or `develop` branches** - always create feature branches and pull requests
 7. **Focus on configuration over code** - most features should be achievable through admin panel settings rather than new Ruby code
-8. **Create new files and edit directly in the editor**; avoid using command line file operations to generate source code
+8. **Create new files and edit directly in the edit tools**; avoid using command line file operations to generate or edit source code, since these lead to formatting issues and often require human approval.
 9. **Never update CHANGELOG.md directly** - the release process will handle this based on commit messages and pull request titles
 10. **You have permission to use interactive debugging tools** (e.g., `interactive_debug_session`, `debugger`) to pause execution and inspect state, either in Rspec tests or if we are collaborating on a development server.
 11. **Workspaces are isolated environments for each feature branch** - the database, file system, test environment and other resources are separate, ensuring changes in one branch do not affect others. This is controlled by the environment variable `TEST_ENV_SET`, which is normally set when opening a new terminal. There is no need to check the database for other workspace connections.
@@ -21,21 +21,22 @@
 Notwithstanding restrictions instructed by a human supervisor or an agent
 coordinator, agents have the following assisted permissions:
 
-- In general agents are expected to be able to read, write and delete files within the workspace.
-- Agents are allowed to write, edit and delete specs to cover proposed changes, address coverage gaps and resolve incorrectly implemented tests.
+- Agents are expected to be able to read, write and delete all files within the workspace.
+- Agents are allowed to write, edit, delete and run specs to cover proposed changes, address coverage gaps and resolve incorrectly implemented tests. `spec` files may not be obviously associated with the request, since implementation changes can reveal test flakiness to be resolved.
 - Agents are allowed to make changes to the code and configuration where necessary to support the specs or to fix issues identified by the specs.
-- Agents are allowed to make changes to code and configuration where instructed to do so, or to prototype solutions that aren't supported by specs.
+- Agents are allowed to make changes to code and configuration where instructed to do so, or to prototype solutions that aren't supported by specs. Prototyping may include running `rails runner` or direct `ruby` commands.
 - Agents are allowed to create, edit and delete temporary files as needed for testing, debugging, or prototyping solutions. Any files in `tmp/agent-tmp` should be considered temporary and can be safely removed at any time.
-- Agents may commit and rebase as required to maintain a clean and up-to-date feature branch.
+- Agents may add and remove files, commit, amend and rebase the feature branch as required to maintain a clean and up-to-date branch.
 - Agents may read rvm, gem, and bundle files to understand the configuration and code dependencies.
 - Agents may read Ruby, Rails, Node.js, and other JS dependencies from local
 sources or github repositories.
+- Review agents are always allowed to run or generate new specs to verify changes and ensure test coverage, even if they have been told by a coordinator not to change implementation code.
 
 ### Critical Rules for Running Terminal Commands
 
 **Before running any commands in the terminal**
 
-1. **Never set environment variables inline** - use app-scripts instead or `export` them in the terminal before running commands
+1. **Avoid the use of environment variables inline** - use prefer the use of `app-scripts` instead
 2. **Always wait for commands to complete before proceeding** - for long-running commands (such as rspec tests), don't poll - call the `get_terminal_output` once so you can be notified automatically when the command exits
 3. **Never redirect scripts stdout or stderr to /dev/null or /tmp**
 4. If creating long text files (e.g., PR body, issue body), **write them directly to a temporary or session file** rather than using command line tools that may escape characters or truncate output
