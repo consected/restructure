@@ -464,7 +464,9 @@
   // Display date in local format, without adjusting the timezone and giving the appearance of changing the day
   Handlebars.registerHelper('local_date', function (date_string, unknown, options) {
     if (date_string === null || date_string === '') return unknown;
-    const startTime = _fpa.utils.DateTime.fromISO(date_string)
+    // Parse in UTC: date-only values (e.g. birth_date) have no timezone, so parsing them in the browser's
+    // zone and converting to UTC moves them to the previous day in zones east of UTC
+    const startTime = _fpa.utils.DateTime.fromISO(date_string, { zone: 'UTC' })
 
     if (!startTime.isValid) {
       if (options.hash.return_string)
@@ -474,7 +476,7 @@
     }
 
     const format = UserPreferences.date_format();
-    return startTime.toUTC().toFormat(format);
+    return startTime.toFormat(format);
   });
 
   Handlebars.registerHelper('and', function (a, b, options) {
