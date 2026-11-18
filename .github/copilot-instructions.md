@@ -10,7 +10,7 @@
 5. **If requirements are not clear, ask for clarification before proceeding**
 6. **Never commit directly to `up-develop` or `develop` branches** - always create feature branches and pull requests
 7. **Focus on configuration over code** - most features should be achievable through admin panel settings rather than new Ruby code
-8. **Create new files and edit directly in the edit tools**; avoid using command line file operations to generate or edit source code, since these lead to formatting issues and often require human approval.
+8. **Create new files and edit directly in the edit tools**; avoid using command line file operations to generate or edit source code *unless the edit and create tools are not available*.
 9. **Never update CHANGELOG.md directly** - the release process will handle this based on commit messages and pull request titles
 10. **You have permission to use interactive debugging tools** (e.g., `interactive_debug_session`, `debugger`) to pause execution and inspect state, either in Rspec tests or if we are collaborating on a development server.
 11. **Workspaces are isolated environments for each feature branch** - the database, file system, test environment and other resources are separate, ensuring changes in one branch do not affect others. This is controlled by the environment variable `TEST_ENV_SET`, which is normally set when opening a new terminal. There is no need to check the database for other workspace connections.
