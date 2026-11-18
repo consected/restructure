@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-# Characterizes the legacy report button matrix, including its context-specific
-# labels/classes and the distinct list, table, count, and embedded result paths.
+# Characterizes legacy report buttons, option read-through, editable-report controls, and result markup.
 
 require 'rails_helper'
 
@@ -34,6 +33,25 @@ RSpec.describe 'Legacy report button rendering', type: :request do
       expect(buttons.first[:classes]).to include('auto-submitter')
       expect(buttons.first[:classes]).not_to include('hidden', 'auto-run')
       expect(buttons.first[:id]).to be_nil
+    end
+
+    it 'reads legacy hide_criteria_panel and prevent_collapse_for_list settings' do
+      report = create_report(
+        report_type: 'regular_report', searchable: true,
+        view_options: { hide_criteria_panel: true, prevent_collapse_for_list: true }
+      )
+
+      get '/masters/search'
+      expect(response).to have_http_status(:ok)
+      search_page = response.parsed_body
+      tab = search_page.at_css("#expand-searchable-report-#{report.alt_resource_name}")
+      expect(tab['class'].split).to include('prevent-list-collapse')
+      panel_body = search_page.at_css("#master-report-#{report.alt_resource_name} .panel-body.searchable-report")
+      expect(panel_body['style']).to include('max-height: 0', 'padding: 0 !important')
+
+      get report_path(report)
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body.css('.report-criteria.hidden')).not_to be_empty
     end
 
     it 'hides an auto search-panel button unless force_show_search_button is enabled' do
@@ -214,6 +232,24 @@ RSpec.describe 'Legacy report button rendering', type: :request do
       expect(response.parsed_body.css('.search_count_reports')).to be_empty
     end
 
+    it 'keeps legacy editable-report inline actions and suppresses count and exports' do
+      editable_regular = create_report(report_type: 'regular_report', edit_model: 'masters')
+      regular_page = get_report_form(editable_regular)
+      regular_buttons = submit_buttons(regular_page)
+
+      expect(regular_buttons.pluck(:value)).to eq(['table'])
+      expect(regular_page.css('.inline-search-button')).not_to be_empty
+      expect(regular_page.css('.inline-search-button input[type="submit"], .inline-search-button button[type="submit"]')).to be_empty
+
+      editable_search = create_report(report_type: 'search', edit_model: 'masters')
+      search_page = get_report_form(editable_search)
+      search_buttons = submit_buttons(search_page)
+
+      expect(search_buttons.pluck(:value)).to eq(['search'])
+      expect(search_page.css('.inline-search-button button[name="commit"][value="search"]')).not_to be_empty
+      expect(search_buttons.pluck(:value) & %w[count csv json]).to be_empty
+    end
+
     it 'does not render count submission for count reports while retaining authorized exports' do
       report = create_report(report_type: 'count')
 
@@ -260,6 +296,54 @@ RSpec.describe 'Legacy report button rendering', type: :request do
       expect(count_results.css('.count-only')).not_to be_empty
     end
 
+    it 'preserves the legacy results container and navigation markup for each report type' do
+      reports = %w[regular_report search count].map { |report_type| create_report(report_type:) }
+
+      reports.each do |report|
+        results = get_report_results(report)
+        container = results.at_css('.data-results.report-container')
+
+        expect(container).not_to be_nil
+        expect(container['data-report-id']).to eq(report.id.to_s)
+        expect(container['data-report-type']).to be_nil
+        expect(container['class'].split).not_to include('report-type-report')
+
+        results_block = container.at_css('.report-results-block')
+        expect(results_block).not_to be_nil
+        expect(results_block['class'].split).not_to include('hidden', 'no_results_scroll', 'report-type-report')
+        expect(results_block['data-report-type']).to be_nil
+        expect(results_block.css('.back-to-search-form-btn, .show-results-btn')).to have_attributes(length: 2)
+        expect(results.css('.report-type-report, [data-report-type="report"]')).to be_empty
+      end
+
+      count_results = get_report_results(reports.first, commit: 'count')
+      count_container = count_results.at_css('.data-results.report-container')
+      count_block = count_container.at_css('.report-results-block')
+      expect(count_container.css('.count-only')).not_to be_empty
+      expect(count_block['class'].split).to include('hidden')
+      expect(count_block['class'].split).not_to include('no_results_scroll', 'report-type-report')
+      expect(count_block.css('.back-to-search-form-btn, .show-results-btn')).to have_attributes(length: 2)
+      expect(count_results.css('.report-type-report, [data-report-type="report"]')).to be_empty
+    end
+
+    it 'applies no_results_scroll to legacy reports and to embedded results' do
+      %w[regular_report search count].each do |report_type|
+        configured_report = create_report(report_type:, view_options: { no_results_scroll: true })
+        configured_results = get_report_results(configured_report)
+        configured_block = configured_results.at_css('.report-results-block')
+
+        expect(configured_block['class'].split).to include('no_results_scroll')
+        expect(configured_block.css('.back-to-search-form-btn, .show-results-btn')).to be_empty
+
+        embedded_report = create_report(report_type:)
+        embedded_results = get_report_results(embedded_report, embed: true)
+        embedded_block = embedded_results.at_css('.report-results-block')
+
+        expect(embedded_block['class'].split).to include('no_results_scroll')
+        expect(embedded_block.css('.back-to-search-form-btn, .show-results-btn')).to be_empty
+      end
+    end
+
     it 'renders embedded part=results without the report-page back and show buttons' do
       report = create_report(report_type: 'regular_report')
 
@@ -277,7 +361,7 @@ RSpec.describe 'Legacy report button rendering', type: :request do
 
   private
 
-  def create_report(report_type:, searchable: false, auto: false, view_options: {})
+  def create_report(report_type:, searchable: false, auto: false, view_options: {}, edit_model: nil)
     search_attrs = <<~YAML
       master_id:
         number:
@@ -296,7 +380,8 @@ RSpec.describe 'Legacy report button rendering', type: :request do
       report_type:,
       auto:,
       searchable:,
-      position: nil
+      position: nil,
+      edit_model:
     )
     Admin::UserAccessControl.create!(
       app_type: @user.app_type,
@@ -315,6 +400,17 @@ RSpec.describe 'Legacy report button rendering', type: :request do
     document = response.parsed_body
     expect(document.css('#report_query_form')).not_to be_empty
     document
+  end
+
+  def get_report_results(report, commit: 'table', embed: false)
+    get report_path(report), params: {
+      commit:,
+      part: 'results',
+      embed: embed ? 'true' : nil,
+      search_attrs: { master_id: @master.id }
+    }
+    expect(response).to have_http_status(:ok)
+    Nokogiri::HTML.fragment(response.body)
   end
 
   def submit_buttons(document)

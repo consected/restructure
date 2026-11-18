@@ -82,6 +82,21 @@ RSpec.describe OptionConfigs::ReportOptions, type: :model do
     end
   end
 
+  describe 'legacy result_handlers validation' do
+    it 'allows array values and rejects non-arrays with the legacy save error' do
+      report = @report1
+      report.options = "view_options:\n  result_handlers: []"
+
+      expect(report.save).to be(true)
+
+      report.options = "view_options:\n  result_handlers: invalid"
+      expect(report.save).to be(false)
+      expect(report.errors[:options].map(&:message)).to include(
+        'options view_options.result_handlers must be an array of handler names'
+      )
+    end
+  end
+
   describe 'list_options.get_query_count' do
     it 'accepts get_query_count as a valid list_options configuration' do
       report = @report1
