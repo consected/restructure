@@ -155,12 +155,17 @@ module GeneralDataConcerns
   end
 
   #
-  # Return a definition version string prefixed with a v
-  # If not version definition is provided (the version is current)
-  # or the templates don't use a version definition, just return 'v'
+  # Return the definition version key, using the live definition token for current records.
   # @return [String]
   def vdef_version
-    "v#{def_version}"
+    versioned_definition_record = respond_to?(:versioned_definition)
+    token = if versioned_definition_record
+              def_version || current_definition&.template_version_token
+            else
+              0
+            end
+
+    "v#{token || 0}"
   end
 
   #

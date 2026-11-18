@@ -6,6 +6,24 @@ module OptionConfigs
   # This is a stopgap until dynamic model and activity log definitions
   # are fully aligned
   class TemplateOptionMapping
+    #
+    # The template option mapping for a definition, by the model data type of the records it defines
+    # @param [Symbol] model_data_type - :dynamic_model, :activity_log or :external_identifier
+    # @param [DynamicModel|ActivityLog|ExternalIdentifier] def_record
+    # @param [OptionConfigs::ExtraOptions] option_type_config
+    # @param [User] current_user
+    # @return [Hash|nil] - nil if the model data type has no mapping
+    def self.mapping_for(model_data_type, def_record, option_type_config, current_user)
+      case model_data_type
+      when :dynamic_model
+        dynamic_model_mapping(def_record, option_type_config, current_user)
+      when :activity_log
+        activity_log_mapping(def_record, option_type_config, current_user)
+      when :external_identifier
+        external_identifier_mapping(def_record, option_type_config, current_user)
+      end
+    end
+
     def self.external_identifier_mapping(def_record, option_type_config, current_user)
       external_id_type = def_record.implementation_class
 
@@ -208,7 +226,7 @@ module OptionConfigs
         ),
         template_class: "alt-width #{cwc}",
         extra_class: view_options[:extra_class],
-        item_list: option_type_config.fields,
+        item_list: activity_log_item_list(def_record, option_type_config),
         data_sort: [:desc, data_action_when],
         subsort_id: true,
         custom_activity_log: :none,
@@ -266,6 +284,24 @@ module OptionConfigs
         base_route_segments: def_record.base_route_segments,
         base_route_short_name: def_record.base_route_short_name
       }
+    end
+
+    # The item list for an activity log option type.
+    # The primary and blank log lists of a live definition are those the page skeleton uses, which
+    # include the tracker history field. Other option types, and historical versions, use the
+    # configured fields.
+    # @return [Array]
+    def self.activity_log_item_list(def_record, option_type_config)
+      if def_record.def_version.nil?
+        case option_type_config.name
+        when :primary
+          return def_record.implementation_class.view_attribute_list
+        when :blank_log
+          return def_record.implementation_class.view_blank_log_attribute_list
+        end
+      end
+
+      option_type_config.fields
     end
 
     #

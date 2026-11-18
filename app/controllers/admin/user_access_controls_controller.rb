@@ -63,7 +63,7 @@ class Admin::UserAccessControlsController < AdminController
   end
 
   def resource_names_filters
-    ckey = "admin_user_access_control_resource_names-#{Admin::UserAccessControl.latest_update}"
+    ckey = Admin::UserAccessControl.resource_names_cache_key
     Rails.cache.fetch(ckey) do
       rns = Admin::UserAccessControl.resource_names_by_type.clone
       rns.each do |rnt, v|

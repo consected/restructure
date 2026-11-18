@@ -12,6 +12,9 @@ class Classification::GeneralSelection < ActiveRecord::Base
                       player_contacts_type player_contacts_source player_contacts_rank
                       addresses_type addresses_source addresses_rank].freeze
 
+  # Admin reference data fragment listing the item types, which follow the dynamic definitions' fields
+  InfoBlockCacheKey = 'info-block-gs-block'
+
   default_scope { order Arel.sql('item_type asc, coalesce(disabled, false) asc, coalesce(position, 0) asc, name asc') }
 
   before_validation :prevent_value_change, on: :update
@@ -23,6 +26,7 @@ class Classification::GeneralSelection < ActiveRecord::Base
   def self.item_types(refresh: false)
     if refresh
       Rails.cache.delete('Classification::GeneralSelection.item_types')
+      Rails.cache.delete(InfoBlockCacheKey)
       Classification::SelectionOptionsHandler.reset!
     end
     Rails.cache.fetch('Classification::GeneralSelection.item_types') do

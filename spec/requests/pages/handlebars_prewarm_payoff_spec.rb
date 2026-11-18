@@ -71,11 +71,13 @@ RSpec.describe 'Handlebars prewarm payoff (issue #1362 Stage 2)', type: :request
     HandlebarsPrecompiler.cleanup_compiled_output
     HandlebarsPrecompiler.cleanup_tmp_dir
     Rails.cache.delete('server_cache_version')
+    Rails.cache.delete(Application::HANDLEBARS_GENERATION_CACHE_KEY)
   end
 
   def bust_page_fragment_cache!
     scv = Rails.cache.read('server_cache_version')
-    Rails.cache.clear
+    # Keeps the compiled generation, as an admin save does, so only fragments are discarded
+    Application.clear_cache_preserving_generation
     Rails.cache.write('server_cache_version', scv) if scv
   end
 

@@ -1,15 +1,2 @@
-<% 
-@instance_list.each do |oi|
-  ovd = oi.versioned_definition 
-  ovd.option_configs.each do |otc|
-%>
-<%= render partial: 'external_identifiers/common_search_results_template_item',
-                 locals: {
-                   def_record: ovd,
-                   option_type_config: otc
-                 } %>
-<% 
-  end
-end  
-%>
-<%= retrieve_requested_handlebars_templates __FILE__ %>
+<%= render partial: 'dynamic_models/common_search_results_template_set',
+           locals: { type: 'external_identifiers' } %>

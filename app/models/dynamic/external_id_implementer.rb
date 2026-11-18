@@ -258,10 +258,13 @@ module Dynamic
       end
     end
 
-    #
     # No versioning of templates at this time
     def def_version
       nil
+    end
+
+    def versioned_definition
+      current_definition
     end
 
     def initialize(attr = {})
