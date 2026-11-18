@@ -10,6 +10,10 @@ Administration is provided in [Admin: App Configurations](/admin/app_configurati
 
 !defs(app_configuration_defs.yaml)
 
+## Master Record Banner Titles
+
+The **master header prefix** and **master header title** configurations are substitution templates for the master record banner. Their tags accept [tag formatters](../general/substitutions.md). Date-only fields such as `birth_date` should use the `date` formatter, not the `date_time` formatters, so the day is not shifted. See the date and time formatting section of the substitutions page.
+
 ## Message Notification Contact Matching
 
 - **message notification contact resources**: a YAML hash mapping `email` and `phone` to `Master` contact association names. Each defaults to `player_contact_emails` and `player_contact_phones`. Each association must be a `has_many` whose table has `master_id` and `data` columns (`data` holds the email address or phone number). Any filtering the association defines, such as a `rec_type`, is applied, so a plain table containing only emails or only phone numbers works without a `rec_type` column. Invalid YAML or an unknown/invalid association is logged during live notifications and counted as a failure by the strict backfill task.
