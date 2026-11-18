@@ -43,6 +43,15 @@ RSpec.describe 'Config library versioning with dynamic definitions', type: :mode
     setup_access :tracker_histories
   end
 
+  # The rolled-back definitions (and their deleted libraries) must not stay registered in the
+  # process, or later specs that build template tokens for every active definition raise
+  after do
+    [DynamicModel, ActivityLog, ExternalIdentifier].each do |definition_class|
+      definition_class.reset_active_model_configurations!
+      definition_class.definition_cache.clear
+    end
+  end
+
   def create_test_config_library(label_value:)
     @lib_category = "test_ver_cat_#{rand(1_000_000_000)}"
     @lib_name = "test_ver_lib_#{rand(1_000_000_000)}"

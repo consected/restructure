@@ -3,14 +3,15 @@
 # Regression specs for issues #1525/#1526 and #1481: config-only edits keep the
 # cached page-template skeleton stable, while live template_config and index-data
 # ETags include current local and referenced definition tokens across requests.
-# Inputs baked into the skeleton (option type structure, reference captions, alt width
-# classes, dynamic model position) move the skeleton signature; lazily delivered
-# configuration does not. Bundle filenames are content addressed, so a permission change
+# The inputs that move or leave the skeleton signature are covered directly in
+# spec/models/master_templates/skeleton_signature_spec.rb. Bundle filenames are
+# content addressed, so a permission change
 # rotates the skeleton key but not the bundle unless the rendered content changes.
 require 'rails_helper'
 require './db/table_generators/dynamic_models_table'
 
 RSpec.describe 'Pages template freshness after dynamic definition edits', type: :request do
+  include CacheKeyMemoizationSupport
   include MasterSupport
   include ModelSupport
   include DynamicModelSupport
@@ -127,12 +128,11 @@ RSpec.describe 'Pages template freshness after dynamic definition edits', type: 
     ).uniq
   end
 
-  def skeleton_signature
-    Application.refresh_dynamic_defs
-    helpers = ApplicationController.helpers
-    helpers.instance_variable_set(:@master_templates_skeleton_cache_signatures, nil)
-    helpers.instance_variable_set(:@partial_cache_key_access_control_timestamps, nil)
-    helpers.master_templates_skeleton_cache_signature(app_type_id: @user.app_type_id)
+  def handlebars_bundle_contents(urls)
+    urls.map do |url|
+      key, filename = url.match(%r{gen-([\w-]+)/multi/([\w.-]+\.js)}).captures
+      File.read(HandlebarsPrecompiler.multi_dir(key).join(filename))
+    end
   end
 
   def save_definition_options_without_migration(definition, options)
@@ -148,10 +148,8 @@ RSpec.describe 'Pages template freshness after dynamic definition edits', type: 
   end
 
   def master_skeleton_cache_key
-    helpers = ApplicationController.helpers
-    helpers.instance_variable_set(:@master_templates_skeleton_cache_signatures, nil)
-    helpers.instance_variable_set(:@partial_cache_key_access_control_timestamps, nil)
-    helpers.master_templates_skeleton_cache_key(force_user_or_admin: @user)
+    Application.refresh_dynamic_defs
+    fresh_master_skeleton_cache_key(@user)
   end
 
   it 'keeps the cached skeleton after an options-only save' do
@@ -278,159 +276,6 @@ RSpec.describe 'Pages template freshness after dynamic definition edits', type: 
     change_setting('DisableVDef', previous_disable_vdef)
   end
 
-  it 'tracks active definition identity changes without including option edits' do
-    signature_before_add = skeleton_signature
-    definition = create_dynamic_model(live_caption_options('SignatureOne'))
-    signature_after_add = skeleton_signature
-    expect(signature_after_add).not_to eq(signature_before_add)
-
-    change_setting('AllowDynamicMigrations', false)
-    begin
-      definition.current_admin = @admin
-      definition.options = live_caption_options('SignatureTwo')
-      definition.save!
-      expect(skeleton_signature).to eq(signature_after_add)
-
-      definition.name = "Renamed template #{SecureRandom.hex(3)}"
-      definition.save!
-    ensure
-      change_setting('AllowDynamicMigrations', true)
-    end
-    signature_after_rename = skeleton_signature
-    expect(signature_after_rename).not_to eq(signature_after_add)
-
-    definition.disable!(@admin)
-    signature_after_disable = skeleton_signature
-    expect(signature_after_disable).not_to eq(signature_after_rename)
-
-    definition.reload.enable!(@admin)
-    signature_after_enable = skeleton_signature
-    expect(signature_after_enable).not_to eq(signature_after_disable)
-  end
-
-  it 'tracks bundled option structure but ignores template state changes' do
-    definition = create_dynamic_model(live_caption_options('StructureOne'))
-    original_signature = skeleton_signature
-
-    save_definition_options_without_migration(definition, <<~YAML)
-      _configurations:
-        use_current_version: true
-
-      default:
-        fields: [test1]
-        label: Changed label
-        caption_before:
-          test1: StructureTwo
-        show_if: {}
-        field_options:
-          test1:
-            disabled: true
-    YAML
-    expect(skeleton_signature).to eq(original_signature)
-
-    save_definition_options_without_migration(definition, <<~YAML)
-      _configurations:
-        use_current_version: true
-
-      default:
-        fields: [test1, test2]
-        caption_before:
-          test1: StructureTwo
-      secondary:
-        fields: [test2]
-    YAML
-    option_type_signature = skeleton_signature
-    expect(option_type_signature).not_to eq(original_signature)
-
-    save_definition_options_without_migration(definition, <<~YAML)
-      _configurations:
-        use_current_version: true
-
-      default:
-        fields: [test1, test2]
-        references:
-          player_contacts:
-            from: this
-            add: one_to_this
-      secondary:
-        fields: [test2]
-    YAML
-    references_signature = skeleton_signature
-    expect(references_signature).not_to eq(option_type_signature)
-
-    save_definition_options_without_migration(definition, <<~YAML)
-      _configurations:
-        use_current_version: true
-
-      default:
-        fields: [test1, test2]
-        embed: player_contact
-        references:
-          player_contacts:
-            from: this
-            add: one_to_this
-      secondary:
-        fields: [test2]
-    YAML
-    expect(skeleton_signature).not_to eq(references_signature)
-  end
-
-  it 'tracks dynamic model position, alt_width_classes and reference captions baked into the skeleton' do
-    options_with = lambda do |view_options: '', reference_caption: 'RefOne', label: 'Label'|
-      <<~YAML
-        _configurations:
-          use_current_version: true
-
-        default:
-          fields: [test1, test2]
-          label: #{label}
-          #{view_options}
-          caption_before:
-            test1: TemplateConfigOnly #{label}
-            reference_player_contacts: #{reference_caption}
-          references:
-            player_contacts:
-              from: this
-              add: one_to_this
-      YAML
-    end
-    definition = create_dynamic_model(options_with.call)
-    original_signature = skeleton_signature
-    original_key = master_skeleton_cache_key
-
-    # A purely lazily delivered edit (label and non-reference caption) must not move the skeleton
-    save_definition_options_without_migration(definition, options_with.call(label: 'Changed label'))
-    expect(skeleton_signature).to eq(original_signature)
-    expect(master_skeleton_cache_key).to eq(original_key)
-
-    definition.reload.update_columns(position: definition.position.to_i + 7)
-    position_signature = skeleton_signature
-    expect(position_signature).not_to eq(original_signature)
-    expect(master_skeleton_cache_key).not_to eq(original_key)
-
-    save_definition_options_without_migration(
-      definition, options_with.call(label: 'Changed label', view_options: "view_options:\n    alt_width_classes: col-md-8")
-    )
-    alt_width_signature = skeleton_signature
-    expect(alt_width_signature).not_to eq(position_signature)
-
-    save_definition_options_without_migration(
-      definition,
-      options_with.call(label: 'Changed label', reference_caption: 'RefTwo',
-                        view_options: "view_options:\n    alt_width_classes: col-md-8")
-    )
-    expect(skeleton_signature).not_to eq(alt_width_signature)
-  end
-
-  it 'tracks dynamic-definition category changes in the skeleton signature' do
-    definition = create_dynamic_model(live_caption_options('CategoryOne'))
-    original_signature = skeleton_signature
-
-    definition.update_columns(category: 'structural-category-change')
-
-    expect(skeleton_signature).not_to eq(original_signature)
-  end
-
   it 'rotates the skeleton for layout and permission changes, the bundle only when rendered content changes' do
     previous_caching = Rails.configuration.action_controller.perform_caching
     Rails.configuration.action_controller.perform_caching = true
@@ -475,40 +320,15 @@ RSpec.describe 'Pages template freshness after dynamic definition edits', type: 
     permission_text = page_template_text(clean_compiled_output: false)
     permission_bundle_urls = handlebars_bundle_urls(permission_text)
     # Bundle filenames are content-addressed since Phase 1 (no access-control version), so a
-    # permission change rotates the skeleton key but only changes the bundle when it changes
-    # the rendered template content, which revoking this access does not.
-    expect(permission_bundle_urls).to eq(layout_bundle_urls)
+    # permission change rotates the skeleton key but moves the bundle only if it changes the bundled
+    # content. Whether revoking this access changes it depends on any other access the user holds, so
+    # assert the invariant; spec/requests/pages/template_bundle_permission_content_spec.rb covers
+    # permission changes that do and do not alter the bundled content deterministically.
+    expect(permission_bundle_urls == layout_bundle_urls).to eq(
+      handlebars_bundle_contents(permission_bundle_urls) == handlebars_bundle_contents(layout_bundle_urls)
+    )
   ensure
     Rails.configuration.action_controller.perform_caching = previous_caching
-  end
-
-  it 'reuses a definition structure digest until its live template token changes' do
-    definition = create_dynamic_model(caption_options('StructureCache'))
-    helper = Object.new.extend(ApplicationHelper)
-    token = definition.current_def_version
-    allow(definition).to receive(:option_configs).and_call_original
-    allow(definition).to receive(:template_version_token) { token }
-
-    first_structure = helper.master_templates_definition_structure(definition)
-    expect(helper.master_templates_definition_structure(definition)).to eq(first_structure)
-    expect(definition).to have_received(:option_configs).once
-
-    token += 1
-    expect(helper.master_templates_definition_structure(definition)).to eq(first_structure)
-    expect(definition).to have_received(:template_version_token).exactly(3).times
-    expect(definition).to have_received(:option_configs).twice
-  end
-
-  it 'tracks activity-log item and record types in the skeleton signature' do
-    activity_log = ActivityLog.active.first!
-    original_rec_type = activity_log.rec_type
-    original_signature = skeleton_signature
-
-    activity_log.update_columns(rec_type: "structural-#{SecureRandom.hex(4)}")
-
-    expect(skeleton_signature).not_to eq(original_signature)
-  ensure
-    activity_log&.update_columns(rec_type: original_rec_type) if original_rec_type
   end
 
   it 'keeps a config-library edit out of the skeleton and refreshes template_config' do
@@ -623,12 +443,12 @@ RSpec.describe 'Pages template freshness after dynamic definition edits', type: 
     new_token = worker_definition.current_def_version
     expect(new_token).not_to eq(old_token)
     expect(record.current_definition).to equal(stale_definition)
-    expect(stale_definition).to receive(:refresh_current_def_version!).once.and_call_original
 
     get path
 
     expect(response).to have_http_status(:ok)
     expect(response.body).to include("\"vdef_version\":\"v#{new_token}\"")
+    expect(DynamicModel.definition_cache.fetch(definition.id)).not_to equal(stale_definition)
   end
 
   it 'revalidates cached data after another worker changes only the live definition' do
@@ -667,6 +487,57 @@ RSpec.describe 'Pages template freshness after dynamic definition edits', type: 
     expect(response).to have_http_status(:ok)
     expect(response.headers['ETag']).not_to eq(old_etag)
     expect(response.body).to include("\"vdef_version\":\"v#{worker_definition.current_def_version}\"")
+  end
+
+  it 'reloads a worker-stale definition before computing and caching an index result under its new token' do
+    definition = create_dynamic_model(live_caption_options('WorkerOne'))
+    @master.current_user = @user
+    @master.dynamic_model__issue1525_template_recs.create!(current_user: @user, test1: 'secret-marker')
+    path = "/masters/#{@master.id}/#{definition.base_route_segments}"
+
+    stale_definition = DynamicModel.definition_cache.fetch(definition.id)
+    old_token = stale_definition.current_def_version
+    worker_definition = DynamicModel.find(definition.id)
+    worker_definition.current_admin = @admin
+    worker_definition.options = <<~YAML
+      _configurations:
+        use_current_version: true
+
+      default:
+        fields:
+          - test1
+          - test2
+        showable_if:
+          all:
+            this:
+              test1: never-matches
+    YAML
+    change_setting('AllowDynamicMigrations', false)
+    begin
+      worker_definition.save!
+    ensure
+      change_setting('AllowDynamicMigrations', true)
+    end
+
+    # This worker still holds the permissive definition it parsed before the other worker's save
+    DynamicModel.definition_cache[definition.id] = stale_definition
+    expect(stale_definition.current_def_version).to eq(old_token)
+    expect(worker_definition.current_def_version).not_to eq(old_token)
+
+    cached_results = []
+    allow(Rails.cache).to receive(:fetch).and_wrap_original do |original, *args, **kwargs, &block|
+      original.call(*args, **kwargs, &block).tap { |result| cached_results << result }
+    end
+
+    get path, params: { cache_result: 'true' }
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).not_to include('secret-marker')
+    expect(cached_results.to_json).not_to include('secret-marker')
+    expect(DynamicModel.definition_cache.fetch(definition.id)).not_to equal(stale_definition)
+
+    get path, params: { cache_result: 'true' }
+    expect(response.body).not_to include('secret-marker')
   end
 
   it 'returns 304 for unchanged index data and refreshes after a live definition edit' do
@@ -878,10 +749,8 @@ RSpec.describe 'Pages template freshness after dynamic definition edits', type: 
       @master.dynamic_model__issue1525_template_recs.create!(current_user: @user, test1: 'first'),
       @master.dynamic_model__issue1525_template_recs.create!(current_user: @user, test1: 'second')
     ]
-    controller = DynamicModel::DynamicModelsController.new
-    controller.instance_variable_set(:@instance_list, records)
 
-    cache_records = controller.send(:template_config_records)
+    cache_records = Dynamic::TemplateConfigFreshness.new(records).records
 
     expect(cache_records.count { |record| record.instance_of?(definition_class) }).to eq(1)
   end
@@ -893,11 +762,10 @@ RSpec.describe 'Pages template freshness after dynamic definition edits', type: 
       @master.dynamic_model__issue1525_template_recs.create!(current_user: @user, test1: 'first'),
       @master.dynamic_model__issue1525_template_recs.create!(current_user: @user, test1: 'second')
     ]
-    controller = DynamicModel::DynamicModelsController.new
     expect(records.first).to receive(:model_references).once.and_return([])
     expect(records.second).not_to receive(:model_references)
 
-    controller.send(:refresh_live_template_version_tokens, records)
+    Dynamic::TemplateConfigFreshness.refresh_live_definitions(records)
   end
 
   it 'does not refresh dynamic definitions when revalidating a matching template etag' do

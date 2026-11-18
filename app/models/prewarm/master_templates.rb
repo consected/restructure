@@ -42,7 +42,8 @@ module Prewarm
     def master_fragment_cache_key(user)
       return unless Rails.configuration.action_controller.perform_caching
 
-      ApplicationController.helpers.master_templates_skeleton_cache_key(force_user_or_admin: user)
+      # A user is its own pair; a fresh instance keeps the key independent of process-wide state
+      ::MasterTemplates::SkeletonSignature.new.cache_key(user_or_admin: user, paired_user: user)
     end
   end
 end

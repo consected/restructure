@@ -8,7 +8,9 @@
 // session-scoped request URLs include a stable per-session salt. Pending requests are
 // keyed by root record, version and embedded item versions, so a request for one embedded
 // version never satisfies another. A live slot installed by a form beside an older v0
-// alias triggers a single reconciling fetch.
+// alias (older by live_order, since the slot token is only an identity) triggers a single reconciling
+// fetch. A record needs the slot of its own option type: a base slot installed by a form of another
+// option type does not stop the fetch.
 
 describe('_fpa.prepare_template_configs', function () {
   beforeEach(function () {
@@ -414,9 +416,9 @@ describe('_fpa.prepare_template_configs', function () {
         options.success('');
       });
       var slot = {
-        v8: { vdef_version: 'v8' },
-        v9: { vdef_version: 'v9' },
-        v0: { vdef_version: 'v8' }
+        v8: { vdef_version: 'v8', live_order: 100 },
+        v9: { vdef_version: 'v9', live_order: 200 },
+        v0: { vdef_version: 'v8', live_order: 100 }
       };
       _fpa.state.template_config.activity_log__player_contact_phone_primary = slot;
 
@@ -426,15 +428,43 @@ describe('_fpa.prepare_template_configs', function () {
       });
     });
 
-    it('does not fetch when the v0 alias is on the requested or a newer token', function () {
+    it('fetches when the live slot has a newer live order but a numerically smaller composite token', function () {
+      spyOn($, 'ajax').and.callFake(function (url, options) {
+        options.success('');
+      });
+      _fpa.state.template_config.activity_log__player_contact_phone_primary = {
+        v1000000900000: { vdef_version: 'v1000000900000', live_order: 100 },
+        v1000000100000: { vdef_version: 'v1000000100000', live_order: 200 },
+        v0: { vdef_version: 'v1000000900000', live_order: 100 }
+      };
+
+      return _fpa.prepare_template_configs(pageDataForVersion('v1000000100000')).then(function () {
+        expect($.ajax.calls.count()).toBe(1);
+      });
+    });
+
+    it('does not fetch when the v0 alias has an older token but a newer live order', function () {
       spyOn($, 'ajax');
       _fpa.state.template_config.activity_log__player_contact_phone_primary = {
-        v9: { vdef_version: 'v9' },
-        v0: { vdef_version: 'v9' }
+        v1000000900000: { vdef_version: 'v1000000900000', live_order: 100 },
+        v1000000100000: { vdef_version: 'v1000000100000', live_order: 200 },
+        v0: { vdef_version: 'v1000000100000', live_order: 200 }
+      };
+
+      return _fpa.prepare_template_configs(pageDataForVersion('v1000000900000')).then(function () {
+        expect($.ajax).not.toHaveBeenCalled();
+      });
+    });
+
+    it('does not fetch when the v0 alias is on the requested or a newer live order', function () {
+      spyOn($, 'ajax');
+      _fpa.state.template_config.activity_log__player_contact_phone_primary = {
+        v9: { vdef_version: 'v9', live_order: 200 },
+        v0: { vdef_version: 'v9', live_order: 200 }
       };
 
       return _fpa.prepare_template_configs(pageDataForVersion('v9')).then(function () {
-        _fpa.state.template_config.activity_log__player_contact_phone_primary.v0 = { vdef_version: 'v12' };
+        _fpa.state.template_config.activity_log__player_contact_phone_primary.v0 = { vdef_version: 'v12', live_order: 300 };
         return _fpa.prepare_template_configs(pageDataForVersion('v9'));
       }).then(function () {
         expect($.ajax).not.toHaveBeenCalled();
@@ -456,8 +486,8 @@ describe('_fpa.prepare_template_configs', function () {
     it('does not reconcile v0 for a historical record version', function () {
       spyOn($, 'ajax');
       _fpa.state.template_config.activity_log__player_contact_phone_primary = {
-        v9: { vdef_version: 'v9', def_version: 9 },
-        v0: { vdef_version: 'v8' }
+        v9: { vdef_version: 'v9', def_version: 9, live_order: null },
+        v0: { vdef_version: 'v8', live_order: 900 }
       };
 
       return _fpa.prepare_template_configs(pageDataForVersion('v9', { def_version: 9 })).then(function () {
@@ -470,12 +500,12 @@ describe('_fpa.prepare_template_configs', function () {
         options.success('');
       });
       _fpa.state.template_config.activity_log__player_contact_phone_primary = {
-        v20: { vdef_version: 'v20' },
-        v0: { vdef_version: 'v20' }
+        v20: { vdef_version: 'v20', live_order: 300 },
+        v0: { vdef_version: 'v20', live_order: 300 }
       };
       _fpa.state.template_config.dynamic_model__test_embedded_rec = {
-        v9: { vdef_version: 'v9' },
-        v0: { vdef_version: 'v8' }
+        v9: { vdef_version: 'v9', live_order: 200 },
+        v0: { vdef_version: 'v8', live_order: 100 }
       };
       var pageData = pageDataForVersion('v20', {
         embedded_item: {
@@ -496,8 +526,8 @@ describe('_fpa.prepare_template_configs', function () {
         options.success('');
       });
       _fpa.state.template_config.activity_log__player_contact_phone_primary = {
-        v9: { vdef_version: 'v9' },
-        v0: { vdef_version: 'v8' }
+        v9: { vdef_version: 'v9', live_order: 200 },
+        v0: { vdef_version: 'v8', live_order: 100 }
       };
 
       return _fpa.prepare_template_configs(pageDataForVersion('v9')).then(function () {
@@ -512,8 +542,8 @@ describe('_fpa.prepare_template_configs', function () {
         options.error({});
       });
       _fpa.state.template_config.activity_log__player_contact_phone_primary = {
-        v9: { vdef_version: 'v9' },
-        v0: { vdef_version: 'v8' }
+        v9: { vdef_version: 'v9', live_order: 200 },
+        v0: { vdef_version: 'v8', live_order: 100 }
       };
 
       return _fpa.prepare_template_configs(pageDataForVersion('v9')).then(function () {
@@ -525,12 +555,12 @@ describe('_fpa.prepare_template_configs', function () {
 
     it('stops fetching once the response has promoted v0 to the requested token', function () {
       spyOn($, 'ajax').and.callFake(function (url, options) {
-        _fpa.state.template_config.activity_log__player_contact_phone_primary.v0 = { vdef_version: 'v9' };
+        _fpa.state.template_config.activity_log__player_contact_phone_primary.v0 = { vdef_version: 'v9', live_order: 200 };
         options.success('');
       });
       _fpa.state.template_config.activity_log__player_contact_phone_primary = {
-        v9: { vdef_version: 'v9' },
-        v0: { vdef_version: 'v8' }
+        v9: { vdef_version: 'v9', live_order: 200 },
+        v0: { vdef_version: 'v8', live_order: 100 }
       };
 
       return _fpa.prepare_template_configs(pageDataForVersion('v9')).then(function () {
@@ -538,6 +568,92 @@ describe('_fpa.prepare_template_configs', function () {
         return _fpa.prepare_template_configs(pageDataForVersion('v9'));
       }).then(function () {
         expect($.ajax.calls.count()).toBe(1);
+      });
+    });
+  });
+
+  describe('option type slots', function () {
+    var pageDataForOption = function (extra) {
+      return {
+        multiple_results: 'dynamic_model__a_things',
+        dynamic_model__a_things: [Object.assign({
+          id: 42,
+          vdef_version: 'v9',
+          item_type: 'dynamic_model__a_thing',
+          option_type: 'other'
+        }, extra)],
+        master_id: 99
+      };
+    };
+
+    beforeEach(function () {
+      _fpa.state.template_config_v0_attempts = {};
+      // A default option form installed the base slot and promoted v0, but no form of the "other" option type has
+      _fpa.state.template_config.dynamic_model__a_thing = {
+        v9: { vdef_version: 'v9', live_order: 200 },
+        v0: { vdef_version: 'v9', live_order: 200 }
+      };
+      _fpa.state.template_config.dynamic_model__a_thing_default = {
+        v9: { vdef_version: 'v9', live_order: 200 },
+        v0: { vdef_version: 'v9', live_order: 200 }
+      };
+    });
+
+    it('fetches when the base slot is present but the slot of the record option type is not', function () {
+      spyOn($, 'ajax').and.callFake(function (url, options) {
+        options.success('');
+      });
+
+      return _fpa.prepare_template_configs(pageDataForOption()).then(function () {
+        expect($.ajax.calls.count()).toBe(1);
+        expect($.ajax.calls.argsFor(0)[0]).toMatch(/\/dynamic_model\/a_things\/42\/template_config\?/);
+      });
+    });
+
+    it('fetches a historical version whose option type slot is missing beside a base slot', function () {
+      spyOn($, 'ajax').and.callFake(function (url, options) {
+        options.success('');
+      });
+      _fpa.state.template_config.dynamic_model__a_thing.v3 = { vdef_version: 'v3', def_version: 3 };
+
+      return _fpa.prepare_template_configs(pageDataForOption({ vdef_version: 'v3', def_version: 3 })).then(function () {
+        expect($.ajax.calls.count()).toBe(1);
+      });
+    });
+
+    it('does not fetch when the slot of the record option type is present', function () {
+      spyOn($, 'ajax');
+      _fpa.state.template_config.dynamic_model__a_thing_other = {
+        v9: { vdef_version: 'v9', live_order: 200 },
+        v0: { vdef_version: 'v9', live_order: 200 }
+      };
+
+      return _fpa.prepare_template_configs(pageDataForOption()).then(function () {
+        expect($.ajax).not.toHaveBeenCalled();
+      });
+    });
+
+    it('fetches the missing option type slot once when the response does not install it', function () {
+      spyOn($, 'ajax').and.callFake(function (url, options) {
+        options.success('');
+      });
+
+      return _fpa.prepare_template_configs(pageDataForOption()).then(function () {
+        return _fpa.prepare_template_configs(pageDataForOption());
+      }).then(function () {
+        expect($.ajax.calls.count()).toBe(1);
+      });
+    });
+
+    it('retries the missing option type slot after a failed request', function () {
+      spyOn($, 'ajax').and.callFake(function (url, options) {
+        options.error({});
+      });
+
+      return _fpa.prepare_template_configs(pageDataForOption()).then(function () {
+        return _fpa.prepare_template_configs(pageDataForOption());
+      }).then(function () {
+        expect($.ajax.calls.count()).toBe(2);
       });
     });
   });

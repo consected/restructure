@@ -333,11 +333,13 @@ RSpec.describe 'ActivityLog embedded dynamic model template_config', type: :requ
       expect(response.body)
         .to include("fpa_state_config--#{embedded_state_name}--#{embedded_item.vdef_version}")
       expect(response.body)
-        .to include("set_v0(_fpa.state.template_config.#{activity_state_name}, " \
-                    "_fpa.state.template_config.#{activity_state_name}.#{al.vdef_version});")
+        .to include("_fpa.promote_template_state_v0(_fpa.state.template_config.#{activity_state_name}, " \
+                    "_fpa.state.template_config.#{activity_state_name}.#{al.vdef_version}, " \
+                    "#{Dynamic::TemplateVersionTokens.live_order(activity_definition)})")
       expect(response.body)
-        .to include("set_v0(_fpa.state.template_config.#{embedded_state_name}, " \
-                    "_fpa.state.template_config.#{embedded_state_name}.#{embedded_item.vdef_version});")
+        .to include("_fpa.promote_template_state_v0(_fpa.state.template_config.#{embedded_state_name}, " \
+                    "_fpa.state.template_config.#{embedded_state_name}.#{embedded_item.vdef_version}, " \
+                    "#{Dynamic::TemplateVersionTokens.live_order(embedded_definition)})")
       expect(response.body).not_to include('_fpa.retrieve_requested_handlebars_templates')
       expect(response.body).not_to include('references_results')
     end

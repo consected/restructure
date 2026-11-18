@@ -283,11 +283,7 @@ module ApplicationHelper
 
     auth_type = u.class.name
 
-    paired_user = if u.is_a?(User)
-                    u
-                  elsif u.is_a?(Admin)
-                    safe_current_user || u.matching_user
-                  end
+    paired_user = paired_user_for(u)
 
     if paired_user
       apptype = paired_user.app_type_id
@@ -318,92 +314,9 @@ module ApplicationHelper
   # Skeleton state is independent of per-definition config edits, which are fetched lazily.
   def master_templates_skeleton_cache_key(force_user_or_admin: nil)
     user_or_admin = force_user_or_admin || current_user || current_admin
-    paired_user = if user_or_admin.is_a?(User)
-                    user_or_admin
-                  elsif user_or_admin.is_a?(Admin)
-                    safe_current_user || user_or_admin.matching_user
-                  end
-    app_type_id = paired_user&.app_type_id
-
-    scope = [user_or_admin&.class&.name, user_or_admin&.id, app_type_id, paired_user&.id]
-    Digest::SHA256.hexdigest([master_templates_skeleton_cache_signature(app_type_id:), *scope].to_json)
-  end
-
-  # Shared by the fragment and prewarm marker so both follow structural changes only.
-  def master_templates_skeleton_cache_signature(app_type_id:)
-    @master_templates_skeleton_cache_signatures ||= {}
-    @master_templates_skeleton_cache_signatures[app_type_id] ||= begin
-      definition_sets = [DynamicModel, ActivityLog, ExternalIdentifier].map do |definition_class|
-        resource_name_column = %i[table_name name].find do |column|
-          column == :name || definition_class.column_names.include?(column.to_s)
-        end
-        columns = [:id, :name, resource_name_column].compact.uniq
-        columns << :category if definition_class.column_names.include?('category')
-        # Position orders the dynamic model blocks baked into the master panels
-        columns << :position if definition_class.column_names.include?('position')
-        columns += %i[item_type rec_type] if definition_class == ActivityLog
-        definitions = definition_class.active.reorder(:id).to_a
-        [definition_class.name, definitions.map do |definition|
-          [columns.map { |column| definition.public_send(column) },
-           master_templates_definition_structure(definition)]
-        end]
-      end
-      matching_panels = Admin::PageLayout.active
-                                         .where(app_type_id: [app_type_id, nil], layout_name: 'master')
-                                         .order(Arel.sql('app_type_id ASC NULLS LAST, panel_position ASC, id ASC'))
-                                         .pluck(:id, :app_type_id, :panel_name, :disabled)
-      access_timestamps = partial_cache_key_access_control_timestamps(app_type_id)
-
-      Digest::SHA256.hexdigest([
-        Application.server_cache_version,
-        Settings::OnlyLoadAppTypes,
-        app_type_id,
-        definition_sets,
-        matching_panels,
-        *access_timestamps,
-        Dynamic::TemplateVersionTokens.panel_chrome_token
-      ].to_json)
-    end
-  end
-
-  def master_templates_definition_structure(definition)
-    @master_templates_definition_structures ||= {}
-    cached_definition = if definition.class.respond_to?(:definition_cache)
-                          definition.class.definition_cache[definition.id]
-                        end
-    definition = cached_definition if cached_definition && cached_definition.updated_at == definition.updated_at
-    key = [definition.class.name, definition.id, definition.updated_at&.to_f,
-           Dynamic::TemplateVersionTokens.resource_token(definition)]
-    @master_templates_definition_structures[key] ||= begin
-      option_configs = Array(definition.option_configs)
-      structure = option_configs.map do |option_config|
-        embed = option_config.embed
-        embed = embed.except(:resource_model_def) if embed.is_a?(Hash)
-        config_digest = Digest::SHA256.hexdigest({
-          references: option_config.references,
-          embed:,
-          reference_caption_before: master_templates_reference_caption_before(option_config)
-        }.to_json)
-        [option_config.name.to_s, config_digest]
-      end
-      structure << ['alt_width_classes', master_templates_alt_width_classes(definition, option_configs)]
-      structure
-    end
-  end
-
-  # Only the reference_* captions are rendered into the reference action templates.
-  def master_templates_reference_caption_before(option_config)
-    option_config.caption_before.as_json&.select { |key, _| key.to_s.start_with?('reference_') }
-  end
-
-  # Baked into the dynamic model and external identifier containers of the master panels.
-  # Activity logs take their width classes from lazily delivered template state.
-  def master_templates_alt_width_classes(definition, option_configs)
-    return if definition.is_a?(ActivityLog)
-
-    default_name = definition.default_option_type_name.to_s.underscore.to_sym
-    option_configs.find { |option_config| option_config.name == default_name }
-                  &.view_options&.dig(:alt_width_classes)
+    # One instance per view context, so memoized signatures never outlive the request
+    @master_templates_skeleton_signature ||= MasterTemplates::SkeletonSignature.new
+    @master_templates_skeleton_signature.cache_key(user_or_admin:, paired_user: paired_user_for(user_or_admin))
   end
 
   #
@@ -421,8 +334,20 @@ module ApplicationHelper
   end
 
   #
+  # The effective user for cache keys: a User is its own pair, an Admin pairs with the
+  # signed-in user or its matching user.
+  # @param user_or_admin [User, Admin, nil]
+  # @return [User, nil]
+  def paired_user_for(user_or_admin)
+    case user_or_admin
+    when User then user_or_admin
+    when Admin then safe_current_user || user_or_admin.matching_user
+    end
+  end
+
+  #
   # Safely resolve the current signed-in user, returning nil instead of raising
-  # if unavailable (e.g. no user session present). Used by #partial_cache_key to
+  # if unavailable (e.g. no user session present). Used by #paired_user_for to
   # determine the effective user paired with an Admin without duplicating the
   # rescue logic at each call site.
   def safe_current_user

@@ -231,12 +231,12 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
       allow(DynamicModel).to receive(:active).and_return(DynamicModel.where(id: @dm.id))
       allow(ActivityLog).to receive(:active).and_return(ActivityLog.none)
       allow(ExternalIdentifier).to receive(:active).and_return(ExternalIdentifier.none)
-      version_before = DynamicModel.definition_cache_version_token
+      version_before = Dynamic::DefinitionCacheVersion.token
 
       @config_library.current_admin = @admin
       @config_library.update!(options: @library_v2_options)
 
-      expect(DynamicModel.definition_cache_version_token).not_to eq(version_before)
+      expect(Dynamic::DefinitionCacheVersion.token).not_to eq(version_before)
     end
 
     it 'refreshes the access control resource names key when a library used by a definition changes' do

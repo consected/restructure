@@ -67,10 +67,8 @@ class Admin::ConfigLibrary < Admin::AdminBase
       end
     end
 
-    dependants.map(&:first).map(&:class).uniq.each do |definition_class|
-      definition_class.reset_active_model_configurations!
-      definition_class.rotate_definition_cache_version!
-    end
+    dependants.map(&:first).map(&:class).uniq.each(&:reset_active_model_configurations!)
+    Dynamic::DefinitionCacheVersion.rotate! if dependants.any?
   end
 
   validates :name, presence: true

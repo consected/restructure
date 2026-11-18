@@ -17,6 +17,7 @@
 # Issue #1481 (Stage C): warm markers follow the masters skeleton's structural signature,
 # so definition config edits skip while set, chrome, and access changes re-warm. They also
 # follow the cache epoch, which changes on any whole-cache clear and leaves fragment caches cold.
+# The runner holds one MasterTemplates::SkeletonSignature per pass rather than a view helper.
 # A re-run skips unchanged state and re-warms after a genuine content change.
 
 require 'rails_helper'
@@ -25,16 +26,15 @@ RSpec.describe Prewarm::Runner do
   let(:user_one) { instance_double(User, id: 1) }
   let(:user_two) { instance_double(User, id: 2) }
   let(:app_type) { instance_double(Admin::AppType, id: 10) }
-  let(:cache_helper) { double }
+  let(:skeleton_signature) { instance_double(MasterTemplates::SkeletonSignature) }
 
   before do
     allow(Prewarm::Candidates).to receive(:representatives).and_return([[user_one, app_type], [user_two, app_type]])
     allow(HandlebarsPrecompiler).to receive(:setup_directories)
     allow(HandlebarsPrecompiler).to receive(:tmp_generation_dir)
       .and_return(Pathname.new(Dir.mktmpdir('prewarm_runner_spec')))
-    allow(ApplicationController).to receive(:helpers).and_return(cache_helper)
-    allow(cache_helper).to receive(:master_templates_skeleton_cache_signature)
-      .with(app_type_id: app_type.id).and_return('skeleton-v1')
+    allow(MasterTemplates::SkeletonSignature).to receive(:new).and_return(skeleton_signature)
+    allow(skeleton_signature).to receive(:signature).with(app_type_id: app_type.id).and_return('skeleton-v1')
   end
 
   it 'is a no-op when the pass lock is contended' do
@@ -153,9 +153,7 @@ RSpec.describe Prewarm::Runner do
 
     it 'changes when the masters skeleton signature changes' do
       signature = 'skeleton-v1'
-      allow(cache_helper).to receive(:master_templates_skeleton_cache_signature) do
-        signature
-      end
+      allow(skeleton_signature).to receive(:signature) { signature }
       first_path = described_class.new.send(:warm_marker_path, user_one, app_type)
 
       signature = 'skeleton-v2'
@@ -174,12 +172,10 @@ RSpec.describe Prewarm::Runner do
     end
 
     it 'uses the real masters skeleton signature and cache epoch in the marker path' do
-      allow(ApplicationController).to receive(:helpers).and_call_original
+      allow(MasterTemplates::SkeletonSignature).to receive(:new).and_call_original
       allow(HandlebarsPrecompiler).to receive(:app_type_access_control_timestamps).and_call_original
       actual_app_type = Admin::AppType.active.first!
-      signature = ApplicationController.helpers.master_templates_skeleton_cache_signature(
-        app_type_id: actual_app_type.id
-      )
+      signature = MasterTemplates::SkeletonSignature.new.signature(app_type_id: actual_app_type.id)
       expected_version = Digest::SHA256.hexdigest([signature, Application.cache_epoch].join('-'))[0..31]
 
       marker = described_class.new.send(:warm_marker_path, user_one, actual_app_type)
@@ -191,7 +187,7 @@ RSpec.describe Prewarm::Runner do
   it 'skips unchanged warm state and re-warms after the skeleton signature changes' do
     allow(HandlebarsPrecompiler::FileLock).to receive(:acquire).and_yield
     signature = 'skeleton-v1'
-    allow(cache_helper).to receive(:master_templates_skeleton_cache_signature) { signature }
+    allow(skeleton_signature).to receive(:signature) { signature }
     expect(Prewarm::MasterTemplates).to receive(:render_for).exactly(4).times.and_return('<html/>')
 
     first_pass = described_class.run

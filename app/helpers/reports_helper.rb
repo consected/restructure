@@ -252,7 +252,7 @@ module ReportsHelper
   def select_from_model_resource_name_options
     # The shared definition token covers definition changes within the same second as the registry update
     cache_key = "select_from_model_resource_name_options-#{Resources::Models.updated_at}-" \
-                "#{DynamicModel.shared_definition_cache_version_token}"
+                "#{Dynamic::DefinitionCacheVersion.token}"
     Rails.cache.fetch(cache_key) do
       res = Resources::Models.all.values
                              .reject { |r| r.option_type }

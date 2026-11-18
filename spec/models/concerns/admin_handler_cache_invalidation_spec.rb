@@ -171,7 +171,7 @@ RSpec.describe AdminHandler, type: :model do
       it 'rotates the select-from-model resource name options when a definition is saved' do
         helpers = Object.new.extend(ReportsHelper).extend(ActionView::Helpers::FormOptionsHelper)
         key_before = "select_from_model_resource_name_options-#{Resources::Models.updated_at}-" \
-                     "#{DynamicModel.shared_definition_cache_version_token}"
+                     "#{Dynamic::DefinitionCacheVersion.token}"
         Rails.cache.write(key_before, 'stale options')
 
         instance_exec(&definition_saves['DynamicModel'])
