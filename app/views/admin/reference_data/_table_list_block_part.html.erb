@@ -1,8 +1,20 @@
 <div>
   <div class="table-list-block admin-form__left-aligned" data-result="table-list-block">
     <div class="row">
-      <div class="form-group col-md-8">
-        <%= select_tag 'primary_tables_schema_select', options_for_select(@schemas), prompt: '-- select schema --', class: 'form-control input-sm ff'  %>
+      <div class="form-group col-md-6">
+        <%= select_tag 'primary_tables_schema_select', options_for_select(@schemas), prompt: '-- select schema --', class: 'form-control input-sm ff use-chosen'  %>
+      </div>
+      <div class="form-group col-md-6">
+        <input type="search" id="primary_tables_search" list="primary_tables_search_options" autocomplete="off"
+               class="form-control input-sm" placeholder="search table or view name" />
+        <datalist id="primary_tables_search_options">
+          <% @table_search_index.each do |t| %>
+          <option value="<%= "#{t['schema_name']}.#{t['table_name']}" %>"
+                  data-schema-name="<%= t['schema_name'] %>"
+                  data-table-name="<%= t['table_name'] %>"
+                  data-object-type="<%= Admin::MigrationGenerator.view_in_schema?(t['table_name'], t['schema_name']) ? 'view' : 'table' %>"></option>
+          <% end %>
+        </datalist>
       </div>
       <div class="form-group col-md-8">
         <label class="">

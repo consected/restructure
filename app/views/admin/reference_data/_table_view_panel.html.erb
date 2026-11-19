@@ -1,0 +1,25 @@
+<div id="dm-table-view-panel" class="ref-table-view-panel">
+<% if object_instance.persisted? %>
+  <%
+    Admin::MigrationGenerator.tables_and_views_reset!
+    schema_name = object_instance.schema_name.presence || object_instance.schema_name_in_db
+    table_info = Admin::TableViewInfo.new(schema_name:, table_name: object_instance.table_name)
+  %>
+  <% if table_info.exists? %>
+    <p>
+      <label><%= table_info.object_type %></label>
+      <code><%= [table_info.schema_name, table_info.table_name].join('.') %></code>
+    </p>
+    <ul class="ref-table-view-details">
+      <%= render partial: 'admin/reference_data/table_view_details', locals: { table_info: } %>
+    </ul>
+  <% else %>
+    <div class="config-error-block">
+      <p>The table or view <code><%= [schema_name, object_instance.table_name].compact.join('.') %></code> does not exist in the database.</p>
+    </div>
+  <% end %>
+<% else %>
+  <p><label>not yet saved</label></p>
+  <p class="help-block">The table or view details are available once the definition is saved.</p>
+<% end %>
+</div>

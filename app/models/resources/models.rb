@@ -204,6 +204,28 @@ module Resources
       resources.delete(resource_name.to_sym)
     end
 
+    DYNAMIC_DEFINITION_TYPES = %i[dynamic_model activity_log external_identifier].freeze
+
+    #
+    # Registered dynamic definitions (dynamic models, activity logs and external identifiers) that
+    # use a table or view in the schema, keyed by table name.
+    # A definition without a schema name is assumed to use the schema the database resolves its table to.
+    # @param [String] schema_name
+    # @return [Hash{String => DynamicModel | ActivityLog | ExternalIdentifier}]
+    def self.dynamic_definitions_in_schema(schema_name)
+      schema_hash = Admin::MigrationGenerator.table_schema_hash
+
+      resources.values.each_with_object({}) do |item, res|
+        next unless DYNAMIC_DEFINITION_TYPES.include?(item[:type])
+
+        definition = item[:model]&.definition
+        next unless definition
+
+        definition_schema = definition.schema_name.presence || schema_hash[definition.table_name]
+        res[definition.table_name] = definition if definition_schema == schema_name
+      end
+    end
+
     init
   end
 end
