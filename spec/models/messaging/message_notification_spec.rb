@@ -4,7 +4,8 @@
 # Covers message generation, template rendering, recipient handling (email/SMS/records),
 # calendar invite attachment resolution (#953), NfsStore file attachment resolution (#954),
 # NotificationMailer integration with attachment support, and status-based tracker entries
-# including user-addressed notification exclusions and master-targeted notifications without resolved recipients (#1479).
+# including user-addressed notification exclusions, do-not-email recipient handling (#1559),
+# and master-targeted notifications without resolved recipients (#1479).
 
 require 'rails_helper'
 
@@ -112,6 +113,75 @@ RSpec.describe Messaging::MessageNotification, type: :model do
       expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id #{master.id}. This is a name: #{expected_name}.</p></div></body></html>"
 
       expect(res).to eq expected_text
+    end
+
+    it 'completes without error when every recipient has opted out of email' do
+      notification = Messaging::MessageNotification.create!(
+        app_type: @user.app_type,
+        user: @user,
+        recipient_user_ids: [@rec_user],
+        layout_template_name: @layout.name,
+        content_template_text: 'Notification content',
+        item_type: @activity_log.class.name,
+        item_id: @activity_log.id,
+        master: @activity_log.master,
+        message_type: :email,
+        subject: 'Notification subject'
+      )
+      @rec_user.update!(do_not_email: true)
+      unmock_notification_mailer
+
+      expect { notification.handle_notification_now(logger: Delayed::Worker.logger) }
+        .not_to(change { ActionMailer::Base.deliveries.size })
+
+      expect(notification.reload.status).to eq Messaging::MessageNotification::StatusComplete
+    end
+
+    it 'still fires on_complete triggers when every recipient has opted out of email' do
+      notification = Messaging::MessageNotification.create!(
+        app_type: @user.app_type,
+        user: @user,
+        recipient_user_ids: [@rec_user],
+        layout_template_name: @layout.name,
+        content_template_text: 'Notification content',
+        item_type: @activity_log.class.name,
+        item_id: @activity_log.id,
+        master: @activity_log.master,
+        message_type: :email,
+        subject: 'Notification subject'
+      )
+      on_complete = { update_this: { first: { field: 'value' } } }
+      @rec_user.update!(do_not_email: true)
+      unmock_notification_mailer
+      expect(OptionConfigs::ActivityLogOptions).to receive(:calc_triggers).with(@activity_log, on_complete)
+
+      notification.handle_notification_now(logger: Delayed::Worker.logger, for_item: @activity_log,
+                                           on_complete_config: on_complete)
+
+      expect(notification.reload.status).to eq Messaging::MessageNotification::StatusComplete
+    end
+
+    it 'passes require_email_sent from the job to the mailer' do
+      notification = Messaging::MessageNotification.create!(
+        app_type: @user.app_type,
+        user: @user,
+        recipient_user_ids: [@rec_user],
+        layout_template_name: @layout.name,
+        content_template_text: 'Notification content',
+        item_type: @activity_log.class.name,
+        item_id: @activity_log.id,
+        master: @activity_log.master,
+        message_type: :email,
+        subject: 'Notification subject'
+      )
+      expect(NotificationMailer).to receive(:send_message_notification) do |mailer_notification|
+        expect(mailer_notification.require_email_sent).to be(true)
+        double(deliver_now: true)
+      end
+
+      HandleMessageNotificationJob.perform_now(notification, require_email_sent: true)
+
+      expect(notification.reload.status).to eq Messaging::MessageNotification::StatusComplete
     end
 
     it 'generates a message from a text template' do
