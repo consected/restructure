@@ -20,45 +20,17 @@ class NotificationMailer < ActionMailer::Base
   MAX_DATA_URI_IMAGE_BYTES = (10 * 1024 * 1024).freeze
   #
   # Send a message notification
-  # Filter out any emails that are either invalid (no fully qualified domain name specified)
-  # or where if there is a matching user it is not marked as disabled or "do not email".
-  # Emails that do not match users are always acceptable, since we have no record of their preferences
-  # and filtering must have been performed elsewhere
+  # Filter invalid addresses and disabled users. Opted-out users are omitted; if they are the only
+  # recipients and email delivery is not required, nothing is sent and no error is raised.
+  # Addresses that do not match users remain acceptable since there is no preference to check.
   # @param [Messaging::MessageNotification] notify
   # @param [Logger] logger - Rails logger
   # @return [Mail::Message]
   def send_message_notification(notify)
     Rails.logger.info "Sending email for #{notify.id}"
     messages = []
-
-    emails = notify.recipient_emails.select do |email|
-      email ||= ''
-      res = fully_qualified_domain_name?(email)
-
-      if res
-        # Lookup the user email
-        user = User.find_by(email: email&.downcase)
-
-        # We can email if the email address is not a user, or
-        # the user is not disabled and is not flagged "do not email"
-        res = !user || (!user.disabled && !user.do_not_email)
-
-        unless res
-          msg = "send_message_notification email #{email} - " \
-                "can not send disabled: #{user&.disabled} or do not email: #{user&.do_not_email}"
-          Rails.logger.info msg
-          messages << msg
-        end
-
-        res
-      else
-        msg = "send_message_notification email #{email} - " \
-              'can not send due to no FQDN'
-        Rails.logger.info msg
-        messages << msg
-      end
-      res
-    end
+    do_not_email_recipients = []
+    emails = filter_emailable_recipients(notify, messages, do_not_email_recipients)
 
     if notify.from_user_email.blank?
       raise FphsException,
@@ -66,6 +38,11 @@ class NotificationMailer < ActionMailer::Base
     end
 
     if emails.empty?
+      if do_not_email_only?(notify, do_not_email_recipients)
+        Rails.logger.info "No email sent for notification #{notify.id}: all recipients opted out"
+        return
+      end
+
       raise FphsException,
             "No TO emails set in notification for #{notify.recipient_emails}.\n#{messages.join("\n")}"
     end
@@ -106,6 +83,45 @@ class NotificationMailer < ActionMailer::Base
   end
 
   private
+
+  # Select the addresses that can be emailed. Reasons for exclusion are appended to `messages` for the error text.
+  # Opted-out users are also collected in `do_not_email_recipients`, so the caller can tell that apart from
+  # other unsendable reasons (disabled user, no FQDN), which must still be treated as errors.
+  def filter_emailable_recipients(notify, messages, do_not_email_recipients)
+    notify.recipient_emails.select do |email|
+      email ||= ''
+      res = fully_qualified_domain_name?(email)
+
+      if res
+        user = User.find_by(email: email&.downcase)
+        res = !user || !user.disabled
+        if res && user&.do_not_email
+          res = false
+          do_not_email_recipients << email
+        end
+
+        unless res
+          msg = "send_message_notification email #{email} - " \
+                "can not send disabled: #{user&.disabled} or do not email: #{user&.do_not_email}"
+          Rails.logger.info msg
+          messages << msg
+        end
+      else
+        msg = "send_message_notification email #{email} - " \
+              'can not send due to no FQDN'
+        Rails.logger.info msg
+        messages << msg
+      end
+      res
+    end
+  end
+
+  # True only when every recipient was excluded because of "do not email" and sending was not required.
+  # Any other excluded recipient (disabled, invalid address) means the length differs, so an error is raised.
+  def do_not_email_only?(notify, do_not_email_recipients)
+    !notify.require_email_sent && do_not_email_recipients.present? &&
+      do_not_email_recipients.length == notify.recipient_emails.length
+  end
 
   #
   # Replace <img src="data:<mime>;base64,..."> tags with MIME inline attachments.

@@ -7,6 +7,7 @@
 # inline data URI image conversion (#1148), literal/template/array phones+emails (#1152),
 # config app_type for role lookup + error message improvements (#1172), and when
 # substitutions are made - content_template_text is resolved as the trigger fires, with
+# do_not_email recipient retention and the require_email_sent compatibility option (#1559),
 # missing tags blanked, while a named content template is resolved when the message is
 # sent, where a missing tag raises (#1381), and automatic tracker-entry opt-out (#1479).
 
@@ -29,6 +30,90 @@ RSpec.describe SaveTriggers::Notify, type: :model do
 
     before :example do
       setup_notify_example
+    end
+
+    it 'creates a notification for do-not-email users by default' do
+      recipient = User.find(@non_template_user_ids.first)
+      recipient.update!(do_not_email: true)
+      config = {
+        type: 'email',
+        users: [recipient.id],
+        layout_template: @layout.name,
+        content_template: @content.name,
+        subject: 'do not email test'
+      }
+      trigger = SaveTriggers::Notify.new(config, @al)
+      expect(HandleMessageNotificationJob).to receive(:perform_later)
+        .with(instance_of(Messaging::MessageNotification), hash_including(require_email_sent: false))
+        .and_return(nil)
+
+      trigger.perform
+
+      notification = @al.save_trigger_results['notify_messages'].first
+      expect(trigger.receiving_user_ids).to eq [recipient.id]
+      expect(notification.recipient_user_ids).to eq [recipient.id]
+      expect(@al.save_trigger_results['notify_errors']).to eq [nil]
+    end
+
+    it 'keeps do-not-email users out when require_email_sent is enabled' do
+      recipient = User.find(@non_template_user_ids.first)
+      recipient.update!(do_not_email: true)
+      config = {
+        type: 'email',
+        users: [recipient.id],
+        layout_template: @layout.name,
+        content_template: @content.name,
+        subject: 'required email test',
+        require_email_sent: true
+      }
+      trigger = SaveTriggers::Notify.new(config, @al)
+      expect(HandleMessageNotificationJob).not_to receive(:perform_later)
+
+      trigger.perform
+
+      expect(trigger.receiving_user_ids).to be_empty
+      expect(@al.save_trigger_results['notify_messages']).to be_empty
+      expect(@al.save_trigger_results['notify_errors'].first).to include('No recipients')
+    end
+
+    describe 'require_email_sent resolved from a conditional reference' do
+      # The option accepts a literal, a {{{template}}} or a conditional hash, as no_tracker_entry does.
+      # A conditional return_value that resolves to a present value requires email; nil does not.
+      def notify_config_requiring(reference)
+        {
+          type: 'email',
+          users: [User.find(@non_template_user_ids.first).id],
+          layout_template: @layout.name,
+          content_template: @content.name,
+          subject: 'conditional require email',
+          require_email_sent: reference
+        }
+      end
+
+      it 'keeps do-not-email users when the reference resolves to nothing' do
+        User.find(@non_template_user_ids.first).update!(do_not_email: true)
+        @al.update_columns(notes: nil)
+        expect(HandleMessageNotificationJob).to receive(:perform_later)
+          .with(instance_of(Messaging::MessageNotification), hash_including(require_email_sent: false))
+          .and_return(nil)
+
+        trigger = SaveTriggers::Notify.new(notify_config_requiring({ this: { notes: 'return_value' } }), @al)
+        trigger.perform
+
+        expect(trigger.receiving_user_ids).to eq [@non_template_user_ids.first]
+      end
+
+      it 'filters do-not-email users when the reference resolves to a value' do
+        User.find(@non_template_user_ids.first).update!(do_not_email: true)
+        @al.update_columns(notes: 'require')
+        expect(HandleMessageNotificationJob).not_to receive(:perform_later)
+
+        trigger = SaveTriggers::Notify.new(notify_config_requiring({ this: { notes: 'return_value' } }), @al)
+        trigger.perform
+
+        expect(trigger.receiving_user_ids).to be_empty
+        expect(@al.save_trigger_results['notify_errors'].first).to include('No recipients')
+      end
     end
 
     it 'generates a message notification and job' do

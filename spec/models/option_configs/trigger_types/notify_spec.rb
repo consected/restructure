@@ -118,6 +118,22 @@ RSpec.describe OptionConfigs::TriggerTypes::Notify, type: :model do
         .to include('no_tracker_entry must be a boolean, template substitution, or conditional Hash')
     end
 
+    it 'accepts boolean and dynamic require_email_sent values and warns on other types' do
+      config = {
+        type: 'email',
+        emails: ['someone@example.com'],
+        layout_template: 'test_notify_email_layout',
+        content_template_text: 'Email text',
+        subject: 'Subject'
+      }
+
+      expect(described_class.validate_config(config.merge(require_email_sent: true))).to be_empty
+      expect(described_class.validate_config(config.merge(require_email_sent: '{{{needs_email}}}'))).to be_empty
+      expect(described_class.validate_config(config.merge(require_email_sent: { this: { flag: 'return_value' } }))).to be_empty
+      expect(described_class.validate_config(config.merge(require_email_sent: 'yes')))
+        .to include('require_email_sent must be a boolean, template substitution, or conditional Hash')
+    end
+
     it 'skips static checks for template substitutions and conditional hashes' do
       config = {
         type: '{{calculated_type}}',

@@ -43,8 +43,12 @@ module Messaging
     scope :unhandled, -> { where status: nil }
     scope :limited_index, -> { limit 50 }
 
+    # Non-persisted attribute, passed in through the background job:
+    # - require_email_sent: when true, "do not email" recipients are not an acceptable reason for nothing
+    #   to be sent, so the mailer raises. Otherwise a notification addressed only to opted-out users is
+    #   recorded and completes normally without any email being sent.
     attr_accessor :generated_text, :disabled, :admin_id, :for_item, :on_complete_config, :ignore_no_recipients,
-                  :no_tracker_entry
+                  :no_tracker_entry, :require_email_sent
     attr_writer :extra_substitutions_data, :batch_user
 
     #
@@ -220,8 +224,9 @@ module Messaging
     # @param [UserBase] for_item - typically an activity log item
     # @param [Hash] on_complete_config - the on_complete configuration from the activity log definition
     def handle_notification_now(logger: Rails.logger, for_item: nil, on_complete_config: {}, alt_batch_user: nil,
-                                ignore_no_recipients: nil, no_tracker_entry: nil)
+                                ignore_no_recipients: nil, no_tracker_entry: nil, require_email_sent: nil)
       self.no_tracker_entry ||= no_tracker_entry
+      self.require_email_sent ||= require_email_sent
       logger.info "MessageNotification: handling item #{id}"
       update! status: StatusInProgress
 
@@ -239,6 +244,8 @@ module Messaging
         generate_and_send
       end
 
+      # A notification addressed only to "do not email" users is also complete: it is recorded but
+      # NotificationMailer sends nothing (unless require_email_sent makes that an error)
       update! status: StatusComplete
       fire_item_on_complete_triggers
       logger.info "MessageNotification: handled item #{id}"
