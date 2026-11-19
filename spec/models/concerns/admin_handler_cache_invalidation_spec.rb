@@ -240,7 +240,7 @@ RSpec.describe AdminHandler, type: :model do
             Dynamic::DefinitionCacheVersion.token == token_before ? [incomplete_class] : [complete_class]
           end
           Rails.cache.delete("#{class_name}.item_types-#{token_before}")
-          Rails.cache.delete("Classification::GeneralSelection.item_types-#{token_before}")
+          Rails.cache.delete("Classification::GeneralSelection.item_types-#{Report.item_types_cache_version}")
 
           expect(definition_class.item_types.map(&:to_s)).to include(a_string_matching(/select_before_save\z/))
           expect(Classification::GeneralSelection.item_types.map(&:to_s))

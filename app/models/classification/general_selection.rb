@@ -24,7 +24,7 @@ class Classification::GeneralSelection < ActiveRecord::Base
   validate :not_duplicated
 
   def self.item_types(refresh: false)
-    cache_key = "Classification::GeneralSelection.item_types-#{Dynamic::DefinitionCacheVersion.token}"
+    cache_key = "Classification::GeneralSelection.item_types-#{Report.item_types_cache_version}"
     if refresh
       Rails.cache.delete(cache_key)
       Rails.cache.delete(InfoBlockCacheKey)

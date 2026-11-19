@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Reports
   module ReportEditing
     extend ActiveSupport::Concern
@@ -9,10 +11,15 @@ module Reports
     class_methods do
       #
       # Editable reports can have general selections attached to them. This method allows that.
-      def item_types(refresh: false)
-        Rails.cache.delete('Report.item_types') if refresh
+      def item_types_cache_version
+        [Dynamic::DefinitionCacheVersion.token, count, maximum(:updated_at)&.utc&.iso8601(6)].join('-')
+      end
 
-        Rails.cache.fetch('Report.item_types') do
+      def item_types(refresh: false)
+        cache_key = "Report.item_types-#{item_types_cache_version}"
+        Rails.cache.delete(cache_key) if refresh
+
+        Rails.cache.fetch(cache_key) do
           res = []
           editable_data_reports.each do |r|
             next if r.selection_fields.blank?

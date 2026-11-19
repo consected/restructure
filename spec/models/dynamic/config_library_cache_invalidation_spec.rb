@@ -238,7 +238,7 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
         Dynamic::DefinitionCacheVersion.token == token_before ? [incomplete_class] : [complete_class]
       end
       Rails.cache.delete("DynamicModel.item_types-#{token_before}")
-      Rails.cache.delete("Classification::GeneralSelection.item_types-#{token_before}")
+      Rails.cache.delete("Classification::GeneralSelection.item_types-#{Report.item_types_cache_version}")
       expect(DynamicModel.item_types.map(&:to_s)).to include(a_string_matching(/select_library_before\z/))
       expect(Classification::GeneralSelection.item_types.map(&:to_s))
         .to include(a_string_matching(/select_library_before\z/))
