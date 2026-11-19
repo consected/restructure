@@ -104,7 +104,8 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     it 'recomputes table visibility after a dynamic definition changes' do
       resource_lookup = 0
       allow(Admin::UserAccessControl).to receive(:resource_names_for).with(:table) do
-        resource_lookup += 1
+        # Rebuilding the definition lists also asks for resource names; count only viewable_tables lookups
+        resource_lookup += 1 if caller.any? { |l| l.include?("'Admin::UserAccessControl.viewable_tables'") }
         ['player_infos']
       end
       allow(Admin::UserAccessControl).to receive(:access_for_list?).and_return({})

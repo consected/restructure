@@ -67,6 +67,31 @@ describe DefinitionsController, type: :controller do
       expect(response.parsed_body).to include(hash_including('id' => new_user.id, 'name' => new_email))
     end
 
+    it 'refreshes the users definition response when a user is changed by another worker' do
+      id = "users-cache-token-#{SecureRandom.hex(4)}"
+      # The test database has definitions that never generate, so force the cache to publish
+      allow(Dynamic::DefinitionCache).to receive(:definitions_current?).and_return(true)
+      get :show, params: { id: }, xhr: true
+      expect(response.parsed_body).to include(hash_including('id' => @user.id, 'name' => @user.email))
+      memoized_latest_update = User.latest_update
+
+      # Another worker's save leaves this worker's latest_update memo untouched
+      new_email = "other-worker-#{SecureRandom.hex(4)}@example.com"
+      new_user = User.create!(
+        current_admin: Admin.active.first!,
+        email: new_email,
+        first_name: 'Other',
+        last_name: 'Worker',
+        password: Devise.friendly_token(30)
+      )
+      User.where(id: new_user.id).update_all(updated_at: 1.minute.from_now)
+      User.instance_variable_set(:@latest_update, memoized_latest_update)
+
+      get :show, params: { id: }, xhr: true
+
+      expect(response.parsed_body).to include(hash_including('id' => new_user.id))
+    end
+
     it 'should not get an unexpected item' do
       get :show, params:  { id: 'new' }, xhr: true
       expect(response).to have_http_status(404)

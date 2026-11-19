@@ -413,7 +413,16 @@ RSpec.describe 'Pages template freshness after dynamic definition edits', type: 
     expect(page_template_text).to include('WorkerOne')
 
     cached_updated_at = definition.reload.updated_at
-    definition.update_columns(options: caption_options('WorkerTwo'), updated_at: cached_updated_at + 3.seconds)
+    worker_definition = DynamicModel.find(definition.id)
+    worker_definition.current_admin = @admin
+    worker_definition.options = caption_options('WorkerTwo')
+    change_setting('AllowDynamicMigrations', false)
+    begin
+      worker_definition.save!
+      worker_definition.update_columns(updated_at: cached_updated_at + 3.seconds)
+    ensure
+      change_setting('AllowDynamicMigrations', true)
+    end
 
     text = page_template_text
     expect(text).to include('WorkerTwo')

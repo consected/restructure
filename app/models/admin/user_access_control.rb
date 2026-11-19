@@ -535,5 +535,7 @@ class Admin::UserAccessControl < Admin::AdminBase
 
   def reset_associated_items!
     Admin::AppType.reset_memo_associated_items!
+    # The definition lists are built from the app type associations, so they are stale too
+    [ActivityLog, DynamicModel, ExternalIdentifier].each(&:reset_active_model_configurations!)
   end
 end

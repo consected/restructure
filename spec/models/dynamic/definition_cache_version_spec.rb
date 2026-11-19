@@ -10,6 +10,8 @@ require 'rails_helper'
 # These specs verify that:
 # - the token is stable until it is explicitly rotated
 # - rotate! changes the token
+# - when the shared cache can't take the new token, rotate! reports the failure and the token becomes unique
+#   per call (so no worker can treat definitions as verified) until publishing works again
 # - saving a DynamicModel, ActivityLog or ExternalIdentifier rotates the token
 # - saving a YAML config library used by a definition rotates the token once, and saving a
 #   library used by no definition does not
@@ -66,6 +68,43 @@ RSpec.describe Dynamic::DefinitionCacheVersion, type: :model do
     described_class.rotate!
 
     expect(described_class.token).not_to eq(token_before)
+  end
+
+  describe 'when the shared cache cannot store the token' do
+    after { described_class.rotate! }
+
+    def make_cache_unwritable
+      allow(Rails.cache).to receive(:write).and_return(false)
+      allow(Rails.cache).to receive(:read).and_call_original
+      allow(Rails.cache).to receive(:read).with(/dynamic-definitions-cache-version/).and_return(nil)
+    end
+
+    it 'returns false, flags the publish as pending and reports the failure' do
+      make_cache_unwritable
+      allow(Rails.error).to receive(:report)
+
+      expect(described_class.rotate!).to be false
+      expect(described_class.publish_pending?).to be true
+      expect(Rails.error).to have_received(:report).once
+    end
+
+    it 'returns a different token on every call until publishing succeeds' do
+      make_cache_unwritable
+      described_class.rotate!
+
+      expect(described_class.token).not_to eq(described_class.token)
+    end
+
+    it 'recovers with a stable, newly published token once the cache works again' do
+      make_cache_unwritable
+      described_class.rotate!
+      RSpec::Mocks.space.proxy_for(Rails.cache).reset
+
+      token = described_class.token
+
+      expect(described_class.publish_pending?).to be false
+      expect(described_class.token).to eq(token)
+    end
   end
 
   {

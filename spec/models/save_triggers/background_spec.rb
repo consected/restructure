@@ -305,6 +305,8 @@ RSpec.describe SaveTriggersBackgroundJob, type: :job do
       ]
 
       expect(Rails.logger).to receive(:info).with(/First job message/)
+      # Other debug logging (for example from a definition refresh) may legitimately occur during the job
+      allow(Rails.logger).to receive(:debug)
       expect(Rails.logger).to receive(:debug).with(/Second job message/)
       allow(Rails.logger).to receive(:info)
 

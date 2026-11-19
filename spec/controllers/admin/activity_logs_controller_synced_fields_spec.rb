@@ -305,6 +305,10 @@ RSpec.describe Admin::ActivityLogsController, type: :controller do
       # (rather than ActivityLog#implementation_class generally) avoids affecting other
       # unrelated parts of the same edit page that also resolve implementation_class for every
       # activity log definition (e.g. populating item type dropdowns).
+      #
+      # Bring the worker's loaded definitions up to date first, so that the request's refresh does not
+      # regenerate the implementation class and discard the stub.
+      ActivityLog.refresh_outdated
       allow(ActivityLog::PlayerContactPhone).to receive(:fields_to_sync).and_raise(StandardError, 'boom')
 
       get :edit, params: { id: @phone_log.id }

@@ -49,7 +49,8 @@ module BhsDefinitionSnapshot
 
     snapshot[:settings].each { |name, value| change_setting(name, value) }
 
-    # Clear memos explicitly: up_to_date? treats changes within 2 seconds as unchanged
+    # Rotate the shared token so a worker rechecks definitions restored by direct SQL.
+    Dynamic::DefinitionCacheVersion.rotate!
     [ActivityLog, DynamicModel, ExternalIdentifier].each do |klass|
       klass.reset_active_model_configurations! if klass.respond_to?(:reset_active_model_configurations!)
     end

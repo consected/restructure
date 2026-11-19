@@ -113,18 +113,19 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
     handler::RequestCache.reset
     token_before_rotation = Dynamic::DefinitionCacheVersion.token
     allow(handler).to receive(:selector_with_config_overrides_processing).and_return([])
-    allow(Rails.cache).to receive(:fetch).and_call_original
+    allow(Rails.cache).to receive(:read).and_call_original
 
     handler.selector_with_config_overrides(condition)
     handler.selector_with_config_overrides(condition.merge(field_name: 'second_field'))
 
-    expect(Rails.cache).to have_received(:fetch).with(shared_key).once
+    expect(Rails.cache).to have_received(:read).with(shared_key).once
     Dynamic::DefinitionCacheVersion.rotate!
 
     handler::RequestCache.reset
     handler.selector_with_config_overrides(condition)
     expect(handler::RequestCache.shared_definition_cache_version).not_to eq(token_before_rotation)
-    expect(Rails.cache).to have_received(:fetch).with(shared_key).twice
+    # rotate! reads the token back to verify publication, then the new request reads it once
+    expect(Rails.cache).to have_received(:read).with(shared_key).exactly(3).times
   end
 
   it 'bounds tracked selector cache keys and removes pruned entries' do
