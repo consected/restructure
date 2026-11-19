@@ -285,9 +285,56 @@ module Dynamic
         [@latest_def_update, cl_update].compact.max
       end
 
+      # Compare persisted definitions with the ones loaded by this worker without consuming changes.
+      # The shared token makes the common unchanged case query-free; a new token triggers an exact check.
+      # @return [:current, :unverified, :definitions_changed, :library_only_changed]
+      def definition_refresh_status
+        token = Dynamic::DefinitionCacheVersion.token
+        return :current if @verified_definition_cache_token == token
+
+        definitions_changed = false
+        definitions_unready = false
+        active_model_configurations.each do |stored|
+          unless stored.table_or_view_ready?
+            definitions_unready = true
+            next
+          end
+
+          loaded = Resources::Models.find_by(resource_name: stored.resource_name)&.model&.definition ||
+                   definition_cache[stored.id]
+          implementation_namespace = stored.is_a?(ExternalIdentifier) ? Object : stored.class.name.constantize
+          same_version = same_definition_version?(loaded, stored) &&
+                         stored.implementation_class_defined?(implementation_namespace, fail_without_exception: true)
+          definitions_changed ||= !same_version
+        end
+
+        return :definitions_changed if definitions_changed
+        return :unverified if definitions_unready || @verified_definition_cache_token.nil?
+
+        :library_only_changed
+      end
+
+      # Record the token and definition timestamps only after the caller has completed a refresh.
+      # A not-ready definition or a concurrent save leaves the worker unverified for the next call.
+      # @return [Boolean] whether the worker was marked current
+      def mark_definition_refresh_current!
+        token_before = Dynamic::DefinitionCacheVersion.token
+        timestamps = {}
+        active_model_configurations.each do |definition|
+          return false unless definition.table_or_view_ready?
+
+          timestamps[definition.id] = definition.updated_at
+        end
+        return false unless Dynamic::DefinitionCacheVersion.token == token_before
+
+        @verified_definition_timestamps = timestamps
+        @verified_definition_cache_token = token_before
+        true
+      end
+
       #
       # Does the persisted latest updated definition match the memoized update?
-      # Returns nil if not previously memoized, otherwise true or false.
+      # Kept temporarily for callers migrating to #definition_refresh_status.
       # @return [true | false | nil]
       def up_to_date?
         lu = latest_stored_update

@@ -118,20 +118,19 @@ module Dynamic
       # do not match the memoized version, since these may have changed on
       # another server in the cluster.
       def refresh_outdated
-        utd = up_to_date?
-        # If up to date, or not previously set
-        # (and therefore we are on our first load and everything will have just been set up) just return
-        return if utd || utd.nil?
+        status = definition_refresh_status
+        return if status == :current
 
-        if @config_library_only_change
+        if status == :library_only_changed
           Rails.logger.warn "Refreshing config library dependents for #{name}"
           reset_active_model_configurations!
-          active.each do |d|
-            next unless d.options_text&.include?('# @library ')
+          active.each do |definition|
+            next unless definition.options_text&.include?('# @library ')
 
-            d.force_option_config_parse(raise_bad_configs: false)
-            definition_cache[d.id] = d
+            definition.force_option_config_parse(raise_bad_configs: false)
+            definition_cache[definition.id] = definition
           end
+          mark_definition_refresh_current!
           return
         end
 
@@ -141,32 +140,30 @@ module Dynamic
         clear_all_versions_memo
         defs = active_model_configurations.reorder('').order('updated_at desc nulls last')
         any_new = false
-        defs.each do |d|
-          rn = d.resource_name
-          u = d.updated_at
-          m = Resources::Models.find_by(resource_name: rn)&.model&.definition
+        skipped_unready_definition = false
+        defs.each do |definition|
+          resource_name = definition.resource_name
+          updated_at = definition.updated_at
+          loaded = Resources::Models.find_by(resource_name:)&.model&.definition
 
-          unless d.table_or_view_ready?
-            Rails.logger.warn "refresh_outdated dynamic def #{d.class.name} table or view is not ready"
+          unless definition.table_or_view_ready?
+            skipped_unready_definition = true
+            Rails.logger.warn "refresh_outdated dynamic def #{definition.class.name} table or view is not ready"
             next
           end
 
-          klass = if d.is_a? ExternalIdentifier
-                    Object
-                  else
-                    d.class.name.constantize
-                  end
+          implementation_namespace = definition.is_a?(ExternalIdentifier) ? Object : definition.class.name.constantize
+          next if same_definition_version?(loaded, definition) &&
+                  definition.implementation_class_defined?(implementation_namespace, fail_without_exception: true)
 
-          # Skip if the model was previous set and the updated timestamps match AND the implementation class is defined
-          next if m && m.updated_at == u && d.implementation_class_defined?(klass, fail_without_exception: true)
-
-          Rails.logger.warn "Refreshing #{rn}, last updated at #{u}"
-          this_is_new = !m
-          any_new ||= this_is_new
-          regenerate_from_stored(d, this_is_new:)
+          Rails.logger.warn "Refreshing #{resource_name}, last updated at #{updated_at}"
+          is_new_definition = loaded.nil?
+          any_new ||= is_new_definition
+          regenerate_from_stored(definition, this_is_new: is_new_definition)
         end
 
         routes_reload if any_new
+        mark_definition_refresh_current! unless skipped_unready_definition
       end
 
       # Regenerate the implementation and parsed configuration from a freshly loaded definition record

@@ -491,6 +491,7 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
       dm_original_time = DynamicModel.where(id: existing_dm.id).pick(:updated_at)
       future_time = lu_before + 60.seconds
       DynamicModel.where(id: existing_dm.id).update_all(updated_at: future_time)
+      Dynamic::DefinitionCacheVersion.rotate!
       DynamicModel.reset_active_model_configurations!
 
       # Call refresh_outdated directly (without calling up_to_date? first, which would
@@ -510,6 +511,7 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
 
       # Restore original timestamp to avoid affecting other tests
       DynamicModel.where(id: existing_dm.id).update_all(updated_at: dm_original_time)
+      Dynamic::DefinitionCacheVersion.rotate!
       DynamicModel.reset_active_model_configurations!
     end
   end
@@ -538,6 +540,7 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
       future_time = [dm_original_time, cl_original_time].max + 60.seconds
       DynamicModel.where(id: existing_dm.id).update_all(updated_at: future_time)
       Admin::ConfigLibrary.where(id: @config_library.id).update_all(updated_at: future_time)
+      Dynamic::DefinitionCacheVersion.rotate!
       DynamicModel.reset_active_model_configurations!
 
       # Call refresh_outdated which internally calls up_to_date? and detects the change.
@@ -561,6 +564,7 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
       # Restore timestamps
       DynamicModel.where(id: existing_dm.id).update_all(updated_at: dm_original_time)
       Admin::ConfigLibrary.where(id: @config_library.id).update_all(updated_at: cl_original_time)
+      Dynamic::DefinitionCacheVersion.rotate!
       DynamicModel.reset_active_model_configurations!
     end
   end

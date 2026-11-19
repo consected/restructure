@@ -313,9 +313,8 @@ RSpec.describe 'Definition versioning', type: :model do
   end
 
   it 'resolves an older record to its historical version after another worker edits the definition' do
-    ActivityLog.up_to_date?
     stale_versions = @activity_log.all_versions
-    stale_update_marker = ActivityLog.instance_variable_get(:@prev_latest_update)
+    stale_definition = ActivityLog.definition_cache[@activity_log.id].dup
     record_created_at = Time.current
     sleep 2
 
@@ -328,7 +327,7 @@ RSpec.describe 'Definition versioning', type: :model do
     ActivityLog.all_versions_memo = ActivityLog.all_versions_memo.merge(
       @activity_log.send(:versions_memo_key) => stale_versions
     )
-    ActivityLog.instance_variable_set(:@prev_latest_update, stale_update_marker)
+    ActivityLog.definition_cache[@activity_log.id] = stale_definition
     ActivityLog.refresh_outdated
 
     historical = @activity_log.versioned(record_created_at)
