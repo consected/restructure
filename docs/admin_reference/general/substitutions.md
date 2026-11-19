@@ -150,6 +150,13 @@ When working with an association, pick a specific element:
 - `\{\{association.last\}\}`
 - `\{\{association.<number>}\}` - zero based index
 
+For a condition that compares one record field with a field from the latest record of another
+resource on the same master, optionally filtered by that record's attributes, use the explicit
+[`associated_with` field comparison syntax](conditions_record_sources.md#comparing-fields-with-the-latest-related-record).
+Its filter values are literals, not `{{}}` substitutions. A substitution such as
+`{{association.first.attribute}}` follows the association's ordering, which may not be the most
+recent record.
+
 ### Other related items
 
 Special names, which are not actual associations but work like them are:

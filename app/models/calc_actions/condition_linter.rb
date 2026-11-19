@@ -28,7 +28,8 @@ module CalcActions
     RESERVED_KEYS = (NON_JOIN_KEYS - NON_QUERY_SOURCES - %i[masters users definition_resources]).freeze
 
     REFERENCE_KEYS = %i[this parent embedded_item referring_record top_referring_record reference user
-                        this_references parent_references parent_or_this_references ids_referencing lookup].freeze
+                        this_references parent_references parent_or_this_references ids_referencing lookup
+                        associated_with].freeze
     RETURN_FLAGS = %i[return_value return_value_list return_result return_all_results].freeze
     FIELD_CONDITION_KEYS = (%i[condition value not element hide_error invalid_error_message] + RETURN_FLAGS).freeze
     SPECIAL_FIELDS = %i[return_constant exists role_name].freeze
@@ -352,7 +353,61 @@ module CalcActions
       when :this_references, :parent_references, :parent_or_this_references then check_reference_value(key, val, path)
       when :ids_referencing then lint_ids_referencing(val, path)
       when :lookup then lint_lookup(val, path)
+      when :associated_with then lint_associated_with(val, path)
       end
+    end
+
+    # Lint an `associated_with` value: exactly one resource that is a master association, with either
+    # a field name or a filtered hash holding one return_value / return_value_list directive.
+    # Fields, filter keys and the return field must be attributes of the resource,
+    # and filter values must be scalars or arrays of scalars.
+    def lint_associated_with(val, path)
+      return add(path, 'associated_with must name exactly one resource') unless val.is_a?(Hash) && val.size == 1
+
+      resource_name, comparison = val.first
+      resource_path = join(path, resource_name)
+      reflection = Master.reflect_on_association(resource_name)
+      unless reflection
+        message = if resource_for(resource_name)
+                    "'#{resource_name}' is not an association of masters"
+                  else
+                    "'#{resource_name}' is not a known resource or association of masters"
+                  end
+        return add(resource_path, message)
+      end
+
+      resource_class = reflection_class(reflection)
+      if comparison.is_a?(Hash)
+        directives = comparison.select { |_field, value| record_source_return_directive?(value) }
+        if directives.length != 1
+          add(resource_path, 'filtered field comparison must specify exactly one return_value or return_value_list')
+        end
+
+        comparison.each do |field, value|
+          field_path = join(resource_path, field)
+          check_attribute(field, resource_class, field_path, resource_name)
+          next if record_source_return_directive?(value)
+          next if scalar_filter_value?(value)
+
+          add(field_path, 'filter values must be scalars or arrays of scalars')
+        end
+      elsif single_attribute_value?(comparison)
+        check_attribute(comparison, resource_class, resource_path, resource_name)
+      else
+        add(resource_path, 'associated_with resource value must name a field or provide filtered field conditions')
+      end
+    end
+
+    # Is the value a return_value or return_value_list directive?
+    def record_source_return_directive?(value)
+      (value.is_a?(String) || value.is_a?(Symbol)) && value.to_s.in?(%w[return_value return_value_list])
+    end
+
+    # Filters must be a scalar or an array of scalars (no nested hashes or arrays)
+    def scalar_filter_value?(value)
+      return value.all? { |entry| !entry.is_a?(Hash) && !entry.is_a?(Array) } if value.is_a?(Array)
+
+      !value.is_a?(Hash)
     end
 
     def check_user_value(val, path)
