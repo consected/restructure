@@ -78,13 +78,13 @@ RSpec.describe AdminHandler, type: :model do
   end
 
   describe 'item type caches' do
-    def item_type_cache_key(class_name, token)
-      "#{class_name}.item_types-#{token}"
+    def item_type_cache_key(class_name, _token)
+      Dynamic::DefinitionCache.key("#{class_name}.item_types")
     end
 
     it 'does not serve a DynamicModel item-type list written by a worker with incomplete classes' do
       token = Dynamic::DefinitionCacheVersion.token
-      Rails.cache.delete('DynamicModel.item_types')
+      Dynamic::DefinitionCache.delete('DynamicModel.item_types')
       Rails.cache.delete(item_type_cache_key('DynamicModel', token))
       incomplete_class = double(attribute_names: ['select_incomplete'], model_name: double(to_s: 'CacheTest'))
       complete_class = double(attribute_names: ['select_complete'], model_name: double(to_s: 'CacheTest'))
@@ -100,7 +100,7 @@ RSpec.describe AdminHandler, type: :model do
 
     it 'does not serve a GeneralSelection item-type list written with stale definition availability' do
       token = Dynamic::DefinitionCacheVersion.token
-      Rails.cache.delete('Classification::GeneralSelection.item_types')
+      Dynamic::DefinitionCache.delete('Classification::GeneralSelection.item_types', Report.item_types_cache_version)
       Rails.cache.delete(item_type_cache_key('Classification::GeneralSelection', token))
       allow(Report).to receive(:item_types).and_return([])
       allow(ActivityLog).to receive(:item_types).and_return([])
@@ -239,8 +239,8 @@ RSpec.describe AdminHandler, type: :model do
           allow(definition_class).to receive(:implementation_classes) do
             Dynamic::DefinitionCacheVersion.token == token_before ? [incomplete_class] : [complete_class]
           end
-          Rails.cache.delete("#{class_name}.item_types-#{token_before}")
-          Rails.cache.delete("Classification::GeneralSelection.item_types-#{Report.item_types_cache_version}")
+          Dynamic::DefinitionCache.delete("#{class_name}.item_types")
+          Dynamic::DefinitionCache.delete('Classification::GeneralSelection.item_types', Report.item_types_cache_version)
 
           expect(definition_class.item_types.map(&:to_s)).to include(a_string_matching(/select_before_save\z/))
           expect(Classification::GeneralSelection.item_types.map(&:to_s))

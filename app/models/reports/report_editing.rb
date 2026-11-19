@@ -16,10 +16,7 @@ module Reports
       end
 
       def item_types(refresh: false)
-        cache_key = "Report.item_types-#{item_types_cache_version}"
-        Rails.cache.delete(cache_key) if refresh
-
-        Rails.cache.fetch(cache_key) do
+        Dynamic::DefinitionCache.fetch('Report.item_types', item_types_cache_version, refresh:) do
           res = []
           editable_data_reports.each do |r|
             next if r.selection_fields.blank?

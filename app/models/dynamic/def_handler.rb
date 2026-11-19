@@ -235,10 +235,7 @@ module Dynamic
       # when defining a new definition record, which
       # is in fact provided by self.use_with_class_names
       def item_types(refresh: false)
-        cname = "#{name}.item_types-#{Dynamic::DefinitionCacheVersion.token}"
-        Rails.cache.delete(cname) if refresh
-
-        Rails.cache.fetch(cname) do
+        Dynamic::DefinitionCache.fetch("#{name}.item_types", refresh:) do
           list = []
           implementation_classes.each do |imp_class|
             list += imp_class.attribute_names
@@ -294,12 +291,17 @@ module Dynamic
 
         definitions_changed = false
         definitions_unready = false
+        current_timestamps = {}
         active_model_configurations.each do |stored|
           unless stored.table_or_view_ready?
             definitions_unready = true
             next
           end
 
+          current_timestamps[stored.id] = stored.updated_at
+          if @verified_definition_timestamps && @verified_definition_timestamps[stored.id] != stored.updated_at
+            definitions_changed = true
+          end
           loaded = Resources::Models.find_by(resource_name: stored.resource_name)&.model&.definition ||
                    definition_cache[stored.id]
           implementation_namespace = stored.is_a?(ExternalIdentifier) ? Object : stored.class.name.constantize
@@ -310,8 +312,12 @@ module Dynamic
 
         return :definitions_changed if definitions_changed
         return :unverified if definitions_unready || @verified_definition_cache_token.nil?
+        return :definitions_changed if (@verified_definition_timestamps || {}).keys.sort != current_timestamps.keys.sort
 
-        :library_only_changed
+        library_updated_at = Admin::ConfigLibrary.where(format: 'yaml').maximum(:updated_at)
+        return :library_only_changed if library_updated_at != @verified_config_library_updated_at
+
+        :definitions_changed
       end
 
       # Record the token and definition timestamps only after the caller has completed a refresh.
@@ -323,11 +329,21 @@ module Dynamic
         active_model_configurations.each do |definition|
           return false unless definition.table_or_view_ready?
 
+          namespace = definition.is_a?(ExternalIdentifier) ? Object : definition.class.name.constantize
+          loaded = Resources::Models.find_by(resource_name: definition.resource_name)&.model&.definition ||
+                   definition_cache[definition.id]
+          return false unless same_definition_version?(loaded, definition) &&
+                              definition.implementation_class_defined?(namespace, fail_without_exception: true)
+
           timestamps[definition.id] = definition.updated_at
         end
         return false unless Dynamic::DefinitionCacheVersion.token == token_before
 
+        library_updated_at = Admin::ConfigLibrary.where(format: 'yaml').maximum(:updated_at)
+        return false unless Dynamic::DefinitionCacheVersion.token == token_before
+
         @verified_definition_timestamps = timestamps
+        @verified_config_library_updated_at = library_updated_at
         @verified_definition_cache_token = token_before
         true
       end

@@ -21,7 +21,7 @@ class DefinitionsController < ApplicationController
     return if performed?
 
     def_type = params[:id]
-    j = Rails.cache.fetch(definition_cache_key(def_type)) do
+    j = Dynamic::DefinitionCache.fetch(*definition_cache_key(def_type)) do
       get_def(def_type).as_json
     end
     render json: j
@@ -45,10 +45,9 @@ class DefinitionsController < ApplicationController
     [
       "definition_#{def_type}",
       Application.server_cache_version,
-      Dynamic::DefinitionCacheVersion.token,
       user_version,
       role_version
-    ].join('-')
+    ]
   end
 
   def get_def(def_type)

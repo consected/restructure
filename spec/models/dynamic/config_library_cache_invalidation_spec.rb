@@ -165,10 +165,16 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
   # Reset class-level memoized state before each test to prevent cross-test
   # contamination through ivars that persist on the DynamicModel class.
   before do
-    DynamicModel.instance_variable_set(:@prev_latest_update, nil)
-    DynamicModel.instance_variable_set(:@prev_latest_def_update, nil)
-    DynamicModel.instance_variable_set(:@config_library_only_change, nil)
-    DynamicModel.instance_variable_set(:@latest_def_update, nil)
+    [DynamicModel, ActivityLog].each do |definition_class|
+      definition_class.instance_variable_set(:@prev_latest_update, nil)
+      definition_class.instance_variable_set(:@prev_latest_def_update, nil)
+      definition_class.instance_variable_set(:@config_library_only_change, nil)
+      definition_class.instance_variable_set(:@latest_def_update, nil)
+      definition_class.instance_variable_set(:@verified_definition_cache_token, nil)
+      definition_class.instance_variable_set(:@verified_definition_timestamps, nil)
+      definition_class.instance_variable_set(:@verified_config_library_updated_at, nil)
+      definition_class.mark_definition_refresh_current!
+    end
   end
 
   # ---------------------------------------------------------------------------
@@ -237,8 +243,8 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
       allow(DynamicModel).to receive(:implementation_classes) do
         Dynamic::DefinitionCacheVersion.token == token_before ? [incomplete_class] : [complete_class]
       end
-      Rails.cache.delete("DynamicModel.item_types-#{token_before}")
-      Rails.cache.delete("Classification::GeneralSelection.item_types-#{Report.item_types_cache_version}")
+      Dynamic::DefinitionCache.delete('DynamicModel.item_types')
+      Dynamic::DefinitionCache.delete('Classification::GeneralSelection.item_types', Report.item_types_cache_version)
       expect(DynamicModel.item_types.map(&:to_s)).to include(a_string_matching(/select_library_before\z/))
       expect(Classification::GeneralSelection.item_types.map(&:to_s))
         .to include(a_string_matching(/select_library_before\z/))
@@ -306,6 +312,7 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
         options: @library_v2_options,
         updated_at: future_time
       )
+      Dynamic::DefinitionCacheVersion.rotate!
 
       # Spy on generate_model to verify it is NOT called (lightweight path)
       generate_called_for = []
@@ -330,6 +337,7 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
           options: cl_original_options,
           updated_at: cl_original_time
         )
+        Dynamic::DefinitionCacheVersion.rotate!
         cached_definition = DynamicModel.definition_cache[@dm.id]
         cached_definition.reload
         cached_definition.force_option_config_parse
@@ -372,6 +380,7 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
         options: @library_v2_options,
         updated_at: future_time
       )
+      Dynamic::DefinitionCacheVersion.rotate!
 
       begin
         ActivityLog.refresh_outdated
@@ -383,6 +392,7 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
           options: @library_v1_options,
           updated_at: cl_original_time
         )
+        Dynamic::DefinitionCacheVersion.rotate!
         cached_definition = ActivityLog.definition_cache[@activity_log.id]
         cached_definition.reload
         cached_definition.force_option_config_parse

@@ -351,7 +351,9 @@ module Dynamic
 
       Rails.logger.info 'Refreshing item types'
       Admin::AppTypeImport.run_now_or_after_import(:general_selection_item_types_refresh) do
-        Classification::GeneralSelection.item_types refresh: true
+        Dynamic::DefinitionCache.with_refresh_suppressed do
+          Classification::GeneralSelection.item_types refresh: true
+        end
       end
     end
 
