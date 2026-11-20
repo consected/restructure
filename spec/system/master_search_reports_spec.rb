@@ -5,6 +5,7 @@ require 'rails_helper'
 # Tests for master search with searchable report tabs
 # Related to GitHub issue #834 - Master results get requested twice
 # Related to GitHub issue #87 - Report tabs should refresh, not collapse, when clicked again
+# Related to GitHub issue #1496 - searchable report selector presentation and preferences
 describe 'master search with reports', js: true, driver: $browser_driver do
   include ModelSupport
   include MasterDataSupport
@@ -60,6 +61,7 @@ describe 'master search with reports', js: true, driver: $browser_driver do
       report_type: 'search',
       auto: false,
       searchable: true,
+      item_type: 'Alpha',
       position: 1
     )
 
@@ -84,6 +86,7 @@ describe 'master search with reports', js: true, driver: $browser_driver do
       report_type: 'search',
       auto: true,
       searchable: true,
+      item_type: 'Beta',
       position: 2
     )
 
@@ -137,6 +140,16 @@ describe 'master search with reports', js: true, driver: $browser_driver do
   before :each do
     validate_setup
     login
+  end
+
+  after :each do
+    %w[search_selector search_selector_header search_selector_footer search_selector_label search_selector_categorized].each do |key|
+      name = Admin::AppConfiguration.sym_to_name(key.to_sym)
+      @user.app_type.app_configurations.where(name:, user_id: nil, role_name: nil).find_each do |configuration|
+        configuration.update!(current_admin: @admin, value: '')
+      end
+    end
+    page.execute_script("document.cookie = 'search-selector-app-type-#{@user.app_type_id}=; Max-Age=0; path=/'")
   end
 
   # Test for GitHub issue #834 - Master results get requested twice
@@ -554,5 +567,79 @@ describe 'master search with reports', js: true, driver: $browser_driver do
     sleep 0.5
     expect(page.evaluate_script('window.rerunSubmitCount')).to be >= 1,
                                                                'Expected the auto-run report to re-submit when clicking the already-expanded tab, but no submit was detected'
+  end
+
+  it 'renders searchable reports as a categorized chosen dropdown with substituted markdown captions' do
+    add_app_config(@user.app_type, 'search selector', 'dropdown')
+    add_app_config(@user.app_type, 'search selector header', 'Search for **{{email}}**')
+    add_app_config(@user.app_type, 'search selector footer', '_End of report choices_')
+    add_app_config(@user.app_type, 'search selector label', 'Find reports for {{email}}')
+    add_app_config(@user.app_type, 'search selector categorized', '{{#if email}}true{{else}}false{{/if}}')
+
+    visit '/masters/search'
+    finish_page_loading
+
+    expect(page).to have_css('#search_selector_dropdown.use-chosen', visible: :all)
+    expect(page).to have_css('#search_selector_dropdown_chosen')
+    expect(page).to have_css('.search-selector__header strong', text: @user.email.gsub('--', '–'))
+    expect(page).to have_css('.search-selector__footer em', text: 'End of report choices')
+    expect(page).to have_css('label[for="search_selector_dropdown"]', text: "Find reports for #{@user.email}")
+    expect(page).to have_css("#search_selector_dropdown optgroup[label='Alpha'] option", text: @searchable_report.name, visible: :all)
+    expect(page).to have_css("#search_selector_dropdown optgroup[label='Beta'] option", text: @auto_run_report.name, visible: :all)
+  end
+
+  it 'switches selector views and retains the selected view for the app type' do
+    add_app_config(@user.app_type, 'search selector', '{{#if email}}dropdown{{else}}tabs{{/if}}')
+
+    visit '/masters/search'
+    finish_page_loading
+    expect(page).to have_css('#search_selector_dropdown_chosen')
+    expect(page).not_to have_css('#search_selector_dropdown optgroup', visible: :all)
+
+    click_button('Switch to tabs')
+    expect(page).to have_css('.advanced-form-selections.search-selector--tabs')
+    expect(page).not_to have_css('#search_selector_dropdown_chosen', visible: true)
+
+    visit '/masters/search'
+    finish_page_loading
+    expect(page).to have_css('.advanced-form-selections.search-selector--tabs')
+    expect(page).to have_css("#expand-searchable-report-#{@auto_run_report.alt_resource_name}")
+  end
+
+  it 'collapses the previous report panel when a different dropdown report is selected' do
+    add_app_config(@user.app_type, 'search selector', 'dropdown')
+
+    visit '/masters/search'
+    finish_page_loading
+
+    select_from_dropdown_field('search_selector_dropdown', @searchable_report.name)
+    expect(page).to have_css("#master-report-#{@searchable_report.alt_resource_name}.in", wait: 10)
+
+    select_from_dropdown_field('search_selector_dropdown', @auto_run_report.name)
+    expect(page).to have_css("#master-report-#{@auto_run_report.alt_resource_name}.in", wait: 10)
+    expect(page).not_to have_css("#master-report-#{@searchable_report.alt_resource_name}.in")
+  end
+
+  it 'hides report selectors when configured as none' do
+    add_app_config(@user.app_type, 'search selector', 'none')
+
+    visit '/masters/search'
+    finish_page_loading
+
+    expect(page).not_to have_css('.search-selector__reports')
+    expect(page).not_to have_css('#search-selector-toggle')
+    expect(page).to have_button('Simple Search')
+    expect(page).to have_button('Advanced Search')
+  end
+
+  it 'does not mark Simple Search as selected when another report is the default search form' do
+    add_app_config(@user.app_type, 'default search form', @searchable_report.alt_resource_name)
+
+    visit '/masters/search'
+    finish_page_loading
+
+    expect(page).to have_css("#master-report-#{@searchable_report.alt_resource_name}.in", wait: 10)
+    expect(page).to have_css('#expand-simple-form.collapsed[aria-expanded="false"]')
+    expect(page).to have_css('#expand-adv-form.collapsed')
   end
 end

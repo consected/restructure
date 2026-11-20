@@ -2,31 +2,91 @@
   <%
   default_search_form = app_config_text(:default_search_form, 'Simple Search')
   hide_searchable_reports = app_config_set(:hide_search_form_searchable_reports)
+  searchable_reports = Report.active.searchable.for_user(current_user).to_a
+  substitute_search_selector_value = lambda do |name, default = '', html_escape_values: false|
+    value = app_config_text(name, default)
+    Formatter::Substitution.substitute(
+      value, data: current_user, tag_subs: nil, ignore_missing: true, html_escape_values:
+    ).to_s.strip
+  end
+  search_selector_mode = substitute_search_selector_value.call(:search_selector, 'tabs').downcase
+  search_selector_mode = 'tabs' unless %w[tabs dropdown none].include?(search_selector_mode)
+  search_selector_header = substitute_search_selector_value.call(:search_selector_header, '', html_escape_values: true)
+  search_selector_footer = substitute_search_selector_value.call(:search_selector_footer, '', html_escape_values: true)
+  search_selector_label = substitute_search_selector_value.call(:search_selector_label)
+  search_selector_categorized = ActiveModel::Type::Boolean.new.cast(
+    substitute_search_selector_value.call(:search_selector_categorized)
+  )
+  show_search_selector = !hide_searchable_reports && search_selector_mode != 'none' && searchable_reports.any?
+  # Apply the user's saved view on the server to avoid a flash of the other view while the page loads
+  saved_search_selector_mode = cookies["search-selector-app-type-#{current_user.app_type_id}"]
+  if show_search_selector && %w[tabs dropdown].include?(saved_search_selector_mode)
+    search_selector_mode = saved_search_selector_mode
+  end
 %>
   <div class="panel-group <%= @requested_master ? 'loading-results' : '' %>" id="master-search-accordion" role="tablist" aria-multiselectable="false">
-    <div class="advanced-form-selections">
+    <div class="advanced-form-selections <%= "search-selector search-selector--#{search_selector_mode}" if show_search_selector %>"<% if show_search_selector %> data-search-selector-mode="<%= search_selector_mode %>" data-app-type-id="<%= current_user.app_type_id %>"<% end %>>
       <% unless app_config_set(:hide_search_form_simple) %>
-        <button id="expand-simple-form" class="btn btn-primary search-selector-btn" type="button" data-parent="#master-search-accordion" data-toggle="collapse" data-target="#master-search-simple-form" aria-expanded="true" aria-controls="master-search-simple-form">Simple Search</button>
+        <button id="expand-simple-form" class="btn btn-primary search-selector-btn <%= default_search_form == 'Simple Search' ? '' : 'collapsed' %>" type="button" data-parent="#master-search-accordion" data-toggle="collapse" data-target="#master-search-simple-form" aria-expanded="<%= default_search_form == 'Simple Search' %>" aria-controls="master-search-simple-form">Simple Search</button>
       <% end %>
       <% unless app_config_set(:hide_search_form_advanced) %>
-        <button id="expand-adv-form" class="btn btn-primary collapsed search-selector-btn" type="button" data-parent="#master-search-accordion" data-toggle="collapse" data-target="#master-search-advanced-form" aria-expanded="false" aria-controls="master-search-advanced-form">Advanced Search</button>
+        <button id="expand-adv-form" class="btn btn-primary search-selector-btn <%= default_search_form == 'Advanced Search' ? '' : 'collapsed' %>" type="button" data-parent="#master-search-accordion" data-toggle="collapse" data-target="#master-search-advanced-form" aria-expanded="<%= default_search_form == 'Advanced Search' %>" aria-controls="master-search-advanced-form">Advanced Search</button>
       <% end %>
-      <% Report.active.searchable.for_user(current_user).each do |r|%>
-        <%  # Hide the searchable reports, except for if one of those reports is the default.
-        is_default = default_search_form == r.name.downcase || default_search_form == r.alt_resource_name
-        if !app_config_set(:hide_search_form_searchable_reports) || is_default
-          add_class = (is_default ? 'is_default_report' : 'collapsed')
-          prevent_collapse = if r.report_type_report?
-                               r.report_options.search_panel_options.prevent_collapse_for_search_panel_results
-                             else
-                               r.report_options.view_options.prevent_collapse_for_list
-                             end
-          add_class += ' prevent-list-collapse' if prevent_collapse
-      %>
-        <a href="<%= report_path(id: r.id, part: :form, format: :html, view_context: :search) %>" data-preprocessor="reports_form" data-parent="#master-search-accordion" data-remote="true" class="btn btn-primary prevent-on-collapse  search-selector-btn <%= add_class %> one-time-only-ajax <%=hide_searchable_reports ? 'hidden' : ''%>" type="button" data-toggle="collapse" data-report-resource-name="<%=r.alt_resource_name%>" data-result-target="#master-report-<%=r.alt_resource_name%> .searchable-report" data-target="#master-report-<%=r.alt_resource_name%>" aria-expanded="<%= is_default ? 'true' : 'false' %>" aria-controls="master-report-<%=r.alt_resource_name%>" id="expand-searchable-report-<%=r.alt_resource_name%>" ><%=r.name%></a>
+      <% if searchable_reports.any? %>
+        <% if show_search_selector && search_selector_header.present? %>
+          <div class="search-selector__header"><%= markdown_to_html(search_selector_header) %></div>
+        <% end %>
+        <% if show_search_selector %>
+          <button id="search-selector-toggle" class="btn btn-default btn-sm search-selector__toggle" type="button" title="Switch searchable report selector view" aria-label="Switch searchable report selector view" aria-pressed="<%= search_selector_mode == 'dropdown' %>">
+            <span class="glyphicon <%= search_selector_mode == 'dropdown' ? 'glyphicon-th-list' : 'glyphicon-list' %>" aria-hidden="true"></span>
+          </button>
+        <% end %>
+        <div class="search-selector__reports <%= 'hidden' unless show_search_selector %>">
+          <div class="search-selector__tabs <%= 'hidden' unless show_search_selector %>">
+            <% searchable_reports.each do |r|
+              is_default = default_search_form == r.name.downcase || default_search_form == r.alt_resource_name
+              next unless show_search_selector || is_default
+
+              add_class = is_default ? 'is_default_report' : 'collapsed'
+              prevent_collapse = if r.report_type_report?
+                                   r.report_options.search_panel_options.prevent_collapse_for_search_panel_results
+                                 else
+                                   r.report_options.view_options.prevent_collapse_for_list
+                                 end
+              add_class += ' prevent-list-collapse' if prevent_collapse
+            %>
+              <a href="<%= report_path(id: r.id, part: :form, format: :html, view_context: :search) %>" data-preprocessor="reports_form" data-parent="#master-search-accordion" data-remote="true" class="btn btn-primary prevent-on-collapse search-selector-btn search-selector__report-tab <%= add_class %> one-time-only-ajax" type="button" data-toggle="collapse" data-report-resource-name="<%= r.alt_resource_name %>" data-result-target="#master-report-<%= r.alt_resource_name %> .searchable-report" data-target="#master-report-<%= r.alt_resource_name %>" aria-expanded="<%= is_default ? 'true' : 'false' %>" aria-controls="master-report-<%= r.alt_resource_name %>" id="expand-searchable-report-<%= r.alt_resource_name %>"><%= r.name %></a>
+            <% end %>
+          </div>
+          <% if show_search_selector %>
+          <div class="search-selector__dropdown">
+            <label class="search-selector__label" for="search_selector_dropdown"><%= search_selector_label %></label>
+            <select id="search_selector_dropdown" name="search_selector" data-attr-name="search_selector_dropdown" class="form-control use-chosen" data-placeholder="Select Search" aria-label="<%= search_selector_label.presence || 'Searchable reports' %>">
+              <option value=""></option>
+              <% if search_selector_categorized
+                searchable_reports.group_by(&:category).each do |category, reports|
+              %>
+                <optgroup label="<%= category.present? ? category.humanize.titleize : 'Uncategorized' %>">
+                  <% reports.each do |r| %>
+                    <option value="<%= r.alt_resource_name %>"><%= r.name %></option>
+                  <% end %>
+                </optgroup>
+              <% end
+              else
+                searchable_reports.each do |r|
+              %>
+                <option value="<%= r.alt_resource_name %>"><%= r.name %></option>
+              <% end
+              end %>
+            </select>
+          </div>
+          <% end %>
+        </div>
+        <% if show_search_selector && search_selector_footer.present? %>
+          <div class="search-selector__footer"><%= markdown_to_html(search_selector_footer) %></div>
+        <% end %>
       <% end %>
-    <% end %>
-  </div>
+    </div>
   <div class="panel panel-default">
     <div id="master-search-simple-form" class="panel-collapse collapse <%= default_search_form == 'Simple Search' ? 'in' : '' %>" role="tabpanel">
       <div class="panel-body searchable-report">
@@ -41,7 +101,7 @@
       </div>
     </div>
   </div>
-  <% Report.active.searchable.for_user(current_user).each do |r|
+  <% searchable_reports.each do |r|
       if default_search_form == r.name.downcase || default_search_form == r.alt_resource_name
         @view_context = :search
         @report = r
