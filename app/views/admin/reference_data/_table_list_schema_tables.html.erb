@@ -4,15 +4,25 @@
     table_name = table['table_name']
     history_table = table_name.end_with? '_history'
     table_comment = Admin::MigrationGenerator.table_comment(table_name, @schema_name)
+    object_type = Admin::MigrationGenerator.view_in_schema?(table_name, @schema_name) ? 'view' : 'table'
+    definition = @dynamic_definitions[table_name]
 %>
-<li id="t-<%=@schema_name%>-<%=table_name%>" data-schema="<%=@schema_name%>" class="ref-table-item <%=history_table ? 'history-table' : 'regular-table' %>">
+<li id="t-<%=@schema_name%>-<%=table_name%>" data-schema="<%=@schema_name%>" data-object-type="<%=object_type%>" class="ref-table-item <%=history_table ? 'history-table' : 'regular-table' %>">
   <a href="#tblock-<%=@schema_name%>-<%=table_name%>" data-toggle="collapse" class="table-name-collapser collapsed"><%= table_name  %></a>
+  <span class="label <%= object_type == 'view' ? 'label-info' : 'label-default' %> ref-table-object-type"><%= object_type %></span>
   <%= link_to '', report_path('reference_data__table_data', 
                                           table_name: table_name, 
                                           schema_name: @schema_name, 
                                           search_attrs: { no_run: true }
                                         ), 
                                         target: '_blank', class: 'glyphicon glyphicon-search' if @can_view_table_data %>
+  <% if definition %>
+    <%= link_to send("#{definition.class.base_route_name.pluralize}_path", filter: { id: definition.id }, perform_action: 'edit'),
+                target: '_blank', class: 'ref-table-definition-link',
+                title: "Edit the #{definition.class.human_name.downcase} definition for this #{object_type}" do %>
+      <span class="glyphicon glyphicon-cog"></span> <%= definition.class.human_name.downcase %>
+    <% end %>
+  <% end %>
   <% if table_comment %>
     <div class="table-comment help-block"><%= table_comment %></div>
   <% end %>

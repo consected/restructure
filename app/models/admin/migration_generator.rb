@@ -156,9 +156,32 @@ class Admin::MigrationGenerator
   end
 
   #
+  # Get the views (as opposed to tables) with the schema they belong to, in the schemas visible to the app
+  # @return [Array(Hash {schema_name, table_name})]
+  def self.views
+    @views ||=
+      connection.execute <<~END_SQL
+        select table_schema "schema_name", table_name from information_schema.views
+        where table_schema IN (#{quoted_schemas})
+        and table_catalog = '#{current_database}'
+        order by "schema_name", table_name
+      END_SQL
+  end
+
+  #
+  # Is the named table or view a view in the schema, based on cached view names
+  # @param [String] table_name
+  # @param [String] schema_name
+  # @return [true | false]
+  def self.view_in_schema?(table_name, schema_name)
+    views.any? { |v| v['table_name'] == table_name && v['schema_name'] == schema_name }
+  end
+
+  #
   # Reset the memoized tables and views value
   def self.tables_and_views_reset!
     @tables_and_views = nil
+    @views = nil
   end
 
   #
