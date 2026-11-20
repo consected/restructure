@@ -7,7 +7,10 @@
 # - the schema list is a chosen field that can be filtered by typing
 # - the table / view search is a typeahead; choosing a match shows only that table or view, expanded,
 #   within its schema, and clearing the search restores the list
-# - a view's DDL is shown in a CodeMirror section when the view is expanded, across the full width of its section
+# - a view's DDL is shown in a CodeMirror section when the view is expanded, across the full width of its section,
+#   below the view's field list
+# - the typeahead menu closes once a single table or view match is applied
+# - a table's columns that fail to load show a message with a retry link
 # - a table that is a dynamic definition links to its admin page in edit mode
 # - a dynamic definition's Table / View panel shows its own table columns
 
@@ -104,6 +107,61 @@ describe 'admin reference data tables and views', js: true, driver: $browser_dri
     JS
     expect(sizes['cm']).to be >= sizes['section'] * 0.95
     expect(sizes['height']).to be_between(60, 500)
+  end
+
+  it 'shows the view definition below the field list of the view' do
+    open_tables_tab
+
+    fill_in 'primary_tables_search', with: 'ref_data_sys_view'
+    expect(page).to have_css('#tblock-dynamic_test-ref_data_sys_view .ref-table-col-item', visible: true, wait: 10)
+
+    below_fields = page.evaluate_script(<<~JS)
+      (function () {
+        var block = document.getElementById('tblock-dynamic_test-ref_data_sys_view');
+        var cols = block.querySelectorAll('.ref-table-col-item');
+        var defn = block.querySelector('.ref-view-definition');
+        return cols.length > 0 && defn !== null &&
+          (cols[cols.length - 1].compareDocumentPosition(defn) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
+      })()
+    JS
+    expect(below_fields).to be true
+  end
+
+  it 'closes the suggestions menu once a single table or view match is applied' do
+    open_tables_tab
+
+    fill_in 'primary_tables_search', with: 'ref_data_sys_'
+    expect(page).to have_css('.tt-menu.tt-open', visible: true, wait: 10)
+
+    find('#primary_tables_search').send_keys('base')
+    expect(page).to have_css('#tblock-dynamic_test-ref_data_sys_base.in', visible: true, wait: 10)
+    expect(page).to have_no_css('.tt-menu.tt-open', visible: true)
+  end
+
+  it 'shows a retry message when the columns fail to load, and loads them on retry' do
+    open_tables_tab
+
+    page.execute_script(<<~JS)
+      window.refDataOrigAjax = $.ajax;
+      window.refDataFailColumns = true;
+      $.ajax = function (url) {
+        if (window.refDataFailColumns && String(url).indexOf('table_list_columns') !== -1) {
+          return $.Deferred().reject(null, 'error', 'Server Error').promise();
+        }
+        return window.refDataOrigAjax.apply(this, arguments);
+      };
+    JS
+
+    fill_in 'primary_tables_search', with: 'ref_data_sys_base'
+
+    expect(page).to have_css('#tblock-dynamic_test-ref_data_sys_base .ref-tblock__error', visible: true, wait: 10)
+    expect(page).to have_no_css('#tblock-dynamic_test-ref_data_sys_base.content-loading')
+
+    page.execute_script('window.refDataFailColumns = false;')
+    find('#tblock-dynamic_test-ref_data_sys_base .ref-tblock__retry', visible: true).click
+
+    expect(page).to have_css('#tblock-dynamic_test-ref_data_sys_base .ref-table-col-item', visible: true, wait: 10)
+    expect(page).to have_no_css('#tblock-dynamic_test-ref_data_sys_base .ref-tblock__error')
   end
 
   it 'filters the schema list to the table found by searching, and restores the list when the search is cleared' do

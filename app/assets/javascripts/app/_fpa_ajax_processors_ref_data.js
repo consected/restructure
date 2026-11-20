@@ -12,10 +12,16 @@ _fpa.postprocessors_ref_data = {
     // Postprocessors replace the default block formatting, so attach the "chosen" schema select here
     _fpa.form_utils.setup_chosen(block);
 
+    // Look up an element by id without a jQuery selector, as schema and table names may contain characters
+    // that are special in selectors (for example ".")
+    var by_id = function (id) {
+      return $(document.getElementById(id));
+    }
+
     // Show the schema chosen in the schema select, or only the schema of the table chosen by searching
     var filter_schemas = function () {
       var schema = selected_table ? selected_table.schema : $schema_select.val();
-      var $schema_list = schema ? $(`#table-list-${schema}`) : $();
+      var $schema_list = schema ? by_id(`table-list-${schema}`) : $();
 
       // Hide the other schemas without hiding the chosen one first, as a hide in progress blocks showing it
       $('.table-list').not($schema_list).collapse('hide');
@@ -41,6 +47,26 @@ _fpa.postprocessors_ref_data = {
       });
     }
 
+    // Load the columns of a table into its columns block. On failure, show a message with a retry link
+    var load_columns = function ($el) {
+      $el.removeClass('content-loaded').addClass('content-loading').find('.ref-tblock__error').remove();
+      var schema = $el.attr('data-schema-name')
+      var table = $el.attr('data-table-name')
+      var url = `/admin/reference_data/table_list_columns?schema_name=${encodeURIComponent(schema)}&table_name=${encodeURIComponent(table)}`
+      $.ajax(url).done(function (data, status, xhr) {
+        $el.html(data)
+        $el.addClass('content-loaded').removeClass('content-loading')
+      }).fail(function () {
+        $el.removeClass('content-loading').empty()
+        $el.append('<li class="ref-tblock__error help-block">Could not load the columns. <a href="#" class="ref-tblock__retry">Retry</a></li>')
+      })
+    }
+
+    $(document).on('click', '.ref-tblock__retry', function (ev) {
+      ev.preventDefault()
+      load_columns($(this).closest('.ref-tblock'))
+    })
+
     var apply_filters = function () {
       filter_schemas();
       filter_tables();
@@ -59,14 +85,7 @@ _fpa.postprocessors_ref_data = {
         var $el = $(this)
         if ($el.hasClass('content-loading') || $el.hasClass('content-loaded')) return;
 
-        $el.addClass('content-loading')
-        var schema = $el.attr('data-schema-name')
-        var table = $el.attr('data-table-name')
-        var url = `/admin/reference_data/table_list_columns?schema_name=${schema}&table_name=${table}`
-        $.ajax(url).done(function (data, status, xhr) {
-          $el.html(data)
-          $el.addClass('content-loaded').removeClass('content-loading')
-        })
+        load_columns($el)
       }).addClass('table-ev-setup')
 
     }
@@ -85,7 +104,7 @@ _fpa.postprocessors_ref_data = {
       if (!$el.hasClass('content-loaded')) {
         $el.addClass('content-loading')
         var schema = $el.attr('data-schema-name')
-        var url = `/admin/reference_data/table_list_tables?schema_name=${schema}`
+        var url = `/admin/reference_data/table_list_tables?schema_name=${encodeURIComponent(schema)}`
         $.ajax(url).done(function (data, status, xhr) {
           $el.html(data)
           $el.addClass('content-loaded').removeClass('content-loading')
@@ -112,9 +131,9 @@ _fpa.postprocessors_ref_data = {
       $schema_select.val(schema).trigger('chosen:updated');
       apply_filters();
 
-      load_schema_tables($(`#table-list-${schema}`), function () {
-        if ($(`#tblock-${schema}-${table}`).hasClass('in')) return;
-        $(`#t-${schema}-${table} a.table-name-collapser`).click();
+      load_schema_tables(by_id(`table-list-${schema}`), function () {
+        if (by_id(`tblock-${schema}-${table}`).hasClass('in')) return;
+        by_id(`t-${schema}-${table}`).find('a.table-name-collapser').click();
       })
     }
 
@@ -122,8 +141,13 @@ _fpa.postprocessors_ref_data = {
     var clear_selection = function () {
       if (!selected_table) return;
 
-      $(`#tblock-${selected_table.schema}-${selected_table.table}`).collapse('hide');
+      by_id(`tblock-${selected_table.schema}-${selected_table.table}`).collapse('hide');
       selected_table = null;
+    }
+
+    // Hide the suggestions menu, so it does not stay open over the results
+    var close_menu = function () {
+      $search.typeahead('close');
     }
 
     // Search across all schemas for a table or view name, matching on the schema qualified name
@@ -152,6 +176,7 @@ _fpa.postprocessors_ref_data = {
     // Choosing a suggestion selects that table or view
     $search.on('typeahead:select typeahead:autocomplete', function (_ev, suggestion) {
       if (suggestion && suggestion.schema) select_table(suggestion.schema, suggestion.table);
+      close_menu();
     });
 
     // When exactly one table or view matches the search, select it. When it does not, go back to normal filtering
@@ -161,6 +186,7 @@ _fpa.postprocessors_ref_data = {
 
       if (matches.length === 1) {
         select_table(matches[0].schema, matches[0].table);
+        close_menu();
       } else if (selected_table) {
         clear_selection();
         apply_filters();

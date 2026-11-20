@@ -1,5 +1,7 @@
+<%= render partial: 'admin/reference_data/table_columns_part', locals: { table_info: } %>
 <% if table_info.view? %>
-<% definition_id = "view-definition-#{table_info.schema_name}-#{table_info.table_name}" %>
+<%# Hex encoded so the id is safe to use as a selector, whatever the schema or view name %>
+<% definition_id = "view-definition-#{[table_info.schema_name, table_info.table_name].join('.').unpack1('H*')}" %>
 <li class="ref-view-definition">
   <a class="collapsed" role="button" data-toggle="collapse" href="#<%= definition_id %>" aria-expanded="false" aria-controls="<%= definition_id %>">view definition</a>
   <div id="<%= definition_id %>" class="collapse">
@@ -7,4 +9,3 @@
   </div>
 </li>
 <% end %>
-<%= render partial: 'admin/reference_data/table_columns_part', locals: { table_info: } %>
