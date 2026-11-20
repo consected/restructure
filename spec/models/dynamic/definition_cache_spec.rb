@@ -26,6 +26,15 @@ RSpec.describe Dynamic::DefinitionCache, type: :model do
     expect(described_class.read('current-value')).to eq(:complete)
   end
 
+  it 'returns but does not cache a value when the definition refresh fails' do
+    allow(Application).to receive(:refresh_dynamic_defs).and_raise(FphsException, 'bad definition')
+    allow(described_class).to receive(:definitions_current?).and_return(true)
+    computed_value = :computed
+
+    expect(described_class.fetch('refresh-fails') { computed_value }).to eq(:computed)
+    expect(described_class.read('refresh-fails')).to be_nil
+  end
+
   it 'returns but does not cache a value computed by a lagging worker' do
     allow(Application).to receive(:refresh_dynamic_defs)
     allow(described_class).to receive(:definitions_current?).and_return(false, true)

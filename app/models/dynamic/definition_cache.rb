@@ -18,10 +18,12 @@ module Dynamic
         cached = Rails.cache.read(cache_key)
         return cached unless cached.nil?
 
-        refresh_dynamic_definitions(on_miss)
+        refreshed = refresh_dynamic_definitions(on_miss)
         value = yield
         current ||= -> { definitions_current? }
-        write_cache_key(cache_key, value) if current.call
+        # The refresh may rotate the token, so the key must be rebuilt before writing.
+        # A failed refresh leaves this worker behind, so the value is returned without being shared.
+        write_cache_key(key(*key_components), value) if refreshed && current.call
         value
       end
 
@@ -63,11 +65,15 @@ module Dynamic
       private
 
       def refresh_dynamic_definitions(on_miss)
-        return if Thread.current[RefreshThreadKey]
+        return true if Thread.current[RefreshThreadKey]
 
         Thread.current[RefreshThreadKey] = true
         begin
           (on_miss || -> { Application.refresh_dynamic_defs }).call
+          true
+        rescue StandardError, Psych::Exception => e
+          Rails.logger.error "Definition cache refresh failed: #{e.message}"
+          false
         ensure
           Thread.current[RefreshThreadKey] = false
         end
