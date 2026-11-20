@@ -4,15 +4,14 @@
 #
 # When a YAML config library (Admin::ConfigLibrary) is updated, dependent dynamic
 # definitions (DynamicModel, ActivityLog, ExternalIdentifier) should detect the
-# change via their `up_to_date?` / `refresh_outdated` mechanisms.
+# change through repeatable token-backed refresh status checks.
 #
 # Two key scenarios exist after PR #1034 (config library versioning):
 #
 # 1. Definitions with `use_current_version: true` — the `touch` in
 #    `refresh_dependencies` is skipped, so the definition's `updated_at` does
-#    NOT change. Cross-server detection relies entirely on the config library
-#    timestamp check in `latest_stored_update`, and `refresh_outdated` takes
-#    the lightweight path (force_option_config_parse only, no full regen).
+#    NOT change. The shared definition token and verified library timestamp enable
+#    `refresh_outdated` to take the lightweight path (option parsing only).
 #
 # 2. Standard versioned definitions — `refresh_dependencies` calls `touch`,
 #    bumping the definition's `updated_at`. Cross-server detection works via
@@ -21,7 +20,7 @@
 #
 # These tests cover:
 #   AC1: refresh_outdated detects config library changes
-#   AC2: up_to_date? incorporates the latest config library updated_at
+#   AC2: definition_refresh_status detects library-only changes repeatably
 #   AC3: Only force_option_config_parse is called (not full regeneration) when
 #        only a config library changed and touch is skipped (use_current_version)
 #   AC4: Only definitions referencing the changed library are refreshed
@@ -29,7 +28,6 @@
 #   AC6: ApplicationJob calls Application.refresh_dynamic_defs before each job
 #   AC7: Existing cache invalidation for direct definition edits still works
 #   AC9: Standard versioned definitions trigger full regen via touch
-#   AC10: ActivityLog definitions refresh through their extra_log_types attribute
 #   AC10: ActivityLog definitions refresh through their extra_log_types attribute
 
 require 'rails_helper'
@@ -153,8 +151,6 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
     ActivityLog.refresh_outdated
     @activity_log.reload
     @activity_log.force_option_config_parse
-    # Prime the up_to_date? memoization so subsequent calls return true
-    DynamicModel.instance_variable_set(:@prev_latest_update, DynamicModel.latest_stored_update)
   end
 
   after :all do
@@ -162,68 +158,43 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
     change_setting('AllowDynamicMigrations', false)
   end
 
-  # Reset class-level memoized state before each test to prevent cross-test
-  # contamination through ivars that persist on the DynamicModel class.
+  # Establish a complete worker baseline before each example; subsequent writes rotate the shared token.
   before do
     [DynamicModel, ActivityLog].each do |definition_class|
-      definition_class.instance_variable_set(:@prev_latest_update, nil)
-      definition_class.instance_variable_set(:@prev_latest_def_update, nil)
-      definition_class.instance_variable_set(:@config_library_only_change, nil)
-      definition_class.instance_variable_set(:@latest_def_update, nil)
       definition_class.instance_variable_set(:@verified_definition_cache_token, nil)
       definition_class.instance_variable_set(:@verified_definition_timestamps, nil)
       definition_class.instance_variable_set(:@verified_config_library_updated_at, nil)
-      definition_class.mark_definition_refresh_current!
+      definition_class.refresh_outdated
     end
   end
 
   # ---------------------------------------------------------------------------
-  # AC2: up_to_date? incorporates config library timestamps
+  # AC2: repeatable definition refresh status checks
   # ---------------------------------------------------------------------------
-  describe 'AC2: up_to_date? incorporates config library timestamps' do
-    it 'returns false when a YAML config library timestamp is newer (cross-server)' do
-      # Prime: first call returns nil, second returns true
-      expect(DynamicModel.up_to_date?).to be_nil
-      expect(DynamicModel.up_to_date?).to be true
-
-      # Capture current state for later restoration
-      cl_original_time = Admin::ConfigLibrary.where(id: @config_library.id).pick(:updated_at)
-
-      # Simulate cross-server: bump config library timestamp 60s forward via SQL
-      # (bypasses callbacks — simulates change made on another server)
-      future_time = cl_original_time + 60.seconds
+  describe 'AC2: definition_refresh_status detects config library changes' do
+    it 'returns a stable library-only status after a YAML library changes' do
+      original_time = Admin::ConfigLibrary.where(id: @config_library.id).pick(:updated_at)
+      future_time = original_time + 60.seconds
       Admin::ConfigLibrary.where(id: @config_library.id).update_all(updated_at: future_time)
+      Dynamic::DefinitionCacheVersion.rotate!
 
-      # up_to_date? should return false — config library is newer
-      expect(DynamicModel.up_to_date?).to be false
-
-      # @config_library_only_change should be true — only config library changed
-      expect(DynamicModel.instance_variable_get(:@config_library_only_change)).to be true
-
-      # Restore timestamp
-      Admin::ConfigLibrary.where(id: @config_library.id).update_all(updated_at: cl_original_time)
+      expect(DynamicModel.definition_refresh_status).to eq(:library_only_changed)
+      expect(DynamicModel.definition_refresh_status).to eq(:library_only_changed)
+    ensure
+      Admin::ConfigLibrary.where(id: @config_library.id).update_all(updated_at: original_time)
+      Dynamic::DefinitionCacheVersion.rotate!
     end
 
-    it 'returns true when config libraries have not changed' do
-      # Prime
-      expect(DynamicModel.up_to_date?).to be_nil
-      expect(DynamicModel.up_to_date?).to be true
+    it 'returns current when config libraries have not changed' do
+      expect(DynamicModel.definition_refresh_status).to eq(:current)
     end
 
     it 'is not affected by non-YAML config library updates' do
-      # Prime
-      expect(DynamicModel.up_to_date?).to be_nil
-      expect(DynamicModel.up_to_date?).to be true
-
-      # Bump only the HTML (non-YAML) config library timestamp forward
       html_original_time = Admin::ConfigLibrary.where(id: @html_config_library.id).pick(:updated_at)
-      future_time = html_original_time + 60.seconds
-      Admin::ConfigLibrary.where(id: @html_config_library.id).update_all(updated_at: future_time)
+      Admin::ConfigLibrary.where(id: @html_config_library.id).update_all(updated_at: html_original_time + 60.seconds)
 
-      # up_to_date? should still return true — non-YAML libraries are not checked
-      expect(DynamicModel.up_to_date?).to be true
-
-      # Restore
+      expect(DynamicModel.definition_refresh_status).to eq(:current)
+    ensure
       Admin::ConfigLibrary.where(id: @html_config_library.id).update_all(updated_at: html_original_time)
     end
   end
@@ -300,10 +271,6 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
     end
 
     it 'calls force_option_config_parse without full regen when only config library changed' do
-      # Prime
-      expect(DynamicModel.up_to_date?).to be_nil
-      expect(DynamicModel.up_to_date?).to be true
-
       # Capture and bump config library timestamp 60s forward via SQL
       cl_original_time = Admin::ConfigLibrary.where(id: @config_library.id).pick(:updated_at)
       cl_original_options = Admin::ConfigLibrary.where(id: @config_library.id).pick(:options)
@@ -356,13 +323,6 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
   # AC10: ActivityLog uses its own option_configs_attr in the lightweight path
   # ---------------------------------------------------------------------------
   describe 'ActivityLog lightweight path' do
-    before do
-      ActivityLog.instance_variable_set(:@prev_latest_update, nil)
-      ActivityLog.instance_variable_set(:@prev_latest_def_update, nil)
-      ActivityLog.instance_variable_set(:@config_library_only_change, nil)
-      ActivityLog.instance_variable_set(:@latest_def_update, nil)
-    end
-
     it 'refreshes the cached definition when extra_log_types references a changed library' do
       cl_original_time = Admin::ConfigLibrary.where(id: @config_library.id).pick(:updated_at)
       Admin::ConfigLibrary.where(id: @config_library.id).update_all(options: @library_v1_options)
@@ -371,9 +331,6 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
       cached_definition.reload
       cached_definition.force_option_config_parse
       ActivityLog.definition_cache[@activity_log.id] = cached_definition
-
-      expect(ActivityLog.up_to_date?).to be_nil
-      expect(ActivityLog.up_to_date?).to be true
 
       future_time = cl_original_time + 60.seconds
       Admin::ConfigLibrary.where(id: @config_library.id).update_all(
@@ -404,52 +361,29 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
   # AC4: Only dependent definitions are refreshed (lightweight path)
   # ---------------------------------------------------------------------------
   describe 'AC4: only dependent definitions are refreshed (lightweight path)' do
-    it 'refreshes only definitions with @library references via the lightweight path' do
-      # Prime caches
-      DynamicModel.instance_variable_set(:@prev_latest_update, nil)
-      DynamicModel.up_to_date?
-      DynamicModel.up_to_date?
+    it 'refreshes only definitions with @library references' do
+      original_time = Admin::ConfigLibrary.where(id: @config_library.id).pick(:updated_at)
+      original_options = Admin::ConfigLibrary.where(id: @config_library.id).pick(:options)
+      Admin::ConfigLibrary.where(id: @config_library.id).update_all(
+        options: @library_v2_options, updated_at: original_time + 60.seconds
+      )
+      Dynamic::DefinitionCacheVersion.rotate!
 
-      # Update the config library. Touch is skipped for @dm (use_current_version),
-      # but the @dm_versioned definition will be touched (standard versioned).
-      # We need to re-prime after the touch so that only the config library
-      # timestamp change is detected by the lightweight path.
-      original_options = @config_library.options
-      @config_library.current_admin = @admin
-      @config_library.update!(options: @library_v2_options)
-
-      # Re-prime to absorb the def timestamp change from touch on @dm_versioned,
-      # but leave the config library timestamp change undetected.
-      # The lightweight path should only fire for config-library-only changes.
-      # Since @dm_versioned was touched, we need to simulate the scenario where
-      # only config library changes are pending (e.g. on another server that
-      # only has use_current_version definitions, or where touch already
-      # triggered a full regen for the versioned definition).
-      # We test this by verifying the lightweight path itself filters correctly.
-      DynamicModel.instance_variable_set(:@config_library_only_change, true)
-
-      # Track which definitions get force_option_config_parse called
       refreshed_table_names = []
-
       allow_any_instance_of(DynamicModel).to receive(:force_option_config_parse).and_wrap_original do |original_method, **kwargs|
         refreshed_table_names << original_method.receiver.table_name
         original_method.call(**kwargs)
       end
 
-      # Directly invoke the lightweight path in refresh_outdated
-      DynamicModel.reset_active_model_configurations!
-      DynamicModel.active.each do |d|
-        next unless d.options_text&.include?('# @library ')
+      DynamicModel.refresh_outdated
 
-        d.force_option_config_parse(raise_bad_configs: false)
-      end
-
-      # Only definitions with @library references should be refreshed
       expect(refreshed_table_names).to include(@dm_table_name)
       expect(refreshed_table_names).not_to include(@dm_no_lib_table)
-
-      @config_library.current_admin = @admin
-      @config_library.update!(options: original_options)
+    ensure
+      Admin::ConfigLibrary.where(id: @config_library.id).update_all(
+        options: original_options, updated_at: original_time
+      )
+      Dynamic::DefinitionCacheVersion.rotate!
     end
   end
 
@@ -493,20 +427,14 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
       existing_dm = DynamicModel.active_model_configurations.reorder('').order('updated_at desc nulls last').first
       expect(existing_dm).not_to be_nil
 
-      # Prime from clean state (before(:each) already reset ivars)
-      expect(DynamicModel.up_to_date?).to be_nil
-      lu_before = DynamicModel.instance_variable_get(:@prev_latest_update)
-
       # Simulate a cross-server update: bump the definition's updated_at via SQL
       dm_original_time = DynamicModel.where(id: existing_dm.id).pick(:updated_at)
-      future_time = lu_before + 60.seconds
+      future_time = dm_original_time + 1.second
       DynamicModel.where(id: existing_dm.id).update_all(updated_at: future_time)
       Dynamic::DefinitionCacheVersion.rotate!
       DynamicModel.reset_active_model_configurations!
 
-      # Call refresh_outdated directly (without calling up_to_date? first, which would
-      # consume the change and update @prev_latest_update).
-      # refresh_outdated internally calls up_to_date? and then regenerates changed definitions.
+      # A fresh worker check must observe this exact timestamp change before refreshing.
       log_output = StringIO.new
       test_logger = Logger.new(log_output)
       original_logger = Rails.logger
@@ -531,13 +459,9 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
   # ---------------------------------------------------------------------------
   describe 'AC9: definition timestamp change triggers full regen (not lightweight)' do
     it 'triggers full regeneration when both definition and config library timestamps change' do
-      # Prime
-      expect(DynamicModel.up_to_date?).to be_nil
-      expect(DynamicModel.up_to_date?).to be true
-
       # Get a definition that IS in active_model_configurations (test definitions
       # created in before(:all) are not associated with any app type, so they
-      # don't appear in active_model_configurations or affect latest_stored_update).
+      # don't appear in active_model_configurations.
       DynamicModel.reset_active_model_configurations!
       existing_dm = DynamicModel.active_model_configurations.reorder('').order('updated_at desc nulls last').first
       expect(existing_dm).not_to be_nil
@@ -553,8 +477,8 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
       Dynamic::DefinitionCacheVersion.rotate!
       DynamicModel.reset_active_model_configurations!
 
-      # Call refresh_outdated which internally calls up_to_date? and detects the change.
-      # Do NOT call up_to_date? separately — that would consume the change.
+      # The exact status comparison prioritizes the definition change over the library update.
+      expect(DynamicModel.definition_refresh_status).to eq(:definitions_changed)
       log_output = StringIO.new
       test_logger = Logger.new(log_output)
       original_logger = Rails.logger
@@ -563,9 +487,6 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
       DynamicModel.refresh_outdated
 
       Rails.logger = original_logger
-
-      # @config_library_only_change should be false — definition timestamp also changed
-      expect(DynamicModel.instance_variable_get(:@config_library_only_change)).to be false
 
       # The log should show "Refreshing outdated" (full path)
       expect(log_output.string).to include('Refreshing outdated')
@@ -580,42 +501,28 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
   end
 
   # ---------------------------------------------------------------------------
-  # AC5 & AC8: Config library timestamp check is lightweight
+  # AC5 & AC8: unchanged-token status checks are query-free
   # ---------------------------------------------------------------------------
-  describe 'AC5 & AC8: config library timestamp check is lightweight' do
-    it 'retrieves the max updated_at from YAML config libraries efficiently' do
-      # The latest_stored_update (or a new companion method) should also consider
-      # yaml config library timestamps. We verify that the latest yaml config
-      # library updated_at is obtainable and is a Time-like value.
-      latest_cl_time = Admin::ConfigLibrary.where(format: 'yaml')
-                                           .order('updated_at desc nulls last')
-                                           .limit(1)
-                                           .pluck(:updated_at)
-                                           .first
+  describe 'AC5 & AC8: verified token fast path' do
+    it 'records the latest YAML library timestamp when marking the worker current' do
+      latest_cl_time = Admin::ConfigLibrary.where(format: 'yaml').maximum(:updated_at)
 
-      expect(latest_cl_time).to be_a(ActiveSupport::TimeWithZone).or be_a(Time)
-
-      # The combined latest_stored_update should be >= the latest config library time
-      # This tests the new behavior where latest_stored_update incorporates config libraries
-      combined_latest = DynamicModel.latest_stored_update
-      expect(combined_latest).to be >= latest_cl_time
+      expect(DynamicModel.mark_definition_refresh_current!).to be true
+      expect(DynamicModel.instance_variable_get(:@verified_config_library_updated_at)).to eq(latest_cl_time)
     end
 
-    it 'uses a single query or minimal queries for the timestamp check' do
-      # Verify that checking up_to_date? does not make an excessive number of queries.
-      # We allow up to 3 queries (definition table + config_libraries table + possible cache).
-      # Note: before(:each) already reset @prev_latest_update to nil
-
+    it 'does not query persisted definitions when the token is unchanged' do
       query_count = 0
       counter = lambda { |_name, _start, _finish, _id, payload|
         query_count += 1 unless payload[:name] == 'SCHEMA' || payload[:sql]&.include?('SHOW')
       }
 
       ActiveSupport::Notifications.subscribed(counter, 'sql.active_record') do
-        DynamicModel.up_to_date?
+        expect(DynamicModel.definition_refresh_status).to eq(:current)
       end
 
-      expect(query_count).to be <= 3
+      expect(query_count).to eq(0)
     end
   end
+
 end

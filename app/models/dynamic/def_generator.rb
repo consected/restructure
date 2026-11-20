@@ -114,12 +114,15 @@ module Dynamic
       end
 
       #
-      # Reload the models and configurations any definitions that
-      # do not match the memoized version, since these may have changed on
-      # another server in the cluster.
+      # Refresh definitions whose persisted timestamps or generated classes are not
+      # verified against the shared token, including changes made on another worker.
       def refresh_outdated
         status = definition_refresh_status
-        return if status == :current
+        if status == :current
+          # The token moved without any change this worker needs, so record it for the query-free fast path
+          mark_definition_refresh_current! unless @verified_definition_cache_token == Dynamic::DefinitionCacheVersion.token
+          return
+        end
 
         if status == :library_only_changed
           Rails.logger.warn "Refreshing config library dependents for #{name}"
@@ -141,6 +144,7 @@ module Dynamic
         defs = active_model_configurations.reorder('').order('updated_at desc nulls last')
         any_new = false
         skipped_unready_definition = false
+        regenerated_ids = []
         defs.each do |definition|
           resource_name = definition.resource_name
           updated_at = definition.updated_at
@@ -159,11 +163,12 @@ module Dynamic
           Rails.logger.warn "Refreshing #{resource_name}, last updated at #{updated_at}"
           is_new_definition = loaded.nil?
           any_new ||= is_new_definition
+          regenerated_ids << definition.id
           regenerate_from_stored(definition, this_is_new: is_new_definition)
         end
 
         routes_reload if any_new
-        mark_definition_refresh_current! unless skipped_unready_definition
+        mark_definition_refresh_current!(regenerated_ids:) unless skipped_unready_definition
       end
 
       # Regenerate the implementation and parsed configuration from a freshly loaded definition record
@@ -338,7 +343,6 @@ module Dynamic
     def other_regenerate_actions
       return if disabled
 
-      self.class.prev_latest_update = updated_at
       Admin::AppTypeImport.run_now_or_after_import([:dynamic_definition_preload, self.class]) do
         self.class.preload
       end
