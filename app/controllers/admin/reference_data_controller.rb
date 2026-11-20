@@ -10,19 +10,21 @@ class Admin::ReferenceDataController < ApplicationController
   def table_list
     return not_authorized unless current_admin || current_user.can?(:view_data_reference)
 
+    Admin::MigrationGenerator.tables_and_views_reset!
     @schemas = Admin::MigrationGenerator.current_search_paths.uniq.sort
-    @table_search_index = Admin::MigrationGenerator.tables_and_views
+    @table_search_items = Admin::TableViewInfo.search_items
     render partial: 'admin/reference_data/table_list_block_part'
   end
 
   def table_list_tables
     return not_authorized unless current_admin || current_user.can?(:view_data_reference)
 
+    Admin::MigrationGenerator.tables_and_views_reset!
     @schema_name = params[:schema_name]
     @can_view_table_data = current_admin || current_user.has_access_to?(:read, :report, :reference_data__table_data)
     @table_info_for_schema = Admin::MigrationGenerator.tables_and_views
                                                       .filter { |ti| ti['schema_name'] == @schema_name }
-    @dynamic_definitions = Resources::Models.dynamic_definitions_in_schema(@schema_name)
+    @dynamic_definitions = Admin::TableViewInfo.dynamic_definitions_in_schema(@schema_name)
 
     render partial: 'table_list_schema_tables'
   end

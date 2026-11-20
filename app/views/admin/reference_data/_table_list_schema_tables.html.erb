@@ -17,9 +17,11 @@
                                         ), 
                                         target: '_blank', class: 'glyphicon glyphicon-search' if @can_view_table_data %>
   <% if definition %>
-    <%= link_to '', send("#{definition.class.base_route_name.pluralize}_path", filter: { id: definition.id }, perform_action: 'edit'),
-                target: '_blank', class: 'glyphicon glyphicon-cog ref-table-definition-link',
-                title: "#{definition.class.human_name} definition" %>
+    <%= link_to send("#{definition.class.base_route_name.pluralize}_path", filter: { id: definition.id }, perform_action: 'edit'),
+                target: '_blank', class: 'ref-table-definition-link',
+                title: "Edit the #{definition.class.human_name.downcase} definition for this #{object_type}" do %>
+      <span class="glyphicon glyphicon-cog"></span> <%= definition.class.human_name.downcase %>
+    <% end %>
   <% end %>
   <% if table_comment %>
     <div class="table-comment help-block"><%= table_comment %></div>

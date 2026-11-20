@@ -22,6 +22,8 @@ RSpec.describe Admin::TableViewInfo do
       DROP TABLE IF EXISTS dynamic_test.ref_data_spec_base;
       CREATE TABLE dynamic_test.ref_data_spec_base (id integer PRIMARY KEY, label varchar);
       CREATE VIEW dynamic_test.ref_data_spec_view AS SELECT id, label FROM dynamic_test.ref_data_spec_base;
+      DROP TABLE IF EXISTS dynamic_test.ref_data_spec_base_history;
+      CREATE TABLE dynamic_test.ref_data_spec_base_history (id integer);
     SQL
     Admin::MigrationGenerator.tables_and_views_reset!
   end
@@ -30,6 +32,7 @@ RSpec.describe Admin::TableViewInfo do
     ActiveRecord::Base.connection.execute <<~SQL
       DROP VIEW IF EXISTS dynamic_test.ref_data_spec_view;
       DROP TABLE IF EXISTS dynamic_test.ref_data_spec_base;
+      DROP TABLE IF EXISTS dynamic_test.ref_data_spec_base_history;
     SQL
     Admin::MigrationGenerator.tables_and_views_reset!
   end
@@ -99,6 +102,22 @@ RSpec.describe Admin::TableViewInfo do
     it 'leaves the underlying table in place after an injection attempt' do
       info("x'); DROP TABLE dynamic_test.ref_data_spec_base; --").exists?
       expect(info('ref_data_spec_base').exists?).to be_truthy
+    end
+  end
+
+  describe '.search_items' do
+    let(:by_label) { described_class.search_items.index_by { |item| item[:label] } }
+
+    it 'lists tables and views with their schema, so a search does not need a schema chosen first' do
+      expect(by_label['dynamic_test.ref_data_spec_view']).to include(schema: 'dynamic_test',
+                                                                     table: 'ref_data_spec_view',
+                                                                     object_type: 'view')
+      expect(by_label['dynamic_test.ref_data_spec_base']).to include(object_type: 'table')
+    end
+
+    it 'flags history tables so they can be filtered out of the search' do
+      expect(by_label['dynamic_test.ref_data_spec_base_history']).to include(history: true)
+      expect(by_label['dynamic_test.ref_data_spec_base']).to include(history: false)
     end
   end
 end

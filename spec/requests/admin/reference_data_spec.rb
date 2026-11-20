@@ -80,6 +80,16 @@ RSpec.describe 'Admin reference data tables and views', type: :request do
 
   before { sign_in @admin }
 
+  # The table / view search items, as embedded in the data-search-items attribute of the search field
+  def search_items
+    JSON.parse(Nokogiri::HTML(response.body).at_css('#primary_tables_search')['data-search-items'])
+  end
+
+  # The definition link for a table in the dynamic_test schema list, if any
+  def definition_link(table_name)
+    Nokogiri::HTML(response.body).at_css("#t-dynamic_test-#{table_name} a.ref-table-definition-link")
+  end
+
   describe 'GET /admin/reference_data/table_list' do
     before { get '/admin/reference_data/table_list' }
 
@@ -88,13 +98,14 @@ RSpec.describe 'Admin reference data tables and views', type: :request do
       expect(response.body).to match(/<select[^>]*id="primary_tables_schema_select"[^>]*use-chosen/)
     end
 
-    it 'renders a table / view search field beside the schema select' do
-      expect(response.body).to include('id="primary_tables_search"')
+    it 'renders a table / view search field as a typeahead beside the schema select' do
+      expect(response.body).to match(/<input[^>]*id="primary_tables_search"[^>]*class="[^"]*typeahead/)
+      expect(response.body).not_to include('primary_tables_search_options')
     end
 
-    it 'lists tables and views in the search index, without needing the schema' do
-      expect(response.body).to include('<option value="dynamic_test.ref_data_spec_view"')
-      expect(response.body).to include('data-object-type="view"')
+    it 'lists tables and views in the search items, without needing the schema' do
+      expect(search_items).to include(hash_including('label' => 'dynamic_test.ref_data_spec_view',
+                                                     'object_type' => 'view'))
     end
   end
 
@@ -106,9 +117,40 @@ RSpec.describe 'Admin reference data tables and views', type: :request do
       expect(response.body).to match(/id="t-dynamic_test-ref_data_spec_base"[^>]*data-object-type="table"/)
     end
 
-    it 'links a table that is a dynamic definition to its admin page with filter[id] and edit action' do
-      link = admin_dynamic_models_path(filter: { id: @dm.id }, perform_action: 'edit')
-      expect(response.body).to include(CGI.escapeHTML(link))
+    it 'links a dynamic model table to its admin page in edit mode' do
+      link = definition_link('ref_data_spec_recs')
+      expect(link['href']).to eq admin_dynamic_models_path(filter: { id: @dm.id }, perform_action: 'edit')
+      expect(link['title'].downcase).to include('dynamic model')
+    end
+
+    it 'links an activity log table to its admin page in edit mode' do
+      link = definition_link(@al.table_name)
+      expect(link['href']).to eq admin_activity_logs_path(filter: { id: @al.id }, perform_action: 'edit')
+      expect(link['title'].downcase).to include('activity log')
+    end
+
+    it 'links an external identifier table to its admin page in edit mode' do
+      link = definition_link(@ei.table_name)
+      expect(link['href']).to eq admin_external_identifiers_path(filter: { id: @ei.id }, perform_action: 'edit')
+      expect(link['title'].downcase).to include('external identifier')
+    end
+
+    it 'does not link a table or view that is not a dynamic definition' do
+      expect(definition_link('ref_data_spec_base')).to be_nil
+    end
+
+    it 'links a definition even when its class is not loaded into the resource registry in this process' do
+      allow(Resources::Models).to receive(:resources).and_return({})
+      get '/admin/reference_data/table_list_tables', params: { schema_name: 'dynamic_test' }
+      expect(definition_link('ref_data_spec_recs')).to be_present
+    end
+
+    it 'links a definition without a schema name to the schema its table is found in' do
+      @dm.update_column(:schema_name, nil)
+      get '/admin/reference_data/table_list_tables', params: { schema_name: 'dynamic_test' }
+      expect(definition_link('ref_data_spec_recs')).to be_present
+    ensure
+      @dm.update_column(:schema_name, 'dynamic_test')
     end
   end
 

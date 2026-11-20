@@ -5,8 +5,10 @@
 # Exercises the browser behaviour added to the Tables tab of /admin/reference_data and the
 # Table / View panel on dynamic definition admin pages:
 # - the schema list is a chosen field that can be filtered by typing
-# - a view's DDL is shown in a CodeMirror section when the view is expanded
-# - searching for a table or view name without its schema expands it automatically when one matches
+# - the table / view search is a typeahead; choosing a match shows only that table or view, expanded,
+#   within its schema, and clearing the search restores the list
+# - a view's DDL is shown in a CodeMirror section when the view is expanded, across the full width of its section
+# - a table that is a dynamic definition links to its admin page in edit mode
 # - a dynamic definition's Table / View panel shows its own table columns
 
 require 'rails_helper'
@@ -61,8 +63,10 @@ describe 'admin reference data tables and views', js: true, driver: $browser_dri
     expect(page).to have_css('#primary_tables_schema_select', visible: :all, wait: 10)
   end
 
-  it 'filters the schema list by typing into the chosen field, and shows a view definition' do
+  it 'shows the chosen schema list and the typeahead table search, and filters the schema list by typing into the chosen field' do
     open_tables_tab
+
+    expect(page).to have_css('.twitter-typeahead #primary_tables_search', visible: :all)
 
     # The chosen dropdown is positioned at body level, so it is outside the tables block
     find('#primary_tables_schema_select_chosen a.chosen-single', visible: true).click
@@ -82,12 +86,54 @@ describe 'admin reference data tables and views', js: true, driver: $browser_dri
     expect(page).to have_css('#tblock-dynamic_test-ref_data_sys_view .CodeMirror', text: 'ref_data_sys_base', visible: true)
   end
 
-  it 'expands a table found by searching for its name without the schema' do
+  it 'lays out the view definition CodeMirror across the full width of its section, with a limited height' do
+    open_tables_tab
+
+    fill_in 'primary_tables_search', with: 'ref_data_sys_view'
+    expect(page).to have_css('#tblock-dynamic_test-ref_data_sys_view.in', visible: true, wait: 10)
+    find('#tblock-dynamic_test-ref_data_sys_view .ref-view-definition > a').click
+    expect(page).to have_css('#tblock-dynamic_test-ref_data_sys_view .ref-view-definition .CodeMirror', visible: true, wait: 10)
+
+    sizes = page.evaluate_script(<<~JS)
+      (function () {
+        var section = document.querySelector('#tblock-dynamic_test-ref_data_sys_view .ref-view-definition');
+        var cm = section.querySelector('.CodeMirror');
+        return { section: section.getBoundingClientRect().width, cm: cm.getBoundingClientRect().width,
+                 height: cm.getBoundingClientRect().height };
+      })()
+    JS
+    expect(sizes['cm']).to be >= sizes['section'] * 0.95
+    expect(sizes['height']).to be_between(60, 500)
+  end
+
+  it 'filters the schema list to the table found by searching, and restores the list when the search is cleared' do
     open_tables_tab
 
     fill_in 'primary_tables_search', with: 'ref_data_sys_base'
 
+    expect(page).to have_css('#table-list-dynamic_test', visible: true, wait: 10)
     expect(page).to have_css('#tblock-dynamic_test-ref_data_sys_base.in', visible: true, wait: 10)
+    expect(page).to have_css('#table-list-dynamic_test .ref-table-item', count: 1, visible: true)
+    expect(page).to have_no_css('#t-dynamic_test-ref_data_sys_view', visible: true)
+
+    # Clear the search with keystrokes, as a user would, so the input event is fired
+    find('#primary_tables_search').send_keys([:control, 'a'], :backspace)
+
+    expect(page).to have_css('#t-dynamic_test-ref_data_sys_view', visible: true, wait: 10)
+    expect(page).to have_css('#t-dynamic_test-ref_data_sys_base', visible: true)
+    expect(page).to have_no_css('#tblock-dynamic_test-ref_data_sys_base.in', visible: true, wait: 10)
+  end
+
+  it 'links a table that is a dynamic definition to its admin page in edit mode' do
+    open_tables_tab
+
+    fill_in 'primary_tables_search', with: 'ref_data_sys_recs'
+    within '#table-list-dynamic_test' do
+      link = find('#t-dynamic_test-ref_data_sys_recs a.ref-table-definition-link', visible: true)
+      expect(link[:title]).to match(/dynamic model/i)
+      expect(link[:href]).to include("filter%5Bid%5D=#{@dm.id}")
+      expect(link[:href]).to include('perform_action=edit')
+    end
   end
 
   it 'shows the Table / View panel for a dynamic definition with its own table columns' do
