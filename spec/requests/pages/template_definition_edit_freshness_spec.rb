@@ -414,6 +414,8 @@ RSpec.describe 'Pages template freshness after dynamic definition edits', type: 
 
     cached_updated_at = definition.reload.updated_at
     definition.update_columns(options: caption_options('WorkerTwo'), updated_at: cached_updated_at + 3.seconds)
+    # A save in another process rotates the shared token after commit; update_columns skips that callback
+    Dynamic::DefinitionCacheVersion.rotate!
 
     text = page_template_text
     expect(text).to include('WorkerTwo')
