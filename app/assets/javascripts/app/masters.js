@@ -10,6 +10,101 @@ _fpa.masters = {
     auto_run_init_delay: 300,
     default_search_delay: 500,
 
+    search_selector_cookie_name: function (appTypeId) {
+        return 'search-selector-app-type-' + appTypeId;
+    },
+
+    search_selector_preference: function (appTypeId) {
+        var name = this.search_selector_cookie_name(appTypeId) + '=';
+        var cookie = document.cookie.split(';').map(function (value) {
+            return value.trim();
+        }).filter(function (value) {
+            return value.indexOf(name) === 0;
+        })[0];
+
+        if (!cookie) return null;
+
+        try {
+            return decodeURIComponent(cookie.substring(name.length));
+        } catch (e) {
+            return null;
+        }
+    },
+
+    set_search_selector_mode: function (container, mode, persist) {
+        var $container = $(container);
+        if (!$container.length || (mode !== 'tabs' && mode !== 'dropdown')) return false;
+
+        $container.removeClass('search-selector--tabs search-selector--dropdown')
+            .addClass('search-selector--' + mode)
+            .attr('data-search-selector-mode', mode);
+
+        var $selector = $container.find('#search_selector_dropdown');
+        var $toggle = $container.find('#search-selector-toggle');
+        var nextMode = mode === 'tabs' ? 'dropdown' : 'tabs';
+        var activePanelId = $container.closest('#master-search-accordion')
+            .find('.searchable-report-panel .panel-collapse.in').first().attr('id');
+        var activeReport = activePanelId ? activePanelId.replace(/^master-report-/, '') : '';
+
+        if (mode === 'dropdown') $selector.val(activeReport);
+        $selector.trigger('chosen:updated');
+
+        $toggle.attr('title', 'Switch to ' + nextMode)
+            .attr('aria-label', 'Switch to ' + nextMode)
+            .attr('aria-pressed', mode === 'dropdown' ? 'true' : 'false');
+        $toggle.find('.glyphicon')
+            .removeClass('glyphicon-list glyphicon-th-list')
+            .addClass(mode === 'tabs' ? 'glyphicon-list' : 'glyphicon-th-list');
+
+        var appTypeId = $container.attr('data-app-type-id');
+        if (persist && appTypeId) {
+            document.cookie = this.search_selector_cookie_name(appTypeId) + '=' + encodeURIComponent(mode) +
+                '; Max-Age=31536000; Path=/; SameSite=Lax';
+        }
+
+        return true;
+    },
+
+    init_search_selector: function () {
+        var $container = $('.search-selector[data-search-selector-mode]').first();
+        if (!$container.length) return;
+
+        _fpa.form_utils.setup_chosen($container);
+
+        var appTypeId = $container.attr('data-app-type-id');
+        var savedMode = this.search_selector_preference(appTypeId);
+        var initialMode = savedMode === 'tabs' || savedMode === 'dropdown' ? savedMode :
+            $container.attr('data-search-selector-mode');
+        this.set_search_selector_mode($container, initialMode, false);
+
+        if ($container.data('searchSelectorHandlersAttached')) return;
+        $container.data('searchSelectorHandlersAttached', true);
+
+        var self = this;
+        $container.on('click.searchSelector', '#search-selector-toggle', function (event) {
+            event.preventDefault();
+            var currentMode = $container.attr('data-search-selector-mode');
+            self.set_search_selector_mode($container, currentMode === 'tabs' ? 'dropdown' : 'tabs', true);
+        });
+
+        $container.on('change.searchSelector', '#search_selector_dropdown', function () {
+            var resourceName = $(this).val();
+            if (!resourceName) return;
+
+            var reportTab = document.getElementById('expand-searchable-report-' + resourceName);
+            if (reportTab) $(reportTab).trigger('click');
+        });
+
+        $container.on('click.searchSelector', '.search-selector__report-tab', function () {
+            var resourceName = $(this).attr('data-report-resource-name');
+            $container.find('#search_selector_dropdown').val(resourceName).trigger('chosen:updated');
+        });
+
+        $container.on('click.searchSelector', '#expand-simple-form, #expand-adv-form', function () {
+            $container.find('#search_selector_dropdown').val('').trigger('chosen:updated');
+        });
+    },
+
     /**
      * Initialize switchable IDs to show the first non-"(none)" ID.
      * If all IDs are "(none)", shows the first one.
@@ -144,6 +239,7 @@ _fpa.masters = {
 _fpa.loaded.masters = function () {
 
     _fpa.masters.set_fields_to_search();
+    _fpa.masters.init_search_selector();
 
     $('#expand-adv-form').click(function () {
         $('#master_results_block').html('');
