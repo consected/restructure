@@ -1,5 +1,5 @@
 <%= render partial: 'admin/reference_data/table_columns_part', locals: { table_info: } %>
-<% if table_info.view? %>
+<% if table_info.definition? %>
 <%# Hex encoded so the id is safe to use as a selector, whatever the schema or view name %>
 <% definition_id = "view-definition-#{[table_info.schema_name, table_info.table_name].join('.').unpack1('H*')}" %>
 <li class="ref-view-definition">

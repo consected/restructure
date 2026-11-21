@@ -62,10 +62,21 @@ _fpa.postprocessors_ref_data = {
       })
     }
 
-    $(document).on('click', '.ref-tblock__retry', function (ev) {
+    // Namespaced, so the handlers are only ever bound once however many times this postprocessor runs
+    $(document).off('click.ref-data-retry').on('click.ref-data-retry', '.ref-tblock__retry', function (ev) {
       ev.preventDefault()
       load_columns($(this).closest('.ref-tblock'))
     })
+
+    $(document).on('click.ref-data-retry', '.table-list__retry', function (ev) {
+      ev.preventDefault()
+      load_schema_tables($(this).closest('.table-list'))
+    })
+
+    // Show a message when a search matches no table or view
+    var show_no_match = function (show) {
+      $('.ref-tables__no-match').prop('hidden', !show);
+    }
 
     var apply_filters = function () {
       filter_schemas();
@@ -102,7 +113,7 @@ _fpa.postprocessors_ref_data = {
       if ($el.hasClass('content-loading')) return;
 
       if (!$el.hasClass('content-loaded')) {
-        $el.addClass('content-loading')
+        $el.addClass('content-loading').find('.table-list__error').remove()
         var schema = $el.attr('data-schema-name')
         var url = `/admin/reference_data/table_list_tables?schema_name=${encodeURIComponent(schema)}`
         $.ajax(url).done(function (data, status, xhr) {
@@ -110,6 +121,9 @@ _fpa.postprocessors_ref_data = {
           $el.addClass('content-loaded').removeClass('content-loading')
           setup_tables();
           run_after_load($el);
+        }).fail(function () {
+          $el.removeClass('content-loading').data('after-load', [])
+          $el.html('<li class="table-list__error help-block">Could not load the tables and views. <a href="#" class="table-list__retry">Retry</a></li>')
         })
         return;
       }
@@ -159,6 +173,16 @@ _fpa.postprocessors_ref_data = {
       });
     }
 
+    var max_suggestions = 50;
+
+    // Build menu items with jQuery text so names are never interpreted as HTML
+    var type_label = function (object_type) {
+      return object_type.replace(/_/g, ' ');
+    }
+    var type_badge_class = function (object_type) {
+      return { view: 'label-info', materialized_view: 'label-primary' }[object_type] || 'label-default';
+    }
+
     $search.typeahead({
       hint: true,
       highlight: true,
@@ -166,10 +190,22 @@ _fpa.postprocessors_ref_data = {
       autoselect: true
     }, {
       name: 'primary_tables_search',
-      limit: 50,
+      limit: max_suggestions,
       display: 'label',
       source: function (query, sync) {
         sync(find_matches(query.trim().toLowerCase()));
+      },
+      templates: {
+        suggestion: function (item) {
+          return $('<div class="ref-tables__suggestion"></div>')
+            .append($('<span class="ref-tables__suggestion-name"></span>').text(item.label))
+            .append(' ')
+            .append($('<span class="label ref-table-object-type"></span>').addClass(type_badge_class(item.object_type)).text(type_label(item.object_type)));
+        },
+        footer: function (context) {
+          if (find_matches(context.query.trim().toLowerCase()).length <= max_suggestions) return '';
+          return $('<div class="ref-tables__suggestion-more help-block"></div>').text(`Showing the first ${max_suggestions} matches \u2013 keep typing to narrow the results`);
+        }
       }
     });
 
@@ -184,6 +220,8 @@ _fpa.postprocessors_ref_data = {
       var term = $search.val().trim().toLowerCase();
       var matches = term ? find_matches(term) : [];
 
+      show_no_match(term && matches.length === 0);
+
       if (matches.length === 1) {
         select_table(matches[0].schema, matches[0].table);
         close_menu();
@@ -197,6 +235,7 @@ _fpa.postprocessors_ref_data = {
     $schema_select.on('change', function () {
       clear_selection();
       $search.typeahead('val', '');
+      show_no_match(false);
       apply_filters();
     })
 
@@ -226,7 +265,8 @@ $(document).on('shown.bs.collapse', '.ref-view-definition > .collapse', function
     mode: 'text/x-sql',
     readOnly: true,
     lineNumbers: true,
-    lineWrapping: true
+    lineWrapping: true,
+    viewportMargin: Infinity
   });
   textarea.CodeMirror = cm;
   cm.refresh();

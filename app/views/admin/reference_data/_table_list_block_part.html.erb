@@ -1,5 +1,5 @@
 <div>
-  <div class="table-list-block admin-form__left-aligned" data-result="table-list-block">
+  <div class="table-list-block ref-tables admin-form__left-aligned" data-result="table-list-block">
     <div class="row">
       <div class="form-group col-md-6">
         <%= select_tag 'primary_tables_schema_select', options_for_select(@schemas), prompt: '-- select schema --', class: 'form-control input-sm ff use-chosen'  %>
@@ -8,6 +8,7 @@
         <%= tag.input type: 'search', id: 'primary_tables_search', autocomplete: 'off',
                       class: 'form-control input-sm typeahead',
                       placeholder: 'search table or view name',
+                      aria: { label: 'Search tables and views by name' },
                       data: { search_items: @table_search_items.to_json } %>
       </div>
       <div class="form-group col-md-8">
@@ -16,6 +17,7 @@
         </label>
       </div>
     </div>
+    <p class="ref-tables__no-match help-block" role="status" hidden>No tables or views match the search.</p>
     <% 
       @schemas.each do |schema_name| 
     %>

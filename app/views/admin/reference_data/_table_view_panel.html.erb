@@ -7,7 +7,7 @@
   %>
   <% if table_info.exists? %>
     <p>
-      <label><%= table_info.object_type %></label>
+      <%= render partial: 'admin/reference_data/object_type_badge', locals: { object_type: table_info.object_type } %>
       <code><%= [table_info.schema_name, table_info.table_name].join('.') %></code>
     </p>
     <ul class="ref-table-view-details">
@@ -19,7 +19,7 @@
     </div>
   <% end %>
 <% else %>
-  <p><label>not yet saved</label></p>
+  <p><span class="label label-default ref-table-object-type">not yet saved</span></p>
   <p class="help-block">The table or view details are available once the definition is saved.</p>
 <% end %>
 </div>
