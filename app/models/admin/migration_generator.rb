@@ -117,6 +117,9 @@ class Admin::MigrationGenerator
         select table_schema "schema_name", table_name from information_schema.views
         where table_schema IN (#{quoted_schemas})
         and table_catalog = '#{current_database}'
+        UNION
+        select schemaname "schema_name", matviewname "table_name" from pg_matviews
+        where schemaname IN (#{quoted_schemas})
         order by "schema_name", table_name
       END_SQL
   end
@@ -169,19 +172,54 @@ class Admin::MigrationGenerator
   end
 
   #
-  # Is the named table or view a view in the schema, based on cached view names
+  # Get the materialized views with the schema they belong to, in the schemas visible to the app.
+  # Materialized views are not reported by information_schema, so they are read from pg_matviews.
+  # @return [Array(Hash {schema_name, table_name})]
+  def self.materialized_views
+    @materialized_views ||=
+      connection.execute <<~END_SQL
+        select schemaname "schema_name", matviewname "table_name" from pg_matviews
+        where schemaname IN (#{quoted_schemas})
+        order by "schema_name", "table_name"
+      END_SQL
+  end
+
+  #
+  # Is the named table or view a (non-materialized) view in the schema, based on cached view names
   # @param [String] table_name
   # @param [String] schema_name
   # @return [true | false]
   def self.view_in_schema?(table_name, schema_name)
-    views.any? { |v| v['table_name'] == table_name && v['schema_name'] == schema_name }
+    view_keys.include?([schema_name, table_name])
   end
+
+  #
+  # Is the named table or view a materialized view in the schema, based on cached names
+  # @param [String] table_name
+  # @param [String] schema_name
+  # @return [true | false]
+  def self.materialized_view_in_schema?(table_name, schema_name)
+    materialized_view_keys.include?([schema_name, table_name])
+  end
+
+  def self.view_keys
+    @view_keys ||= views.to_set { |v| [v['schema_name'], v['table_name']] }
+  end
+  private_class_method :view_keys
+
+  def self.materialized_view_keys
+    @materialized_view_keys ||= materialized_views.to_set { |v| [v['schema_name'], v['table_name']] }
+  end
+  private_class_method :materialized_view_keys
 
   #
   # Reset the memoized tables and views value
   def self.tables_and_views_reset!
     @tables_and_views = nil
     @views = nil
+    @materialized_views = nil
+    @view_keys = nil
+    @materialized_view_keys = nil
   end
 
   #
@@ -517,12 +555,12 @@ class Admin::MigrationGenerator
   # @param [String] view_name
   # @return [String | nil]
   def self.view_definition(schema, view_name)
-    return unless view_exists?(view_name)
-
+    # pg_get_viewdef works for both views and materialized views
     sql = <<~SQL
-      select definition
-      from pg_views
-      where viewname = $1 and schemaname = $2;
+      select pg_get_viewdef(c.oid) as definition
+      from pg_class c
+      join pg_namespace n on n.oid = c.relnamespace
+      where c.relname = $1 and n.nspname = $2 and c.relkind in ('v', 'm');
     SQL
 
     type  = ActiveModel::Type::String.new

@@ -19,8 +19,6 @@ class Admin::TableViewInfo
   # Tables and views in the schemas visible to the app, for the table / view search on the Tables tab
   # @return [Array<Hash{Symbol => String | Boolean}>]
   def self.search_items
-    view_keys = Admin::MigrationGenerator.views.to_set { |v| [v['schema_name'], v['table_name']] }
-
     Admin::MigrationGenerator.tables_and_views.map do |t|
       schema_name = t['schema_name']
       table_name = t['table_name']
@@ -28,9 +26,35 @@ class Admin::TableViewInfo
         label: "#{schema_name}.#{table_name}",
         schema: schema_name,
         table: table_name,
-        object_type: view_keys.include?([schema_name, table_name]) ? 'view' : 'table',
+        object_type: object_type_in_schema(table_name, schema_name).to_s,
         history: table_name.end_with?('_history')
       }
+    end
+  end
+
+  # @param [String] table_name
+  # @param [String] schema_name
+  # @return [:table | :view | :materialized_view]
+  def self.object_type_in_schema(table_name, schema_name)
+    return :view if Admin::MigrationGenerator.view_in_schema?(table_name, schema_name)
+    return :materialized_view if Admin::MigrationGenerator.materialized_view_in_schema?(table_name, schema_name)
+
+    :table
+  end
+
+  # @param [Symbol | String] object_type
+  # @return [String] the label to show for the object type
+  def self.object_type_label(object_type)
+    object_type.to_s.tr('_', ' ')
+  end
+
+  # @param [Symbol | String] object_type
+  # @return [String] the label CSS class for the object type badge
+  def self.object_type_badge_class(object_type)
+    case object_type.to_s
+    when 'view' then 'label-info'
+    when 'materialized_view' then 'label-primary'
+    else 'label-default'
     end
   end
 
@@ -59,21 +83,26 @@ class Admin::TableViewInfo
     @exists = Admin::MigrationGenerator.table_or_view_exists_in_schema?(table_name, schema_name).present?
   end
 
-  # @return [:table | :view | nil]
+  # @return [:table | :view | :materialized_view | nil]
   def object_type
     return unless exists?
 
-    view? ? :view : :table
+    @object_type ||= self.class.object_type_in_schema(table_name, schema_name)
   end
 
-  # @return [true | false]
+  # @return [true | false] a (non-materialized) view
   def view?
-    exists? && Admin::MigrationGenerator.view_in_schema?(table_name, schema_name)
+    object_type == :view
   end
 
-  # @return [String | nil] the DDL for a view
+  # @return [true | false] has a DDL definition, being a view or a materialized view
+  def definition?
+    %i[view materialized_view].include?(object_type)
+  end
+
+  # @return [String | nil] the DDL for a view or materialized view
   def view_definition
-    return unless view?
+    return unless definition?
 
     Admin::MigrationGenerator.view_definition(schema_name, table_name)
   end

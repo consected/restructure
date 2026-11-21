@@ -18,9 +18,10 @@ class Admin::ReferenceDataController < ApplicationController
 
   def table_list_tables
     return not_authorized unless current_admin || current_user.can?(:view_data_reference)
+    return head :bad_request if params[:schema_name].blank?
 
     Admin::MigrationGenerator.tables_and_views_reset!
-    @schema_name = params[:schema_name]
+    @schema_name = params[:schema_name].to_s
     @can_view_table_data = current_admin || current_user.has_access_to?(:read, :report, :reference_data__table_data)
     @table_info_for_schema = Admin::MigrationGenerator.tables_and_views
                                                       .filter { |ti| ti['schema_name'] == @schema_name }
@@ -31,6 +32,8 @@ class Admin::ReferenceDataController < ApplicationController
 
   def table_list_columns
     return not_authorized unless current_admin || current_user.can?(:view_data_reference)
+
+    return head :bad_request if params[:schema_name].blank? || params[:table_name].blank?
 
     table_info = Admin::TableViewInfo.new(schema_name: params[:schema_name], table_name: params[:table_name])
     return head :not_found unless table_info.exists?
