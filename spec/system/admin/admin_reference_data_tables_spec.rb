@@ -10,7 +10,12 @@
 # - a view's DDL is shown in a CodeMirror section when the view is expanded, across the full width of its section,
 #   below the view's field list
 # - the typeahead menu closes once a single table or view match is applied
-# - a table's columns that fail to load show a message with a retry link
+# - a table's columns, or a schema's tables, that fail to load show a message with a retry link; retry runs once
+# - a search that matches nothing shows a no-match message, several matches select nothing, and changing
+#   the schema clears the search
+# - materialized views are searchable and labelled with their own badge, and their DDL is shown
+# - the typeahead menu shows the object type, and a note when the matches are truncated
+# - the CodeMirror view definition grows to fit short views and is capped for long ones
 # - a table that is a dynamic definition links to its admin page in edit mode
 # - a dynamic definition's Table / View panel shows its own table columns
 
@@ -29,10 +34,13 @@ describe 'admin reference data tables and views', js: true, driver: $browser_dri
     make_an_admin
 
     ActiveRecord::Base.connection.execute <<~SQL
+      DROP MATERIALIZED VIEW IF EXISTS dynamic_test.ref_data_sys_matview;
       DROP VIEW IF EXISTS dynamic_test.ref_data_sys_view;
       DROP TABLE IF EXISTS dynamic_test.ref_data_sys_base;
       CREATE TABLE dynamic_test.ref_data_sys_base (id integer PRIMARY KEY, label varchar);
       CREATE VIEW dynamic_test.ref_data_sys_view AS SELECT id, label FROM dynamic_test.ref_data_sys_base;
+      DROP MATERIALIZED VIEW IF EXISTS dynamic_test.ref_data_sys_matview;
+      CREATE MATERIALIZED VIEW dynamic_test.ref_data_sys_matview AS SELECT id, label FROM dynamic_test.ref_data_sys_base;
     SQL
     Admin::MigrationGenerator.tables_and_views_reset!
 
@@ -52,6 +60,7 @@ describe 'admin reference data tables and views', js: true, driver: $browser_dri
   after(:all) do
     DynamicModel.active.where(table_name: 'ref_data_sys_recs').each { |dm| dm.disable!(@admin) }
     ActiveRecord::Base.connection.execute <<~SQL
+      DROP MATERIALIZED VIEW IF EXISTS dynamic_test.ref_data_sys_matview;
       DROP VIEW IF EXISTS dynamic_test.ref_data_sys_view;
       DROP TABLE IF EXISTS dynamic_test.ref_data_sys_base;
     SQL
@@ -106,7 +115,7 @@ describe 'admin reference data tables and views', js: true, driver: $browser_dri
       })()
     JS
     expect(sizes['cm']).to be >= sizes['section'] * 0.95
-    expect(sizes['height']).to be_between(60, 500)
+    expect(sizes['height']).to be_between(30, 200)
   end
 
   it 'shows the view definition below the field list of the view' do
@@ -157,11 +166,102 @@ describe 'admin reference data tables and views', js: true, driver: $browser_dri
     expect(page).to have_css('#tblock-dynamic_test-ref_data_sys_base .ref-tblock__error', visible: true, wait: 10)
     expect(page).to have_no_css('#tblock-dynamic_test-ref_data_sys_base.content-loading')
 
-    page.execute_script('window.refDataFailColumns = false;')
+    page.execute_script('window.refDataFailColumns = false; window.refDataColumnCalls = 0;')
+    page.execute_script(<<~JS)
+      var counting = $.ajax;
+      $.ajax = function (url) {
+        if (String(url).indexOf('table_list_columns') !== -1) window.refDataColumnCalls += 1;
+        return counting.apply(this, arguments);
+      };
+    JS
     find('#tblock-dynamic_test-ref_data_sys_base .ref-tblock__retry', visible: true).click
 
     expect(page).to have_css('#tblock-dynamic_test-ref_data_sys_base .ref-table-col-item', visible: true, wait: 10)
     expect(page).to have_no_css('#tblock-dynamic_test-ref_data_sys_base .ref-tblock__error')
+    expect(page.evaluate_script('window.refDataColumnCalls')).to eq 1
+  end
+
+  it 'shows a retry message when the tables of a schema fail to load, and loads them on retry' do
+    open_tables_tab
+
+    page.execute_script(<<~JS)
+      window.refDataOrigAjax = $.ajax;
+      window.refDataFailTables = true;
+      $.ajax = function (url) {
+        if (window.refDataFailTables && String(url).indexOf('table_list_tables') !== -1) {
+          return $.Deferred().reject(null, 'error', 'Server Error').promise();
+        }
+        return window.refDataOrigAjax.apply(this, arguments);
+      };
+      $('#primary_tables_schema_select').val('dynamic_test').trigger('change');
+    JS
+
+    expect(page).to have_css('#table-list-dynamic_test .table-list__error', visible: true, wait: 10)
+
+    page.execute_script('window.refDataFailTables = false;')
+    find('#table-list-dynamic_test .table-list__retry', visible: true).click
+
+    expect(page).to have_css('#t-dynamic_test-ref_data_sys_base', visible: true, wait: 10)
+    expect(page).to have_no_css('#table-list-dynamic_test .table-list__error')
+  end
+
+  it 'shows a no-match message for a search that matches nothing, and clears it with the schema change' do
+    open_tables_tab
+
+    fill_in 'primary_tables_search', with: 'zz_no_such_table_zz'
+    expect(page).to have_css('.ref-tables__no-match', text: 'No tables or views match', visible: true, wait: 10)
+
+    page.execute_script("$('#primary_tables_schema_select').val('dynamic_test').trigger('change')")
+    expect(page).to have_no_css('.ref-tables__no-match', visible: true, wait: 10)
+    expect(find('#primary_tables_search', visible: :all).value).to eq ''
+    expect(page).to have_css('#t-dynamic_test-ref_data_sys_base', visible: true, wait: 10)
+  end
+
+  it 'selects nothing while a search matches several tables, and clears a selection when the search widens' do
+    open_tables_tab
+
+    fill_in 'primary_tables_search', with: 'ref_data_sys_base'
+    expect(page).to have_css('#tblock-dynamic_test-ref_data_sys_base.in', visible: true, wait: 10)
+
+    find('#primary_tables_search').send_keys(%i[backspace backspace backspace backspace])
+    expect(page).to have_no_css('#tblock-dynamic_test-ref_data_sys_base.in', wait: 10)
+    expect(page).to have_no_css('.ref-tables__no-match', visible: true)
+  end
+
+  it 'shows the object type in the typeahead menu and a materialized view with its own badge' do
+    open_tables_tab
+
+    fill_in 'primary_tables_search', with: 'ref_data_sys_'
+    within '.tt-menu.tt-open' do
+      expect(page).to have_css('.ref-tables__suggestion .label-default', text: 'table', wait: 10)
+      expect(page).to have_css('.ref-tables__suggestion .label-info', text: /\Aview\z/)
+      expect(page).to have_css('.ref-tables__suggestion .label-primary', text: 'materialized view')
+      expect(page).to have_no_css('.ref-tables__suggestion-more')
+    end
+
+    find('#primary_tables_search').send_keys('matview')
+    expect(page).to have_css('#t-dynamic_test-ref_data_sys_matview[data-object-type="materialized_view"] .label-primary',
+                             text: 'materialized view', visible: true, wait: 10)
+    find('#tblock-dynamic_test-ref_data_sys_matview .ref-view-definition > a', visible: true).click
+    expect(page).to have_css('#tblock-dynamic_test-ref_data_sys_matview .CodeMirror', text: 'ref_data_sys_base',
+                             visible: true, wait: 10)
+  end
+
+  it 'notes that more results are available when the typeahead matches are truncated' do
+    ActiveRecord::Base.connection.execute(
+      (1..55).map { |i| "CREATE TABLE IF NOT EXISTS dynamic_test.ref_data_many_#{i} (id integer);" }.join("\n")
+    )
+    Admin::MigrationGenerator.tables_and_views_reset!
+    open_tables_tab
+
+    fill_in 'primary_tables_search', with: 'ref_data_many_'
+    expect(page).to have_css('.tt-menu .ref-tables__suggestion-more', text: 'keep typing', visible: true, wait: 10)
+    expect(page).to have_css('.tt-menu .ref-tables__suggestion', count: 50)
+  ensure
+    ActiveRecord::Base.connection.execute(
+      (1..55).map { |i| "DROP TABLE IF EXISTS dynamic_test.ref_data_many_#{i};" }.join("\n")
+    )
+    Admin::MigrationGenerator.tables_and_views_reset!
   end
 
   it 'filters the schema list to the table found by searching, and restores the list when the search is cleared' do

@@ -9,6 +9,12 @@
 # - a view shows its DDL (pg_get_viewdef) in a CodeMirror section
 # - a table or view that is a dynamic definition links to its admin page using filter[id]
 # - the columns endpoint refuses names that are not visible to the app
+# - blank schema or table names are rejected with a bad request
+# - a non-admin user needs the view_data_reference access control to use the endpoints
+# - history tables are flagged so they can be filtered out
+# - materialized views (which are not in information_schema) are listed, labelled, and show their DDL and columns
+# - the Table / View panel handles a missing table, an unsaved definition and a view-backed definition
+# - the same table name in two schemas resolves to the table in the schema asked for
 
 require 'rails_helper'
 
@@ -25,7 +31,22 @@ RSpec.describe 'Admin reference data tables and views', type: :request do
       DROP TABLE IF EXISTS dynamic_test.ref_data_spec_base;
       CREATE TABLE dynamic_test.ref_data_spec_base (id integer PRIMARY KEY, label varchar);
       CREATE VIEW dynamic_test.ref_data_spec_view AS SELECT id, label FROM dynamic_test.ref_data_spec_base;
+      DROP MATERIALIZED VIEW IF EXISTS dynamic_test.ref_data_spec_matview;
+      CREATE MATERIALIZED VIEW dynamic_test.ref_data_spec_matview AS SELECT id, label FROM dynamic_test.ref_data_spec_base;
+      DROP TABLE IF EXISTS dynamic_test.ref_data_spec_base_history;
+      CREATE TABLE dynamic_test.ref_data_spec_base_history (id integer);
+      DROP TABLE IF EXISTS dynamic_test.ref_data_spec_dup;
+      DROP TABLE IF EXISTS redcap_test.ref_data_spec_dup;
+      CREATE TABLE dynamic_test.ref_data_spec_dup (in_dynamic_test integer);
+      CREATE TABLE redcap_test.ref_data_spec_dup (in_redcap_test integer);
     SQL
+
+    create_user
+    @reader = @user
+    Admin::UserAccessControl.create!(app_type: @reader.app_type, access: :read, resource_type: :general,
+                                     resource_name: :view_data_reference, current_admin: @admin, user: @reader)
+    create_user
+    @non_reader = @user
 
     DynamicModel.active.where(table_name: 'ref_data_spec_recs').each { |dm| dm.disable!(@admin) }
     @dm = DynamicModel.create!(
@@ -71,8 +92,12 @@ RSpec.describe 'Admin reference data tables and views', type: :request do
     DynamicModel.active.where(table_name: 'ref_data_spec_recs').each { |dm| dm.disable!(@admin) }
     [@ei, @al].each { |definition| definition&.disable!(@admin) }
     ActiveRecord::Base.connection.execute <<~SQL
+      DROP MATERIALIZED VIEW IF EXISTS dynamic_test.ref_data_spec_matview;
       DROP VIEW IF EXISTS dynamic_test.ref_data_spec_view;
       DROP TABLE IF EXISTS dynamic_test.ref_data_spec_base;
+      DROP TABLE IF EXISTS dynamic_test.ref_data_spec_base_history;
+      DROP TABLE IF EXISTS dynamic_test.ref_data_spec_dup;
+      DROP TABLE IF EXISTS redcap_test.ref_data_spec_dup;
     SQL
     Admin::MigrationGenerator.tables_and_views_reset!
     change_setting('AllowDynamicMigrations', @prev_allow_dms)
@@ -90,6 +115,51 @@ RSpec.describe 'Admin reference data tables and views', type: :request do
     Nokogiri::HTML(response.body).at_css("#t-dynamic_test-#{table_name} a.ref-table-definition-link")
   end
 
+  describe 'access for a non-admin user' do
+    let(:paths) do
+      ['/admin/reference_data/table_list',
+       '/admin/reference_data/table_list_tables?schema_name=dynamic_test',
+       '/admin/reference_data/table_list_columns?schema_name=dynamic_test&table_name=ref_data_spec_base']
+    end
+
+    it 'allows a user with view_data_reference to use all three actions' do
+      sign_out @admin
+      sign_in @reader
+      paths.each do |path|
+        get path
+        expect(response).to have_http_status(:ok), "#{path} returned #{response.status}"
+      end
+    end
+
+    it 'refuses a user without view_data_reference' do
+      Admin::UserAccessControl.active
+                              .where(resource_type: 'general', resource_name: 'view_data_reference')
+                              .where('user_id IS NULL OR user_id != ?', @reader.id)
+                              .update_all(disabled: true, updated_at: Time.current)
+      Admin::UserAccessControl.reset_latest_update
+      sign_out @admin
+      sign_in @non_reader
+      paths.each do |path|
+        get path
+        expect(response).to have_http_status(:unauthorized), "#{path} returned #{response.status}"
+      end
+    end
+  end
+
+  describe 'blank names' do
+    it 'rejects a blank schema name for the tables list' do
+      get '/admin/reference_data/table_list_tables', params: { schema_name: '' }
+      expect(response).to have_http_status(:bad_request)
+    end
+
+    it 'rejects a missing schema or table name for the columns' do
+      get '/admin/reference_data/table_list_columns', params: { table_name: 'ref_data_spec_base' }
+      expect(response).to have_http_status(:bad_request)
+      get '/admin/reference_data/table_list_columns', params: { schema_name: 'dynamic_test', table_name: ' ' }
+      expect(response).to have_http_status(:bad_request)
+    end
+  end
+
   describe 'GET /admin/reference_data/table_list' do
     before { get '/admin/reference_data/table_list' }
 
@@ -101,6 +171,11 @@ RSpec.describe 'Admin reference data tables and views', type: :request do
     it 'renders a table / view search field as a typeahead beside the schema select' do
       expect(response.body).to match(/<input[^>]*id="primary_tables_search"[^>]*class="[^"]*typeahead/)
       expect(response.body).not_to include('primary_tables_search_options')
+    end
+
+    it 'lists materialized views in the search items' do
+      expect(search_items).to include(hash_including('label' => 'dynamic_test.ref_data_spec_matview',
+                                                     'object_type' => 'materialized_view'))
     end
 
     it 'lists tables and views in the search items, without needing the schema' do
@@ -137,6 +212,27 @@ RSpec.describe 'Admin reference data tables and views', type: :request do
 
     it 'does not link a table or view that is not a dynamic definition' do
       expect(definition_link('ref_data_spec_base')).to be_nil
+      expect(definition_link('ref_data_spec_view')).to be_nil
+    end
+
+    it 'gives the definition and data links an accessible name, without text in the link' do
+      link = definition_link('ref_data_spec_recs')
+      expect(link['aria-label']).to eq 'Edit dynamic model definition'
+      expect(link.text.strip).to be_empty
+    end
+
+    it 'flags history tables so they can be filtered out' do
+      doc = Nokogiri::HTML(response.body)
+      expect(doc.at_css('#t-dynamic_test-ref_data_spec_base_history.history-table')).to be_present
+      expect(doc.at_css('#t-dynamic_test-ref_data_spec_base.regular-table')).to be_present
+    end
+
+    it 'labels a materialized view with its own badge' do
+      doc = Nokogiri::HTML(response.body)
+      item = doc.at_css('#t-dynamic_test-ref_data_spec_matview[data-object-type="materialized_view"]')
+      expect(item.at_css('.label.label-primary').text).to eq 'materialized view'
+      expect(doc.at_css('#t-dynamic_test-ref_data_spec_view .label.label-info').text).to eq 'view'
+      expect(doc.at_css('#t-dynamic_test-ref_data_spec_base .label.label-default').text).to eq 'table'
     end
 
     it 'links a definition even when its class is not loaded into the resource registry in this process' do
@@ -162,6 +258,28 @@ RSpec.describe 'Admin reference data tables and views', type: :request do
       expect(response.body).to include('ref-view-definition__sql')
       expect(response.body).to include('ref_data_spec_base')
       expect(response.body).to include('label')
+    end
+
+    it 'shows the DDL and columns of a materialized view' do
+      get '/admin/reference_data/table_list_columns', params: { schema_name: 'dynamic_test', table_name: 'ref_data_spec_matview' }
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('ref-view-definition__sql')
+      expect(response.body).to include('ref_data_spec_base')
+      expect(response.body).to include('ref-col-dynamic_test.ref_data_spec_matview.label')
+    end
+
+    it 'gives each column a unique id including its schema and table, so it cannot collide with form inputs' do
+      get '/admin/reference_data/table_list_columns', params: { schema_name: 'dynamic_test', table_name: 'ref_data_spec_base' }
+      ids = Nokogiri::HTML(response.body).css('.ref-table-col-item').pluck('id')
+      expect(ids).to eq %w[ref-col-dynamic_test.ref_data_spec_base.id ref-col-dynamic_test.ref_data_spec_base.label]
+    end
+
+    it 'resolves the same table name in two schemas to the schema asked for' do
+      get '/admin/reference_data/table_list_columns', params: { schema_name: 'redcap_test', table_name: 'ref_data_spec_dup' }
+      expect(response.body).to include('in_redcap_test')
+      expect(response.body).not_to include('in_dynamic_test')
+      get '/admin/reference_data/table_list_columns', params: { schema_name: 'dynamic_test', table_name: 'ref_data_spec_dup' }
+      expect(response.body).to include('in_dynamic_test')
     end
 
     it 'does not show a view definition section for a table' do
@@ -212,6 +330,43 @@ RSpec.describe 'Admin reference data tables and views', type: :request do
       expect(response.body).to include(@al.table_name)
       expect(response.body).to include('ref-table-col-item')
       expect(response.body).not_to include('does not exist in the database')
+    end
+  end
+
+  describe 'Table / View panel states' do
+    it 'shows a message when the definition table does not exist' do
+      @dm.update_column(:table_name, 'ref_data_spec_missing')
+      get "/admin/dynamic_models/#{@dm.id}/edit"
+      expect(response.body).to include('does not exist in the database')
+      expect(response.body).to include('dynamic_test.ref_data_spec_missing')
+    ensure
+      @dm.update_column(:table_name, 'ref_data_spec_recs')
+    end
+
+    it 'says the details are available once a new definition is saved' do
+      get '/admin/dynamic_models/new'
+      expect(response.body).to include('not yet saved')
+      expect(response.body).not_to include('ref-table-view-details')
+    end
+
+    it 'shows a badge and the view definition for a definition that uses a view' do
+      @dm.update_column(:table_name, 'ref_data_spec_view')
+      get "/admin/dynamic_models/#{@dm.id}/edit"
+      panel = Nokogiri::HTML(response.body).at_css('#dm-table-view-panel')
+      expect(panel.at_css('.label.label-info').text).to eq 'view'
+      expect(panel.at_css('label')).to be_nil
+      expect(panel.at_css('.ref-view-definition__sql').text).to include('ref_data_spec_base')
+    ensure
+      @dm.update_column(:table_name, 'ref_data_spec_recs')
+    end
+
+    it 'shows a materialized view badge for a definition that uses a materialized view' do
+      @dm.update_column(:table_name, 'ref_data_spec_matview')
+      get "/admin/dynamic_models/#{@dm.id}/edit"
+      panel = Nokogiri::HTML(response.body).at_css('#dm-table-view-panel')
+      expect(panel.at_css('.label.label-primary').text).to eq 'materialized view'
+    ensure
+      @dm.update_column(:table_name, 'ref_data_spec_recs')
     end
   end
 end
