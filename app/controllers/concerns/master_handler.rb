@@ -32,6 +32,8 @@ module MasterHandler
   # Any change to the params will cause a new version to be retrieved if using cache,
   # so simply add a parameter like :cache_version => current timestamp to force new data
   def index
+    Dynamic::TemplateConfigFreshness.refresh_live_definitions(@master_objects)
+
     index_res = if params[:cache_result].present?
                   set_browser_cache(max_age: 30)
                   return unless stale?(etag: index_cache_key)
@@ -47,6 +49,7 @@ module MasterHandler
   end
 
   def show
+    Dynamic::TemplateConfigFreshness.refresh_live_definitions([object_instance])
     p = { full_object_name => object_instance.as_json, _control: control_feedback }
 
     render json: p
@@ -194,13 +197,18 @@ module MasterHandler
       upd_all << m.class.name
       upd_all << m.id
       upd_all << m.updated_at
+      upd_all << m.vdef_version if m.respond_to?(:vdef_version)
+      upd_all << current_definition_cache_token(m)
 
       next unless m.respond_to? :model_references
 
       m.model_references.each do |r|
         upd_all << r.to_record_type
         upd_all << r.to_record_id
-        upd_all << r.to_record.updated_at
+        referenced_record = r.to_record
+        upd_all << referenced_record.updated_at
+        upd_all << referenced_record.vdef_version if referenced_record.respond_to?(:vdef_version)
+        upd_all << current_definition_cache_token(referenced_record)
       end
     end
     upd_ver = Digest::SHA256.hexdigest upd_all.join('>')
@@ -210,6 +218,42 @@ module MasterHandler
     res = params.to_unsafe_h
     res[:_upd_ver] = upd_ver
     @index_cache_key = Digest::SHA256.hexdigest(res.to_json)
+  end
+
+  # Token for the current (live) definition of a record. A record on an older definition
+  # version keeps its historical vdef_version, so without this a change to the current
+  # definition (such as a tighter showable_if, applied in #filter_records) would not change
+  # a cached index result for it.
+  # @return [Array, nil] the live definition token and any config library tokens
+  def current_definition_cache_token(record)
+    return unless record.respond_to?(:current_definition)
+
+    Dynamic::TemplateVersionTokens.definition_token(record.current_definition)
+  end
+
+  def template_config_cache_key
+    freshness = Dynamic::TemplateConfigFreshness.new(@instance_list)
+    freshness.refresh!
+
+    paired_user = helpers.paired_user_for(current_user || current_admin)
+    app_type_id = paired_user&.app_type_id
+    access_timestamps = helpers.partial_cache_key_access_control_timestamps(app_type_id)
+
+    Digest::SHA256.hexdigest([
+      Application.version,
+      controller_name,
+      current_user&.class&.name,
+      current_user&.id,
+      current_admin&.id,
+      paired_user&.id,
+      app_type_id,
+      access_timestamps,
+      Dynamic::TemplateVersionTokens.panel_chrome_token,
+      freshness.tokens(include_activity_item_types: controller_name == 'activity_logs'),
+      @master&.id,
+      @master&.updated_at&.to_f,
+      @id_list
+    ].to_json)
   end
 
   # Before update and before insert triggers can lead update and create actions to return incorrect

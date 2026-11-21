@@ -11,6 +11,9 @@
 # - Directory creation for tmp/handlebars and public/handlebars
 # - Cleanup operations for temporary and compiled files
 # - Environment-based flags for minification and source maps
+# - Issue #1481 (Phase 1): generation_key survives admin saves (which clear the whole Rails
+#   cache) and rotates only on restart or eviction of its cached version, and the
+#   startup cleanup also removes FileLock lock files (not in delayed_job/console/runner)
 
 require 'rails_helper'
 
@@ -28,6 +31,53 @@ RSpec.describe HandlebarsPrecompiler do
 
       expect(path).to be_a(String)
       expect(path).not_to be_empty
+    end
+  end
+
+  describe '.generation_key' do
+    it 'does not rotate when an admin record is created, which clears the whole Rails cache' do
+      key_before = described_class.generation_key
+      Rails.cache.write('generation-key-spec-sentinel', 'present')
+
+      record = Admin::MessageTemplate.create!(
+        name: "generation-key-#{SecureRandom.hex(4)}",
+        message_type: :plain,
+        template_type: :content,
+        template: '',
+        current_admin: SetupHelper.auto_admin
+      )
+
+      expect(Rails.cache.read('generation-key-spec-sentinel')).to be_nil
+      expect(described_class.generation_key).to eq(key_before)
+
+      record.update!(template: 'changed', current_admin: SetupHelper.auto_admin)
+      expect(described_class.generation_key).to eq(key_before)
+    end
+
+    it 'does not rotate when the cache is cleared with the generation preserved' do
+      key_before = described_class.generation_key
+
+      Application.clear_cache_preserving_generation
+
+      expect(described_class.generation_key).to eq(key_before)
+    end
+
+    it 'rotates when the cached generation version is evicted by a plain cache clear' do
+      key_before = described_class.generation_key
+
+      Rails.cache.clear
+      Rails.cache.write('server_cache_version', "rotated-#{SecureRandom.hex(4)}")
+
+      expect(described_class.generation_key).not_to eq(key_before)
+    end
+
+    it 'rotates after the cached versions are deleted, as startup cleanup does' do
+      key_before = described_class.generation_key
+      Rails.cache.delete('server_cache_version')
+      Rails.cache.delete(Application::HANDLEBARS_GENERATION_CACHE_KEY)
+      Application.server_cache_version = "restart-#{SecureRandom.hex(4)}"
+
+      expect(described_class.generation_key).not_to eq(key_before)
     end
   end
 
@@ -98,25 +148,33 @@ RSpec.describe HandlebarsPrecompiler do
     # concurrently-running test suite sharing the same test database/memcached.
     let(:key) { described_class.generation_key }
     let(:compiled_dir) { described_class.templates_compiled_dir(key) }
+    let(:lock_file) { described_class::FileLock::LOCK_DIR.join("startup-cleanup-#{SecureRandom.hex(4)}") }
 
     before do
       described_class.setup_directories
       FileUtils.mkdir_p(compiled_dir)
       FileUtils.touch(compiled_dir.join('leftover.js'))
+      FileUtils.mkdir_p(lock_file.dirname)
+      FileUtils.touch(lock_file)
       # Also simulate an in-flight web request's source tmp files (issue #1362 B2 fix):
       # these live under TEMPLATES_TMP_DIR/PARTIALS_TMP_DIR, shared with the delayed_job
       # process, and must be just as protected as the compiled output above.
       FileUtils.touch(described_class::TEMPLATES_TMP_DIR.join('in-flight.handlebars'))
     end
 
+    after { FileUtils.rm_f(lock_file) }
+
     it 'cleans up compiled and tmp output, and invalidates server_cache_version outside the delayed_job process' do
       allow(described_class).to receive(:delayed_job_worker?).and_return(false)
+      allow(Rails.cache).to receive(:delete).and_call_original
       expect(Rails.cache).to receive(:delete).with('server_cache_version')
+      expect(Rails.cache).to receive(:delete).with(Application::HANDLEBARS_GENERATION_CACHE_KEY)
 
       described_class.startup_cleanup!
 
       expect(Dir.glob(compiled_dir.join('*.js'))).to be_empty
       expect(Dir.glob(described_class::TEMPLATES_TMP_DIR.join('*'))).to be_empty
+      expect(File.exist?(lock_file)).to be false
     end
 
     it 'does NOT clean up compiled/tmp output or invalidate server_cache_version inside the delayed_job process' do
@@ -127,6 +185,7 @@ RSpec.describe HandlebarsPrecompiler do
 
       expect(Dir.glob(compiled_dir.join('*.js'))).not_to be_empty
       expect(Dir.glob(described_class::TEMPLATES_TMP_DIR.join('*'))).not_to be_empty
+      expect(File.exist?(lock_file)).to be true
     end
 
     it 'does NOT clean up compiled/tmp output or invalidate server_cache_version under rails console/runner' do
@@ -138,6 +197,7 @@ RSpec.describe HandlebarsPrecompiler do
 
       expect(Dir.glob(compiled_dir.join('*.js'))).not_to be_empty
       expect(Dir.glob(described_class::TEMPLATES_TMP_DIR.join('*'))).not_to be_empty
+      expect(File.exist?(lock_file)).to be true
     end
   end
 
@@ -213,10 +273,9 @@ RSpec.describe HandlebarsPrecompiler do
   end
 
   # Issue #1362 (Stage 1) - DISK GUARANTEE SPEC: bounds how many compiled-Handlebars
-  # generations can accumulate on disk, regardless of how many times a dynamic
-  # definition/config change rotates the generation key. Operates on fabricated generation
-  # directories (with controlled mtimes) rather than real DB-driven rotations, so the sweep
-  # LOGIC can be exercised precisely and quickly, independent of directory-creation timing.
+  # generations can accumulate after runtime memcached-eviction rotations. Operates on
+  # fabricated generation directories (with controlled mtimes) rather than real DB-driven
+  # rotations, so the sweep logic is exercised precisely and quickly.
   describe '.sweep_old_generations' do
     def make_generation(name, mtime:)
       FileUtils.mkdir_p(HandlebarsPrecompiler::TMP_DIR.join(name))

@@ -43,6 +43,15 @@ RSpec.describe 'Config library versioning with dynamic definitions', type: :mode
     setup_access :tracker_histories
   end
 
+  # The rolled-back definitions (and their deleted libraries) must not stay registered in the
+  # process, or later specs that build template tokens for every active definition raise
+  after do
+    [DynamicModel, ActivityLog, ExternalIdentifier].each do |definition_class|
+      definition_class.reset_active_model_configurations!
+      definition_class.definition_cache.clear
+    end
+  end
+
   def create_test_config_library(label_value:)
     @lib_category = "test_ver_cat_#{rand(1_000_000_000)}"
     @lib_name = "test_ver_lib_#{rand(1_000_000_000)}"
@@ -151,6 +160,23 @@ RSpec.describe 'Config library versioning with dynamic definitions', type: :mode
   end
 
   describe 'versioned dynamic definition uses versioned config library' do
+    it 'uses the latest library content when the live definition predates the library update' do
+      lib = create_test_config_library(label_value: 'v1_label')
+      dmdef = generate_dm_with_library_ref
+      definition_updated_at = dmdef.updated_at
+
+      lib.current_admin = @admin
+      lib.update!(options: <<~YAML)
+        _definitions_lib:
+          label_from_lib: &label_from_lib v2_label
+      YAML
+
+      dmdef.update_column(:updated_at, definition_updated_at)
+      dmdef.reload.force_option_config_parse
+
+      expect(dmdef.option_type_config_for(:default).label).to eq('v2_label')
+    end
+
     it 'uses the v1 library content for instances created under v1 definition' do
       # Create library v1 and dynamic model referencing it
       lib = create_test_config_library(label_value: 'v1_label')

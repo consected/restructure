@@ -66,7 +66,10 @@ RSpec.describe ActivityLog::PlayerContactPhonesController, type: :controller do
       # error page, rather than propagating as a Ruby exception here - so the
       # response status/body is the only reliable evidence of the underlying
       # failure.
-      expect(response.body).not_to match(/tracker_history_id/)
+      # The state block legitimately lists tracker_history_id in item_list, so assert on the
+      # exception message and the rendered form, not on the field name alone.
+      expect(response.body).not_to match(/Column tracker_history_id does not appear/)
+      expect(response.body).to include('id="new_activity_log_player_contact_phone"')
       expect(response).to have_http_status(:ok)
     end
   end

@@ -11,7 +11,7 @@ RSpec.describe 'masters/_cache_search_results_template', type: :view do
   before do
     @perform_caching = Rails.configuration.action_controller.perform_caching
     Rails.configuration.action_controller.perform_caching = true
-    allow(view).to receive(:partial_cache_key).and_return(cache_key)
+    allow(view).to receive(:master_templates_skeleton_cache_key).and_return(cache_key)
     allow(view).to receive(:render).and_call_original
     Rails.cache.delete(cache_key)
   end

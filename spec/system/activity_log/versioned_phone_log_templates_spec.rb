@@ -67,7 +67,7 @@ describe 'Versioned phone log templates', driver: $browser_driver do
     # Clear the class-level all_versions memo to ensure we read the actual DB count,
     # not a stale value left by a prior transaction (e.g. from lifecycle_hooks_spec
     # before :each) that was rolled back without clearing the class-level memo.
-    ActivityLog.all_versions_memo.delete("ActivityLog-#{activity_log.id}")
+    ActivityLog.delete_all_versions_memo("ActivityLog-#{activity_log.id}")
     previous_versions_count = activity_log.all_versions.length
     activity_log.current_admin = @admin
 

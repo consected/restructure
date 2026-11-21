@@ -9,6 +9,12 @@ class Classification::SelectionOptionsHandler
   attr_accessor :user_base_object, :table_name
 
   CacheKeySelectorWithConfigOverrides = 'selector_with_config_overrides'
+  MaxTrackedCacheKeys = 500
+  CacheKeysListLock = Mutex.new
+
+  class RequestCache < ActiveSupport::CurrentAttributes
+    attribute :shared_definition_cache_version
+  end
 
   #
   # The canonical list of "self-sourcing" field name prefixes.
@@ -287,10 +293,26 @@ class Classification::SelectionOptionsHandler
   end
 
   def self.selector_with_config_overrides(conditions = nil)
-    cname = "#{CacheKeySelectorWithConfigOverrides}--#{Classification::GeneralSelection.selector_cache_version_token}--#{conditions}"
-    @cache_keys_list ||= []
-    @cache_keys_list << cname
+    definition_versions = RequestCache.shared_definition_cache_version ||=
+      Dynamic::DefinitionCacheVersion.token
+    cname = "#{CacheKeySelectorWithConfigOverrides}--#{Classification::GeneralSelection.selector_cache_version_token}--#{definition_versions}--#{conditions}"
+    track_selector_cache_key(cname)
     Rails.cache.fetch(cname) { selector_with_config_overrides_processing(conditions) }
+  end
+
+  # Track a selector cache key so it can be cleared when definitions change, pruning the oldest key
+  # once MaxTrackedCacheKeys is reached. Requests add keys concurrently with definition saves
+  # clearing them, so the tracking hash is only touched under a lock, and cache deletes happen outside it.
+  def self.track_selector_cache_key(cname)
+    pruned_key = nil
+    CacheKeysListLock.synchronize do
+      @cache_keys_list ||= {}
+      unless @cache_keys_list.key?(cname)
+        pruned_key = @cache_keys_list.shift.first if @cache_keys_list.length >= MaxTrackedCacheKeys
+        @cache_keys_list[cname] = true
+      end
+    end
+    Rails.cache.delete(pruned_key) if pruned_key
   end
 
   #
@@ -419,10 +441,12 @@ class Classification::SelectionOptionsHandler
   #
   # Reset memoized items
   def self.reset!
-    @cache_keys_list&.each do |cname|
-      Rails.cache.delete(cname)
+    cache_keys = CacheKeysListLock.synchronize do
+      keys = @cache_keys_list&.keys
+      @cache_keys_list = {}
+      keys
     end
-    @cache_keys_list = []
+    cache_keys&.each { |cname| Rails.cache.delete(cname) }
     @implementation_classes = nil
   end
 

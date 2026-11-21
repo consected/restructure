@@ -31,7 +31,7 @@ RSpec.describe 'Master template fragment reuse across user logins', type: :reque
 
   def bust_fragment_cache!
     server_cache_version = Rails.cache.read('server_cache_version')
-    Rails.cache.clear
+    Application.clear_cache_preserving_generation
     Rails.cache.write('server_cache_version', server_cache_version) if server_cache_version
   end
 

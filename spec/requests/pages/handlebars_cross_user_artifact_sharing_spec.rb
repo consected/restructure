@@ -128,7 +128,7 @@ RSpec.describe 'Cross-user Handlebars compiled artifact sharing and isolation (i
   # Handlebars generation key - and therefore gen-<key>/ - never rotates mid-sequence.
   def bust_page_fragment_cache!
     scv = Rails.cache.read('server_cache_version')
-    Rails.cache.clear
+    Application.clear_cache_preserving_generation
     Rails.cache.write('server_cache_version', scv) if scv
   end
 

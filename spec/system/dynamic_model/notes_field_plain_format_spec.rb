@@ -10,9 +10,8 @@
 # fields, including those with an explicit `format: plain` field option.  Markdown does
 # not convert single `\n` to `<br>`, so multi-line plain text appears on one line.
 #
-# This spec is intentionally RED (failing) until the fix is implemented in
-# app/views/common_templates/_common_parts.html.erb to check for `format: plain`
-# *before* falling through to the app-config markdown check.
+# This spec verifies that plain-format notes preserve newlines and that the
+# AJAX form response executes its inline template-state script.
 
 require 'rails_helper'
 
@@ -132,6 +131,10 @@ describe 'notes field with format: plain displays newlines', js: true, driver: $
       new_button_selector = '.details-item-type-dynamic-model--test-notes-plain-fields .new-button-container a.btn'
       expect(page).to have_css(new_button_selector, wait: 10)
 
+      template_config_name = "#{@notes_dm.item_type_name}_default"
+      template_version = @notes_dm.current_def_version
+      page.execute_script("_fpa.state.template_config[#{template_config_name.to_json}] = null;")
+
       new_button = find(new_button_selector, wait: 10)
       scroll_into_view(new_button)
       new_button.click
@@ -139,6 +142,11 @@ describe 'notes field with format: plain displays newlines', js: true, driver: $
 
       expect(page).to have_css('form.new_dynamic_model_test_notes_plain_field', wait: 10)
       finish_form_formatting
+      template_state_restored = page.evaluate_script(
+        "!!(_fpa.state.template_config[#{template_config_name.to_json}] && " \
+        "_fpa.state.template_config[#{template_config_name.to_json}].v#{template_version})"
+      )
+      expect(template_state_restored).to be(true)
 
       fill_in_field('details', multiline_text)
 
