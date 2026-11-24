@@ -32,7 +32,8 @@ applyTo: '**/*.rb'
 - Write isolated unit tests for models, services, and helpers.
 - Cover end-to-end logic with request/system tests.
 - Use background jobs (ActiveJob) for non-blocking operations like sending emails or calling APIs.
-- Document complex code paths and methods with YARD
+- Add method comments with YARD unless the method is private and trivial
+- Document complex code paths with inline comments
 - Use modern Ruby syntax 
   - safe navigation
   - keyword arguments
