@@ -80,16 +80,38 @@ module Messaging
     end
 
     #
-    # Generate the message text from the templates and data
-    # The instance is saved, to ensure the data and generated content is persisted.
+    # Generate the message text from the templates and data.
+    # When data is blank (e.g. deferred jobs), builds substitution data from `item` and
+    # falls back to `for_item.current_user` or `self.user` so user-aware formatters still
+    # have timezone and format preferences. Any temporary `current_user` applied to `item`
+    # is restored in `ensure` to avoid affecting downstream UAC checks.
+    #
+    # @param [Boolean] ignore_missing whether missing substitution tags should be ignored
+    # @return [Boolean] result of saving the generated content
     def generate(ignore_missing: false)
+      item_instance = nil
+      original_item_current_user = nil
+      original_item_master = nil
+      restore_item_current_user = false
+
       data = self.data
       if data.blank?
-        if item
-          data = Formatter::Substitution.setup_data item, for_item
+        item_instance = item
+        # Prefer the live trigger item's current_user when present; otherwise fall back to notification owner
+        fallback_user = for_item.current_user if for_item.respond_to?(:current_user)
+        fallback_user = user unless fallback_user.is_a?(User)
+
+        if item_instance
+          data = Formatter::Substitution.setup_data(item_instance, for_item)
+          if !data[:current_user_instance].is_a?(User) && fallback_user
+            # Snapshot item/master user state before setting a temporary fallback user for template rendering
+            restore_item_current_user, original_item_current_user, original_item_master =
+              item_current_user_context_for_restore(item_instance)
+            data = add_fallback_current_user(item_instance, data, fallback_user)
+          end
         else
           Rails.logger.warn 'MessageNotification#generate data is blank and item_type / item_id does not return an item'
-          data = {}
+          data = Formatter::Substitution.setup_data({ current_user: fallback_user })
         end
         data[:_subject] = subject
         data[:extra_substitutions] = extra_substitutions_data
@@ -119,6 +141,11 @@ module Messaging
 
       self.generated_content = generated_text
       save!
+    ensure
+      # Always reset temporary item/master user context even if template rendering or save raises
+      if restore_item_current_user
+        restore_item_current_user_context(item_instance, original_item_current_user, original_item_master)
+      end
     end
 
     #
@@ -388,6 +415,71 @@ module Messaging
 
     private
 
+    #
+    # Temporarily attach `fallback_user` to `item_instance` and `data` so both association
+    # tags (resolved via `master.current_user`) and plain-hash formatters receive user context.
+    #
+    # @param [Object] item_instance the notification's target item
+    # @param [Hash] data substitution data built from `item_instance`
+    # @param [User] fallback_user user context to apply for rendering
+    # @return [Hash] updated substitution data with `current_user_instance` populated
+    def add_fallback_current_user(item_instance, data, fallback_user)
+      if item_instance.respond_to?(:current_user=) &&
+         (!item_instance.respond_to?(:current_user) || !item_instance.current_user.is_a?(User))
+        # Assign on item_instance so association tags on item.master also receive current_user
+        item_instance.current_user = fallback_user
+        data = Formatter::Substitution.setup_data(item_instance, for_item)
+      end
+      return data if data[:current_user_instance].is_a?(User)
+
+      # Models without a master (or unassigned master) ignore current_user=, so enrich data directly
+      data[:current_user_instance] = fallback_user
+      Formatter::Substitution.setup_data_for_current_user(data, data[:master], item_instance)
+      data
+    end
+
+    #
+    # Capture whether `item_instance` needs its `current_user` restored after generation
+    # and which object (`master` or `item_instance`) holds that memoized state.
+    #
+    # @param [Object] item_instance the notification's target item
+    # @return [Array(Boolean, User|nil, Master|nil)] `[should_restore, original_user, master]`
+    def item_current_user_context_for_restore(item_instance)
+      return [false, nil, nil] unless item_instance.respond_to?(:current_user=)
+
+      current_user = item_instance.current_user if item_instance.respond_to?(:current_user)
+      # Never overwrite an already-configured User on the item or its master
+      return [false, nil, nil] if current_user.is_a?(User)
+
+      # Master items store @current_user directly rather than through a `master` association
+      master = if item_instance.is_a?(Master)
+                 item_instance
+               elsif item_instance.respond_to?(:master)
+                 item_instance.master
+               end
+      [true, current_user, master]
+    end
+
+    #
+    # Restore `current_user` on `master` or `item_instance` to its pre-generation value.
+    #
+    # @param [Object] item_instance the notification's target item
+    # @param [User, nil] original_current_user the pre-existing user value (typically nil)
+    # @param [Master, nil] master the master holding `@current_user`, if applicable
+    # @return [void]
+    def restore_item_current_user_context(item_instance, original_current_user, master)
+      if master
+        if original_current_user
+          master.current_user = original_current_user
+        else
+          # Master#current_user= rejects nil, so clear the temporary memoized context directly.
+          master.instance_variable_set(:@current_user, nil)
+        end
+      elsif item_instance.respond_to?(:current_user=)
+        item_instance.current_user = original_current_user
+      end
+    end
+
     def trackable_tracker_status_change?
       saved_change_to_status? && [StatusComplete, StatusFailed].include?(status) && create_tracker_entry?
     end
@@ -524,8 +616,12 @@ module Messaging
       return @extra_substitutions_data if @extra_substitutions_data
       return unless extra_substitutions
 
-      @extra_substitutions_data = YAML.safe_load(extra_substitutions, permitted_classes: [Symbol])
-                                      &.with_indifferent_access
+      # Permit persisted date/time classes (never User) and YAML aliases required by ActiveSupport::TimeWithZone
+      @extra_substitutions_data = YAML.safe_load(
+        extra_substitutions,
+        permitted_classes: [Symbol, Date, Time, DateTime, ActiveSupport::TimeWithZone, ActiveSupport::TimeZone],
+        aliases: true
+      )&.with_indifferent_access
     end
 
     #

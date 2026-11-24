@@ -5,7 +5,8 @@
 # calendar invite attachment resolution (#953), NfsStore file attachment resolution (#954),
 # NotificationMailer integration with attachment support, and status-based tracker entries
 # including user-addressed notification exclusions, do-not-email recipient handling (#1559),
-# and master-targeted notifications without resolved recipients (#1479).
+# master-targeted notifications without resolved recipients (#1479), and temporary current-user
+# fallback behavior during template generation.
 
 require 'rails_helper'
 
@@ -349,6 +350,186 @@ RSpec.describe Messaging::MessageNotification, type: :model do
       mn.generate
 
       expect(mn.generated_text).to eq "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some new content in a text template.</p><p>Related to another master_id #{master.id}. This is a name: #{@activity_log.select_who}. Footer has es-data-one</p></div></body></html>"
+    end
+
+    it 'formats persisted date and time extra substitutions using the notification user preferences' do
+      @user.user_preference.update!(timezone: 'London', date_format: 'dd/mm/yyyy',
+                                    date_time_format: 'dd/mm/yyyy hh:mm am/pm', time_format: '24h:mm')
+      date = Date.parse('2024-01-15')
+      time = Time.utc(2024, 1, 15, 12, 34, 56)
+      date_time = DateTime.parse('2024-01-15T12:34:56Z')
+      time_with_zone = ActiveSupport::TimeZone['UTC'].parse('2024-01-15 12:34:56')
+      extra_substitutions = { date:, time:, date_time:, time_with_zone: }
+      content = '<p>{{extra_substitutions.date::date}} | {{extra_substitutions.time::time_show_zone}} | ' \
+                '{{extra_substitutions.date_time::date_time}} | ' \
+                '{{extra_substitutions.time_with_zone::date_time_show_zone}}</p>'
+      notification = described_class.create!(
+        user: @user,
+        recipient_user_ids: [@rec_user],
+        layout_template_name: @layout.name,
+        content_template_text: content,
+        item_type: @activity_log.class.name,
+        item_id: @activity_log.id,
+        master: @activity_log.master,
+        message_type: :email,
+        subject: 'Test Subject',
+        extra_substitutions:
+      )
+      notification = described_class.find(notification.id)
+
+      expect(notification.send(:extra_substitutions_data)['time_with_zone']).to be_a(ActiveSupport::TimeWithZone)
+      notification.generate
+
+      expected = [
+        Formatter::Substitution.substitute('{{value::date}}', data: { value: date, current_user: @user }, tag_subs: nil),
+        Formatter::Substitution.substitute('{{value::time_show_zone}}', data: { value: time, current_user: @user }, tag_subs: nil),
+        Formatter::Substitution.substitute('{{value::date_time}}', data: { value: date_time, current_user: @user }, tag_subs: nil),
+        Formatter::Substitution.substitute('{{value::date_time_show_zone}}',
+                                           data: { value: time_with_zone, current_user: @user }, tag_subs: nil)
+      ].join(' | ')
+
+      expect(notification.generated_text).to include(expected)
+    end
+
+    it 'uses the notification user as formatting context when there is no item' do
+      @user.user_preference.update!(timezone: 'London', date_format: 'dd/mm/yyyy',
+                                    date_time_format: 'dd/mm/yyyy hh:mm am/pm', time_format: '24h:mm')
+      value = DateTime.parse('2024-01-15T12:34:56Z')
+      notification = described_class.create!(
+        user: @user,
+        recipient_user_ids: [@rec_user],
+        layout_template_name: @layout.name,
+        content_template_text: '<p>{{extra_substitutions.value::date_time_show_zone}}</p>',
+        message_type: :email,
+        subject: 'Test Subject',
+        extra_substitutions: { value: }
+      )
+      notification = described_class.find(notification.id)
+
+      notification.generate
+
+      expected = Formatter::Substitution.substitute('{{value::date_time_show_zone}}',
+                                                    data: { value:, current_user: @user }, tag_subs: nil)
+      expect(notification.generated_text).to include(expected)
+    end
+
+    it 'prefers the for_item current user when no item is configured' do
+      for_item_user, = create_user
+      for_item_user.user_preference.update!(timezone: 'Eastern Time (US & Canada)', date_format: 'mm/dd/yyyy',
+                                            date_time_format: 'mm/dd/yyyy hh:mm am/pm', time_format: 'h:mm am/pm')
+      @activity_log.current_user = for_item_user
+      value = DateTime.parse('2024-01-15T12:34:56Z')
+      notification = described_class.create!(
+        user: @user,
+        recipient_user_ids: [@rec_user],
+        layout_template_name: @layout.name,
+        content_template_text: '<p>{{extra_substitutions.value::date_time_show_zone}}</p>',
+        message_type: :email,
+        subject: 'Test Subject',
+        extra_substitutions: { value: }
+      )
+      notification.for_item = @activity_log
+
+      notification.generate
+
+      expected = Formatter::Substitution.substitute('{{value::date_time_show_zone}}',
+                                                    data: { value:, current_user: for_item_user }, tag_subs: nil)
+      expect(notification.generated_text).to include(expected)
+    end
+
+    it 'uses and restores the notification user when generating an item message' do
+      @user.user_preference.update!(timezone: 'London', date_format: 'dd/mm/yyyy',
+                                    date_time_format: 'dd/mm/yyyy hh:mm am/pm', time_format: '24h:mm')
+      value = DateTime.parse('2024-01-15T12:34:56Z')
+      item = @activity_log.class.find(@activity_log.id)
+      expect(item.current_user).to be_nil
+      expect(item.master.current_user).to be_nil
+
+      notification = described_class.create!(
+        user: @user,
+        recipient_user_ids: [@rec_user],
+        layout_template_name: @layout.name,
+        content_template_text: '<p>{{extra_substitutions.value::date_time_show_zone}} | ' \
+                               '{{master.created_at::date_time_show_zone}}</p>',
+        item_type: item.class.name,
+        item_id: item.id,
+        message_type: :email,
+        subject: 'Test Subject',
+        extra_substitutions: { value: }
+      )
+      notification.item = item
+
+      notification.generate
+
+      expected = [
+        Formatter::Substitution.substitute('{{value::date_time_show_zone}}',
+                                           data: { value:, current_user: @user }, tag_subs: nil),
+        Formatter::Substitution.substitute('{{value::date_time_show_zone}}',
+                                           data: { value: item.master.created_at, current_user: @user }, tag_subs: nil)
+      ].join(' | ')
+      expect(notification.generated_text).to include(expected)
+      expect(item.current_user).to be_nil
+      expect(item.master.current_user).to be_nil
+    end
+
+    it 'uses and restores the for_item current user when generating an item message' do
+      for_item_user, = create_user
+      for_item_user.user_preference.update!(timezone: 'Eastern Time (US & Canada)', date_format: 'mm/dd/yyyy',
+                                            date_time_format: 'mm/dd/yyyy hh:mm am/pm', time_format: 'h:mm am/pm')
+      value = DateTime.parse('2024-01-15T12:34:56Z')
+      item = @activity_log.class.find(@activity_log.id)
+      for_item = @activity_log.class.find(@activity_log.id)
+      for_item.current_user = for_item_user
+      expect(item.current_user).to be_nil
+      expect(item.master.current_user).to be_nil
+
+      notification = described_class.create!(
+        user: @user,
+        recipient_user_ids: [@rec_user],
+        layout_template_name: @layout.name,
+        content_template_text: '<p>{{extra_substitutions.value::date_time_show_zone}} | ' \
+                               '{{master.created_at::date_time_show_zone}}</p>',
+        item_type: item.class.name,
+        item_id: item.id,
+        message_type: :email,
+        subject: 'Test Subject',
+        extra_substitutions: { value: }
+      )
+      notification.item = item
+      notification.for_item = for_item
+
+      notification.generate
+
+      expected = [
+        Formatter::Substitution.substitute('{{value::date_time_show_zone}}',
+                                           data: { value:, current_user: for_item_user }, tag_subs: nil),
+        Formatter::Substitution.substitute('{{value::date_time_show_zone}}',
+                                           data: { value: item.master.created_at, current_user: for_item_user },
+                                           tag_subs: nil)
+      ].join(' | ')
+      expect(notification.generated_text).to include(expected)
+      expect(item.current_user).to be_nil
+      expect(item.master.current_user).to be_nil
+    end
+
+    it 'restores an item current user when template generation raises' do
+      item = @activity_log.class.find(@activity_log.id)
+      notification = described_class.create!(
+        user: @user,
+        recipient_user_ids: [@rec_user],
+        layout_template_name: @layout.name,
+        content_template_text: '<p>{{extra_substitutions.payload}}</p>',
+        item_type: item.class.name,
+        item_id: item.id,
+        message_type: :email,
+        subject: 'Test Subject',
+        extra_substitutions: { payload: '<img src="x" onerror="alert(1)">' }
+      )
+      notification.item = item
+
+      expect { notification.generate }.to raise_error(FphsException, /disallowed tag or attribute/)
+      expect(item.current_user).to be_nil
+      expect(item.master.current_user).to be_nil
     end
 
     it 'uses avoids producing HTML for SMS messages' do
