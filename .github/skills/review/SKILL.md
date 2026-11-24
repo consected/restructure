@@ -17,3 +17,5 @@ Review PR for:
 - changes that could cause regressions in other areas of the codebase
 - areas the implementation could be improved for readability, maintainability, or performance
 - adherence to our workspace workflow and GitHub issue requirements.
+- comments are provided to methods and inline where complexity warrants an explanation.
+- comments and documentation agrees with implementation.
