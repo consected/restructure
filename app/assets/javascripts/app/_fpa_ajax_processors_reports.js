@@ -202,20 +202,19 @@ _fpa.postprocessors_reports = {
         }).addClass('hover-link');
       }
 
-      for (var t in table_cell_types) {
+      for (let t in table_cell_types) {
         if (table_cell_types.hasOwnProperty(t)) {
-          var table = table_cell_types[t];
+          const table = table_cell_types[t];
 
           if (block.find('td[data-col-table="' + t + '"]').length > 0) {
-            for (var i in table) {
+            for (let i in table) {
 
               if (table.hasOwnProperty(i)) {
 
-                col_types = table_cell_types[t];
-                var idname = col_types[i];
+                const idname = table[i];
                 _fpa.cache.get_definition(i, function () {
-                  var pe = _fpa.cache.fetch(i);
-                  var cells = block.find('td[data-col-table="' + t + '"][data-col-type="' + idname + '"]');
+                  const pe = _fpa.cache.fetch(i);
+                  const cells = block.find('td[data-col-table="' + t + '"][data-col-type="' + idname + '"]');
                   cells.each(function () {
                     var cell = $(this);
                     var d = cell.html();
