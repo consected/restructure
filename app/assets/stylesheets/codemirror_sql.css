@@ -1,0 +1,6 @@
+/*
+ * CodeMirror styles for pages that use the application layout and show SQL read-only
+ * (for example, view definitions on the reference data tables tab).
+ * Admin pages already load these styles through admin_index.css.
+ *= require codemirror/lib/codemirror
+ */

@@ -1,12 +1,9 @@
-<% @columns.each  do |c| 
+<% table_info.columns.each do |c| 
             column_name = c.name
-            column_comment = @column_comments.find {|cs| cs['schema_name'] == @schema_name && cs['table_name'] == @table_name && cs['column_name'] == column_name }
-            column_comment = column_comment['column_comment'] if column_comment
-          
-            column_fk = @column_fks.find {|cfk| cfk['source_schema'] == @schema_name && cfk['source_table'] == @table_name && cfk['source_column'] == column_name}
-            column_fk = "#{column_fk['target_schema']}.#{column_fk['target_table']} (#{column_fk['target_column']})" if column_fk
+            column_comment = table_info.column_comment(column_name)
+            column_fk = table_info.column_foreign_key(column_name)
           %>
-<li id="table-<%= column_name %>" class="ref-table-col-item">
+<li id="ref-col-<%= table_info.schema_name %>.<%= table_info.table_name %>.<%= column_name %>" class="ref-table-col-item">
   <span><%= column_name %></span> <span class="ref-table-column-name"><%=c.type.to_s%></span>
   <% if column_fk %>
     <span class="column-fk"><i class="glyphicon glyphicon-link"></i><%= column_fk %></span>
