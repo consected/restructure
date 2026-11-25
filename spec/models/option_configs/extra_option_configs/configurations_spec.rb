@@ -170,6 +170,70 @@ RSpec.describe 'ExtraOptionConfigs::Configurations', type: :model do
       end
     end
 
+    describe 'batch_trigger frequency' do
+      ['1 week', '2 weeks', '15 minutes', 'once'].each do |frequency|
+        it "accepts frequency '#{frequency}'" do
+          instance = klass.new(batch_trigger: { frequency:, run_at: 'monday 8:00am' })
+          instance.valid?
+          expect(instance.errors).to be_empty
+        end
+      end
+
+      it 'accepts a batch_trigger without a schedule' do
+        instance = klass.new(batch_trigger: { limit: 5 })
+        instance.valid?
+        expect(instance.errors).to be_empty
+      end
+
+      [nil, '', false].each do |frequency|
+        it "reports an error when run_at is set with frequency #{frequency.inspect}" do
+          instance = klass.new(batch_trigger: { frequency:, run_at: '8:00am' })
+          instance.valid?
+          expect(instance.errors.full_messages.join).to include('batch_trigger run_at requires a frequency')
+        end
+      end
+
+      ['1 fortnight', 'weekly', '1week', 5, '0 weeks', '-1 week'].each do |frequency|
+        it "reports an error for invalid frequency #{frequency.inspect}" do
+          instance = klass.new(batch_trigger: { frequency:, run_at: 'monday 8:00am' })
+          instance.valid?
+          expect(instance.errors.full_messages.join).to include('batch_trigger frequency')
+          expect(instance.errors.full_messages.join).to include(frequency.inspect)
+        end
+      end
+    end
+
+    describe 'batch_trigger run_at' do
+      [
+        ['1 week', 'monday 8:00am'],
+        ['1 day', ['8:00am', '6:00pm']],
+        ['once', '2026-05-01 02:00'],
+        ['once', '2026-05-01T02:00:00'],
+        ['once', '2026-05-01 02:00 -0500']
+      ].each do |frequency, run_at|
+        it "accepts run_at #{run_at.inspect} with frequency '#{frequency}'" do
+          instance = klass.new(batch_trigger: { frequency:, run_at: })
+          instance.valid?
+          expect(instance.errors).to be_empty
+        end
+      end
+
+      [
+        ['once', 'garbage'],
+        ['once', ['2026-05-01 02:00']],
+        ['1 week', 'garbage'],
+        ['1 week', ['8:00am', 'garbage']],
+        ['1 week', 12_345]
+      ].each do |frequency, run_at|
+        it "reports an error for run_at #{run_at.inspect} with frequency '#{frequency}'" do
+          instance = klass.new(batch_trigger: { frequency:, run_at: })
+          instance.valid?
+          expect(instance.errors.full_messages.join).to include('batch_trigger run_at')
+          expect(instance.errors.full_messages.join).to include('is not a valid time')
+        end
+      end
+    end
+
     describe 'string keys' do
       it 'accepts string values' do
         instance = klass.new(secondary_key: 'alt_id', tab_caption: 'My Tab')

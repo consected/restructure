@@ -12,6 +12,8 @@ require 'rails_helper'
 #
 # The fix prevents one-time batch jobs from being recreated on every app configuration re-import,
 # while ensuring they can still be created when the model is explicitly saved by an admin.
+# Issue #1593 specs also verify week-based recurring intervals and that invalid frequency values
+# are reported as config errors rather than silently falling back to delayed_job_recurring's hourly default.
 RSpec.describe 'Import app configuration with batch_trigger frequency once', type: :model do
   include ModelSupport
 
@@ -328,6 +330,122 @@ RSpec.describe 'Import app configuration with batch_trigger frequency once', typ
       expect(captured_run_at.to_time.to_i).to be_within(5).of((before_save + 10.seconds).to_time.to_i),
                                               "Expected run_at to be approximately #{before_save + 10.seconds} " \
                                               "(DateTime.now + 10s), but got #{captured_run_at}"
+    end
+  end
+
+  describe 'weekly batch trigger frequency - issue #1593' do
+    def save_batch_trigger_configuration(dynamic_model, frequency, run_at = 'monday 8:00am')
+      frequency_yaml = frequency.nil? ? '' : "frequency: '#{frequency}'"
+      dynamic_model.options = <<~YAML
+        _configurations:
+          batch_trigger:
+            #{frequency_yaml}
+            run_at: '#{run_at}'
+            label: test weekly batch
+            user: batch_test@example.com
+
+        default:
+          label: Default
+          fields:
+            - test_field
+          batch_trigger:
+            on_record:
+              update_this:
+                one:
+                  with:
+                    test_field: processed
+      YAML
+      dynamic_model.current_admin = @admin
+      dynamic_model.save!
+      dynamic_model.reload
+    end
+
+    it 'creates a delayed job with a weekly interval and Monday 8:00am run time' do
+      dynamic_model = DynamicModel.find(@dm_id)
+      original_options = dynamic_model.options
+
+      begin
+        RecurringBatchTask.unschedule_task dynamic_model
+        save_batch_trigger_configuration(dynamic_model, '1 week')
+
+        job = dynamic_model.task_schedule
+        expect(job).to be_present
+
+        run_interval = job.payload_object.instance_variable_get(:@schedule_options).fetch(:run_interval)
+        expect(run_interval).to eq(value: 1.week.value, parts: 1.week.parts)
+        expect(job.run_at.wday).to eq 1
+        expect(job.run_at.hour).to eq 8
+        expect(job.run_at.min).to eq 0
+      ensure
+        dynamic_model.reload
+        dynamic_model.options = original_options
+        dynamic_model.current_admin = @admin
+        dynamic_model.save!
+      end
+    end
+
+    [nil, '0 weeks', '-1 week'].each do |frequency|
+      it "does not schedule or fail saving for frequency #{frequency.inspect} with run_at" do
+        dynamic_model = DynamicModel.find(@dm_id)
+        original_options = dynamic_model.options
+
+        begin
+          RecurringBatchTask.unschedule_task dynamic_model
+          Timeout.timeout(10) { save_batch_trigger_configuration(dynamic_model, frequency) }
+
+          expect(dynamic_model.task_schedule).to be_nil
+        ensure
+          dynamic_model.reload
+          dynamic_model.options = original_options
+          dynamic_model.current_admin = @admin
+          dynamic_model.save!
+        end
+      end
+    end
+
+    ['once', '1 week'].each do |frequency|
+      it "does not schedule or fail saving an unparseable run_at with frequency '#{frequency}' and reports a config error" do
+        dynamic_model = DynamicModel.find(@dm_id)
+        original_options = dynamic_model.options
+
+        begin
+          RecurringBatchTask.unschedule_task dynamic_model
+          Timeout.timeout(10) { save_batch_trigger_configuration(dynamic_model, frequency, 'garbage') }
+
+          expect(dynamic_model.task_schedule).to be_nil
+          dynamic_model.option_configs(force: true)
+          messages = OptionConfigs::ExtraOptions.all_option_configs_notices(dynamic_model).map { |e| e[:message] }.join
+          expect(messages).to include('run_at "garbage" is not a valid time')
+        ensure
+          dynamic_model.reload
+          dynamic_model.options = original_options
+          dynamic_model.current_admin = @admin
+          dynamic_model.save!
+        end
+      end
+    end
+
+    it 'does not schedule an invalid frequency with the hourly default and reports a config error' do
+      dynamic_model = DynamicModel.find(@dm_id)
+      original_options = dynamic_model.options
+
+      begin
+        RecurringBatchTask.unschedule_task dynamic_model
+        save_batch_trigger_configuration(dynamic_model, '1 hour')
+        expect(dynamic_model.task_schedule).to be_present
+
+        save_batch_trigger_configuration(dynamic_model, '1 fortnight')
+
+        expect(dynamic_model.task_schedule).to be_nil
+        dynamic_model.option_configs(force: true)
+        messages = OptionConfigs::ExtraOptions.all_option_configs_notices(dynamic_model).map { |e| e[:message] }.join
+        expect(messages).to include('batch_trigger frequency "1 fortnight" is invalid')
+      ensure
+        dynamic_model.reload
+        dynamic_model.options = original_options
+        dynamic_model.current_admin = @admin
+        dynamic_model.save!
+      end
     end
   end
 end

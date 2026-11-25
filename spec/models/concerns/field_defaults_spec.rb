@@ -6,10 +6,54 @@
 #   instead of treating it as a ConditionalActions query (issue #943)
 # - Verifies that string values within an 'object' hash are recursively substituted,
 #   including through nested hashes and arrays (issue #956)
+# - Verifies duration parsing supports weekly units (issue #1593)
 
 require 'rails_helper'
 
 RSpec.describe FieldDefaults, type: :model do
+  describe '.duration' do
+    it 'parses singular and plural week units while preserving existing units' do
+      expect(FieldDefaults.duration('1 week')).to eq 1.week
+      expect(FieldDefaults.duration('2 weeks')).to eq 2.weeks
+      expect(FieldDefaults.duration('1 day')).to eq 1.day
+    end
+  end
+
+  describe '.valid_run_at?' do
+    ['monday 8:00am', '6:00pm', '2026-05-01 02:00', '2026-05-01T02:00:00', '2026-05-01 02:00 -0500'].each do |value|
+      it "accepts #{value.inspect}" do
+        expect(FieldDefaults.valid_run_at?(value)).to be true
+      end
+    end
+
+    it 'accepts time objects and lists of times' do
+      expect(FieldDefaults.valid_run_at?(Time.zone.now)).to be true
+      expect(FieldDefaults.valid_run_at?(['8:00am', 'sunday 6:00pm'])).to be true
+    end
+
+    it 'rejects lists when a single value is required' do
+      expect(FieldDefaults.valid_run_at?(['8:00am'], single: true)).to be false
+    end
+
+    ['garbage', '', '99:99', 12_345, nil, { a: 1 }, ['8:00am', 'garbage'], []].each do |value|
+      it "rejects #{value.inspect}" do
+        expect(FieldDefaults.valid_run_at?(value)).to be false
+      end
+    end
+  end
+
+  describe '.recurring_interval' do
+    it 'returns positive durations' do
+      expect(FieldDefaults.recurring_interval('1 week')).to eq 1.week
+    end
+
+    ['0 weeks', '-1 week', '1 fortnight', '', nil, 5, false].each do |value|
+      it "returns nil for #{value.inspect}" do
+        expect(FieldDefaults.recurring_interval(value)).to be_nil
+      end
+    end
+  end
+
   it 'gets a default value' do
     val = 'today()'
     res = FieldDefaults.calculate_default(nil, val)

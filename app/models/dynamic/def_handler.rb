@@ -610,15 +610,28 @@ module Dynamic
         # or will be manually triggered as needed. Re-importing should not re-trigger one-time jobs.
         return if Admin::AppTypeImport.import_in_progress?
 
-        scheduled_run_at = run_at.present? ? Time.zone.parse(run_at.to_s) : DateTime.now + 10.seconds
+        # An invalid run_at is reported to the admin as a configuration error
+        if run_at.present? && !FieldDefaults.valid_run_at?(run_at, single: true)
+          RecurringBatchTask.unschedule_task self
+          return
+        end
+
+        scheduled_run_at = run_at.present? ? FieldDefaults.parse_run_at(run_at) : DateTime.now + 10.seconds
         RecurringBatchTask.schedule_task self,
                                          { dynamic_def: to_global_id.to_s },
                                          run_every: 10_000.years,
                                          run_at: scheduled_run_at
       else
+        run_every = FieldDefaults.recurring_interval(frequency)
+        unless run_every && (run_at.blank? || FieldDefaults.valid_run_at?(run_at))
+          # Reported to the admin as a configuration error. Never fall back to the hourly default.
+          RecurringBatchTask.unschedule_task self
+          return
+        end
+
         RecurringBatchTask.schedule_task self,
                                          { dynamic_def: to_global_id.to_s },
-                                         run_every: FieldDefaults.duration(frequency),
+                                         run_every: run_every,
                                          run_at: run_at
 
       end
