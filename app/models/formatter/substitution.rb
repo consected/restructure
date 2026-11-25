@@ -971,6 +971,7 @@ module Formatter
     # Common constants tags
     # @param [Hash] data - hash to set up with common constants
     def self.setup_common_constants_tags(data)
+      data[:now] = ::Time.current
       data[:base_url] = Settings::BaseUrl
       data[:admin_email] = Settings::AdminEmail
       data[:environment_name] = Settings::EnvironmentName

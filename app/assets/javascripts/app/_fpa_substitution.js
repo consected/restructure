@@ -30,6 +30,8 @@ _fpa.substitution = class {
       if (!new_data.current_user) new_data.current_user = _fpa.state.current_user;
       if (!new_data.current_user_id) new_data.current_user_id = _fpa.state.current_user.id;
       if (!new_data.current_user_email) new_data.current_user_email = _fpa.state.current_user.email;
+      // Current date/time as a UTC ISO string, matching server-side {{now}} and usable with date formatters
+      if (!new_data.now) new_data.now = _fpa.utils.DateTime.now().toUTC().toISO();
       if (!new_data.current_user_roles) {
         new_data.current_user_roles = {}
         if (_fpa.state.current_user_roles && _fpa.state.current_user_roles.forEach) {

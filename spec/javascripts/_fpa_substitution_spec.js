@@ -45,6 +45,27 @@ describe('substitutions', function () {
 
   });
 
+  it("substitutes {{now}} with the current date and time and standard formatters", function () {
+    // Fixed clock avoids flakiness around midnight
+    const original_now = luxon.Settings.now;
+    luxon.Settings.now = () => Date.UTC(2025, 6, 5, 2, 6, 7);
+    try {
+      const res = _fpa.substitution.substitute('{{now::date}}|{{now::date_time}}|{{now}}', { master_id: 1 });
+      const parts = res.split('|');
+
+      expect(parts[0]).toEqual('07/05/2025');
+      expect(parts[1]).toEqual('07/05/2025 2:06 am');
+      expect(parts[2]).not.toEqual('(?)');
+    } finally {
+      luxon.Settings.now = original_now;
+    }
+  });
+
+  it("does not override a supplied now attribute", function () {
+    const res = _fpa.substitution.substitute('{{now::date}}', { now: '1989-12-10T12:00:00Z' });
+    expect(res).toEqual('12/10/1989');
+  });
+
   it("parses a YAML encoded string with yaml_parse for hash and array access", function () {
     const text = '<p>YAML hash {{yaml.yaml_parse.ykey3.1}}. YAML top-level array {{yaml_array.yaml_parse.0}}</p>'
     const use_data = {
