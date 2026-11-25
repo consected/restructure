@@ -139,7 +139,7 @@ RSpec.describe 'OptionConfigs::TriggerTypes definitions', type: :model do
         type role users emails phones phone_records list_type default_country_code
         from_user_email ignore_no_recipients no_tracker_entry layout_template content_template
         content_template_text subject calendar_invite attachments extra_substitutions
-        importance when on_complete on_failure if app_type user
+        importance when on_complete on_failure if app_type user require_email_sent
       ]
       expect(type_class.allowed_keys).to match_array(expected)
     end
