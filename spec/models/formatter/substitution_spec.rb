@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# These specs verify substitutions resolve record data, built-ins and formatted values.
 require 'rails_helper'
 
 RSpec.describe Formatter::Substitution, type: :model do
@@ -315,6 +316,64 @@ RSpec.describe Formatter::Substitution, type: :model do
     )
 
     expect(actual).to eq(expected)
+  end
+
+  it 'substitutes the current date and time with standard formatters' do
+    now = Time.zone.parse('2025-03-04 15:06:07')
+    allow(Time).to receive(:current).and_return(now)
+
+    expect(Formatter::Substitution.substitute('{{now}}', data: {}, tag_subs: nil))
+      .to eq Formatter::TimeWithZone.format(now)
+    expect(Formatter::Substitution.substitute('{{now::date}}', data: {}, tag_subs: nil))
+      .to eq Formatter::Date.format(now)
+    expect(Formatter::Substitution.substitute('{{now::date_time}}', data: {}, tag_subs: nil))
+      .to eq Formatter::DateTime.format(now)
+  end
+
+  it 'formats {{now}} substitutions using the current user preferences and context resolution' do
+    now = Time.utc(2025, 7, 5, 2, 6, 7).in_time_zone
+    allow(Time).to receive(:current).and_return(now)
+
+    @user.user_preference.update!(timezone: 'Eastern Time (US & Canada)', date_format: 'mm/dd/yyyy',
+                                  date_time_format: 'mm/dd/yyyy hh:mm am/pm', time_format: 'hh:mm am/pm')
+
+    expect(Formatter::Substitution.substitute_plain('{{{now}}}', data: { current_user: @user })).to eq now
+    expect(Formatter::Substitution.substitute('{{now}}', data: { current_user: @user }, tag_subs: nil))
+      .to eq '07/04/2025 10:06 pm'
+    expect(Formatter::Substitution.substitute('{{now::date}}', data: { current_user: @user }, tag_subs: nil))
+      .to eq '07/05/2025'
+    expect(Formatter::Substitution.substitute('{{now::date_time}}', data: { current_user: @user }, tag_subs: nil))
+      .to eq '07/05/2025 2:06 am'
+    expect(Formatter::Substitution.substitute('{{now::date_time_show_zone}}', data: { current_user: @user }, tag_subs: nil))
+      .to eq '07/04/2025 10:06 pm Eastern Time (US & Canada)'
+    expect(Formatter::Substitution.substitute('{{now::date_time}}', data: { current_user_id: @user.id }, tag_subs: nil))
+      .to eq '07/05/2025 2:06 am'
+    expect(Formatter::Substitution.substitute('{{now::date_time_show_zone}}', data: { current_user_id: @user.id }, tag_subs: nil))
+      .to eq '07/04/2025 10:06 pm Eastern Time (US & Canada)'
+
+    @master.current_user = @user
+    expect(Formatter::Substitution.substitute('{{now::date_time}}', data: @master, tag_subs: nil))
+      .to eq '07/05/2025 2:06 am'
+    expect(Formatter::Substitution.substitute('{{now::date_time_show_zone}}', data: @master, tag_subs: nil))
+      .to eq '07/04/2025 10:06 pm Eastern Time (US & Canada)'
+
+    london_user, = create_user
+    london_user.user_preference.update!(timezone: 'London', date_format: 'dd/mm/yyyy',
+                                        date_time_format: 'dd/mm/yyyy 24h:mm', time_format: '24h:mm')
+
+    expect(Formatter::Substitution.substitute('{{now}}', data: { current_user: london_user }, tag_subs: nil))
+      .to eq '05/07/2025 02:06'
+    expect(Formatter::Substitution.substitute('{{now::date_time}}', data: { current_user: london_user }, tag_subs: nil))
+      .to eq '05/07/2025 02:06'
+    expect(Formatter::Substitution.substitute('{{now::date_time_show_zone}}', data: { current_user: london_user }, tag_subs: nil))
+      .to eq '05/07/2025 03:06 London'
+    expect(
+      Formatter::Substitution.substitute(
+        '{{extra_substitutions.now::date_time}} | {{extra_substitutions.now::date_time_show_zone}}',
+        data: { current_user: @user, extra_substitutions: { current_user_id: london_user.id } },
+        tag_subs: nil
+      )
+    ).to eq '05/07/2025 02:06 | 05/07/2025 03:06 London'
   end
 
   it 'substitutes current user role names' do

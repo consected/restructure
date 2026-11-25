@@ -184,6 +184,10 @@ Note the primary name is singular, so don't use:
 
 In addition to the attributes within the current record, the following are available in most circumstances:
 
+- Current date and time: `\{\{now\}\}`
+  - Use `\{\{now::date\}\}` to display the current date or
+    `\{\{now::date_time\}\}` to display the current date and time using the user's formatting preferences.
+
 - User the item was created by:
   - created_by_user
   - created_by_user_email

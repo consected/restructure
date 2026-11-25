@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Specs for Formatter::TagFormatter operations, including string, array, JSON/YAML, and user-preference date/time formatting.
 require 'rails_helper'
 
 RSpec.describe Formatter::TagFormatter, type: :model do
@@ -379,6 +380,29 @@ RSpec.describe Formatter::TagFormatter, type: :model do
       [:date_time_show_zone, summer_datetime, '07/15/2023 2:30 pm Eastern Time (US & Canada)'],
       [:date_time_show_zone, winter_datetime, '15/01/2023 6:30 pm London', @ldn_user],
       [:date_time_show_zone, summer_datetime, '15/07/2023 7:30 pm London', @ldn_user]
+    ]
+
+    run tests
+  end
+
+  it 'formats TimeWithZone values like Time.current using user preferences' do
+    now = Time.utc(2025, 7, 5, 2, 6, 7).in_time_zone
+
+    tests = [
+      [:date, now, '07/05/2025'],
+      [:date, now, '05/07/2025', @ldn_user],
+      [:date_time, now, '07/05/2025 2:06 am'],
+      [:date_time, now, '05/07/2025 2:06 am', @ldn_user],
+      [:date_time, now, '05/07/2025 02:06', @ldn_user24],
+      [:date_time_with_zone, now, '07/05/2025 2:06 am'],
+      [:date_time_with_zone, now, '05/07/2025 02:06', @ldn_user24],
+      [:date_time_show_zone, now, '07/04/2025 10:06 pm Eastern Time (US & Canada)'],
+      [:date_time_show_zone, now, '05/07/2025 3:06 am London', @ldn_user],
+      [:date_time_show_zone, now, '05/07/2025 03:06 London', @ldn_user24],
+      [:time, now, '10:06 pm'],
+      [:time, now, '02:06', @ldn_user24],
+      [:time_show_zone, now, '10:06 pm Eastern Time (US & Canada)'],
+      [:time_show_zone, now, '03:06 London', @ldn_user24]
     ]
 
     run tests
