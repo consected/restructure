@@ -38,11 +38,14 @@ module CalcActions
 
     # Evaluate if this definition represents a non query condition, to be evaluated without
     # directly joining on the master table
-    # @param [Hash | Object] definition - the condition definition
+    # @param [Symbol, String] field_name condition field name
+    # @param [Hash, Object] definition the condition definition
+    # @param [Symbol, String, nil] raw_table original condition key before namespace stripping
     # @return [true | false]
-    def non_query_condition?(field_name, definition)
-      # Simple table keys handled by non query conditions
-      non_query_condition = table.in?(NonQueryTableNames) || selection_type?(table)
+    def non_query_condition?(field_name, definition, raw_table: nil)
+      # Simple table keys handled by non query conditions (check the unstripped key for selection types
+      # so namespaced resources like dynamic_model__all_* are not misclassified)
+      non_query_condition = table.in?(NonQueryTableNames) || selection_type?(raw_table || table)
 
       # Requesting a return constant in any circumstance requires a non query condition
       non_query_condition = true if field_name == :return_constant
@@ -58,8 +61,13 @@ module CalcActions
 
     #
     # Set a non-query condition for this table and field
-    def add(table_name, field_name, val)
-      return unless non_query_condition?(field_name, val)
+    # @param [Symbol, String] table_name resolved database table name
+    # @param [Symbol, String] field_name condition field name
+    # @param [Object] val condition value or hash
+    # @param [Symbol, String, nil] raw_table original condition key before namespace stripping
+    # @return [true, nil] true when added as a non-query condition, nil otherwise
+    def add(table_name, field_name, val, raw_table: nil)
+      return unless non_query_condition?(field_name, val, raw_table:)
 
       # We have decided this is a non query condition, and will not be joined on the master
       # Add this so they can be evaluated at runtime.

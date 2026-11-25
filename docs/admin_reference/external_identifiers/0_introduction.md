@@ -12,6 +12,8 @@ Administration is provided in [External Identifiers](/admin/external_identifiers
 
 !defs(external_identifier_field_defs.yaml)
 
+Because an external identifier's `name` is also its database table and resource name, neither `name` nor its fields (`external_id_attribute` and `extra_fields`) may start with `all`, `any`, `not_all` or `not_any` (including names without an underscore, such as `allergies` or `anyone`). These reserved condition-selection prefixes are reported as configuration notices without preventing saving. Names containing these strings elsewhere, such as `company_records`, are unaffected. See [Conditions](../general/conditions.md) for details.
+
 ## Contents
 
 - [Detailed Options](detailed_options.md)

@@ -61,16 +61,23 @@ class ActivityLog < ActiveRecord::Base
     :extra_log_types
   end
 
+  #
+  # Return non-blocking configuration notices for activity log fields starting with
+  # reserved condition selection prefixes and `no_sync_fields` validation issues.
+  # @param [Array<Symbol>] levels notice severity levels requested (for example `[:errors]`)
+  # @return [Array<Hash>] configuration notices
   def additional_configuration_notices(levels:)
-    return [] unless levels.include?(:errors)
-    return [] unless configurations&.dig(:no_sync_fields).present?
+    notices = super
+    return notices unless levels.include?(:errors) && configurations&.dig(:no_sync_fields).present?
 
-    implementation_class.no_sync_fields_configuration_notices
-  rescue StandardError => e
-    [Dynamic::ActivityLogSyncHandler.no_sync_fields_configuration_notice(
-      definition: self,
-      message: "could not be validated: #{e.message}"
-    )]
+    notices + begin
+      implementation_class.no_sync_fields_configuration_notices
+    rescue StandardError => e
+      [Dynamic::ActivityLogSyncHandler.no_sync_fields_configuration_notice(
+        definition: self,
+        message: "could not be validated: #{e.message}"
+      )]
+    end
   end
 
   def human_name

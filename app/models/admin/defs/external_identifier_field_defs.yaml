@@ -1,5 +1,5 @@
 Name: |
-  table name
+  table name - must not start with prefixes `all`, `any`, `not_all` or `not_any`
 
 Label: |
   name presented to end users

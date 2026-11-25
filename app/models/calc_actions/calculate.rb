@@ -850,7 +850,7 @@ module CalcActions
                        ModelReference.record_type_to_table_name(c_table).to_sym
                      end
 
-        if selection_type?(table_name)
+        if selection_type?(c_table)
           # Nested conditions are ignored, since they are
           # handled directly in the condition processing logic
         elsif c_table == :invalid_error_message
@@ -879,7 +879,7 @@ module CalcActions
 
             # non query conditions are those aren't formulated with a series of
             # inner joins on the master. They are handled as individual queries.
-            next if @non_query_conditions.add(table_name, field_name, val)
+            next if @non_query_conditions.add(table_name, field_name, val, raw_table: join_table_name)
 
             # We have finally decided that this is a regular query condition
             # Handle setting up the condition values
