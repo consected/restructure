@@ -93,7 +93,8 @@ RSpec.describe 'Condition linter integrations', type: :model do
     @user0, = create_user
     create_admin
     create_user
-    @definition = generate_test_dynamic_model
+    # Own model, since the shared test_created_by_recs is readonly in a full suite run
+    @definition = generate_test_dynamic_model(table_name: 'test_cond_linter_recs')
   end
 
   def condition_warnings(notices)
