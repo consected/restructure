@@ -20,6 +20,15 @@ RSpec.describe Admin::AppTypeImport, type: :model do
   end
 
   after :all do
+    # Imports roll back with the example transactions, but the generated classes stay registered
+    # pointing at definition records that no longer exist
+    Resources::Models.all.values.dup.each do |r|
+      model = r[:model]
+      next unless model.respond_to?(:definition_id) && model.definition_id
+
+      definition_class = model.name.start_with?('ActivityLog::') ? ActivityLog : DynamicModel
+      Resources::Models.remove(resource_name: r[:resource_name]) unless definition_class.exists?(model.definition_id)
+    end
     SetupHelper.cleanup_migrations(*@generated_schema_names)
     failed_migration_files = Dir.glob(Rails.root.join(Admin::MigrationConnection.db_migration_failed_dirname, '*.rb'))
     FileUtils.rm_f(failed_migration_files - @failed_migration_files_before)

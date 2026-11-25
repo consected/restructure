@@ -35,29 +35,35 @@ RSpec.describe 'Config library versioning with dynamic definitions', type: :mode
     change_setting('AllowDynamicMigrations', false)
   end
 
+  # The rolled-back definitions (and their deleted libraries) must not stay registered in the
+  # process, or later specs that build template tokens for every active definition raise.
+  # This is registered before before_all so that it runs after before_all's rollback.
+  after :all do
+    [DynamicModel, ActivityLog, ExternalIdentifier].each do |definition_class|
+      definition_class.reset_active_model_configurations!
+      # Keep definitions that still exist, since classes look up their own definition by id.
+      # For rolled-back definitions remove the generated class too, otherwise a later import of the
+      # same definition would reuse a class whose definition can no longer be found
+      # Definitions that remain may hold in-memory option changes that were rolled back in the database
+      definition_class.definition_cache.delete_if do |id, definition|
+        if definition_class.exists?(id)
+          definition.reload
+          definition.send(:reset_all_versions)
+          next false
+        end
+
+        definition.remove_implementation_class
+        true
+      end
+    end
+  end
+
   before_all do
     @user0, = create_user
     create_admin
     create_user
     setup_access :trackers
     setup_access :tracker_histories
-  end
-
-  # The rolled-back definitions (and their deleted libraries) must not stay registered in the
-  # process, or later specs that build template tokens for every active definition raise
-  after do
-    [DynamicModel, ActivityLog, ExternalIdentifier].each do |definition_class|
-      definition_class.reset_active_model_configurations!
-      # Keep definitions that still exist, since classes look up their own definition by id.
-      # For rolled-back definitions remove the generated class too, otherwise a later import of the
-      # same definition would reuse a class whose definition can no longer be found
-      definition_class.definition_cache.delete_if do |id, definition|
-        next false if definition_class.exists?(id)
-
-        definition.remove_implementation_class
-        true
-      end
-    end
   end
 
   def create_test_config_library(label_value:)

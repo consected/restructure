@@ -4930,6 +4930,10 @@ RSpec.describe 'Calculate conditional actions', type: :model do
   describe 'field comparisons with the latest associated record' do
     generate_test_dynamic_model_before_all
 
+    before_all do
+      setup_access :player_infos
+    end
+
     def field_comparison_condition(selection_type: :all)
       {
         selection_type => {
