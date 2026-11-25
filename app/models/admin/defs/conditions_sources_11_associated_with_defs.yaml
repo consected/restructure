@@ -1,0 +1,21 @@
+# Pattern 11: Comparing a field with a record from a master association
+# @runnable: false
+
+# associated_with explicitly names one master association. A scalar field name compares against
+# the field on the latest related record (highest id).
+all:
+  player_infos:
+    birth_date:
+      associated_with:
+        dynamic_model__press_phone_screen_intro_details_recs: birth_date
+
+# A filtered comparison uses exactly one return_value or return_value_list directive. Remaining
+# keys are equality filters; arrays are treated as IN filters.
+not_any:
+  player_infos:
+    birth_date:
+      associated_with:
+        dynamic_model__press_phone_screen_intro_details_recs:
+          rank: 10
+          source: form
+          birth_date: return_value

@@ -28,8 +28,15 @@ class Report < ActiveRecord::Base
   scope :counts, -> { where report_type: 'count' }
   scope :regular, -> { where report_type: 'regular_report' }
   scope :searchable, -> { where(searchable: true).order(position: :asc) }
+  scope :ordered_for_display, -> { reorder(Arel.sql('position ASC NULLS LAST, id ASC')) }
 
-  ReportTypes = %i[count regular_report search].freeze
+  ReportTypes = [
+    ['report', 'report'],
+    ['count', 'count'],
+    ['(deprecated) regular report', 'regular_report'],
+    ['(deprecated) report and list records', 'search']
+  ].map(&:freeze).freeze
+  ReportTypeValues = ReportTypes.map(&:last).freeze
 
   attr_accessor :current_user
 
@@ -243,8 +250,35 @@ class Report < ActiveRecord::Base
     :report
   end
 
+  def report_type_report?
+    report_type == 'report'
+  end
+
+  def report_type_count?
+    report_type == 'count'
+  end
+
+  def report_type_regular_report?
+    report_type == 'regular_report'
+  end
+
+  def report_type_search?
+    report_type == 'search'
+  end
+
+  def report_type_label
+    self.class::ReportTypes.find { |_label, value| value == report_type }&.first || report_type.to_s.humanize
+  end
+
+  def report_type_glyph
+    return 'glyphicon-record' if report_type_count?
+    return 'glyphicon-list-alt' if report_type_regular_report? || report_type_report?
+
+    'glyphicon-search'
+  end
+
   def returns_master_results_list
-    searchable || report_type == 'search'
+    searchable || report_type_search?
   end
 
   private

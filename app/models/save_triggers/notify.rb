@@ -113,6 +113,9 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
     @on_complete = config[:on_complete] || @on_complete_triggers
     @from_user_email = config[:from_user_email]
     @ignore_no_recipients = config[:ignore_no_recipients]
+    # Default false: "do not email" users are kept as recipients so the notification is still recorded.
+    # Set true (literal, {{{template}}} or conditional) to require that an email is really sent.
+    @require_email_sent = !!calc_field_or_return(config[:require_email_sent])
     @no_tracker_entry = !!calc_field_or_return(config[:no_tracker_entry])
     # app_type/user accept a literal id/name, a {{substitution}}, or a conditional
     # Hash reference (e.g. {this: {field: return_value}}) - resolved here via
@@ -183,10 +186,14 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
 
     @receiving_user_ids.uniq!
 
-    # Clean up user list to remove users that are set to no-send emails (if an email is being sent)
-    # or are template users or have expired accounts
+    # Template users and expired accounts are never recipients. Preserve opted-out users by
+    # default so their notification can be recorded; NotificationMailer is what stops the email being sent.
+    # With require_email_sent they are filtered here as before, so an all-opted-out list becomes a
+    # 'No recipients' error rather than a recorded notification that sends nothing.
     rusers = User.active.where(id: @receiving_user_ids)
-    rusers = rusers.reject { |u| u.a_template_or_batch_user? || u.account_expired? || (email? && u.do_not_email) }
+    rusers = rusers.reject do |u|
+      u.a_template_or_batch_user? || u.account_expired? || (email? && @require_email_sent && u.do_not_email)
+    end
     @receiving_user_ids = rusers.map(&:id)
   end
 
@@ -450,7 +457,8 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
                                              on_complete_config: @on_complete,
                                              alt_batch_user: @alt_batch_user,
                                              ignore_no_recipients: @ignore_no_recipients,
-                                             no_tracker_entry: @no_tracker_entry)
+                                             no_tracker_entry: @no_tracker_entry,
+                                             require_email_sent: @require_email_sent)
   end
 
   def calc_field_or_return(cond)

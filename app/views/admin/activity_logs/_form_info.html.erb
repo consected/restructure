@@ -8,6 +8,7 @@
     <li role="presentation"><a href="#user-access-controls" aria-controls="user-access-controls" role="tab" data-toggle="tab">User Access Controls</a></li>
     <li role="presentation"><a href="#def-versions" aria-controls="def-versions" role="tab" data-toggle="tab">Versions</a></li>
     <li role="presentation"><a href="#api-definitions" aria-controls="api-definitions" role="tab" data-toggle="tab">API</a></li>
+    <li role="presentation"><a href="#dm-table-view" aria-controls="dm-table-view" role="tab" data-toggle="tab">Table / View</a></li>
   </ul>
 
   <!-- Tab panes -->
@@ -41,6 +42,11 @@
 
     <div role="tabpanel" class="tab-pane" id="api-definitions">
       <%= render partial: 'admin/common/api_panel', locals: { object_instance: object_instance, resource_type: :activity_log } %>
+    </div>
+
+    <div role="tabpanel" class="tab-pane" id="dm-table-view">
+      <h4>Table / View</h4>
+      <%= render partial: 'admin/reference_data/table_view_panel', locals: { object_instance: object_instance } %>
     </div>
 
   </div>

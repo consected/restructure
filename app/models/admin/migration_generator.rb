@@ -117,6 +117,9 @@ class Admin::MigrationGenerator
         select table_schema "schema_name", table_name from information_schema.views
         where table_schema IN (#{quoted_schemas})
         and table_catalog = '#{current_database}'
+        UNION
+        select schemaname "schema_name", matviewname "table_name" from pg_matviews
+        where schemaname IN (#{quoted_schemas})
         order by "schema_name", table_name
       END_SQL
   end
@@ -156,9 +159,67 @@ class Admin::MigrationGenerator
   end
 
   #
+  # Get the views (as opposed to tables) with the schema they belong to, in the schemas visible to the app
+  # @return [Array(Hash {schema_name, table_name})]
+  def self.views
+    @views ||=
+      connection.execute <<~END_SQL
+        select table_schema "schema_name", table_name from information_schema.views
+        where table_schema IN (#{quoted_schemas})
+        and table_catalog = '#{current_database}'
+        order by "schema_name", table_name
+      END_SQL
+  end
+
+  #
+  # Get the materialized views with the schema they belong to, in the schemas visible to the app.
+  # Materialized views are not reported by information_schema, so they are read from pg_matviews.
+  # @return [Array(Hash {schema_name, table_name})]
+  def self.materialized_views
+    @materialized_views ||=
+      connection.execute <<~END_SQL
+        select schemaname "schema_name", matviewname "table_name" from pg_matviews
+        where schemaname IN (#{quoted_schemas})
+        order by "schema_name", "table_name"
+      END_SQL
+  end
+
+  #
+  # Is the named table or view a (non-materialized) view in the schema, based on cached view names
+  # @param [String] table_name
+  # @param [String] schema_name
+  # @return [true | false]
+  def self.view_in_schema?(table_name, schema_name)
+    view_keys.include?([schema_name, table_name])
+  end
+
+  #
+  # Is the named table or view a materialized view in the schema, based on cached names
+  # @param [String] table_name
+  # @param [String] schema_name
+  # @return [true | false]
+  def self.materialized_view_in_schema?(table_name, schema_name)
+    materialized_view_keys.include?([schema_name, table_name])
+  end
+
+  def self.view_keys
+    @view_keys ||= views.to_set { |v| [v['schema_name'], v['table_name']] }
+  end
+  private_class_method :view_keys
+
+  def self.materialized_view_keys
+    @materialized_view_keys ||= materialized_views.to_set { |v| [v['schema_name'], v['table_name']] }
+  end
+  private_class_method :materialized_view_keys
+
+  #
   # Reset the memoized tables and views value
   def self.tables_and_views_reset!
     @tables_and_views = nil
+    @views = nil
+    @materialized_views = nil
+    @view_keys = nil
+    @materialized_view_keys = nil
   end
 
   #
@@ -183,21 +244,20 @@ class Admin::MigrationGenerator
     Rails.cache.fetch("db_column_comments-#{Application.version}") do
       res = connection.execute <<~END_SQL
         SELECT
-            cols.table_schema "schema_name",
-            cols.table_name,
-            cols.column_name,
-            pg_catalog.col_description(c.oid, cols.ordinal_position::int) AS column_comment
+            n.nspname "schema_name",
+            c.relname "table_name",
+            a.attname "column_name",
+            pg_catalog.col_description(c.oid, a.attnum::int) AS column_comment
         FROM
-            information_schema.columns cols
-        INNER JOIN pg_catalog.pg_class c
-        ON
-          c.oid = ('"' || cols.table_name || '"')::regclass::oid
-          AND c.relname = cols.table_name
-
+            pg_catalog.pg_attribute a
+        INNER JOIN pg_catalog.pg_class c ON c.oid = a.attrelid
+        INNER JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
         WHERE
-            cols.table_catalog = '#{current_database}' AND
-            cols.table_schema IN (#{quoted_schemas}) AND
-            pg_catalog.col_description(c.oid, cols.ordinal_position::int) IS NOT NULL
+            c.relkind IN ('r', 'p', 'v', 'm', 'f') AND
+            a.attnum > 0 AND
+            NOT a.attisdropped AND
+            n.nspname IN (#{quoted_schemas}) AND
+            pg_catalog.col_description(c.oid, a.attnum::int) IS NOT NULL
         ;
       END_SQL
 
@@ -494,12 +554,12 @@ class Admin::MigrationGenerator
   # @param [String] view_name
   # @return [String | nil]
   def self.view_definition(schema, view_name)
-    return unless view_exists?(view_name)
-
+    # pg_get_viewdef works for both views and materialized views
     sql = <<~SQL
-      select definition
-      from pg_views
-      where viewname = $1 and schemaname = $2;
+      select pg_get_viewdef(c.oid) as definition
+      from pg_class c
+      join pg_namespace n on n.oid = c.relnamespace
+      where c.relname = $1 and n.nspname = $2 and c.relkind in ('v', 'm');
     SQL
 
     type  = ActiveModel::Type::String.new

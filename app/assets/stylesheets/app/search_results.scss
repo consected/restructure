@@ -297,6 +297,92 @@ a.glyphicon.edit-entity.edit-tracker {
   box-shadow: 0 7px 5px -5px silver;
 }
 
+.search-selector {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  padding-bottom: 8px;
+
+  &__header,
+  &__footer {
+    flex: 0 0 100%;
+  }
+
+  &__header {
+    order: -1;
+  }
+
+  &__footer {
+    order: 1;
+  }
+
+  &__header p,
+  &__footer p {
+    margin-bottom: 0.5em;
+  }
+
+  &__reports {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  &__tabs {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  &__dropdown {
+    display: none;
+    align-items: center;
+    gap: 6px;
+  }
+
+  &__label {
+    margin: 0;
+  }
+
+  &__dropdown .chosen-container {
+    min-width: 300px;
+  }
+
+  .search-selector__toggle {
+    box-shadow: none;
+    line-height: 1.5;
+    background: $switch_bg_off;
+    color: white;
+    text-shadow: none;
+    border-radius: 30px;
+    padding: 3px 7px;
+    border: 1px solid transparent;
+
+    &:hover,
+    &:focus,
+    &:active {
+      background: $switch_bg_on;
+      color: white;
+      border-color: rgb(199, 181, 142);
+      outline: none;
+    }
+  }
+
+  &--tabs &__dropdown {
+    display: none;
+  }
+
+  &--dropdown &__tabs {
+    display: none;
+  }
+
+  &--dropdown &__dropdown {
+    display: flex;
+  }
+}
+
 .details-tabs {
   background-color: $master_header_bg;
   box-shadow: 0 7px 5px -5px silver;

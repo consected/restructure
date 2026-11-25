@@ -216,11 +216,89 @@ textarea.admin-clean-sql {
 
 .ref-table-item {
   list-style: none;
-  a {
+  overflow-wrap: anywhere;
+
+  a.table-name-collapser {
     font-weight: bold;
     font-family: monospace;
     font-size: 94%;
     text-decoration: none;
+    word-break: break-all;
+  }
+
+  .ref-table-object-type {
+    margin: 0 0.4em 0 0;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+  &__actions {
+    white-space: nowrap;
+  }
+
+  &__icon-link {
+    margin-left: 0.4em;
+    font-size: 90%;
+    color: rgb(119, 119, 119);
+    text-decoration: none;
+
+    &:hover,
+    &:focus {
+      color: rgb(51, 122, 183);
+    }
+  }
+}
+
+.ref-tables {
+  &__no-match[hidden] {
+    display: none;
+  }
+
+  &__no-match,
+  .table-list__error,
+  .ref-tblock__error {
+    margin: 0.5em 0;
+  }
+
+  &__suggestion {
+    padding: 2px 4px;
+    overflow-wrap: anywhere;
+  }
+
+  &__suggestion-name {
+    font-family: monospace;
+    font-size: 94%;
+  }
+
+  &__suggestion-more {
+    margin: 4px 0 0;
+    font-size: 90%;
+  }
+}
+
+.ref-view-definition {
+  list-style: none;
+  margin: 0.5em 0;
+
+  > a:focus {
+    outline: 2px solid rgb(51, 122, 183);
+    outline-offset: 2px;
+  }
+
+  &__sql {
+    width: 100%;
+    height: 8em;
+  }
+
+  .CodeMirror {
+    width: 100%;
+    height: auto;
+    border: 1px solid rgb(204, 204, 204);
+    font-size: 94%;
+  }
+
+  .CodeMirror-scroll {
+    max-height: 400px;
   }
 }
 

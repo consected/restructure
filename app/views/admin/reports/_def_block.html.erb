@@ -12,14 +12,16 @@
     <%=link_to 'Text', report_path(@report.alt_resource_name, format: 'text', search_attrs: { _report_id_: nil }), target: '_blank', class: 'report-admin-report-path-link' %>
   </p>
   <p class="help-block">See the <strong>API</strong> tab for detailed endpoint usage, curl examples, and save trigger configuration.</p>
+  <% report_options = @report.report_options(fail_without_exception: true) %>
   <p class="report-item-options-test">
   <label>options</label>
-  <% if @report.report_options(fail_without_exception: true) %>
+  <% if report_options && report_options.config_errors.blank? %>
   valid
   <% else %>
   <span class="info-danger">invalid</span>
   <% end %>
   </p>
+  <%= render partial: 'admin/dynamic_models/config_errors', locals: { object_instance: @report } %>
   <%= render partial: 'admin/common_templates/def_uac_summary',
              locals: {
                object_instance: @report,

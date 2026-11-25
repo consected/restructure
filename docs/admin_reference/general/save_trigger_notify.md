@@ -33,6 +33,8 @@ Values held on the record but not yet saved are therefore visible to
 !defs(save_triggers_notify_options_defs.yaml)
 ```
 
+For email notifications, users who have opted out with `do_not_email` are retained as recipients by default. If they are the only recipients, the message notification is saved and completes normally, but no email is sent; mixed recipient lists are sent only to users who can receive email. Set `require_email_sent: true` to restore the previous behavior: opted-out users are filtered out, and notifications with no sendable email are treated as errors. This option has no effect on SMS notifications.
+
 Completed and failed notifications addressed to participants automatically create tracker
 entries by default. Notifications sent to end users through `role:` or `users:` are internal
 alerts and never create participant tracker entries. Set `no_tracker_entry: true` to prevent

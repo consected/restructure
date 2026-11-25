@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# Purpose: Verify app type configuration notices include errors from associated reports.
+
 require 'rails_helper'
 
 RSpec.describe Admin::AppType, type: :model do
@@ -13,6 +15,36 @@ RSpec.describe Admin::AppType, type: :model do
     template_uac = Admin::UserAccessControl.last
     expect(template_uac.app_type_id).to eq app.id
     expect(template_uac.role_name).to eq '_app_'
+  end
+
+  it 'includes invalid options from associated reports in configuration notices' do
+    create_admin
+    app_type = Admin::AppType.create!(
+      name: "report notice app #{SecureRandom.hex(4)}",
+      label: 'Report Notice App',
+      current_admin: @admin
+    )
+    report = Report.create!(
+      current_admin: @admin,
+      name: "Report with invalid option #{SecureRandom.hex(4)}",
+      item_type: 'report_notice',
+      sql: 'select 1 as result_value',
+      search_attrs: '',
+      options: "view_options:\n  bad_attr: 1",
+      report_type: 'report',
+      disabled: false
+    )
+    Admin::UserAccessControl.create!(
+      app_type:,
+      access: :read,
+      resource_type: :report,
+      resource_name: report.alt_resource_name,
+      current_admin: @admin
+    )
+
+    notices = app_type.check_option_configs
+
+    expect(notices.pluck(:message).join).to include('bad_attr')
   end
 
   it 'allows a user access to an app type' do

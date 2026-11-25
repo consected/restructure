@@ -150,6 +150,13 @@ When working with an association, pick a specific element:
 - `\{\{association.last\}\}`
 - `\{\{association.<number>}\}` - zero based index
 
+For a condition that compares one record field with a field from the latest record of another
+resource on the same master, optionally filtered by that record's attributes, use the explicit
+[`associated_with` field comparison syntax](conditions_record_sources.md#comparing-fields-with-the-latest-related-record).
+Its filter values are literals, not `{{}}` substitutions. A substitution such as
+`{{association.first.attribute}}` follows the association's ordering, which may not be the most
+recent record.
+
 ### Other related items
 
 Special names, which are not actual associations but work like them are:
@@ -346,6 +353,10 @@ Use the following structure `\{\{some_attribute::formatter\}\}`, where formatter
   - Example: `December 25, 2023` → `2023-12-25`
 - **iso8601_datetime** - Formats date/time in ISO 8601 format (YYYY-MM-DDTHH:MM:SS+00:00)
   - Example: `2023-12-25 14:30:45 UTC` → `2023-12-25T14:30:45+00:00`
+
+**Date-only fields in banners and headers:** Use the `date` formatter for date-only fields such as `birth_date` and `death_date`, for example in a master record title or prefix configured with `\{\{birth_date::date\}\}`. This shows the stored day unchanged, as the record itself does.
+
+Avoid the `date_time` formatters for date-only values. `date_time` converts the value to UTC, which can show the previous day for users whose browser is ahead of UTC. `date_time_with_zone` and `date_time_show_zone` keep the day but add a midnight time, such as `05/03/1980 12:00 am`, which is not wanted for a date of birth.
 
 ### Array processing
 

@@ -45,6 +45,19 @@ hide secondary info: |
   Hide the secondary participant info block and master header summary. Value "true" hides it
 hide search form advanced: |
   Hide the "advanced" search form. Value "true" hides it
+search selector: |
+  How searchable reports are selected on the master search page: "tabs" (default), "dropdown", or "none".
+  The tabs/dropdown view can be switched by users; their choice is remembered for this app type.
+  The value may use runtime curly substitutions.
+search selector header: |
+  Markdown caption displayed above the searchable report tabs or dropdown. May use runtime curly substitutions.
+search selector footer: |
+  Markdown caption displayed below the searchable report tabs or dropdown. May use runtime curly substitutions.
+search selector label: |
+  Plain text label shown before the searchable report dropdown. May use runtime curly substitutions.
+search selector categorized: |
+  When "true", group dropdown reports by category while preserving their configured order within each category.
+  Defaults to "false". The value may use runtime curly substitutions.
 hide search form simple: |
   Hide the "simple" search form. Value "true" hides it
 hide search form searchable reports: |

@@ -41,7 +41,7 @@ class ReportsController < UserBaseController
     pm = filtered_primary_model(pm)
 
     @simple_view = params[:simple_view] == 'true'
-    @reports = pm.order auto: :desc, report_type: :asc, position: :asc
+    @reports = pm.ordered_for_display
     @reports = @reports.reject { |r| r.report_options.list_options.hide_in_list }
 
     respond_to do |format|

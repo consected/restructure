@@ -1,7 +1,7 @@
 //= require app/masters.js
 
 /**
- * Tests for _fpa.masters switchable ID functionality
+ * Tests for _fpa.masters switchable ID and search selector functionality.
  * These tests verify that the participant header correctly switches to show
  * the first non-"(none)" ID when multiple alternative IDs are configured.
  * See issue #872: Switchable ID on participant header should show the first not "(none)" ID
@@ -152,5 +152,44 @@ describe('masters', function () {
       // Verify the single ID remains visible
       expect(container.find('.alt-id-item.first_id').is(':visible')).toBe(true);
     });
+  });
+});
+
+
+describe('search selector view', function () {
+  var container;
+  var appTypeId = 'search-selector-spec';
+
+  beforeEach(function () {
+    container = $(`
+      <div class="advanced-form-selections search-selector search-selector--dropdown" data-app-type-id="${appTypeId}" data-search-selector-mode="dropdown">
+        <div class="search-selector__tabs"></div>
+        <div class="search-selector__dropdown"><select id="search_selector_dropdown"><option value=""></option><option value="reports__first">First report</option></select></div>
+        <button id="search-selector-toggle" type="button"></button>
+      </div>
+    `);
+    $('body').append(container);
+    document.cookie = `search-selector-app-type-${appTypeId}=; Max-Age=0; path=/`;
+  });
+
+  afterEach(function () {
+    container.remove();
+    document.cookie = `search-selector-app-type-${appTypeId}=; Max-Age=0; path=/`;
+  });
+
+  it('updates the active view and stores it in an app-type-specific cookie', function () {
+    _fpa.masters.set_search_selector_mode(container, 'tabs', true);
+
+    expect(container.hasClass('search-selector--tabs')).toBe(true);
+    expect(container.hasClass('search-selector--dropdown')).toBe(false);
+    expect(container.attr('data-search-selector-mode')).toBe('tabs');
+    expect(document.cookie).toContain(`search-selector-app-type-${appTypeId}=tabs`);
+  });
+
+  it('rejects unsupported view modes', function () {
+    _fpa.masters.set_search_selector_mode(container, 'none', true);
+
+    expect(container.attr('data-search-selector-mode')).toBe('dropdown');
+    expect(document.cookie).not.toContain(`search-selector-app-type-${appTypeId}=none`);
   });
 });

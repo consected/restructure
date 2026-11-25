@@ -2,7 +2,7 @@
 
 # Verifies that CalcActions::ConditionLinter reports problems that would otherwise only fail at runtime,
 # and that valid configurations (including those documented in the conditions reference) produce no notices.
-# Each check has a valid and an invalid example. Notices are { path:, message: } warnings.
+# Each check has valid and invalid examples, including latest-record field references. Notices are { path:, message: } warnings.
 require 'rails_helper'
 
 RSpec.describe CalcActions::ConditionLinter, type: :model do
@@ -24,10 +24,17 @@ RSpec.describe CalcActions::ConditionLinter, type: :model do
     expect(lint(condition, **)).to be_empty
   end
 
+  def associated_reference(value)
+    { all: { player_infos: { birth_date: { associated_with: value } } } }
+  end
+
   describe 'top-level keys' do
     it 'accepts selection types with suffixes, always, never and shortcuts' do
       expect_clean({ all: { addresses: { city: 'portland' } } })
       expect_clean({ all_2: { addresses: { city: 'portland' } }, not_any_cancelled: { addresses: { city: 'x' } } })
+      expect_clean(
+        { any: { all_1: { activity_log__player_contact_phones: { id: 1, select_who: 'return_value' } } } }
+      )
       expect_clean({ always: true })
       expect_clean({ has_created_activity: 'primary' })
     end
@@ -56,6 +63,80 @@ RSpec.describe CalcActions::ConditionLinter, type: :model do
       expect_notice({ all: { missing_association: { id: 1 } } }, mentioning: 'missing_association')
     end
 
+    it 'retains the original notice for a bare table keyed under a field' do
+      filtered_table_condition = {
+        all: { player_infos: { birth_date: { addresses: { zip: '02115' } } } }
+      }
+      scalar_table_condition = {
+        all: { player_infos: { birth_date: { player_infos: :birth_date } } }
+      }
+
+      expect_notice(filtered_table_condition, mentioning: 'table under a field')
+      expect_notice(scalar_table_condition, mentioning: 'table under a field')
+    end
+
+    it 'accepts scalar field comparisons only through associated_with' do
+      expect_clean(associated_reference({ player_infos: :birth_date }))
+    end
+
+    it 'reports unknown resources and fields in associated_with comparisons' do
+      expect_notice(associated_reference({ missing_resource: :birth_date }), mentioning: 'missing_resource')
+      expect_notice(associated_reference({ player_infos: :missing_field }), mentioning: 'missing_field')
+    end
+
+    it 'accepts filtered field comparisons with scalar or array filters' do
+      filtered_reference = { addresses: { rank: 10, source: %w[nflpa ncaa], city: 'return_value' } }
+      expect_clean(associated_reference(filtered_reference))
+      expect_clean(associated_reference({ addresses: { rank: [10, 20], city: 'return_value_list' } }))
+    end
+
+    it 'validates exactly one return directive, filters and return fields' do
+      expect_notice(associated_reference({ addresses: { rank: 10 } }),
+                    mentioning: 'exactly one return_value or return_value_list')
+      expect_notice(associated_reference({ addresses: { city: 'return_value', rank: 'return_value_list' } }),
+                    mentioning: 'exactly one return_value or return_value_list')
+      expect_notice(associated_reference({ addresses: { missing_filter: 'x', city: 'return_value' } }),
+                    mentioning: 'missing_filter')
+      expect_notice(associated_reference({ addresses: { missing_return: 'return_value' } }),
+                    mentioning: 'missing_return')
+      expect_notice(associated_reference({ addresses: { city: { nested: 'x' }, rank: 'return_value' } }),
+                    mentioning: 'filter')
+    end
+
+    it 'requires one associated resource and a master association' do
+      expect_notice(associated_reference({}), mentioning: 'exactly one resource')
+      expect_notice(associated_reference({ player_infos: :birth_date, addresses: :city }),
+                    mentioning: 'exactly one resource')
+      expect_notice(associated_reference({ users: :email }), mentioning: 'association of masters')
+    end
+
+    it 'still accepts nested selection blocks and plain field values' do
+      expect_clean(
+        { all: { player_infos: { birth_date: { not_any: { addresses: { zip: '1' } } } } } }, mode: :value
+      )
+      expect_clean({ all: { player_infos: { first_name: { condition: '=', value: 'a' } } } })
+    end
+
+    it 'does not reinterpret other reference keys as associated_with' do
+      expect_clean({ all: { player_infos: { first_name: { this_references: 'id' } } } })
+      expect_clean({ all: { player_infos: { first_name: { this: 'id' } } } })
+      expect_clean({ all: { player_infos: { first_name: { user: 'email' } } } })
+      expect_clean({ all: { player_infos: { first_name: { lookup: { addresses: { city: 'return_value' } } } } } })
+      condition = {
+        all: {
+          player_infos: {
+            id: {
+              ids_referencing: {
+                target: { addresses: { city: 'Portland' } },
+                from: { addresses: { id: 'return_all_results' } }
+              }
+            }
+          }
+        }
+      }
+      expect_clean(condition)
+    end
+
     it 'rejects reserved keys used as record sources' do
       expect_notice({ all: { this_references: { id: 1 } } }, mentioning: 'this_references')
     end
@@ -64,6 +145,27 @@ RSpec.describe CalcActions::ConditionLinter, type: :model do
   describe 'no_masters base table' do
     it 'accepts a known resource as the base table' do
       expect_clean({ all: { no_masters: {}, addresses: { city: 'portland' } } })
+    end
+
+    it 'rejects a scalar comparison to a resource that is not a master association' do
+      condition = {
+        all: {
+          no_masters: {},
+          orphan_resources: {
+            city: { associated_with: { orphan_resources: :city } }
+          }
+        }
+      }
+      linter = described_class.new(condition:, path: 'options.default.showable_if', model_class: Master, mode: :value)
+      address_resource = Resources::Models.find_by(resource_name: :addresses)
+      orphan_resource = address_resource.merge(resource_name: :orphan_resources, table_name: 'orphan_resources')
+      allow(linter).to receive(:resource_for).and_wrap_original do |original, table|
+        table.to_sym == :orphan_resources ? orphan_resource : original.call(table)
+      end
+
+      notices = linter.lint
+      expect(notices.pluck(:message).join)
+        .to include("'orphan_resources' is not an association of masters")
     end
 
     it 'rejects an unknown base table' do
@@ -183,6 +285,16 @@ RSpec.describe CalcActions::ConditionLinter, type: :model do
 
     it 'does not check fields of record sources whose model is only known at runtime' do
       expect_clean({ all: { referring_record: { select_who: 'user' } } })
+    end
+  end
+
+  describe 'selection-like field names' do
+    it 'checks actual fields beginning with all, any or anything instead of treating them as selections' do
+      model_class = Class.new do
+        def self.attribute_names = %w[anything all_day allergies]
+      end
+
+      expect_clean({ all: { this: { anything: 'x', all_day: 'y', allergies: 'z' } } }, model_class:)
     end
   end
 

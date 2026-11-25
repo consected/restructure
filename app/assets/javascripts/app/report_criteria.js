@@ -7,6 +7,13 @@ _fpa.report_criteria = class {
 
     _fpa.report_criteria.handle_search_form(block.find('form'));
 
+    block.find('form.search_report[data-report-type="report"]').each(function () {
+      var report_form = $(this);
+      report_form.find('[type="submit"]').not('.report-auto-submit-tracked').on('click', function (e) {
+        report_form.attr('data-auto-submit', e.originalEvent ? 'false' : 'true');
+      }).addClass('report-auto-submit-tracked');
+    });
+
     var by_auto_search_btn = $('#report-form-auto-submitter-btn');
     by_auto_search_btn.not('.asclick-attached').on('click', function () {
       by_auto_search_btn.attr('data-submitted', 'true');

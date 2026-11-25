@@ -88,6 +88,66 @@ RSpec.describe NotificationMailer, type: :mailer do
       change_setting('ProcessInlineDataUriImages', nil)
     end
 
+    it 'sends nothing and does not raise when all valid recipients opted out' do
+      @rec_user.update!(do_not_email: true)
+      notification = create_notification_with_content('<p>Notification</p>')
+
+      delivery_count = ActionMailer::Base.deliveries.size
+      expect { NotificationMailer.send_message_notification(notification).deliver_now }.not_to raise_error
+
+      expect(ActionMailer::Base.deliveries.size).to eq delivery_count
+    end
+
+    it 'raises when the only recipients have opted out and email delivery is required' do
+      @rec_user.update!(do_not_email: true)
+      notification = create_notification_with_content('<p>Notification</p>')
+      notification.require_email_sent = true
+
+      expect { NotificationMailer.send_message_notification(notification).deliver_now }
+        .to raise_error(FphsException, /No TO emails/)
+    end
+
+    it 'still raises when the sender address is missing for opted-out recipients' do
+      @rec_user.update!(do_not_email: true)
+      notification = create_notification_with_content('<p>Notification</p>')
+      notification.from_user_email = nil
+
+      expect { NotificationMailer.send_message_notification(notification).deliver_now }
+        .to raise_error(FphsException, /No FROM user set/)
+    end
+
+    it 'raises when every recipient is unsendable for a reason other than opting out' do
+      notification = create_notification_with_content('<p>Notification</p>')
+      notification.update!(recipient_user_ids: [], recipient_data: ['not-an-email'])
+
+      expect { NotificationMailer.send_message_notification(notification).deliver_now }
+        .to raise_error(FphsException, /No TO emails/)
+    end
+
+    it 'raises when a disabled recipient is mixed with opted-out recipients' do
+      @rec_user.update!(do_not_email: true)
+      disabled_user, = create_user
+      disabled_user.current_admin = @admin
+      disabled_user.disable!
+      notification = create_notification_with_content('<p>Notification</p>')
+      notification.update!(recipient_user_ids: [], recipient_data: [@rec_user.email, disabled_user.email])
+
+      expect { NotificationMailer.send_message_notification(notification).deliver_now }
+        .to raise_error(FphsException, /No TO emails/)
+    end
+
+    it 'sends to emailable recipients while omitting do-not-email recipients' do
+      @rec_user.update!(do_not_email: true)
+      emailable_user, = create_user
+      notification = create_notification_with_content('<p>Notification</p>')
+      notification.update!(recipient_user_ids: [@rec_user.id, emailable_user.id])
+
+      mail = NotificationMailer.send_message_notification(notification)
+      mail.deliver_now
+
+      expect(mail.to).to eq [emailable_user.email]
+    end
+
     it 'converts a single PNG data URI image to an inline attachment with a cid: reference in the body' do
       content_html = %(<p>Look at this:</p><img src="data:image/png;base64,#{PNG_BASE64}" alt="test"/>)
       mn = create_notification_with_content(content_html)

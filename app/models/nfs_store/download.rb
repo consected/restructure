@@ -10,7 +10,7 @@ module NfsStore
 
     #
     # Find a download file by path, returning a the ContainerFile
-    # This allows theretrieval type and the download id to be easily accessed
+    # This allows the retrieval type and the download id to be easily accessed
     # if the file is found.
     # Leading slash and double slash will be ignored
     # @param [NfsStore::Manage::Container] container
@@ -19,30 +19,28 @@ module NfsStore
     def self.find_download_by_path(container, full_path)
       return if full_path&.strip.blank?
 
-      path_parts = full_path.split('/').reject(&:blank?)
+      path_parts = full_path.split('/').compact_blank
+      return if path_parts.empty?
+
       pp_length = path_parts.length == 1
       file_name = path_parts.last
-      file_path = path_parts[0..-2] unless pp_length
+      file_path = path_parts[0..-2].join('/') unless pp_length
 
       res = container.stored_files.find_by(path: file_path, file_name: file_name)
       return res if res || pp_length
 
-      archive_file = file_path.first
-      file_path = if file_path.length == 1
-                    ''
-                  else
-                    file_path[1..]
-                  end
-      res = container.archived_files.find_by(path: file_path, archive_file: archive_file, file_name: file_name)
-      return res if res
+      archive_file = path_parts.first
+      # ArchivedFile paths are relative to the archive root, so exclude the archive file name
+      archived_path = path_parts[1..-2].join('/')
+      container.archived_files.find_by(path: archived_path, archive_file: archive_file, file_name: file_name)
     end
 
-    # Handle the retrieval of muliple requested files, returning an array of results
+    # Handle the retrieval of multiple requested files, returning an array of results
     # Each result is a hash referencing the requested id/retrieval_type
     # A single requested file is not zipped; use #single_file? with #single_file_path and #single_file_name
     # @param selected_items [Hash{id=>Integer, retrieval_type=>Symbol}] items keyed by ID and retrieval type
     # @param zip [Boolean] whether to create the synchronous archive for multi-file selections
-    # @return [Array(Hash{retrieval_type=>Symbol, id=>Integer, file_name=>String, container_path=>String, retrieval_path=>String})]
+    # @return [Array<Hash>]
     #  id and retrieval_type match the requested item
     #  file_name is the simple file name
     #  container_path represents the local path within the container
