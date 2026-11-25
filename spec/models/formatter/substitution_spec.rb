@@ -173,6 +173,150 @@ RSpec.describe Formatter::Substitution, type: :model do
     expect(res).to eq 'This is a simple test: 12345 03/07/2015 2:56 pm - 2:56:04 pm'
   end
 
+  it 'uses the current user preferences for date and time formatters in extra substitutions' do
+    @user.user_preference.update!(timezone: 'London', date_format: 'dd/mm/yyyy',
+                                  date_time_format: 'dd/mm/yyyy hh:mm am/pm', time_format: '24h:mm')
+    value = DateTime.parse('2024-01-15T12:34:56Z')
+    formats = [nil, :date, :date_time, :date_time_show_zone, :date_time_with_zone, :time,
+               :time_show_zone, :time_with_zone, :time_sec, :time_ignore_zone]
+
+    formats.each do |format|
+      suffix = "#{'::' if format}#{format}"
+      expected = Formatter::Substitution.substitute("{{value#{suffix}}}",
+                                                    data: { value:, current_user: @user }, tag_subs: nil)
+      actual = Formatter::Substitution.substitute(
+        "{{extra_substitutions.value#{suffix}}}",
+        data: { current_user: @user, extra_substitutions: { value: } }, tag_subs: nil
+      )
+
+      expect(actual).to eq(expected), "Expected #{format || 'default'} formatting to use the current user's preferences"
+    end
+  end
+
+  it 'preserves the current user through nested, parsed, and variable hashes' do
+    @user.user_preference.update!(timezone: 'London', date_format: 'dd/mm/yyyy',
+                                  date_time_format: 'dd/mm/yyyy hh:mm am/pm', time_format: '24h:mm')
+    value = '2024-01-15T12:34:56Z'
+    data = {
+      current_user: @user,
+      extra_substitutions: {
+        nested: { value: DateTime.parse(value) },
+        json: %({"value":"2024-01-15T12:34:56Z"}),
+        yaml: "value: '2024-01-15T12:34:56Z'\n"
+      },
+      variables: { nested: { value: DateTime.parse(value) } }
+    }
+    tags = [
+      '{{extra_substitutions.nested.value::date_time_show_zone}}',
+      '{{extra_substitutions.json.json_parse.value::date_time_show_zone}}',
+      '{{extra_substitutions.yaml.yaml_parse.value::date_time_show_zone}}',
+      '{{variables.nested.value::date_time_show_zone}}'
+    ]
+    expected = Formatter::Substitution.substitute('{{value::date_time_show_zone}}',
+                                                  data: { value:, current_user: @user }, tag_subs: nil)
+
+    tags.each do |tag|
+      actual = Formatter::Substitution.substitute(tag, data:, tag_subs: nil)
+      expect(actual).to eq(expected), "Expected #{tag} to use the current user's preferences"
+    end
+  end
+
+  it 'resolves master and current user values from string-keyed hashes' do
+    data = Formatter::Substitution.setup_data('master_id' => @master.id, 'current_user_id' => @user.id)
+
+    expect(data[:master]).to be_nil
+    expect(data[:current_user_instance]).to eq(@user)
+
+    symbol_keyed_data = Formatter::Substitution.setup_data(master_id: @master.id)
+    expect(symbol_keyed_data[:master]).to eq(@master)
+
+    expect do
+      Formatter::Substitution.setup_data(master_id: Master.maximum(:id).to_i + 1)
+    end.to raise_error(ActiveRecord::RecordNotFound)
+  end
+
+  it 'lets a user specified inside an extra substitutions hash override the parent user' do
+    parent_user = @user
+    nested_user, = create_user
+    nested_user.user_preference.update!(timezone: 'Eastern Time (US & Canada)', date_format: 'mm/dd/yyyy',
+                                        date_time_format: 'mm/dd/yyyy hh:mm am/pm', time_format: 'h:mm am/pm')
+    value = DateTime.parse('2024-01-15T12:34:56Z')
+    user_contexts = [
+      { current_user_id: nested_user.id },
+      { current_user_instance: nested_user },
+      { current_user: nested_user }
+    ]
+
+    user_contexts.each do |user_context|
+      data = { current_user: parent_user,
+               extra_substitutions: user_context.merge(nested: { value: }) }
+      actual = Formatter::Substitution.substitute(
+        '{{extra_substitutions.nested.value::date_time_show_zone}}', data:, tag_subs: nil
+      )
+      expected = Formatter::Substitution.substitute('{{value::date_time_show_zone}}',
+                                                    data: { value:, current_user: nested_user }, tag_subs: nil)
+
+      expect(actual).to eq(expected), "Expected #{user_context.keys.first} to override the parent user's preferences"
+    end
+  end
+
+  it 'resolves an extra substitutions current_user_id without a parent user' do
+    nested_user, = create_user
+    nested_user.user_preference.update!(timezone: 'Eastern Time (US & Canada)', date_format: 'mm/dd/yyyy',
+                                        date_time_format: 'mm/dd/yyyy hh:mm am/pm', time_format: 'h:mm am/pm')
+    value = DateTime.parse('2024-01-15T12:34:56Z')
+    data = { extra_substitutions: { current_user_id: nested_user.id, nested: { value: } } }
+
+    actual = Formatter::Substitution.substitute(
+      '{{extra_substitutions.nested.value::date_time_show_zone}}', data:, tag_subs: nil
+    )
+    expected = Formatter::Substitution.substitute('{{value::date_time_show_zone}}',
+                                                  data: { value:, current_user: nested_user }, tag_subs: nil)
+
+    expect(actual).to eq(expected)
+  end
+
+  it 'does not pass a plain hash current_user to date and time formatters' do
+    value = DateTime.parse('2024-01-15T12:34:56Z')
+    data_cases = [
+      ['{{value::date_time}}', { current_user: { id: @user.id }, value: }],
+      ['{{extra_substitutions.value::date_time}}',
+       { extra_substitutions: { current_user: { id: @user.id }, value: } }]
+    ]
+
+    data_cases.each do |tag, data|
+      actual = Formatter::Substitution.substitute(tag, data:, tag_subs: nil)
+      expected = Formatter::Substitution.substitute('{{value::date_time}}', data: { value: }, tag_subs: nil)
+
+      expect(actual).to eq(expected)
+    end
+  end
+
+  it 'uses default preferences when current_user_id does not resolve' do
+    value = DateTime.parse('2024-01-15T12:34:56Z')
+    data = Formatter::Substitution.setup_data(current_user_id: User.maximum(:id).to_i + 1, value:)
+
+    actual = Formatter::Substitution.substitute('{{value::date_time_show_zone}}', data:, tag_subs: nil)
+    expected = Formatter::Substitution.substitute('{{value::date_time_show_zone}}', data: { value: }, tag_subs: nil)
+
+    expect(actual).to eq(expected)
+  end
+
+  it 'continues to use the associated model current user for association tags' do
+    @user.user_preference.update!(timezone: 'London', date_format: 'dd/mm/yyyy',
+                                  date_time_format: 'dd/mm/yyyy hh:mm am/pm', time_format: '24h:mm')
+    @master.current_user = @user
+    expected = Formatter::Substitution.substitute('{{value::date_time_show_zone}}',
+                                                  data: { value: @player_contact.created_at, current_user: @user },
+                                                  tag_subs: nil)
+
+    actual = Formatter::Substitution.substitute(
+      '{{player_contacts.created_at::date_time_show_zone}}', data: @master, tag_subs: nil
+    )
+
+    expect(actual).to eq(expected)
+  end
+
   it 'substitutes current user role names' do
     create_user_role 'test - role substitution', user: @user
     txt = 'This is a role name test: {{current_user_email}} has role {{current_user_roles.test___role_substitution}}'

@@ -495,15 +495,50 @@ module Formatter
       data[:user_contact_info] = iu.contact_info&.attributes&.dup || Users::ContactInfo.new.attributes
     end
 
-    # setup data for current user from item or master
-    def self.setup_data_for_current_user(data, master, item)
-      cu = item.current_user if item.respond_to?(:current_user)
-      cu ||= master.current_user if master
-      cu ||= item if item.is_a? User
-      cu ||= data[:current_user]
-      return unless cu.is_a? User
+    #
+    # Resolve the effective current User from substitution data, master, or item.
+    # Precedence checks explicit User instances on data first, then `current_user_id`
+    # (so plain/YAML hashes can specify a user ID without serializing a User record),
+    # and finally falls back to the item, its master, or a User item itself.
+    #
+    # @param [Hash] data the substitution data hash
+    # @param [Master, nil] master associated master record, if any
+    # @param [Object] item original source object or hash
+    # @return [User, nil] resolved user instance, or nil if none found
+    def self.current_user_for_data(data, master, item)
+      # Only accept actual User instances; data[:current_user] may be an attributes Hash
+      current_user_instance = data[:current_user_instance]
+      return current_user_instance if current_user_instance.is_a?(User)
 
-      data[:current_user_instance] ||= cu
+      current_user = data[:current_user]
+      return current_user if current_user.is_a?(User)
+
+      # Support plain/persisted hashes that identify the rendering user by ID
+      current_user = User.find_by(id: data[:current_user_id]) if data[:current_user_id].present?
+      return current_user if current_user.is_a?(User)
+
+      current_user = item.current_user if item.respond_to?(:current_user)
+      return current_user if current_user.is_a?(User)
+
+      current_user = master.current_user if master.respond_to?(:current_user)
+      return current_user if current_user.is_a?(User)
+
+      item if item.is_a?(User)
+    end
+
+    #
+    # Populate current_user substitution fields on `data` when a User is resolved.
+    #
+    # @param [Hash] data the substitution data hash to enrich
+    # @param [Master, nil] master associated master record, if any
+    # @param [Object] item original source object or hash
+    # @return [void]
+    def self.setup_data_for_current_user(data, master, item)
+      cu = current_user_for_data(data, master, item)
+      return unless cu
+
+      # Preserve an existing User instance, and avoid overwriting an explicit User or hash in :current_user
+      data[:current_user_instance] = cu unless data[:current_user_instance].is_a?(User)
       data[:current_user] ||= cu.attributes.dup
       data[:current_user_email] ||= cu.email
       data[:user_email] ||= cu.email
@@ -613,7 +648,9 @@ module Formatter
               end
         orig_val = data[tag.to_i]
       else
-        current_user = data[:current_user_instance] || data[:current_user]
+        # Guard against plain-Hash :current_user values (e.g. from reloaded YAML) crashing formatters
+        current_user = data[:current_user_instance] if data[:current_user_instance].is_a?(User)
+        current_user ||= data[:current_user] if data[:current_user].is_a?(User)
 
         return template_block tag, data if tag.start_with? 'template_block_'
         return glyphicon tag, data if tag.start_with? 'glyphicon_'
@@ -723,9 +760,20 @@ module Formatter
       begin
         res_data = data
         item_reference = false
+        current_user_instance = data[:current_user_instance] if data.is_a?(Hash)
         ref_parts.each do |name|
           # Get the associated item, based on the current part of the substitution name
-          res_data = get_associated_item(master, name, res_data, item_reference:)
+          res_data = get_associated_item(master, name, res_data, item_reference:, current_user_instance:)
+          if res_data.is_a?(Hash)
+            if res_data[:current_user_instance].is_a?(User)
+              # Propagate resolved user context down to deeper nested plain hashes
+              current_user_instance = res_data[:current_user_instance]
+            elsif res_data.key?(:current_user_instance) || res_data.key?(:current_user_id) ||
+                  res_data[:current_user].is_a?(User)
+              # If this hash explicitly specified a user key that didn't resolve, don't leak the parent user below it
+              current_user_instance = nil
+            end
+          end
 
           break unless res_data.present?
 
@@ -761,24 +809,50 @@ module Formatter
     # @param [Hash | ActiveRecord::Model] data: object or data passed
     #    from {substitute}, from which the association or reference should be found
     # @param [Boolean] item_reference True if getting association / reference from an item rather than the master
-    # @return [ActiveRecord::Model] the first item from an association or reference
+    # @param [User, nil] current_user_instance parent user context to inherit into plain hashes
+    # @return [ActiveRecord::Model, Hash, Array, nil] resolved association, plain hash, or collection
     #
-    def self.get_associated_item(master, name, data, item_reference: false)
+    def self.get_associated_item(master, name, data, item_reference: false, current_user_instance: nil)
       data, is_index = init_associated_data(name, data)
+      # Inherit parent user into plain hashes before setup_data so nested hashes without a user still format properly
+      data = inherit_current_user(data, current_user_instance) if data.is_a?(Hash)
       # Skip setup_data for raw Array results (e.g. from json_parse/yaml_parse) —
       # setup_data is designed for Hash/object data and will corrupt a plain Array.
       data = setup_data data if data && !data.is_a?(Array)
       return unless data
 
+      # Preserve incoming user context through Array steps (whose elements aren't run through setup_data yet)
+      context_user = data[:current_user_instance] if data.is_a?(Hash)
+      context_user ||= current_user_instance if data.is_a?(Array)
       item = data[:original_item] if data.is_a? Hash
       item ||= data
-      return item if is_index
+      return inherit_current_user(item, context_user) if is_index
 
       res = associated_reference(name, data, item, item_reference)
-      # If we found a value already, return it.
-      return res unless res == :no_value
+      # If we found a value already, return it (carrying user context if it is a plain Hash)
+      return inherit_current_user(res, context_user) unless res == :no_value
 
-      associated_master_and_configs(master, name)
+      res = associated_master_and_configs(master, name)
+      inherit_current_user(res, context_user)
+    end
+
+    #
+    # Carry `current_user_instance` onto a plain Hash unless that Hash already defines
+    # its own user (`current_user_instance`, a `User` in `current_user`, or `current_user_id`).
+    # ActiveRecord models and other non-Hash objects are returned untouched.
+    #
+    # @param [Object] data candidate substitution target
+    # @param [User, nil] current_user_instance parent user context to inherit
+    # @return [Object] duplicated symbolized Hash with user context, or original object unchanged
+    def self.inherit_current_user(data, current_user_instance)
+      return data unless data.is_a?(Hash) && current_user_instance.is_a?(User)
+
+      # Dup and symbolize so we never mutate caller hashes (e.g. extra_substitutions)
+      data = data.dup.symbolize_keys
+      has_own_user = data[:current_user_instance].is_a?(User) ||
+                     data[:current_user].is_a?(User) || data[:current_user_id].present?
+      data[:current_user_instance] = current_user_instance unless has_own_user
+      data
     end
 
     def self.associated_reference(name, data, item, item_reference)
