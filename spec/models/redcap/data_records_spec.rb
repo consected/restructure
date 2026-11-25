@@ -52,6 +52,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
 
     before :example do
       reset_mocks
+      Rails.cache.clear
     end
 
     it 'has a valid model to store records to, which must be a subclass of Dynamic::DynamicModelBase' do
@@ -153,7 +154,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
     it 'raises errors if retrieved records id is missing' do
       dm = create_dynamic_model_for_sample_response
 
-      rc = Redcap::ProjectAdmin.active.first
+      rc = Redcap::ProjectAdmin.active.find_by(name: @project[:name], server_url: @project[:server_url])
       rc.current_admin = @admin
 
       dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
@@ -167,7 +168,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
     it 'raises errors if retrieved records have missing fields' do
       dm = create_dynamic_model_for_sample_response
 
-      rc = Redcap::ProjectAdmin.active.first
+      rc = Redcap::ProjectAdmin.active.find_by(name: @project[:name], server_url: @project[:server_url])
       rc.current_admin = @admin
 
       stub_request_records @project[:server_url], @project[:api_key], 'mismatch_fields'
@@ -1113,7 +1114,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
 
       expect(dm.implementation_class.attribute_names).to include 'disabled'
 
-      rc = Redcap::ProjectAdmin.active.first
+      rc = Redcap::ProjectAdmin.active.find_by(name: @project[:name], server_url: @project[:server_url])
       rc.current_admin = @admin
       rc.data_options.handle_deleted_records = 'disable'
       rc.save!
