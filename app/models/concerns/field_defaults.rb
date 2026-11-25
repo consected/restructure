@@ -88,11 +88,48 @@ module FieldDefaults
   end
 
   #
+  # Parse a schedule time such as '6:00pm', 'monday 8:00am' or '2026-05-01 02:00' in the current time zone
+  # @param [String | Time | DateTime | ActiveSupport::TimeWithZone] value
+  # @return [nil | ActiveSupport::TimeWithZone | Time] nil if the value can not be parsed to a time
+  def self.parse_run_at(value)
+    return value if value.respond_to?(:acts_like_time?) && value.acts_like_time?
+    return unless value.is_a?(String)
+
+    Time.zone.parse(value)
+  rescue ArgumentError
+    nil
+  end
+
+  #
+  # Check that a run_at value is a time, or a list of times, that can be scheduled
+  # @param [String | Time | Array] value
+  # @param [Boolean] single - true if a list of times is not allowed
+  # @return [Boolean]
+  def self.valid_run_at?(value, single: false)
+    return false if value.blank? || (single && value.is_a?(Array))
+
+    Array.wrap(value).all? { |v| parse_run_at(v) }
+  end
+
+  #
+  # A recurring schedule interval: a positive duration, so that a schedule always advances.
+  # @param [String | nil] value
+  # @return [nil | duration]
+  def self.recurring_interval(value)
+    return unless value.is_a?(String)
+
+    interval = duration(value)
+    interval if interval&.positive?
+  end
+
+  #
   # Convert something like "15 minutes" or "-1 day" to a usable duration
   # @param [String] value
   # @return [nil | duration]
   def self.duration(value)
-    m = value.scan(/^(-?\+?\d+) (second|seconds|minute|minutes|hour|hours|days|day|months|month|years|year)$/)
+    m = value.scan(
+      /^(-?\+?\d+)\ (second|seconds|minute|minutes|hour|hours|weeks|week|days|day|months|month|years|year)$/x
+    )
     return unless m.first
 
     t = m.first.last
