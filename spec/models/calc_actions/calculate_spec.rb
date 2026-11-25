@@ -5316,4 +5316,90 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       expect(ConditionalActions.new(field_comparison_condition(selection_type: :not_any), @al).calc_action_if).to be false
     end
   end
+
+  describe 'dynamic models whose table name starts with a selection type prefix' do
+    before :all do
+      @all_prefix_dm = generate_test_dynamic_model(table_name: 'all_things_recs', reset_access: true)
+    end
+
+    it 'evaluates dynamic_model__all_* table conditions instead of treating them as selection blocks' do
+      master = @al.master
+      master.current_user = @user
+      master.dynamic_model__all_things_recs.delete_all
+      master.dynamic_model__all_things_recs.create!(test1: 'matched', test2: 'ok', created_by_user_id: @user.id)
+
+      matching_cond = {
+        all: {
+          dynamic_model__all_things_recs: {
+            test1: 'matched'
+          }
+        }
+      }
+      non_matching_cond = {
+        all: {
+          dynamic_model__all_things_recs: {
+            test1: 'does-not-exist'
+          }
+        }
+      }
+      return_cond = {
+        dynamic_model__all_things_recs: {
+          test1: 'matched',
+          test2: 'return_value'
+        }
+      }
+
+      expect(ConditionalActions.new(matching_cond, @al).calc_action_if).to be true
+      expect(ConditionalActions.new(non_matching_cond, @al).calc_action_if).to be false
+      expect(ConditionalActions.new(return_cond, @al).get_this_val).to eq 'ok'
+    end
+
+    it 'supports any, not_any, not_all, non-query conditions and ConditionLinter on dynamic_model__all_* tables' do
+      master = @al.master
+      master.current_user = @user
+      master.dynamic_model__all_things_recs.delete_all
+      record = master.dynamic_model__all_things_recs.create!(test1: 'matched', test2: 'ok', created_by_user_id: @user.id)
+
+      @al.extra_log_type_config.references = {
+        dynamic_model__all_things_rec: {
+          dynamic_model__all_things_rec: {
+            from: 'this',
+            add: 'many'
+          }
+        }
+      }
+      ModelReference.create_with(@al, record, force_create: true)
+      @al.reset_model_references
+
+      %i[any not_any not_all].each do |selection_type|
+        matching_cond = {
+          selection_type => {
+            dynamic_model__all_things_recs: { test1: 'matched' }
+          }
+        }
+        expected = selection_type == :any
+        expect(ConditionalActions.new(matching_cond, @al).calc_action_if).to be(expected)
+      end
+
+      non_query_ref_cond = {
+        all: {
+          dynamic_model__all_things_recs: {
+            id: { this_references: { dynamic_model__all_things_rec: 'id' } }
+          }
+        }
+      }
+      expect(ConditionalActions.new(non_query_ref_cond, @al).calc_action_if).to be true
+
+      nq = CalcActions::NonQueryCondition.new(table: :all_things_recs)
+      expect(nq.non_query_condition?(:test1, 'matched', raw_table: :dynamic_model__all_things_recs)).to be false
+      expect(nq.non_query_condition?(:return_constant, 'ok', raw_table: :dynamic_model__all_things_recs)).to be true
+
+      linter = CalcActions::ConditionLinter.new(
+        condition: { all: { dynamic_model__all_things_recs: { test1: 'matched' } } },
+        path: 'options.default.showable_if',
+        model_class: @al.class
+      )
+      expect(linter.lint).to be_empty
+    end
+  end
 end

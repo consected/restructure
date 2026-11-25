@@ -567,6 +567,55 @@ module Dynamic
     end
 
     #
+    # Return the reserved condition selection prefix matching the start of `val`, if any.
+    # @param [String, Symbol, nil] val candidate field or external identifier name
+    # @return [String, nil] matching selection prefix, or nil if none matches
+    def reserved_selection_type_prefix(val)
+      CalcActions::Common::SelectionTypes.map(&:to_s).find do |prefix|
+        val.to_s.start_with?(prefix)
+      end
+    end
+
+    #
+    # Return non-blocking configuration notices for dynamic definitions whose fields
+    # start with a reserved condition selection prefix.
+    # @param [Array<Symbol>] levels notice severity levels requested (for example `[:errors]`)
+    # @return [Array<Hash>] configuration notices
+    def additional_configuration_notices(levels:)
+      return [] unless levels.include?(:errors)
+
+      reserved_selection_type_notices
+    end
+
+    #
+    # Build non-blocking configuration notices for reserved-prefix field names
+    # configured on this dynamic definition.
+    # @return [Array<Hash>] configuration notices
+    def reserved_selection_type_notices
+      fields = Array(all_implementation_fields(only_real: true)).map(&:to_s).reject(&:blank?).uniq
+
+      fields.filter_map do |field_name|
+        prefix = reserved_selection_type_prefix(field_name)
+        next unless prefix
+
+        OptionConfigs::ConfigErrors.configuration_notice(
+          config_obj: self,
+          type: :reserved_selection_type_field_name,
+          name: field_name,
+          resource_name: respond_to?(:resource_name) ? resource_name : nil,
+          config_def: { 'field' => field_name },
+          message: "Field name \"#{field_name}\" starts with reserved condition selection prefix \"#{prefix}\". " \
+                   'It will be interpreted as a condition selection type rather than a field.',
+          extra_details: {
+            field_name:,
+            reserved_prefix: prefix,
+            semantic_validation: true
+          }
+        )
+      end
+    end
+
+    #
     # Database table column definitions
     def table_columns
       ActiveRecord::Base.connection.columns(table_name)

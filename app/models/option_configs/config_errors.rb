@@ -69,6 +69,26 @@ module OptionConfigs
         }
       end
 
+      #
+      # Append definition-level configuration notices from `#additional_configuration_notices`
+      # without raising if a definition's notice hook fails.
+      # @param [Array<Hash>] notices existing configuration notices list
+      # @param [Object, nil] object_instance dynamic definition instance
+      # @param [Array<Symbol>] levels requested notice severity levels
+      # @return [Array<Hash>] updated configuration notices list
+      def append_additional_configuration_notices(notices, object_instance, levels)
+        return notices if object_instance.nil?
+        return notices unless object_instance.respond_to?(:additional_configuration_notices)
+
+        additional_notices = object_instance.additional_configuration_notices(levels:)
+        notices.concat(Array(additional_notices))
+      rescue StandardError => e
+        error_message = 'Error retrieving additional configuration notices for '
+        error_message += "#{object_instance.class.name}/#{object_instance.id}: #{e}"
+        Rails.logger.error error_message
+        notices
+      end
+
       def append_configuration_notices(notices, object_instance, configuration, levels)
         if levels.include?(:errors) && configuration.config_errors
           notices.concat(configuration.config_errors.map do |notice|
@@ -143,7 +163,7 @@ module OptionConfigs
           resource_name = object_instance.resource_name if object_instance.respond_to?(:resource_name)
           failed_config(nil, res, :parse_error, msg, 'YAML options', resource_name,
                         extra_details: bt, level: :error, config_obj: object_instance)
-          return res
+          return append_additional_configuration_notices(res, object_instance, levels)
         end
 
         res = []
@@ -163,10 +183,7 @@ module OptionConfigs
           configuration = object_instance.configurations if object_instance.respond_to?(:configurations)
           res = append_configuration_notices(res, object_instance, configuration, levels) if configuration
 
-          if object_instance.respond_to?(:additional_configuration_notices)
-            val = object_instance.additional_configuration_notices(levels:)
-            res += val if val
-          end
+          res = append_additional_configuration_notices(res, object_instance, levels)
 
           # Condition warnings are non-blocking, so they are only reported at the warnings level
           res += OptionConfigs::ConditionLintNotices.for(object_instance) if levels.include?(:warnings)

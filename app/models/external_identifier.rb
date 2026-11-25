@@ -42,6 +42,40 @@ class ExternalIdentifier < ActiveRecord::Base
     name
   end
 
+  #
+  # Include external identifier name checks alongside field-name checks for reserved
+  # condition selection prefixes.
+  # @return [Array<Hash>] configuration notices
+  def reserved_selection_type_notices
+    reserved_selection_type_name_configuration_notices + super
+  end
+
+  #
+  # Build non-blocking configuration notices when an external identifier's name
+  # starts with a reserved condition selection prefix.
+  # @return [Array<Hash>] configuration notices
+  def reserved_selection_type_name_configuration_notices
+    prefix = reserved_selection_type_prefix(name)
+    return [] unless prefix
+
+    message = "External identifier name \"#{name}\" starts with reserved condition selection prefix \"#{prefix}\". " \
+              'It will be interpreted as a condition selection type rather than a field.'
+
+    [OptionConfigs::ConfigErrors.configuration_notice(
+      config_obj: self,
+      type: :reserved_selection_type_external_identifier_name,
+      name:,
+      resource_name:,
+      config_def: { 'name' => name },
+      message:,
+      extra_details: {
+        external_identifier_name: name,
+        reserved_prefix: prefix,
+        semantic_validation: true
+      }
+    )]
+  end
+
   # Resource name for a single instance of the model
   def resource_item_name
     resource_name.to_s.singularize.to_sym
@@ -292,7 +326,7 @@ class ExternalIdentifier < ActiveRecord::Base
   end
 
   def field_list
-    "#{external_id_attribute.to_sym} #{extra_fields}"
+    "#{external_id_attribute} #{extra_fields}"
   end
 
   def all_implementation_fields(ignore_errors: true, only_real: false)

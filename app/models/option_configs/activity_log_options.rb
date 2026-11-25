@@ -43,6 +43,8 @@ module OptionConfigs
     # A list of all fields defined within all the individual activity definitions. This does not include
     # the field lists for the old-style primary and blank logs.
     def self.fields_for_all_in(al_def)
+      return [] unless al_def.option_configs
+
       al_def.option_configs.reject { |e| e.name.in?(%i[primary blank_log]) }.map(&:fields).reduce([], &:+).uniq
     rescue StandardError => e
       raise FphsException, <<~END_TEXT
