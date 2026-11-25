@@ -211,6 +211,24 @@
   </div>
 
   <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="<%= ei_accordion_id %>-templates-heading">
+      <h4 class="panel-title">
+        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#<%= ei_accordion_id %>"
+           href="#<%= ei_accordion_id %>-templates-collapse"
+           aria-expanded="false" aria-controls="<%= ei_accordion_id %>-templates-collapse">
+          templates
+        </a>
+      </h4>
+    </div>
+    <div id="<%= ei_accordion_id %>-templates-collapse" class="panel-collapse collapse"
+         role="tabpanel" aria-labelledby="<%= ei_accordion_id %>-templates-heading">
+      <div class="panel-body">
+        <%= render partial: 'admin/common_templates/def_details_templates', locals: {object_instance: object_instance} %>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
     <div class="panel-heading" role="tab" id="<%= ei_accordion_id %>-view-refs-heading">
       <h4 class="panel-title">
         <a class="collapsed" role="button" data-toggle="collapse" data-parent="#<%= ei_accordion_id %>"

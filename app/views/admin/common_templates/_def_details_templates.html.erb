@@ -1,0 +1,40 @@
+<% if object_instance.persisted? && !object_instance.disabled
+     references = notify_template_references_for(object_instance) %>
+<div class="activity-list-templates">
+  <% if references.present? %>
+  <ul class="al-reference-list">
+    <% references.each do |reference|
+         template = if reference[:literal]
+                      scope = Admin::MessageTemplate.active.public_send("#{reference[:template_type]}_templates")
+                      scope = scope.where(message_type: Messaging::MessageNotification::ValidMessageTypes) unless reference[:message_type]
+                      scope.named(reference[:name], type: reference[:message_type])
+                    end
+    %>
+    <li>
+      <span class="badge"><%= reference[:template_type] %></span>
+      <% if reference[:literal] && template %>
+        <%= link_to link_label_open_in_new(ERB::Util.html_escape(template.name)),
+                    admin_message_templates_path(filter: { id: template.id }, perform_action: 'edit'), target: '_blank' %>
+      <% elsif reference[:literal] %>
+        <% init_with = {
+             template_type: reference[:template_type],
+             category: object_instance.category,
+             name: reference[:name]
+           }
+           init_with[:message_type] = reference[:message_type] if reference[:message_type].present?
+        %>
+        Add a <%= link_to link_label_open_in_new(
+                     ERB::Util.html_escape("new #{reference[:template_type]} template for '#{reference[:name]}'")
+                   ),
+                   admin_message_templates_path(init_with:, perform_action: 'new'), target: '_blank' %>
+      <% else %>
+        <%= reference[:name] %>
+      <% end %>
+    </li>
+    <% end %>
+  </ul>
+  <% else %>
+    <p>No layout or content templates are used by notify save or batch triggers.</p>
+  <% end %>
+</div>
+<% end %>
