@@ -1,46 +1,118 @@
 _fpa.substitution = class {
 
-  constructor(text, data) {
+  constructor(text, data, options) {
     this.text = text;
     this.data = data;
+    this.options = options || {};
     this.block = null;
   }
 
-  static substitute(text, data) {
-    this.substitution = new _fpa.substitution(text, data);
+  // Substitutes the text against the data, returning a new string. Options: missing, escape_values, auto_titleize.
+  static substitute(text, data, options) {
+    this.substitution = new _fpa.substitution(text, data, options);
     return this.substitution.substitute();
   }
 
+  // Returns a function (context) => string for an admin config string such as a caption or edit_button_href.
+  static compile_config_string(source, options) {
+    const config_options = Object.assign({ missing: 'blank', escape_values: true, auto_titleize: false }, options || {});
+    const source_text = source == null ? '' : String(source);
+    if (source_text.trim().length === 0) return function () { return ''; };
+    // Text without curly tags needs no substitution.
+    if (!source_text.includes('{{')) return function () { return source_text; };
+
+    // ERB escapes quotes in captions, so decode them inside #is / else is conditions for the comparisons to match.
+    const config_source = source_text.replace(_fpa.substitution.ConfigConditionalTagRegEx, function (tag, expression) {
+      const decoded_expression = expression
+        .replace(/&#39;|&#x27;/g, "'")
+        .replace(/&quot;/g, '"');
+      return '{{' + decoded_expression + '}}';
+    });
+
+    return function (context) {
+      const output = _fpa.substitution.substitute(config_source, context, config_options);
+      // Re-encode quotes in any conditional tags left unprocessed, so they cannot break out of an HTML attribute.
+      return output.replace(_fpa.substitution.ConfigConditionalTagRegEx, function (tag) {
+        return tag.replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+      });
+    };
+  }
+
+  // Map of role id to role. Rebuilt only when the current_user_roles array is replaced.
+  static current_user_roles_map() {
+    const current_user_roles = _fpa.state.current_user_roles;
+    if (!Object.prototype.hasOwnProperty.call(this, '_current_user_roles_source') ||
+      this._current_user_roles_source !== current_user_roles) {
+      const roles_map = {};
+      if (current_user_roles && current_user_roles.forEach) {
+        current_user_roles.forEach(function (role) {
+          roles_map[role.id_underscore()] = role;
+        });
+      }
+      this._current_user_roles_source = current_user_roles;
+      this._current_user_roles_map = roles_map;
+    }
+
+    return this._current_user_roles_map;
+  }
+
+  // Own-property check that tolerates null and undefined.
+  static has_own(obj, key) {
+    return obj != null && Object.prototype.hasOwnProperty.call(obj, key);
+  }
+
+  // The record layered beneath a get_data() result, or null when there is none.
+  static layered_base(obj) {
+    const base = Object.getPrototypeOf(obj);
+    return base === Object.prototype ? null : base;
+  }
+
+  // Builds the data used for substitution: the record layered with user, time, role, constant and master values.
   get_data() {
     const data = this.data;
-    var new_data = {};
+    // Layer the enrichment values over the record instead of copying it: copying and
+    // extending a record with many fields dominates rendering time. The record is never modified.
+    const base = data !== null && typeof data === 'object' ? data : Object.assign({}, data || {});
+    var new_data = Object.create(base);
+    // True if the key is already set on the record or the layer, so a record value is never overwritten.
+    const has_value = function (key) {
+      return _fpa.substitution.has_own(new_data, key) || _fpa.substitution.has_own(base, key);
+    };
+    var master_id;
     if (data && (data.master_id || data.vdef_version)) {
-      var master_id = data.master_id;
+      master_id = data.master_id;
     } else if (this.block) {
-      var master_id = this.block.parents('.master-panel').first().attr('data-master-id');
+      master_id = this.block.parents('.master-panel').first().attr('data-master-id');
     }
 
-    if (data) {
-      // Clone the data
-      new_data = Object.assign({}, data);
+    // Keep the historical front-end user_preference alias and expose the
+    // backend-aligned name separately for portable substitutions.
+    _fpa.state.current_user = _fpa.state.current_user || {};
+    // Falsy record values are replaced by the current user's values, unlike the has_value checks below.
+    if (!new_data.user_preference) new_data.user_preference = _fpa.state.current_user_preference;
+    if (!has_value('current_user_preference')) {
+      new_data.current_user_preference = _fpa.state.current_user_preference;
+    }
+    if (!new_data.current_user) new_data.current_user = _fpa.state.current_user;
+    if (!new_data.current_user_id) new_data.current_user_id = _fpa.state.current_user.id;
+    if (!new_data.current_user_email) new_data.current_user_email = _fpa.state.current_user.email;
+    // Reuse the page's AJAX-refreshed timestamp; initialize lazily if setup has not run yet.
+    if (!new_data.now) {
+      _fpa.state.now = _fpa.state.now || _fpa.utils.DateTime.now().toUTC().toISO();
+      new_data.now = _fpa.state.now;
+    }
+    if (!new_data.current_user_roles) {
+      new_data.current_user_roles = _fpa.substitution.current_user_roles_map();
+    }
 
-      //  Set user_preference and current_user_roles in the data for possible substitution
-      _fpa.state.current_user = _fpa.state.current_user || {}
-      if (!new_data.user_preference) new_data.user_preference = _fpa.state.current_user_preference;
-      if (!new_data.current_user) new_data.current_user = _fpa.state.current_user;
-      if (!new_data.current_user_id) new_data.current_user_id = _fpa.state.current_user.id;
-      if (!new_data.current_user_email) new_data.current_user_email = _fpa.state.current_user.email;
-      // Current date/time as a UTC ISO string, matching server-side {{now}} and usable with date formatters
-      if (!new_data.now) new_data.now = _fpa.utils.DateTime.now().toUTC().toISO();
-      if (!new_data.current_user_roles) {
-        new_data.current_user_roles = {}
-        if (_fpa.state.current_user_roles && _fpa.state.current_user_roles.forEach) {
-          _fpa.state.current_user_roles.forEach(function (v) {
-            new_data.current_user_roles[v.id_underscore()] = v;
-          });
-        }
+    // Add only the explicitly allowlisted constants supplied by the server, without
+    // replacing any value already present on the record.
+    const common_constants = _fpa.state.common_constants || {};
+    Object.keys(common_constants).forEach(function (key) {
+      if (!has_value(key)) {
+        new_data[key] = common_constants[key];
       }
-    }
+    });
 
     // Get the master data saved in state for this instance.
     var master = _fpa.state.masters && _fpa.state.masters[master_id];
@@ -52,9 +124,12 @@ _fpa.substitution = class {
     return new_data;
   };
 
+  // Resolves a dotted tag against the data. Returns [value, tag_name].
   value_for_tag(tag, new_data) {
+    tag = tag.replace(/^this\./, '');
     var elsplit = tag.split('.');
     var iter_data = new_data;
+    const root_base = _fpa.substitution.layered_base(new_data);
     for (const next_tag of Object.values(elsplit)) {
       var got = null;
       var tag_name = next_tag;
@@ -81,7 +156,9 @@ _fpa.substitution = class {
       else if (typeof iter_data == 'string' && next_tag === 'yaml_parse') {
         got = jsyaml.load(iter_data)
       }
-      else if (iter_data.hasOwnProperty(next_tag)) {
+      // At the root, record fields are found through the layer's prototype.
+      else if (_fpa.substitution.has_own(iter_data, next_tag) ||
+        (iter_data === new_data && _fpa.substitution.has_own(root_base, next_tag))) {
         got = iter_data[next_tag];
       }
       else if (iter_data.embedded_item && iter_data.embedded_item.hasOwnProperty(next_tag)) {
@@ -109,6 +186,7 @@ _fpa.substitution = class {
     return [got, tag_name];
   };
 
+  // Processes conditional blocks, then tags, and returns the resulting text.
   substitute() {
     var text = this.text;
     var data = this.data;
@@ -120,23 +198,15 @@ _fpa.substitution = class {
     // by this function.
     text = text.replaceAll('{^{', '{{').replaceAll('}^}', '}}')
 
-    const TagnameRegExString = '[0-9a-zA-Z_.:\-]+';
-    const IfBlockRegExString = `({{#if +(${TagnameRegExString})}}([^]+?){{/if}})`;
-    const StartQuote = `["'‘“]`
-    const EndQuote = `["'’”]`
-    const IsOperator = '(.+?)'
-    const IsConditions = `([0-9a-zA-Z_.:-]+) ${StartQuote}${IsOperator}${EndQuote} (${StartQuote}?.+?${EndQuote}?)`
-    const IsBlockRegExString = `({{#is ${IsConditions}}}(.+?){{/is}})`;
-
-    // [^]+? if the Javascript way to get everything across multiple lines (non-greedy)
-    const IfBlocksRegEx = new RegExp(IfBlockRegExString, 'gms');
-    const IfBlockRegEx = new RegExp(IfBlockRegExString, 'ms');
-    const IsBlocksRegEx = new RegExp(IsBlockRegExString, 'gms');
-    const IsBlockRegEx = new RegExp(IsBlockRegExString, 'ms');
-    const ElseIfBoundaryRegEx = new RegExp(`{{else if +(${TagnameRegExString})}}`, 'ms');
-    const ElseRegEx = /{{else}}/ms;
-    const ElseIsBoundaryRegEx = new RegExp(`{{else is +${IsConditions}}}`, 'ms');
-    const TagRegEx = new RegExp(`{{${TagnameRegExString}}}`, 'g');
+    const regexes = _fpa.substitution.RegularExpressions;
+    const IfBlocksRegEx = regexes.IfBlocks;
+    const IfBlockRegEx = regexes.IfBlock;
+    const IsBlocksRegEx = regexes.IsBlocks;
+    const IsBlockRegEx = regexes.IsBlock;
+    const ElseIfBoundaryRegEx = regexes.ElseIfBoundary;
+    const ElseRegEx = regexes.Else;
+    const ElseIsBoundaryRegEx = regexes.ElseIsBoundary;
+    const TagRegEx = regexes.Tag;
 
     var ifres = text.match(IfBlocksRegEx);
     var isres = text.match(IsBlocksRegEx);
@@ -168,7 +238,8 @@ _fpa.substitution = class {
         });
 
         if (sub_text == null) sub_text = else_content || '';
-        text = text.replace(block_container, sub_text || '');
+        // A function replacement keeps $ sequences in the block content literal.
+        text = text.replace(block_container, () => sub_text || '');
       });
     }
 
@@ -206,7 +277,7 @@ _fpa.substitution = class {
         });
 
         if (sub_text == null) sub_text = else_content || '';
-        text = text.replace(block_container, sub_text || '');
+        text = text.replace(block_container, () => sub_text || '');
       });
     }
 
@@ -236,21 +307,30 @@ _fpa.substitution = class {
       let tag_name = vpair[1];
 
       if (got == null) {
-        if (ignore_missing == 'show_blank') {
+        // Config strings render missing tags blank, as Handlebars did. Other callers show (?).
+        if (ignore_missing == 'show_blank' || _this.options.missing === 'blank') {
           got = '';
         } else {
           got = '(?)';
         }
-      } else if (formatters) {
+      } else if (formatters.length || _this.options.auto_titleize !== false) {
         got = _fpa.tag_formatter.format_all(got, formatters, tag_name, data);
       }
 
-      text = text.replace(el, got);
+      const generated_html = tag.indexOf('glyphicon_') === 0 || tag.indexOf('embedded_report_') === 0;
+      // Values are HTML-escaped, except deliberate glyphicon and embedded report markup.
+      if (_this.options.escape_values && !generated_html) {
+        got = Handlebars.Utils.escapeExpression(got);
+      }
+
+      // A function replacement keeps $ sequences in the value literal.
+      text = text.replace(el, () => got);
     });
 
     return text;
   };
 
+  // Splits an #if block's content into [tag, content] clauses and the else content.
   parse_if_clauses(initial_tag, inner_content, elseIfBoundaryRegEx, elseRegEx) {
     let clauses = [];
     let else_content = null;
@@ -287,6 +367,7 @@ _fpa.substitution = class {
     return [clauses, else_content];
   }
 
+  // Splits an #is block's content into [tag, op, exp, content] clauses and the else content.
   parse_is_clauses(initial_tag, initial_op, initial_exp, inner_content, elseIsBoundaryRegEx, elseRegEx) {
     let clauses = [];
     let else_content = null;
@@ -327,16 +408,14 @@ _fpa.substitution = class {
     return [clauses, else_content];
   }
 
+  // Compares a tag value with an #is expression using the operator. The expression may be a quoted literal, null, or another tag.
   eval_is_comp(op, tag_value, exp, new_data) {
     const _this = this;
-    const StartQuote = `["'‘“]`
-    const EndQuote = `["'’”]`
-    const NotEndQuote = '[^"\'’”]'
-    const PossQuotedRegEx = new RegExp(`(${StartQuote})?(.+${NotEndQuote})?(${EndQuote})?`);
+    const regexes = _fpa.substitution.RegularExpressions;
 
     if (exp) {
       const exp_length = exp.length;
-      if (exp_length > 1 && exp[0].match(new RegExp(StartQuote)) && exp[exp_length - 1].match(new RegExp(EndQuote))) {
+      if (exp_length > 1 && exp[0].match(regexes.StartQuote) && exp[exp_length - 1].match(regexes.EndQuote)) {
         exp = exp.slice(1, exp_length - 1);
       }
       else if (exp.toLowerCase() == 'null') {
@@ -428,3 +507,29 @@ _fpa.substitution = class {
   }
 
 }
+
+// Shared patterns avoid rebuilding the substitution parser's regular expressions for every rendered record.
+_fpa.substitution.RegularExpressions = (function () {
+  const tag_name = '[0-9a-zA-Z_.:\\-]+';
+  const if_block = `({{#if +(${tag_name})}}([^]+?){{/if}})`;
+  const start_quote = `[\"'‘“]`;
+  const end_quote = `[\"'’”]`;
+  const is_operator = '(.+?)';
+  const is_conditions = `([0-9a-zA-Z_.:-]+) ${start_quote}${is_operator}${end_quote} (${start_quote}?.+?${end_quote}?)`;
+  const is_block = `({{#is ${is_conditions}}}(.+?){{/is}})`;
+
+  return {
+    ConfigConditionalTag: /{{(\s*(?:#is\b|else\s+is\b)[^{}]*?)}}/g,
+    IfBlocks: new RegExp(if_block, 'gms'),
+    IfBlock: new RegExp(if_block, 'ms'),
+    IsBlocks: new RegExp(is_block, 'gms'),
+    IsBlock: new RegExp(is_block, 'ms'),
+    ElseIfBoundary: new RegExp(`{{else if +(${tag_name})}}`, 'ms'),
+    Else: /{{else}}/ms,
+    ElseIsBoundary: new RegExp(`{{else is +${is_conditions}}}`, 'ms'),
+    Tag: new RegExp(`{{${tag_name}}}`, 'g'),
+    StartQuote: new RegExp(start_quote),
+    EndQuote: new RegExp(end_quote),
+  };
+})();
+_fpa.substitution.ConfigConditionalTagRegEx = _fpa.substitution.RegularExpressions.ConfigConditionalTag;

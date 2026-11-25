@@ -180,7 +180,38 @@ Note the primary name is singular, so don't use:
 
 `activity_log__player_contacts__step_1`
 
-### Common substitutions
+### Client-side substitutions
+
+The browser prepares substitutions through the same ReStructure syntax used by server-side
+substitutions. This syntax is supported in configured `caption`/`header_caption`, `button_label`,
+`extra_class`, `edit_button_href`, `custom_block_attrs`, `caption_before`, and `show_if` values.
+Handlebars helper expressions and subexpressions (for example `{{uppercase name}}` or
+`{{#if (eq status "active")}}`) are not supported in these configuration keys. Use the ReStructure
+`::formatter`, `{{#if ...}}`, and `{{#is ... 'operator' ...}}` syntax instead.
+
+Missing tags in admin-configured strings (`caption`/`header_caption`, `button_label`, `extra_class`,
+`edit_button_href`, and `custom_block_attrs`) render as blank. Substituted values in these strings
+are HTML-escaped. Generated output from deliberate HTML tags such as `glyphicon_*` and
+`embedded_report_*` is left as HTML. This escaping behavior does not alter `caption_before` or
+`show_if` substitution behavior.
+
+The client-side data includes the current record fields plus these shared values:
+
+- `now` — current date/time in UTC ISO format
+- `current_user`, `current_user_id`, `current_user_email`, and `current_user_roles`
+- `user_preference` — retained as the current user's preference for front-end compatibility
+- `current_user_preference` — the portable name for the current user's preference, matching the
+  backend meaning of this tag
+- `base_url`, `environment_name`, `admin_email`, `default_logo`, `user_session_timeout`, and
+  `allow_users_to_register`
+
+On the backend, `user_preference` means the preference of the record's item user; the backend tag
+`current_user_preference` means the preference of the user interacting with the record. The
+front-end `user_preference` name continues to mean the current user's preference so existing
+browser templates remain compatible. Password settings, invitation codes, and other sensitive
+server constants are not exposed to the browser.
+
+## Common substitutions
 
 In addition to the attributes within the current record, the following are available in most circumstances:
 
@@ -234,7 +265,7 @@ In addition to the attributes within the current record, the following are avail
   - definition_item_type_name
   - default_embed_resource_name
 
-### Server constants
+### Server constants (server-side substitutions)
 
 - `\{\{base_url\}\}`
 - `\{\{admin_email\}\}`

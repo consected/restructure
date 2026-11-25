@@ -30,6 +30,8 @@ module Formatter
 
     FunctionalDirectives = %w[shortlink].freeze
     FunctionalDirectiveRegEx = /\[\[[^\]]+\]\]/
+    ClientCommonConstantTags = %i[base_url environment_name admin_email default_logo user_session_timeout
+                                  allow_users_to_register].freeze
 
     # Set the methods from certain resources that should be accessible for substitution
     # as if they were real attributes
@@ -971,27 +973,42 @@ module Formatter
     # Common constants tags
     # @param [Hash] data - hash to set up with common constants
     def self.setup_common_constants_tags(data)
-      data[:now] = ::Time.current
-      data[:base_url] = Settings::BaseUrl
-      data[:admin_email] = Settings::AdminEmail
-      data[:environment_name] = Settings::EnvironmentName
-      data[:password_age_limit] = Settings::PasswordAgeLimit
-      data[:password_reminder_days] = Settings::PasswordReminderDays
-      data[:password_max_attempts] = Settings::PasswordMaxAttempts
-      data[:password_min_entropy] = Settings::PasswordConfig[:min_entropy]
-      data[:password_min_length] = Settings::PasswordConfig[:min_length]
-      data[:password_regex_requirements] = Settings::PasswordConfig[:regex_requirements]
-      data[:password_unlock_time_mins] = Settings::PasswordUnlockTimeMins
-      data[:user_session_timeout] = (Settings::UserTimeout.to_i / 60)
-      data[:mfa_disabled] = User.two_factor_auth_disabled
-      data[:login_issues_url] = Settings::LoginIssuesUrl
-      data[:allow_users_to_register] = Settings::AllowUsersToRegister ? true : nil
-      data[:did_not_receive_confirmation_instructions_url] = Settings::DidntReceiveConfirmationInstructionsUrl
-      data[:notifications_from_email] = Settings::NotificationsFromEmail
-      data[:two_factor_auth_issuer] = Settings::TwoFactorAuthIssuer
-      data[:allow_admins_to_manage_admins] = Settings::AllowAdminsToManageAdmins
-      data[:invitation_code] = Settings::InvitationCode
-      data[:default_logo] = Settings::DefaultLogo
+      data.merge!(common_constants_tags)
+    end
+
+    # Return the common constants explicitly approved for client-side use.
+    # @return [Hash] browser-safe common substitution constants
+    def self.client_common_constants
+      common_constants_tags.slice(*ClientCommonConstantTags)
+    end
+
+    # Build common substitution constants once so the client allowlist and backend
+    # substitutions always use the same source values.
+    # @return [Hash] all server-side common substitution constants
+    def self.common_constants_tags
+      {
+        now: ::Time.current,
+        base_url: Settings::BaseUrl,
+        admin_email: Settings::AdminEmail,
+        environment_name: Settings::EnvironmentName,
+        password_age_limit: Settings::PasswordAgeLimit,
+        password_reminder_days: Settings::PasswordReminderDays,
+        password_max_attempts: Settings::PasswordMaxAttempts,
+        password_min_entropy: Settings::PasswordConfig[:min_entropy],
+        password_min_length: Settings::PasswordConfig[:min_length],
+        password_regex_requirements: Settings::PasswordConfig[:regex_requirements],
+        password_unlock_time_mins: Settings::PasswordUnlockTimeMins,
+        user_session_timeout: (Settings::UserTimeout.to_i / 60),
+        mfa_disabled: User.two_factor_auth_disabled,
+        login_issues_url: Settings::LoginIssuesUrl,
+        allow_users_to_register: Settings::AllowUsersToRegister ? true : nil,
+        did_not_receive_confirmation_instructions_url: Settings::DidntReceiveConfirmationInstructionsUrl,
+        notifications_from_email: Settings::NotificationsFromEmail,
+        two_factor_auth_issuer: Settings::TwoFactorAuthIssuer,
+        allow_admins_to_manage_admins: Settings::AllowAdminsToManageAdmins,
+        invitation_code: Settings::InvitationCode,
+        default_logo: Settings::DefaultLogo
+      }
     end
 
     def self.setup_resource_info(data)

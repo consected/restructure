@@ -4,6 +4,7 @@
 <%= javascript_tag nonce: true do %>
 
   _fpa.version = '<%=Application.version%>-<%=Application.server_cache_version%>';
+  _fpa.state.now = _fpa.utils.DateTime.now().toUTC().toISO();
   _fpa.status.session = new _fpa.session(<%= current_user ? current_user.timeout_in :  "null" %>);
   _fpa.current_locale = 'en';
   _fpa.env_name = '<%=Settings::EnvironmentName%>';
@@ -13,6 +14,9 @@
   _fpa.state.action_name = _fpa.state.action_name || '<%=action_name%>';
   _fpa.state.template_version = '<%=template_version%>';
   _fpa.state.rails_env = '<%=Rails.env%>';
+  <% if current_user || current_admin %>
+  _fpa.state.common_constants = <%= Formatter::Substitution.client_common_constants.to_json.html_safe %>;
+  <% end %>
   // Indicate whether the current request is being served as an admin page
   // (admin controller namespace, the redirect-to-admin-panel index, or any
   // request under /admin/). The front-end uses this to avoid blocking the

@@ -587,13 +587,15 @@
   });
 
 
-  Handlebars.registerHelper('template', function (source) {
-    return Handlebars.compile(source, _fpa.HandlebarsCompileOptions)(this);
+  Handlebars.registerHelper('template', function (source, context) {
+    const is_helper_options = context && context.name === 'template' && context.hash !== undefined;
+    const template_context = is_helper_options ? this : (context || this);
+    return _fpa.substitution.compile_config_string(source)(template_context);
   });
 
 
   Handlebars.registerHelper('compile_template', function (source) {
-    return Handlebars.compile(source, _fpa.HandlebarsCompileOptions);
+    return _fpa.substitution.compile_config_string(source);
   });
 
   Handlebars.registerHelper('run_template', function (template, context) {
