@@ -194,29 +194,6 @@
       "note": ""
     },
     {
-      "warning_type": "SQL Injection",
-      "warning_code": 0,
-      "fingerprint": "25b8f3ea1549e74f671833e2326d1d74f3fb3d8a8651475bd78ada975a84d4db",
-      "check_name": "SQL",
-      "message": "Possible SQL injection",
-      "file": "app/models/admin/migration_generator.rb",
-      "line": 220,
-      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
-      "code": "connection.execute(\"select\\n  u.view_schema \\\"schemaname\\\",\\n  u.view_name \\\"viewname\\\",\\n  u.table_schema referenced_table_schema,\\n  u.table_name referenced_table_name,\\n  v.view_definition\\nfrom information_schema.view_table_usage u\\njoin information_schema.views v on u.view_schema = v.table_schema\\n  and u.view_name = v.table_name\\nwhere u.table_schema not in ('information_schema', 'pg_catalog')\\n  and u.table_name = '#{table_name}'\\n  and u.table_schema = '#{schema_name}'\\norder by u.view_schema, u.view_name\\n\")",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "Admin::MigrationGenerator",
-        "method": "Admin::MigrationGenerator.views_referencing_table"
-      },
-      "user_input": "table_name",
-      "confidence": "Medium",
-      "cwe_id": [
-        89
-      ],
-      "note": ""
-    },
-    {
       "warning_type": "File Access",
       "warning_code": 16,
       "fingerprint": "2edb9849da815c5c992a7078fb2d38ceb39da72ed7f57d9ceb14aed24c43adaf",
@@ -572,29 +549,6 @@
       "confidence": "Medium",
       "cwe_id": [
         79
-      ],
-      "note": ""
-    },
-    {
-      "warning_type": "SQL Injection",
-      "warning_code": 0,
-      "fingerprint": "8eedc4fdd3c7e0de98c4a99b7caceefbbf1c42df81010c9e9a86eedc0be5d094",
-      "check_name": "SQL",
-      "message": "Possible SQL injection",
-      "file": "app/models/admin/migration_generator.rb",
-      "line": 289,
-      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
-      "code": "connection.execute(\"SELECT * FROM #{tables_and_views.find do\n (tn[\"table_name\"] == \"#{basename}_datadic\")\n end[\"table_name\"]};\\n\")",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "Admin::MigrationGenerator",
-        "method": "Admin::MigrationGenerator.data_dic"
-      },
-      "user_input": "tables_and_views.find do\n (tn[\"table_name\"] == \"#{basename}_datadic\")\n end[\"table_name\"]",
-      "confidence": "Medium",
-      "cwe_id": [
-        89
       ],
       "note": ""
     },

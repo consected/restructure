@@ -10,7 +10,7 @@ class Admin::MigrationGenerator
   DefaultMigrationSchema = Settings::DefaultMigrationSchema
   MIGRATION_TIMESTAMP_MUTEX = Mutex.new
 
-  # Named binds :schemas and :database are quoted by ActiveRecord::Base.sanitize_sql_array when each query runs
+  # Named binds are quoted by ActiveRecord::Base.sanitize_sql_array when each query runs
   TABLES_AND_VIEWS_SQL = <<~SQL.squish
     select table_schema "schema_name", table_name from information_schema.tables
     where table_schema IN (:schemas)
@@ -23,6 +23,22 @@ class Admin::MigrationGenerator
     select schemaname "schema_name", matviewname "table_name" from pg_matviews
     where schemaname IN (:schemas)
     order by "schema_name", table_name
+  SQL
+
+  VIEWS_REFERENCING_TABLE_SQL = <<~SQL.squish
+    select
+      u.view_schema "schemaname",
+      u.view_name "viewname",
+      u.table_schema referenced_table_schema,
+      u.table_name referenced_table_name,
+      v.view_definition
+    from information_schema.view_table_usage u
+    join information_schema.views v on u.view_schema = v.table_schema
+      and u.view_name = v.table_name
+    where u.table_schema not in ('information_schema', 'pg_catalog')
+      and u.table_name = :table_name
+      and u.table_schema = :schema_name
+    order by u.view_schema, u.view_name
   SQL
 
   VIEWS_SQL = <<~SQL.squish
@@ -56,6 +72,27 @@ class Admin::MigrationGenerator
         pg_catalog.col_description(c.oid, a.attnum::int) IS NOT NULL
     ;
   SQL
+
+  SCHEMAS_IN_DB_SQL = <<~SQL.squish
+    SELECT schema_name FROM information_schema.schemata;
+  SQL
+
+  FOREIGN_KEYS_SQL = <<~SQL.squish
+    SELECT
+      o.conname AS constraint_name,
+      (SELECT nspname FROM pg_namespace WHERE oid=m.relnamespace) AS source_schema,
+      m.relname AS source_table,
+      (SELECT a.attname FROM pg_attribute a WHERE a.attrelid = m.oid AND a.attnum = o.conkey[1] AND a.attisdropped = false) AS source_column,
+      (SELECT nspname FROM pg_namespace WHERE oid=f.relnamespace) AS target_schema,
+      f.relname AS target_table,
+      (SELECT a.attname FROM pg_attribute a WHERE a.attrelid = f.oid AND a.attnum = o.confkey[1] AND a.attisdropped = false) AS target_column
+    FROM
+      pg_constraint o LEFT JOIN pg_class f ON f.oid = o.confrelid LEFT JOIN pg_class m ON m.oid = o.conrelid
+    WHERE
+      o.contype = 'f' AND o.conrelid IN (SELECT oid FROM pg_class c WHERE c.relkind = 'r');
+  SQL
+
+  OBJ_DESCRIPTION_SQL = 'select obj_description(CAST(:table_name AS regclass)) c'
 
   attr_accessor :db_migration_schema, :table_name, :all_implementation_fields,
                 :table_comments, :no_master_association, :prev_table_name, :belongs_to_model,
@@ -281,28 +318,13 @@ class Admin::MigrationGenerator
   end
 
   def self.views_referencing_table(schema_name, table_name)
-    res = connection.execute <<~END_SQL
-      select
-        u.view_schema "schemaname",
-        u.view_name "viewname",
-        u.table_schema referenced_table_schema,
-        u.table_name referenced_table_name,
-        v.view_definition
-      from information_schema.view_table_usage u
-      join information_schema.views v on u.view_schema = v.table_schema
-        and u.view_name = v.table_name
-      where u.table_schema not in ('information_schema', 'pg_catalog')
-        and u.table_name = '#{table_name}'
-        and u.table_schema = '#{schema_name}'
-      order by u.view_schema, u.view_name
-    END_SQL
+    binds = { schema_name:, table_name: }
+    res = connection.execute(ActiveRecord::Base.sanitize_sql_array([VIEWS_REFERENCING_TABLE_SQL, binds]))
     res.to_a
   end
 
   def self.schemas_in_db
-    res = connection.execute <<~END_SQL
-      SELECT schema_name FROM information_schema.schemata;
-    END_SQL
+    res = connection.execute(SCHEMAS_IN_DB_SQL)
     res.pluck('schema_name')
   end
 
@@ -314,22 +336,7 @@ class Admin::MigrationGenerator
   # @return [Array {Hash}]
   def self.foreign_keys
     Rails.cache.fetch("db_foreign_keys-#{Application.version}") do
-      res = connection.execute <<~END_SQL
-
-        SELECT
-          o.conname AS constraint_name,
-          (SELECT nspname FROM pg_namespace WHERE oid=m.relnamespace) AS source_schema,
-          m.relname AS source_table,
-          (SELECT a.attname FROM pg_attribute a WHERE a.attrelid = m.oid AND a.attnum = o.conkey[1] AND a.attisdropped = false) AS source_column,
-          (SELECT nspname FROM pg_namespace WHERE oid=f.relnamespace) AS target_schema,
-          f.relname AS target_table,
-          (SELECT a.attname FROM pg_attribute a WHERE a.attrelid = f.oid AND a.attnum = o.confkey[1] AND a.attisdropped = false) AS target_column
-        FROM
-          pg_constraint o LEFT JOIN pg_class f ON f.oid = o.confrelid LEFT JOIN pg_class m ON m.oid = o.conrelid
-        WHERE
-          o.contype = 'f' AND o.conrelid IN (SELECT oid FROM pg_class c WHERE c.relkind = 'r');
-      END_SQL
-
+      res = connection.execute(FOREIGN_KEYS_SQL)
       res.to_a
     end
   end
@@ -360,9 +367,8 @@ class Admin::MigrationGenerator
     ddtab = ddtab['table_name']
 
     Rails.cache.fetch("db_data_dic-#{basename}-#{Application.version}") do
-      res = connection.execute <<~END_SQL
-        SELECT * FROM #{ddtab};
-      END_SQL
+      # Identifiers cannot be bound as parameters, so the table name is quoted instead
+      res = connection.execute("SELECT * FROM #{connection.quote_table_name(ddtab)};")
       res = res.to_a
       res = nil if nil_if_empty && res.blank?
       res
@@ -514,7 +520,9 @@ class Admin::MigrationGenerator
   def table_or_view_comment
     ActiveRecord::Base.connection.schema_cache.clear!
     if self.class.view_exists?(table_name)
-      res = self.class.connection.execute "select obj_description('#{table_name}'::regclass) c"
+      res = self.class.connection.execute(
+        ActiveRecord::Base.sanitize_sql_array([OBJ_DESCRIPTION_SQL, { table_name: table_name }])
+      )
       res[0]['c']
     else
       ActiveRecord::Base.connection.table_comment(table_name)

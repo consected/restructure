@@ -286,4 +286,31 @@ RSpec.describe 'Admin::MigrationGenerator schema search path handling', type: :m
       expect(cache.exist?(cache_key)).to be true
     end
   end
+
+  describe '.views_referencing_table with quotes in names' do
+    let(:schema) { Admin::MigrationGenerator.current_search_paths.first }
+    let(:conn) { ActiveRecord::Base.connection }
+
+    before do
+      conn.execute("DROP VIEW IF EXISTS #{schema}.zz_ref_inj_view")
+      conn.execute("DROP TABLE IF EXISTS #{schema}.zz_ref_inj_table")
+      conn.execute("CREATE TABLE #{schema}.zz_ref_inj_table (id bigint)")
+      conn.execute("CREATE VIEW #{schema}.zz_ref_inj_view AS SELECT id FROM #{schema}.zz_ref_inj_table")
+    end
+
+    after do
+      conn.execute("DROP VIEW IF EXISTS #{schema}.zz_ref_inj_view")
+      conn.execute("DROP TABLE IF EXISTS #{schema}.zz_ref_inj_table")
+    end
+
+    it 'finds the view referencing the table' do
+      rows = Admin::MigrationGenerator.views_referencing_table(schema, 'zz_ref_inj_table')
+      expect(rows.pluck('viewname')).to include('zz_ref_inj_view')
+    end
+
+    it 'treats a quote in the table name as data, not SQL' do
+      rows = Admin::MigrationGenerator.views_referencing_table(schema, "x' or '1'='1")
+      expect(rows).to eq([])
+    end
+  end
 end
