@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 # Purpose: the shared database metadata caches (column comments, foreign keys, data dictionary
-# contents) must be dropped only once a migration has completed, and the column comments cache
+# contents) must be dropped by every migration run through MigrationGenerator.migrate, but only once the
+# migration has completed, and the column comments cache
 # can be force-refreshed so comments written back to the database by a migration are never stale.
 require 'rails_helper'
 
@@ -20,15 +21,15 @@ RSpec.describe Admin::MigrationGenerator, type: :model do
   before do
     cache_keys.each { |key| Rails.cache.write(key, [{ 'cached' => true }]) }
     allow(Admin::AppTypeImport).to receive(:prevent_migrations?).and_return(false)
-    allow(described_class).to receive(:migrate).and_return(true)
+    allow(Admin::MigrationConnection).to receive(:migrate).and_return(true)
   end
 
   after { cache_keys.each { |key| Rails.cache.delete(key) } }
 
-  describe '#run_migration' do
-    it 'drops the cached metadata for the old and new table after the migration completes' do
+  describe '.migrate' do
+    it 'drops the cached column comments and foreign keys after the migration completes' do
       calls = []
-      allow(described_class).to receive(:migrate) do
+      allow(Admin::MigrationConnection).to receive(:migrate) do
         calls << :migrate
         expect(cache_keys.map { |key| Rails.cache.read(key) }).to all(be_present)
       end
@@ -37,18 +38,27 @@ RSpec.describe Admin::MigrationGenerator, type: :model do
         original.call(**args)
       end
 
-      generator.run_migration
+      described_class.migrate('metadata_cache_dir')
 
       expect(calls).to eq(%i[migrate invalidate])
-      expect(cache_keys.map { |key| Rails.cache.read(key) }).to all(be_nil)
+      expect(Rails.cache.read(cache_keys[0])).to be_nil
+      expect(Rails.cache.read(cache_keys[1])).to be_nil
     end
 
     it 'leaves the cached metadata alone when the migration fails' do
-      allow(described_class).to receive(:migrate).and_raise(FphsException, 'migration failure')
+      allow(Admin::MigrationConnection).to receive(:migrate).and_raise(FphsException, 'migration failure')
 
-      expect { generator.run_migration }.to raise_error(FphsException, /migration failure/)
+      expect { described_class.migrate('metadata_cache_dir') }.to raise_error(FphsException, /migration failure/)
 
       expect(cache_keys.map { |key| Rails.cache.read(key) }).to all(be_present)
+    end
+  end
+
+  describe '#run_migration' do
+    it 'drops the cached metadata for the old and new table after the migration completes' do
+      generator.run_migration
+
+      expect(cache_keys.map { |key| Rails.cache.read(key) }).to all(be_nil)
     end
 
     it 'leaves the cached metadata alone when migrations are not allowed' do

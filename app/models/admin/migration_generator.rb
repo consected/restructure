@@ -486,14 +486,18 @@ class Admin::MigrationGenerator
   end
 
   #
-  # Run the migrations and reset tables and view cache
-  def self.migrate(dirname = nil, do_migration: nil)
+  # Run the migrations, then reset the tables and views memo and drop the cached database metadata.
+  # The cached metadata is left alone if the migration fails.
+  # @param [Array{String}] table_names - tables whose cached data dictionary contents may have changed
+  def self.migrate(dirname = nil, do_migration: nil, table_names: [])
     msg = "Running migration from #{dirname}"
     Rails.logger.warn msg
     ExceptionExtensions.puts_or_tmp_log msg unless Rails.env.production?
 
     Admin::MigrationConnection.migrate(dirname, do_migration:)
     tables_and_views_reset!
+    # The migration may have changed comments, foreign keys or data dictionary tables
+    invalidate_definition_metadata_cache!(table_names:)
   end
 
   #
@@ -873,9 +877,7 @@ class Admin::MigrationGenerator
   def migrate(dirname = nil, do_migration: nil)
     @do_migration = do_migration unless do_migration.nil?
     dirname ||= db_migration_dirname
-    self.class.migrate(dirname, do_migration: @do_migration)
-    # The migration may have changed comments, foreign keys or data dictionary tables
-    self.class.invalidate_definition_metadata_cache!(table_names: [prev_table_name, table_name])
+    self.class.migrate(dirname, do_migration: @do_migration, table_names: [prev_table_name, table_name])
   end
 
   #
