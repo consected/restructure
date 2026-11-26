@@ -3,6 +3,7 @@
 # Regression coverage for blank schema names in generated schema-migration files.
 # This guards against creating invalid CREATE SCHEMA migrations when no schema name
 # is available for an app or test environment.
+# It also checks that column comments are not cached when the schema search path is empty.
 require 'rails_helper'
 
 RSpec.describe 'Admin::MigrationGenerator schema search path handling', type: :model do
@@ -257,6 +258,59 @@ RSpec.describe 'Admin::MigrationGenerator schema search path handling', type: :m
       # Clean up
       dm.current_admin = @admin
       dm.disable!
+    end
+  end
+
+  describe '.column_comments caching' do
+    let(:cache) { ActiveSupport::Cache::MemoryStore.new }
+    let(:cache_key) { "db_column_comments-#{Application.version}" }
+
+    before do
+      allow(Rails).to receive(:cache).and_return(cache)
+    end
+
+    it 'returns no comments and does not cache a result when the search path is empty' do
+      allow(Admin::MigrationGenerator).to receive(:current_search_paths).and_return([])
+
+      expect(Admin::MigrationGenerator.column_comments).to eq([])
+      expect(cache.exist?(cache_key)).to be false
+    end
+
+    it 'caches comments for the real search path after an empty search path was seen' do
+      allow(Admin::MigrationGenerator).to receive(:current_search_paths).and_return([])
+      Admin::MigrationGenerator.column_comments
+
+      allow(Admin::MigrationGenerator).to receive(:current_search_paths).and_call_original
+      Admin::MigrationGenerator.column_comments
+
+      expect(cache.exist?(cache_key)).to be true
+    end
+  end
+
+  describe '.views_referencing_table with quotes in names' do
+    let(:schema) { Admin::MigrationGenerator.current_search_paths.first }
+    let(:conn) { ActiveRecord::Base.connection }
+
+    before do
+      conn.execute("DROP VIEW IF EXISTS #{schema}.zz_ref_inj_view")
+      conn.execute("DROP TABLE IF EXISTS #{schema}.zz_ref_inj_table")
+      conn.execute("CREATE TABLE #{schema}.zz_ref_inj_table (id bigint)")
+      conn.execute("CREATE VIEW #{schema}.zz_ref_inj_view AS SELECT id FROM #{schema}.zz_ref_inj_table")
+    end
+
+    after do
+      conn.execute("DROP VIEW IF EXISTS #{schema}.zz_ref_inj_view")
+      conn.execute("DROP TABLE IF EXISTS #{schema}.zz_ref_inj_table")
+    end
+
+    it 'finds the view referencing the table' do
+      rows = Admin::MigrationGenerator.views_referencing_table(schema, 'zz_ref_inj_table')
+      expect(rows.pluck('viewname')).to include('zz_ref_inj_view')
+    end
+
+    it 'treats a quote in the table name as data, not SQL' do
+      rows = Admin::MigrationGenerator.views_referencing_table(schema, "x' or '1'='1")
+      expect(rows).to eq([])
     end
   end
 end
