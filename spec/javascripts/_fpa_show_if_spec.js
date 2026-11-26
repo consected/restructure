@@ -1,5 +1,23 @@
+// Covers show_if evaluation for selection-like field names and suffixed selection types.
 //= require app/_fpa_show_if.js
 describe('show_if', function () {
+  it('evaluates a selection-like field and recognizes suffixed selections', function () {
+    var field_def_init = {
+      allow_this_request: {
+        condition: '=',
+        value: true
+      }
+    };
+    var data = { allow_this_request: true };
+
+    expect(_fpa.show_if.methods.calc_conditions(field_def_init, data)).toBe(true);
+
+    field_def_init = { all_2: { field_a: 2 } };
+    data = { field_a: 2 };
+
+    expect(_fpa.show_if.methods.calc_conditions(field_def_init, data)).toBe(true);
+  });
+
   it("tests that all specified fields have a value", function () {
 
     var res

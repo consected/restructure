@@ -72,6 +72,21 @@ RSpec.describe 'Calculate conditional actions', type: :model do
     ActivityLog::PlayerContactPhone.definition.force_option_config_parse
   end
 
+  it 'evaluates selection-like field names as fields in validation condition hashes' do
+    condition = CalcActions::NonQueryCondition.new(current_instance: @al, table: :this)
+    condition.add(:this, :allow_this_request, { validate: { present: true } })
+
+    expect(condition).to receive(:calc_complex_validation).with({ present: true }, nil).and_return(true)
+    expect(ConditionalActions).not_to receive(:new)
+    expect(condition.condition_type_all).to be true
+  end
+
+  it 'continues evaluating selection conditions with suffixes' do
+    condition = ConditionalActions.new({ all_2: { this: { select_who: @al.select_who } } }, @al)
+
+    expect(condition.calc_action_if).to be true
+  end
+
   it 'always returns false for never and true for always' do
     conf = { never: true }
     res = ConditionalActions.new conf, @al

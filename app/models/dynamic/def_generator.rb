@@ -567,13 +567,11 @@ module Dynamic
     end
 
     #
-    # Return the reserved condition selection prefix matching the start of `val`, if any.
+    # Return a selection prefix at the start of `val` when followed by a non-letter.
     # @param [String, Symbol, nil] val candidate field or external identifier name
     # @return [String, nil] matching selection prefix, or nil if none matches
     def reserved_selection_type_prefix(val)
-      CalcActions::Common::SelectionTypes.map(&:to_s).find do |prefix|
-        val.to_s.start_with?(prefix)
-      end
+      val.to_s[CalcActions::Common::SelectionTypePattern]
     end
 
     #

@@ -1,5 +1,5 @@
 Name: |
-  table name - must not start with prefixes `all`, `any`, `not_all` or `not_any`
+  table name - must not be `all`, `any`, `not_all` or `not_any`, or begin with one of them followed by a non-letter (such as `all_2` or `any_records`). Names such as `allow_records` are allowed.
 
 Label: |
   name presented to end users

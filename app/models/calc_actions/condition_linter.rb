@@ -14,7 +14,6 @@ module CalcActions
   #                lookup: sub-queries and perspective conditional_calculation. The top level is a block
   #                of record sources, optionally with selection types.
   class ConditionLinter
-    SELECTION_TYPES = CalcActions::Common::SelectionTypes
     RETURN_TYPES = CalcActions::Calculate::ReturnTypes
     NON_JOIN_KEYS = CalcActions::Calculate::NonJoinTableNames
     NON_QUERY_SOURCES = CalcActions::NonQueryCondition::NonQueryTableNames
@@ -569,7 +568,7 @@ module CalcActions
 
     # Selection types may carry a suffix, such as all_2 or not_any_cancelled
     def selection_base(key)
-      SELECTION_TYPES.find { |selection| key.to_s.start_with?(selection.to_s) }
+      key.to_s[CalcActions::Common::SelectionTypePattern, 1]&.to_sym
     end
 
     def join(path, key)

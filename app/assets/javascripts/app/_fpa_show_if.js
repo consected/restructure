@@ -166,8 +166,6 @@ _fpa.show_if.methods = {
   // data: hash of field_name => field_value for the form
   calc_conditions: function (cond_def_init, data) {
 
-    // Valid condition types
-    const cond_types = ['all', 'any', 'not_all', 'not_any'];
     var cond_success = true;
 
     // Iterate through each top level rule
@@ -189,13 +187,9 @@ _fpa.show_if.methods = {
       // If the definition is a hash and it has a condition type specified, use the key
       // as the condition type, and the inner value as the condition definition
       if (cond_def_init.hasOwnProperty(cond_type) && typeof (cond_def_init[cond_type]) == 'object' && !Array.isArray(cond_def_init[cond_type])) {
-        for (var ci in cond_types) {
-          var cv = cond_types[ci];
-          if (cond_type.indexOf(cv) === 0) {
-            cond_def = cond_def_init[cond_type];
-            is_cond_type = true;
-            break;
-          }
+        if (/^(all|any|not_all|not_any)(?![a-zA-Z])/.test(cond_type)) {
+          cond_def = cond_def_init[cond_type];
+          is_cond_type = true;
         }
       }
 
