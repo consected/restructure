@@ -3,6 +3,7 @@
 # Regression coverage for blank schema names in generated schema-migration files.
 # This guards against creating invalid CREATE SCHEMA migrations when no schema name
 # is available for an app or test environment.
+# It also checks that column comments are not cached when the schema search path is empty.
 require 'rails_helper'
 
 RSpec.describe 'Admin::MigrationGenerator schema search path handling', type: :model do
@@ -257,6 +258,32 @@ RSpec.describe 'Admin::MigrationGenerator schema search path handling', type: :m
       # Clean up
       dm.current_admin = @admin
       dm.disable!
+    end
+  end
+
+  describe '.column_comments caching' do
+    let(:cache) { ActiveSupport::Cache::MemoryStore.new }
+    let(:cache_key) { "db_column_comments-#{Application.version}" }
+
+    before do
+      allow(Rails).to receive(:cache).and_return(cache)
+    end
+
+    it 'returns no comments and does not cache a result when the search path is empty' do
+      allow(Admin::MigrationGenerator).to receive(:current_search_paths).and_return([])
+
+      expect(Admin::MigrationGenerator.column_comments).to eq([])
+      expect(cache.exist?(cache_key)).to be false
+    end
+
+    it 'caches comments for the real search path after an empty search path was seen' do
+      allow(Admin::MigrationGenerator).to receive(:current_search_paths).and_return([])
+      Admin::MigrationGenerator.column_comments
+
+      allow(Admin::MigrationGenerator).to receive(:current_search_paths).and_call_original
+      Admin::MigrationGenerator.column_comments
+
+      expect(cache.exist?(cache_key)).to be true
     end
   end
 end

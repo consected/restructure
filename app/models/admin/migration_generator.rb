@@ -10,6 +10,53 @@ class Admin::MigrationGenerator
   DefaultMigrationSchema = Settings::DefaultMigrationSchema
   MIGRATION_TIMESTAMP_MUTEX = Mutex.new
 
+  # Named binds :schemas and :database are quoted by ActiveRecord::Base.sanitize_sql_array when each query runs
+  TABLES_AND_VIEWS_SQL = <<~SQL.squish
+    select table_schema "schema_name", table_name from information_schema.tables
+    where table_schema IN (:schemas)
+    and table_catalog = :database
+    UNION
+    select table_schema "schema_name", table_name from information_schema.views
+    where table_schema IN (:schemas)
+    and table_catalog = :database
+    UNION
+    select schemaname "schema_name", matviewname "table_name" from pg_matviews
+    where schemaname IN (:schemas)
+    order by "schema_name", table_name
+  SQL
+
+  VIEWS_SQL = <<~SQL.squish
+    select table_schema "schema_name", table_name from information_schema.views
+    where table_schema IN (:schemas)
+    and table_catalog = :database
+    order by "schema_name", table_name
+  SQL
+
+  MATERIALIZED_VIEWS_SQL = <<~SQL.squish
+    select schemaname "schema_name", matviewname "table_name" from pg_matviews
+    where schemaname IN (:schemas)
+    order by "schema_name", "table_name"
+  SQL
+
+  COLUMN_COMMENTS_SQL = <<~SQL.squish
+    SELECT
+        n.nspname "schema_name",
+        c.relname "table_name",
+        a.attname "column_name",
+        pg_catalog.col_description(c.oid, a.attnum::int) AS column_comment
+    FROM
+        pg_catalog.pg_attribute a
+    INNER JOIN pg_catalog.pg_class c ON c.oid = a.attrelid
+    INNER JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+    WHERE
+        c.relkind IN ('r', 'p', 'v', 'm', 'f') AND
+        a.attnum > 0 AND
+        NOT a.attisdropped AND
+        n.nspname IN (:schemas) AND
+        pg_catalog.col_description(c.oid, a.attnum::int) IS NOT NULL
+    ;
+  SQL
+
   attr_accessor :db_migration_schema, :table_name, :all_implementation_fields,
                 :table_comments, :no_master_association, :prev_table_name, :belongs_to_model,
                 :allow_migrations, :db_configs, :resource_type, :view_sql, :all_referenced_tables,
@@ -78,9 +125,13 @@ class Admin::MigrationGenerator
     connection.current_database
   end
 
+  #
+  # Generate a migration timestamp (YYYYmmddHHMMSS) that is later than the current time,
+  # any timestamp issued earlier in this process, and the timestamps of existing migrations in dirname
   def self.next_migration_timestamp(dirname)
     MIGRATION_TIMESTAMP_MUTEX.synchronize do
-      current_time = Time.now
+      # Local system time, matching the local zone that Time.strptime uses for existing timestamps
+      current_time = Time.now.getlocal
       previous_time = @last_migration_timestamp && Time.strptime(@last_migration_timestamp, '%Y%m%d%H%M%S')
       existing_times = if Dir.exist?(dirname)
                          Dir.glob('*.rb', base: dirname).filter_map do |filename|
@@ -97,31 +148,14 @@ class Admin::MigrationGenerator
     end
   end
 
-  #
-  # Get the current schema search_path, then quote each item and comma separate them for use in a query
-  # @return [String]
-  def self.quoted_schemas
-    @quoted_schemas ||= current_search_paths.map { |s| "'#{s}'" }.join(',')
-  end
-
   # Get the current list of table and views with the schema they belong to
   # This is limited to the current transaction visibility
   # @return [Array(Hash {schema_name, table_name})] array of schema_name and table_name hashes for each table
   def self.tables_and_views
-    @tables_and_views ||=
-      connection.execute <<~END_SQL
-        select table_schema "schema_name", table_name from information_schema.tables
-        where table_schema IN (#{quoted_schemas})
-        and table_catalog = '#{current_database}'
-        UNION
-        select table_schema "schema_name", table_name from information_schema.views
-        where table_schema IN (#{quoted_schemas})
-        and table_catalog = '#{current_database}'
-        UNION
-        select schemaname "schema_name", matviewname "table_name" from pg_matviews
-        where schemaname IN (#{quoted_schemas})
-        order by "schema_name", table_name
-      END_SQL
+    @tables_and_views ||= begin
+      binds = { schemas: current_search_paths, database: current_database }
+      connection.execute(ActiveRecord::Base.sanitize_sql_array([TABLES_AND_VIEWS_SQL, binds]))
+    end
   end
 
   #
@@ -162,13 +196,10 @@ class Admin::MigrationGenerator
   # Get the views (as opposed to tables) with the schema they belong to, in the schemas visible to the app
   # @return [Array(Hash {schema_name, table_name})]
   def self.views
-    @views ||=
-      connection.execute <<~END_SQL
-        select table_schema "schema_name", table_name from information_schema.views
-        where table_schema IN (#{quoted_schemas})
-        and table_catalog = '#{current_database}'
-        order by "schema_name", table_name
-      END_SQL
+    @views ||= begin
+      binds = { schemas: current_search_paths, database: current_database }
+      connection.execute(ActiveRecord::Base.sanitize_sql_array([VIEWS_SQL, binds]))
+    end
   end
 
   #
@@ -176,12 +207,10 @@ class Admin::MigrationGenerator
   # Materialized views are not reported by information_schema, so they are read from pg_matviews.
   # @return [Array(Hash {schema_name, table_name})]
   def self.materialized_views
-    @materialized_views ||=
-      connection.execute <<~END_SQL
-        select schemaname "schema_name", matviewname "table_name" from pg_matviews
-        where schemaname IN (#{quoted_schemas})
-        order by "schema_name", "table_name"
-      END_SQL
+    @materialized_views ||= begin
+      binds = { schemas: current_search_paths }
+      connection.execute(ActiveRecord::Base.sanitize_sql_array([MATERIALIZED_VIEWS_SQL, binds]))
+    end
   end
 
   #
@@ -241,26 +270,12 @@ class Admin::MigrationGenerator
   # Each entry is a Hash: { schema_name: , table_name: , column_name: , column_comment: }
   # @return [Array{Hash}]
   def self.column_comments
-    Rails.cache.fetch("db_column_comments-#{Application.version}") do
-      res = connection.execute <<~END_SQL
-        SELECT
-            n.nspname "schema_name",
-            c.relname "table_name",
-            a.attname "column_name",
-            pg_catalog.col_description(c.oid, a.attnum::int) AS column_comment
-        FROM
-            pg_catalog.pg_attribute a
-        INNER JOIN pg_catalog.pg_class c ON c.oid = a.attrelid
-        INNER JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
-        WHERE
-            c.relkind IN ('r', 'p', 'v', 'm', 'f') AND
-            a.attnum > 0 AND
-            NOT a.attisdropped AND
-            n.nspname IN (#{quoted_schemas}) AND
-            pg_catalog.col_description(c.oid, a.attnum::int) IS NOT NULL
-        ;
-      END_SQL
+    schemas = current_search_paths
+    # Don't cache an empty result for an empty search path, as it would hide comments once the path is restored
+    return [] if schemas.empty?
 
+    Rails.cache.fetch("db_column_comments-#{Application.version}") do
+      res = connection.execute(ActiveRecord::Base.sanitize_sql_array([COLUMN_COMMENTS_SQL, { schemas: schemas }]))
       res.to_a
     end
   end
@@ -288,11 +303,11 @@ class Admin::MigrationGenerator
     res = connection.execute <<~END_SQL
       SELECT schema_name FROM information_schema.schemata;
     END_SQL
-    res.map { |r| r['schema_name'] }
+    res.pluck('schema_name')
   end
 
   #
-  # Returns a list of foreign key definitions for all tables in the search path.
+  # Returns a list of foreign key definitions for all tables in the database, across all schemas.
   # Returns an array of hashes that link source and target:
   # { constraint_name: , source_schema: , source_table: , source_column: ,
   #   target_schema: , target_table: , target_column: }
@@ -334,7 +349,7 @@ class Admin::MigrationGenerator
   # Generate a data dictionary table name related to the provided table name
   # and check if it exists.
   # If it does, run a query to retrieve the full data dictionary content as an array,
-  # caching it for future use,
+  # caching it for future use.
   # @param [String] basename
   # @param [true|false] nil_if_empty - return a nil result rather than empty array
   # @return [Array{Hash}] - return results
@@ -418,7 +433,7 @@ class Admin::MigrationGenerator
   # @param [String] table_name
   # @return [String|nil] the column name or nil if not found
   def self.find_primary_key(schema_name, table_name)
-    sql = <<~SQL
+    sql = <<~SQL.squish
       SELECT
         pg_attribute.attname as column_name
       FROM pg_index, pg_class, pg_attribute, pg_namespace
@@ -443,7 +458,7 @@ class Admin::MigrationGenerator
 
   #
   # Wrap ActiveRecord::MigrationContext since its interface changes between Rails 5, 6 and 7
-  # @return [ActiveRecord::MigrationContext] instance of ActiveRecord::MigrationContext for the specified migration dirname
+  # @return [ActiveRecord::MigrationContext] for the specified migration dirname
   def self.migration_context(dirname)
     connection_pool = ActiveRecord::Tasks::DatabaseTasks.migration_connection_pool
     schema_migration = ActiveRecord::SchemaMigration.new(connection_pool)
@@ -524,7 +539,7 @@ class Admin::MigrationGenerator
   #
   # Identify changes to database table column comments
   # based on the current table_comments configuration
-  # @return [Array{Hash}] - array of only changed comments { col_name: new_comment }
+  # @return [Hash|nil] changed comments keyed by column name, or nil if the columns cannot be read
   def fields_comments_changes
     begin
       cols = if self.class.table_or_view_exists?(table_name)
@@ -548,14 +563,14 @@ class Admin::MigrationGenerator
   end
 
   #
-  # Get the SELECT definition of a view from Postgres,
-  # or nil if the view doesn't exist
+  # Get the SELECT definition of a view or materialized view from Postgres,
+  # or nil if it doesn't exist
   # @param [String] schema
   # @param [String] view_name
   # @return [String | nil]
   def self.view_definition(schema, view_name)
     # pg_get_viewdef works for both views and materialized views
-    sql = <<~SQL
+    sql = <<~SQL.squish
       select pg_get_viewdef(c.oid) as definition
       from pg_class c
       join pg_namespace n on n.oid = c.relnamespace
@@ -573,12 +588,12 @@ class Admin::MigrationGenerator
   end
 
   #
-  # Get the SELECT definition of multiple view matching a LIKE from Postgres
+  # Get the SELECT definition of views matching a LIKE pattern from Postgres (not materialized views)
   # @param [String] schema
   # @param [String] view_name
   # @return [Array]
   def self.view_definitions(schema, view_name)
-    sql = <<~SQL
+    sql = <<~SQL.squish
       select schemaname, viewname, definition
       from pg_views
       where viewname LIKE $1 and schemaname = $2;
@@ -600,14 +615,12 @@ class Admin::MigrationGenerator
   #
   # Find field changes, returning an array of arrays:
   # [ [added], [removed], [changed], [old_colnames] ]
-  # @return [Array]
+  # or nil if the existing table columns cannot be read
+  # @return [Array|nil]
+  # Known limitation (follow-up): for a renamed table, the existing columns are read using the new
+  # table name, which does not exist yet, so this returns nil. A fix must make both table_columns and
+  # standard_columns use prev_table_name, otherwise existing id columns are reported as removed.
   def field_changes
-    table_name = if table_name_changed
-                   prev_table_name
-                 else
-                   self.table_name
-                 end
-
     begin
       cols = table_columns
       old_colnames = cols.map(&:name) - standard_columns
@@ -651,7 +664,7 @@ class Admin::MigrationGenerator
   # Has the no_master_association setting changed, often based on
   # the dynamic model foreign key being blank
   # @return [true|false]
-  def no_master_association_changed
+  def no_master_association_changed?
     prev_no_master_association = !master_fk?
     prev_no_master_association != !!no_master_association
   end
@@ -665,7 +678,7 @@ class Admin::MigrationGenerator
 
   #
   # Content for a migration file for a table update
-  # @return [String]
+  # @return [String|nil] content, or nil if there are no changes to apply
   def migration_update_table
     added, removed, changed, prev_fields = field_changes
 
@@ -675,7 +688,7 @@ class Admin::MigrationGenerator
     end
 
     unless added.present? || removed.present? || changed.present? ||
-           new_table_comment || new_fields_comments.present? || table_name_changed || no_master_association_changed
+           new_table_comment || new_fields_comments.present? || table_name_changed || no_master_association_changed?
       return
     end
 
@@ -732,7 +745,7 @@ class Admin::MigrationGenerator
   def migration_set_attribs
     tcs = table_comments || {}
 
-    if view_sql&.strip&.present?
+    if view_sql.present?
       view_sql_text = <<~VSTEXT
         self.view_sql = <<~VIEWSQL
           #{view_sql}
@@ -762,20 +775,19 @@ class Admin::MigrationGenerator
   end
 
   #
-  # Write a schema-specific migration only if we are in a development mode
+  # Write a migration file to the migrations directory, if migrations are allowed
   # @param [String] mig_text - the migration text to be written
   # @param [String | Symbol] name - underscored model name
   # @param [String] version - six character alphanumeric version
   # @param [String] mode - "create" or "update" type of migration
   # @param [String] export_type - optionally add a type "--export_type" suffix to the directory, "exports" for example
-  # @return [String] full file path
+  # @return [String | nil] full file path, or nil if migrations are not allowed
   def write_db_migration(mig_text, name, version = nil, mode: 'create', export_type: nil)
     return unless allow_migrations
 
     dirname = db_migration_dirname export_type
 
     # Ensure we don't get overlapping migration version numbers or class names
-    cname = nil
     version ||= migration_version
     cname_us = "#{mode}_#{name}_#{version}"
     raise FphsException, "Error in naming of migration #{cname_us}" if cname_us != cname_us.id_underscore
@@ -812,12 +824,11 @@ class Admin::MigrationGenerator
   end
 
   # Relative path to the failed migrations directory.
-  def db_migration_failed_dirname
-    Admin::MigrationConnection.db_migration_failed_dirname
-  end
+  delegate :db_migration_failed_dirname, to: :'Admin::MigrationConnection'
 
   #
-  # Run migrations in the current migration directory specified by #db_migration_dirname
+  # Run migrations in the current migration directory specified by #db_migration_dirname,
+  # unless migrations are prevented, or not allowed for the schema
   def run_migration
     if Admin::AppTypeImport.prevent_migrations?
       msg = 'Migrations prevented by Admin::AppTypeImport - skipping migration'
@@ -827,7 +838,8 @@ class Admin::MigrationGenerator
     end
 
     unless allow_migrations && db_migration_schema != DefaultMigrationSchema
-      msg = "Migrations not allowed or targeting (#{db_migration_schema}) default schema (#{DefaultMigrationSchema}) - skipping migration"
+      msg = "Migrations not allowed or targeting (#{db_migration_schema}) default schema " \
+            "(#{DefaultMigrationSchema}) - skipping migration"
       Rails.logger.warn msg
       ExceptionExtensions.puts_or_tmp_log msg unless Rails.env.production?
       return
@@ -843,7 +855,7 @@ class Admin::MigrationGenerator
   end
 
   #
-  # Set a migration version timestamp
+  # Get a base 36 version string derived from the current time, used in migration names
   def migration_version
     @migration_version ||= (Time.now.to_f * 100_000).to_i.to_s(36)
   end
@@ -918,7 +930,8 @@ class Admin::MigrationGenerator
     do_create_or_update = if mode == 'create'
                             "create_external_identifier_tables :#{dynamic_def.external_id_attribute}, :#{ftype}"
                           elsif mode == 'create_or_update'
-                            "create_or_update_external_identifier_tables :#{dynamic_def.external_id_attribute}, :#{ftype}"
+                            'create_or_update_external_identifier_tables ' \
+                              ":#{dynamic_def.external_id_attribute}, :#{ftype}"
                           else
                             migration_update_table
                           end
@@ -941,7 +954,7 @@ class Admin::MigrationGenerator
   private
 
   #
-  # Content for a migration to create a schema
+  # Content for a migration to create a schema, or nil if the schema name is blank
   def schema_generator_script(schema_name, mode = 'create', owner: DefaultSchemaOwner)
     if schema_name.blank?
       Rails.logger.warn 'Skipping schema migration generation because the schema name is blank.'
@@ -950,7 +963,7 @@ class Admin::MigrationGenerator
 
     cname = "#{mode}_#{schema_name}_schema_#{migration_version}".camelize
 
-    raise FphsException, "No schema owner provided for schema #{schema_name}" unless owner.present?
+    raise FphsException, "No schema owner provided for schema #{schema_name}" if owner.blank?
 
     <<~CONTENT
       require 'active_record/migration/app_generator'

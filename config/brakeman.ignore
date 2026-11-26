@@ -125,29 +125,6 @@
       "note": ""
     },
     {
-      "warning_type": "SQL Injection",
-      "warning_code": 0,
-      "fingerprint": "1ef406f7ae232b6060832fc9f74de3c73debb32b49384ef77a63c8e5338379b0",
-      "check_name": "SQL",
-      "message": "Possible SQL injection",
-      "file": "app/models/admin/migration_generator.rb",
-      "line": 114,
-      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
-      "code": "connection.execute(\"select table_schema \\\"schema_name\\\", table_name from information_schema.tables\\nwhere table_schema IN (#{quoted_schemas})\\nand table_catalog = '#{current_database}'\\nUNION\\nselect table_schema \\\"schema_name\\\", table_name from information_schema.views\\nwhere table_schema IN (#{quoted_schemas})\\nand table_catalog = '#{current_database}'\\norder by \\\"schema_name\\\", table_name\\n\")",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "Admin::MigrationGenerator",
-        "method": "Admin::MigrationGenerator.tables_and_views"
-      },
-      "user_input": "quoted_schemas",
-      "confidence": "Medium",
-      "cwe_id": [
-        89
-      ],
-      "note": ""
-    },
-    {
       "warning_type": "File Access",
       "warning_code": 16,
       "fingerprint": "2117a43ea3be966dd0fb596d6a98fe3e836128500f61f750d83fd24b2df625ae",
@@ -563,29 +540,6 @@
         22
       ],
       "note": "False positive: the job generates one SecureRandom URL-safe token and computes the archive path once. PreparedDownload#path_for enforces the strict 43-character TokenPattern and positive user ID; mkdir, rename, and cleanup reuse that validated per-user path, with only a SecureRandom temp suffix. The request path is never used for writes."
-    },
-    {
-      "warning_type": "SQL Injection",
-      "warning_code": 0,
-      "fingerprint": "8aab190043a4006f4d50d665865d8a1a6f412f450c1dcaa0ada8c58202fb9b0e",
-      "check_name": "SQL",
-      "message": "Possible SQL injection",
-      "file": "app/models/admin/migration_generator.rb",
-      "line": 198,
-      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
-      "code": "connection.execute(\"SELECT\\n    cols.table_schema \\\"schema_name\\\",\\n    cols.table_name,\\n    cols.column_name,\\n    pg_catalog.col_description(c.oid, cols.ordinal_position::int) AS column_comment\\nFROM\\n    information_schema.columns cols\\nINNER JOIN pg_catalog.pg_class c\\nON\\n  c.oid = ('\\\"' || cols.table_name || '\\\"')::regclass::oid\\n  AND c.relname = cols.table_name\\n\\nWHERE\\n    cols.table_catalog = '#{current_database}' AND\\n    cols.table_schema IN (#{quoted_schemas}) AND\\n    pg_catalog.col_description(c.oid, cols.ordinal_position::int) IS NOT NULL\\n;\\n\")",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "Admin::MigrationGenerator",
-        "method": "Admin::MigrationGenerator.column_comments"
-      },
-      "user_input": "current_database",
-      "confidence": "Medium",
-      "cwe_id": [
-        89
-      ],
-      "note": ""
     },
     {
       "warning_type": "Cross-Site Scripting",
