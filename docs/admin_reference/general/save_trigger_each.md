@@ -30,6 +30,10 @@ This produces four log entries: `0/outer_a => 0/inner_a`,
 `0/outer_a => 1/inner_b`, `1/outer_b => 0/inner_a`, and
 `1/outer_b => 1/inner_b`.
 
+When `background` is used inside `do:`, it queues one background job per iteration. Use the
+`with:` context mapping on each background trigger to pass that iteration's selected index or
+value; see [background triggers](save_trigger_background.md).
+
 `value:` and `do:` may be omitted for compatibility with older configurations. Without
 `value:`, the `do:` list runs once with a nil iterator value. Without `do:`, the iteration
 produces no nested trigger results.

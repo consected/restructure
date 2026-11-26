@@ -13,7 +13,8 @@ class SaveTriggersBackgroundJob < ApplicationJob
   # @param [Integer] item_id - the ID of the item
   # @param [Integer] user_id - the ID of the user to run as
   # @param [Array<Hash>] triggers - array of trigger configurations
-  def perform(item_class:, item_id:, user_id:, triggers:)
+  # @param [Hash, nil] context - explicitly selected foreground values for the background triggers
+  def perform(item_class:, item_id:, user_id:, triggers:, context: nil)
     Rails.logger.info "[SaveTriggersBackgroundJob] Starting for #{item_class}##{item_id}"
 
     # Resolve the model class via the Resources::Models registry (allow-list) rather
@@ -41,7 +42,9 @@ class SaveTriggersBackgroundJob < ApplicationJob
     if user_id
       user = User.find(user_id)
       item.current_user = user
+      set_context_current_user(context, user)
     end
+    item.background_context = context if context && item.respond_to?(:background_context=)
 
     # Initialize save_trigger_results if needed
     item.save_trigger_results ||= {} if item.respond_to?(:save_trigger_results=)
@@ -72,5 +75,23 @@ class SaveTriggersBackgroundJob < ApplicationJob
     Rails.logger.info "[SaveTriggersBackgroundJob] Completed #{results.length} triggers for #{item_class}##{item_id}"
 
     results
+  end
+
+  private
+
+  # Sets current_user on every record in a context value, including records nested in Hashes and Arrays,
+  # so they are read as the job user, as the item itself is.
+  # @param value [Object] a resolved context value
+  # @param user [User] the user the job runs as
+  # @return [void]
+  def set_context_current_user(value, user)
+    case value
+    when Hash
+      value.each_value { |nested| set_context_current_user(nested, user) }
+    when Array
+      value.each { |nested| set_context_current_user(nested, user) }
+    else
+      value.current_user = user if value.respond_to?(:current_user=)
+    end
   end
 end

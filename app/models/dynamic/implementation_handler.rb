@@ -22,10 +22,11 @@ module Dynamic
       # skip_save_trigger: Prevent save triggers from running
       # save_trigger_results: Results from stored locally by save triggers
       # trigger_variables: Variables set by the set_variables save trigger
+      # background_context: Explicitly selected values passed to a background trigger
       # in_before_save_trigger: true while a before_save trigger is being processed for this
       #   record - lets a trigger (e.g. update_this) detect it's targeting the very record
       #   currently being saved, so it can avoid a reentrant save (see issue #1384)
-      attr_accessor :skip_save_trigger, :save_trigger_results, :trigger_variables, :option_type,
+      attr_accessor :skip_save_trigger, :save_trigger_results, :trigger_variables, :background_context, :option_type,
                     :in_before_save_trigger
     end
 

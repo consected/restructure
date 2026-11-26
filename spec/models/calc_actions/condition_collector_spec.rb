@@ -90,6 +90,33 @@ RSpec.describe CalcActions::ConditionCollector, type: :model do
     )
   end
 
+  it 'collects conditions in background lifecycle hooks as tasks, not as trigger names' do
+    entries = collect(save_trigger: {
+                        on_create: [{ background: {
+                          log: { message: 'x', if: cond },
+                          on_failure: { log: { message: 'y', if: cond } }
+                        } }]
+                      })
+
+    expect(paths_of(entries)).to contain_exactly(
+      'default.save_trigger.on_create[0].background[0].log.if',
+      'default.save_trigger.on_create[0].background.on_failure.log.if'
+    )
+  end
+
+  it 'collects background do tasks and with value expressions' do
+    entries = collect(save_trigger: {
+                        on_create: [{ background: {
+                          with: { selected: value },
+                          do: [{ log: { message: 'value' } }]
+                        } }]
+                      })
+
+    expect(paths_of(entries)).to contain_exactly(
+      'default.save_trigger.on_create[0].background.with.selected'
+    )
+  end
+
   it 'collects batch trigger on_record tasks and config trigger on_define tasks' do
     entries = collect(batch_trigger: { on_record: [{ run_batch_trigger: { if: cond, mode: 'x' } }] },
                       config_trigger: { on_define: [{ create_defaults: {} }] })
