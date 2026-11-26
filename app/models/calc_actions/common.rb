@@ -6,6 +6,9 @@ module CalcActions
 
     SelectionTypes = %i[all any not_all not_any].freeze
 
+    # Selection keys may have a suffix, but the prefix must end before a letter.
+    SelectionTypePattern = /\A(all|any|not_all|not_any)(?![a-zA-Z])/
+
     ValidExtraConditionsArrays = [
       '= ANY', # The value of this field (must be scalar) matches any value from the retrieved array field
       '= ANY REV', # Reverse the operator order
@@ -51,7 +54,7 @@ module CalcActions
       val
     end
 
-    # Check if the supplied key is a selection type, starting :all, :not_all, :any, :not_any
+    # Check if the supplied key starts with a selection type followed by a non-letter boundary.
     # Allow the same selection type to be used multiple times, such as:
     # not_any:
     # not_any_2:
@@ -61,7 +64,7 @@ module CalcActions
     def selection_type?(key)
       return key if key.in?(SelectionTypes)
 
-      SelectionTypes.select { |st| key.to_s.start_with? st.to_s }.first
+      key.to_s[SelectionTypePattern, 1]&.to_sym
     end
 
     # Create a dynamic value if the condition's value matches certain strings

@@ -142,6 +142,22 @@ RSpec.describe 'Selection type field name validation', type: :model do
 
       expect(admin_config_notices(definition).pluck(:message)).to include(field_name_error(field_name, 'all'))
     end
+
+    it 'does not report ordinary field names that begin with selection text' do
+      definition = dynamic_model_definition(field_list: 'allow_this_request anyone allergies not_allowed')
+
+      expect(admin_config_notices(definition)).to be_empty
+    end
+
+    it 'reports exact selection names and names followed by non-letters' do
+      definition = dynamic_model_definition(field_list: 'all all2 all_x')
+
+      expect(admin_config_notices(definition).pluck(:message)).to contain_exactly(
+        field_name_error('all', 'all'),
+        field_name_error('all2', 'all'),
+        field_name_error('all_x', 'all')
+      )
+    end
   end
 
   describe 'activity log field names' do
@@ -221,6 +237,18 @@ RSpec.describe 'Selection type field name validation', type: :model do
 
         expect_non_blocking_notice(definition, field_name_error(field_name, prefix))
       end
+    end
+
+    it 'does not report ordinary external identifier names or fields that begin with selection text' do
+      definition = external_identifier_definition(
+        name: 'allow_this_request_records',
+        external_id_attribute: 'anyone_id',
+        extra_fields: 'allergies not_allowed'
+      )
+      save_external_identifier(definition)
+
+      expect(admin_config_notices(definition)).to be_empty
+      expect(admin_config_errors(definition)).to be_empty
     end
 
     it 'allows a missing external_id_attribute while checking extra_fields' do

@@ -34,13 +34,12 @@ returned instead.
 | `not_any` | No field condition may be satisfied |
 | `not_all` | The field conditions must not all be satisfied together |
 
-`all`, `any`, `not_all` and `not_any` are reserved prefixes in condition keys: any name
-starting with those characters (including names without an underscore, such as
-`allergies` or `anyone`) is treated as a selection type. Field names in dynamic
-models, activity logs and external identifiers must not start with one of these
-prefixes. External identifier names are also table and resource names, so they must
-not start with a reserved prefix either. These checks report configuration notices and
-do not prevent a definition from being saved.
+A condition key is a selection type when it starts with `all`, `any`, `not_all` or
+`not_any` followed by the end of the key or a non-letter. Thus `all`, `all_2`, `all2`
+and `all.x` are selection types, while `allow_this_request`, `anyone`, `allergies` and
+`not_allowed` are ordinary names. Field names and external identifier names must not
+start with a selection type prefix at that boundary. These checks report configuration
+notices and do not prevent a definition from being saved.
 
 Dynamic model and activity log definition names and table names are not checked by
 these field-name notices. A name containing one of the strings elsewhere, such as

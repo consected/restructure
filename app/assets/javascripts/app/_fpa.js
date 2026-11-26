@@ -1361,7 +1361,7 @@ _fpa = {
     var msgar = [];
     for (var i in j) {
       if (j.hasOwnProperty(i)) {
-        if (i.match && i.match(/^(all|any|not_all|not_any)/)) continue;
+        if (i.match && i.match(/^(all|any|not_all|not_any)(?![a-zA-Z])/)) continue;
 
         var partmsg = j[i];
         if (partmsg.join) partmsg = partmsg.join("\n")
