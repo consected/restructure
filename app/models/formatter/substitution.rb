@@ -323,7 +323,9 @@ module Formatter
     def self.setup_data(item, alt_item = nil)
       if item.is_a?(Hash)
         data = item.dup.symbolize_keys
+        # A plain Hash may have a 'master' key that is just data (e.g. a remote API response), so only accept a Master
         master = item[:master]
+        master = nil unless master.is_a?(Master)
         master = Master.find(item[:master_id]) if item[:master_id] && !master
       elsif item.is_a?(Array)
         data = item.dup
@@ -788,8 +790,8 @@ module Formatter
         return unless res_data
       rescue StandardError => e
         an = ref_parts.join('.').to_sym
-        Rails.logger.info "Get associations for #{an} failed: #{e}"
-        Rails.logger.info e.short_string_backtrace
+        Rails.logger.error "Get associations for #{an} failed: #{e}"
+        Rails.logger.error e.short_string_backtrace
       end
 
       res_data

@@ -788,4 +788,12 @@ Good?)
     expect(Formatter::Substitution.substitute('{{json.json_parse.first}}', data:, tag_subs: nil)).to eq 'alpha'
     expect(Formatter::Substitution.substitute('{{json.json_parse.last}}', data:, tag_subs: nil)).to eq 'gamma'
   end
+
+  it 'resolves a nested Hash with a master key as plain data, not as a Master record' do
+    response = { 'master' => { 'id' => 99 } }.with_indifferent_access
+    data = { 'save_trigger_results' => { 'remote_response' => response } }
+
+    expect(Formatter::Substitution.substitute('{{save_trigger_results.remote_response.master.id::ignore_missing}}',
+                                              data:, tag_subs: nil)).to eq '99'
+  end
 end
