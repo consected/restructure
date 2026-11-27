@@ -32,6 +32,12 @@ RSpec.describe Redcap::DataRecords, type: :model do
     change_setting('AllowDynamicMigrations', true)
   end
 
+  # Retrieved records are cached by the REDCap API client, and saving a dynamic definition
+  # no longer clears the whole cache, so an example must not see the previous example's response
+  before do
+    Rails.cache.clear
+  end
+
   describe 'retrieving records and files' do
     before_all do
       @bad_admin, = create_admin

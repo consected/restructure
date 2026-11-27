@@ -76,6 +76,10 @@ class ExternalIdentifier < ActiveRecord::Base
     )]
   end
 
+  def clear_rails_cache_on_save?
+    false
+  end
+
   # Resource name for a single instance of the model
   def resource_item_name
     resource_name.to_s.singularize.to_sym
@@ -235,6 +239,8 @@ class ExternalIdentifier < ActiveRecord::Base
         got_model = prevent_regenerate_model
         if got_model
           logger.info "Already defined class #{model_class_name}."
+          # A reused class may still point at a previous definition record id
+          got_model.definition_id = definition_id if got_model.respond_to?(:definition_id=)
           # Re-add the model to the list to pick up new extra log types
           add_model_to_list got_model
           return

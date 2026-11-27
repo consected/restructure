@@ -21,6 +21,7 @@ module Dynamic
 
       after_commit :update_tracker_events, if: -> { @regenerate }
       after_commit :clean_schema, if: -> { @regenerate }
+      after_commit :rotate_dynamic_definition_cache_version
       after_commit :other_regenerate_actions
       after_commit :handle_disabled, if: -> { disabled }
       after_update_commit :reload_routes_after_definition_change, if: -> { saved_change_to_disabled? }
@@ -113,65 +114,72 @@ module Dynamic
       end
 
       #
-      # Reload the models and configurations any definitions that
-      # do not match the memoized version, since these may have changed on
-      # another server in the cluster.
+      # Refresh definitions whose persisted timestamps or generated classes are not
+      # verified against the shared token, including changes made on another worker.
       def refresh_outdated
-        utd = up_to_date?
-        # If up to date, or not previously set
-        # (and therefore we are on our first load and everything will have just been set up) just return
-        return if utd || utd.nil?
+        status = definition_refresh_status
+        if status == :current
+          # The token moved without any change this worker needs, so record it for the query-free fast path
+          mark_definition_refresh_current! unless @verified_definition_cache_token == Dynamic::DefinitionCacheVersion.token
+          return
+        end
 
-        if @config_library_only_change
+        if status == :library_only_changed
           Rails.logger.warn "Refreshing config library dependents for #{name}"
           reset_active_model_configurations!
-          active.each do |d|
-            next unless d.options_text&.include?('# @library ')
+          active.each do |definition|
+            next unless definition.options_text&.include?('# @library ')
 
-            d.force_option_config_parse(raise_bad_configs: false)
-            definition_cache[d.id] = d
+            definition.force_option_config_parse(raise_bad_configs: false)
+            definition_cache[definition.id] = definition
           end
+          mark_definition_refresh_current!
           return
         end
 
         Rails.logger.warn "Refreshing outdated #{name}"
         reset_active_model_configurations!
+        # History rows may have been added by another worker, so drop the process-wide version lists
+        clear_all_versions_memo
         defs = active_model_configurations.reorder('').order('updated_at desc nulls last')
         any_new = false
-        defs.each do |d|
-          rn = d.resource_name
-          u = d.updated_at
-          m = Resources::Models.find_by(resource_name: rn)&.model&.definition
+        regenerated_ids = []
+        defs.each do |definition|
+          resource_name = definition.resource_name
+          updated_at = definition.updated_at
+          loaded = Resources::Models.find_by(resource_name:)&.model&.definition
 
-          unless d.table_or_view_ready?
-            Rails.logger.warn "refresh_outdated dynamic def #{d.class.name} table or view is not ready"
+          unless definition.table_or_view_ready?
+            Rails.logger.warn "refresh_outdated dynamic def #{definition.class.name} table or view is not ready"
             next
           end
 
-          klass = if d.is_a? ExternalIdentifier
-                    Object
-                  else
-                    d.class.name.constantize
-                  end
+          implementation_namespace = definition.is_a?(ExternalIdentifier) ? Object : definition.class.name.constantize
+          next if same_definition_version?(loaded, definition) &&
+                  definition.implementation_class_defined?(implementation_namespace, fail_without_exception: true)
 
-          # Skip if the model was previous set and the updated timestamps match AND the implementation class is defined
-          next if m && m.updated_at == u && d.implementation_class_defined?(klass, fail_without_exception: true)
-
-          Rails.logger.warn "Refreshing #{rn}, last updated at #{u}"
-          this_is_new = !m
-          any_new ||= this_is_new
-          d.force_regenerate = true
-          d.generate_model
-          d.check_implementation_class
-          d.force_option_config_parse
-          d.add_master_association
-          # d.add_user_access_controls
-          d.reset_active_model_configurations! if this_is_new
-          # d.update_tracker_events
-          d.other_regenerate_actions
+          Rails.logger.warn "Refreshing #{resource_name}, last updated at #{updated_at}"
+          is_new_definition = loaded.nil?
+          any_new ||= is_new_definition
+          regenerated_ids << definition.id
+          regenerate_from_stored(definition, this_is_new: is_new_definition)
         end
 
         routes_reload if any_new
+        mark_definition_refresh_current!(regenerated_ids:)
+      end
+
+      # Regenerate the implementation and parsed configuration from a freshly loaded definition record
+      def regenerate_from_stored(definition, this_is_new: false)
+        definition.force_regenerate = true
+        definition.generate_model
+        definition.check_implementation_class
+        definition.force_option_config_parse
+        definition.add_master_association
+        # definition.add_user_access_controls
+        definition.reset_active_model_configurations! if this_is_new
+        # definition.update_tracker_events
+        definition.other_regenerate_actions
       end
 
       # Cache the current definitions that are in use within the appropriate dynamic definition class,
@@ -333,7 +341,6 @@ module Dynamic
     def other_regenerate_actions
       return if disabled
 
-      self.class.prev_latest_update = updated_at
       Admin::AppTypeImport.run_now_or_after_import([:dynamic_definition_preload, self.class]) do
         self.class.preload
       end
@@ -346,7 +353,9 @@ module Dynamic
 
       Rails.logger.info 'Refreshing item types'
       Admin::AppTypeImport.run_now_or_after_import(:general_selection_item_types_refresh) do
-        Classification::GeneralSelection.item_types refresh: true
+        Dynamic::DefinitionCache.with_refresh_suppressed do
+          Classification::GeneralSelection.item_types refresh: true
+        end
       end
     end
 
@@ -662,6 +671,25 @@ module Dynamic
     def clean_schema
       # AppControl.restart_server # if Rails.env.production?
       ActiveRecord::Base.connection.schema_cache.clear!
+    end
+
+    def rotate_dynamic_definition_cache_version
+      Dynamic::DefinitionCacheVersion.rotate!
+    end
+
+    # Another worker may have saved this definition since this worker parsed its config. Rather than wait
+    # for #refresh_outdated (which tolerates small timestamp differences), compare against the stored
+    # row and regenerate from it, so a token read from the DB always corresponds to the config in use.
+    # @return [ActiveRecord::Base] the definition this worker now uses for the record
+    def reload_if_stale
+      stored = self.class.active_model_configurations.reorder('').find_by(id:)
+      return self if stored.nil? || self.class.same_definition_version?(self, stored)
+      return self unless stored.table_or_view_ready?
+
+      Rails.logger.warn "Reloading #{self.class.name} #{resource_name}, stored update differs from loaded"
+      self.class.clear_all_versions_memo
+      self.class.regenerate_from_stored(stored)
+      self.class.definition_cache[id] || stored
     end
 
     # Get a complete set of all tables to be accessed by embed configurations

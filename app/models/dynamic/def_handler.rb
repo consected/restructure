@@ -1,6 +1,90 @@
 # frozen_string_literal: true
 
 module Dynamic
+  module DefinitionRefreshState
+    # Compare persisted definitions with the ones loaded by this worker without consuming changes.
+    # The shared token makes the common unchanged case query-free; a new token triggers an exact check.
+    # @return [:current, :unverified, :definitions_changed, :library_only_changed]
+    def definition_refresh_status
+      token = Dynamic::DefinitionCacheVersion.token
+      return :current if @verified_definition_cache_token == token
+
+      definitions_changed = false
+      current_timestamps = {}
+      active_model_configurations.each do |stored|
+        unless stored.table_or_view_ready?
+          # Its table or view does not exist, so it can't be loaded. It is re-checked when the token moves
+          next
+        end
+
+        current_timestamps[stored.id] = stored.updated_at
+        if @verified_definition_timestamps && @verified_definition_timestamps[stored.id] != stored.updated_at
+          definitions_changed = true
+        end
+        loaded = Resources::Models.find_by(resource_name: stored.resource_name)&.model&.definition ||
+                 definition_cache[stored.id]
+        implementation_namespace = stored.is_a?(ExternalIdentifier) ? Object : stored.class.name.constantize
+        same_version = same_definition_version?(loaded, stored) &&
+                       stored.implementation_class_defined?(implementation_namespace, fail_without_exception: true)
+        # A definition that failed to generate at this update time is skipped by implementation_classes everywhere
+        same_version ||= unusable_definition_timestamps[stored.id] == stored.updated_at
+        definitions_changed ||= !same_version
+      end
+
+      return :definitions_changed if definitions_changed
+      return :unverified if @verified_definition_cache_token.nil?
+      return :definitions_changed if (@verified_definition_timestamps || {}).keys.sort != current_timestamps.keys.sort
+
+      library_updated_at = Admin::ConfigLibrary.where(format: 'yaml').maximum(:updated_at)
+      return :library_only_changed if library_updated_at != @verified_config_library_updated_at
+
+      :current
+    end
+
+    def unusable_definition_timestamps
+      @unusable_definition_timestamps ||= {}
+    end
+
+    # Record the token and definition timestamps only after the caller has completed a refresh.
+    # A not-ready definition or a concurrent save leaves the worker unverified for the next call.
+    # @return [Boolean] whether the worker was marked current
+    # @param [Array<Integer>] regenerated_ids - definitions a refresh has just attempted to regenerate. If they
+    #   are still not usable they are remembered as unusable at their current update time, rather than retried
+    #   on every request.
+    def mark_definition_refresh_current!(regenerated_ids: [])
+      token_before = Dynamic::DefinitionCacheVersion.token
+      timestamps = {}
+      unusable = {}
+      active_model_configurations.each do |definition|
+        next unless definition.table_or_view_ready?
+
+        namespace = definition.is_a?(ExternalIdentifier) ? Object : definition.class.name.constantize
+        loaded = Resources::Models.find_by(resource_name: definition.resource_name)&.model&.definition ||
+                 definition_cache[definition.id]
+        usable = same_definition_version?(loaded, definition) &&
+                 definition.implementation_class_defined?(namespace, fail_without_exception: true)
+        unless usable
+          known_unusable = unusable_definition_timestamps[definition.id] == definition.updated_at
+          return false unless known_unusable || regenerated_ids.include?(definition.id)
+
+          unusable[definition.id] = definition.updated_at
+        end
+
+        timestamps[definition.id] = definition.updated_at
+      end
+      return false unless Dynamic::DefinitionCacheVersion.token == token_before
+
+      library_updated_at = Admin::ConfigLibrary.where(format: 'yaml').maximum(:updated_at)
+      return false unless Dynamic::DefinitionCacheVersion.token == token_before
+
+      @verified_definition_timestamps = timestamps
+      @unusable_definition_timestamps = unusable
+      @verified_config_library_updated_at = library_updated_at
+      @verified_definition_cache_token = token_before
+      true
+    end
+  end
+
   module DefHandler
     extend ActiveSupport::Concern
 
@@ -14,6 +98,8 @@ module Dynamic
     end
 
     class_methods do
+      include DefinitionRefreshState
+
       # Attribute holding option configs text
       # This is the default and may be overridden in definition classes
       def option_configs_attr
@@ -235,10 +321,7 @@ module Dynamic
       # when defining a new definition record, which
       # is in fact provided by self.use_with_class_names
       def item_types(refresh: false)
-        cname = "#{name}.item_types"
-        Rails.cache.delete(cname) if refresh
-
-        Rails.cache.fetch(cname) do
+        Dynamic::DefinitionCache.fetch("#{name}.item_types", refresh:) do
           list = []
           implementation_classes.each do |imp_class|
             list += imp_class.attribute_names
@@ -259,70 +342,6 @@ module Dynamic
         @master_nested_attrib ||= Master::MasterNestedAttribs.dup
         @master_nested_attrib << attrib
         Master.accepts_nested_attributes_for(*@master_nested_attrib)
-      end
-
-      #
-      # Get the timestamp for the latest definition stored in the DB.
-      # @return [DateTime]
-      def latest_stored_update(using: nil)
-        using ||= active_model_configurations
-        @latest_def_update = using
-                             .select(:updated_at)
-                             .reorder('')
-                             .order('updated_at desc nulls last')
-                             .limit(1)
-                             .pluck(:updated_at)
-                             .first
-
-        cl_update = Admin::ConfigLibrary
-                    .where(format: 'yaml')
-                    .reorder('')
-                    .order('updated_at desc nulls last')
-                    .limit(1)
-                    .pluck(:updated_at)
-                    .first
-
-        [@latest_def_update, cl_update].compact.max
-      end
-
-      #
-      # Does the persisted latest updated definition match the memoized update?
-      # Returns nil if not previously memoized, otherwise true or false.
-      # @return [true | false | nil]
-      def up_to_date?
-        lu = latest_stored_update
-
-        if !lu && !@prev_latest_update
-          # They match if both nil
-          @config_library_only_change = false
-          true
-        elsif lu && @prev_latest_update && (lu - @prev_latest_update).abs < 2
-          # Consider them a match if they are within 2 seconds of one another,
-          # accounting for the difference between Rails and DB times
-          @config_library_only_change = false
-          true
-        elsif @prev_latest_update.nil?
-          # The remembered value was nil, so let the caller know this
-          self.prev_latest_update = lu
-          @prev_latest_def_update = @latest_def_update
-          @config_library_only_change = false
-          nil
-        else
-          # There was no match - check if only config libraries changed
-          @config_library_only_change = @prev_latest_def_update && @latest_def_update &&
-                                        (@latest_def_update - @prev_latest_def_update).abs < 2
-          self.prev_latest_update = lu
-          @prev_latest_def_update = @latest_def_update
-          false
-        end
-      end
-
-      #
-      # Remember the latest updated at timestamp
-      def prev_latest_update=(updated_at)
-        return if @prev_latest_update && updated_at && updated_at <= @prev_latest_update
-
-        @prev_latest_update = updated_at
       end
 
       # Look up user based on a snippet of the configuration

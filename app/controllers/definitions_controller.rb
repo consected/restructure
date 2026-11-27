@@ -21,7 +21,7 @@ class DefinitionsController < ApplicationController
     return if performed?
 
     def_type = params[:id]
-    j = Rails.cache.fetch("definition_#{def_type}-#{Application.server_cache_version}") do
+    j = Dynamic::DefinitionCache.fetch(*definition_cache_key(def_type)) do
       get_def(def_type).as_json
     end
     render json: j
@@ -38,6 +38,18 @@ class DefinitionsController < ApplicationController
   end
 
   private
+
+  def definition_cache_key(def_type)
+    # Forced, since the in-process memo is only reset by saves made in this worker
+    user_version = User.latest_update(force: true)&.utc&.iso8601(6)
+    role_version = Admin::UserRole.latest_update(force: true)&.utc&.iso8601(6)
+    [
+      "definition_#{def_type}",
+      Application.server_cache_version,
+      user_version,
+      role_version
+    ]
+  end
 
   def get_def(def_type)
     item_selector = available def_type

@@ -9,6 +9,8 @@ class Admin::MigrationGenerator
   DefaultSchemaOwner = Settings::DefaultSchemaOwner
   DefaultMigrationSchema = Settings::DefaultMigrationSchema
   MIGRATION_TIMESTAMP_MUTEX = Mutex.new
+  # Data dictionary rows change without any migration, so the cached copy must expire
+  DataDicCacheTTL = 5.minutes
 
   # Named binds are quoted by ActiveRecord::Base.sanitize_sql_array when each query runs
   TABLES_AND_VIEWS_SQL = <<~SQL.squish
@@ -288,6 +290,17 @@ class Admin::MigrationGenerator
     @materialized_view_keys = nil
   end
 
+  def self.invalidate_definition_metadata_cache!(table_names:)
+    Rails.cache.delete("db_column_comments-#{Application.version}")
+    Rails.cache.delete("db_foreign_keys-#{Application.version}")
+    table_names.compact.uniq.each do |table_name|
+      # data_dic caches by basename, which is the table name without its _datadic suffix
+      [table_name, table_name.to_s.delete_suffix('_datadic')].uniq.each do |basename|
+        Rails.cache.delete("db_data_dic-#{basename}-#{Application.version}")
+      end
+    end
+  end
+
   #
   # Get the database comment for the table
   # @param [String] table_name
@@ -305,13 +318,14 @@ class Admin::MigrationGenerator
   # Get and cache database comments for all columns for all tables
   # in the search path.
   # Each entry is a Hash: { schema_name: , table_name: , column_name: , column_comment: }
+  # @param force [Boolean] re-run the catalog query and replace the cached result
   # @return [Array{Hash}]
-  def self.column_comments
+  def self.column_comments(force: false)
     schemas = current_search_paths
     # Don't cache an empty result for an empty search path, as it would hide comments once the path is restored
     return [] if schemas.empty?
 
-    Rails.cache.fetch("db_column_comments-#{Application.version}") do
+    Rails.cache.fetch("db_column_comments-#{Application.version}", force:) do
       res = connection.execute(ActiveRecord::Base.sanitize_sql_array([COLUMN_COMMENTS_SQL, { schemas: schemas }]))
       res.to_a
     end
@@ -366,7 +380,7 @@ class Admin::MigrationGenerator
 
     ddtab = ddtab['table_name']
 
-    Rails.cache.fetch("db_data_dic-#{basename}-#{Application.version}") do
+    Rails.cache.fetch("db_data_dic-#{basename}-#{Application.version}", expires_in: DataDicCacheTTL) do
       # Identifiers cannot be bound as parameters, so the table name is quoted instead
       res = connection.execute("SELECT * FROM #{connection.quote_table_name(ddtab)};")
       res = res.to_a
@@ -472,14 +486,18 @@ class Admin::MigrationGenerator
   end
 
   #
-  # Run the migrations and reset tables and view cache
-  def self.migrate(dirname = nil, do_migration: nil)
+  # Run the migrations, then reset the tables and views memo and drop the cached database metadata.
+  # The cached metadata is left alone if the migration fails.
+  # @param [Array{String}] table_names - tables whose cached data dictionary contents may have changed
+  def self.migrate(dirname = nil, do_migration: nil, table_names: [])
     msg = "Running migration from #{dirname}"
     Rails.logger.warn msg
     ExceptionExtensions.puts_or_tmp_log msg unless Rails.env.production?
 
     Admin::MigrationConnection.migrate(dirname, do_migration:)
     tables_and_views_reset!
+    # The migration may have changed comments, foreign keys or data dictionary tables
+    invalidate_definition_metadata_cache!(table_names:)
   end
 
   #
@@ -859,7 +877,7 @@ class Admin::MigrationGenerator
   def migrate(dirname = nil, do_migration: nil)
     @do_migration = do_migration unless do_migration.nil?
     dirname ||= db_migration_dirname
-    self.class.migrate(dirname, do_migration: @do_migration)
+    self.class.migrate(dirname, do_migration: @do_migration, table_names: [prev_table_name, table_name])
   end
 
   #

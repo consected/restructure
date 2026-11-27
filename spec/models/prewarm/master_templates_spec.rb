@@ -86,11 +86,7 @@ RSpec.describe Prewarm::MasterTemplates do
   it 'populates the Rails fragment cache for the representative user and app type' do
     previous_caching = Rails.configuration.action_controller.perform_caching
     Rails.configuration.action_controller.perform_caching = true
-    helper = ApplicationController.helpers
-    fragment_cache_key = helper.partial_cache_key(
-      :master__search_results_template,
-      force_user_or_admin: @user
-    )
+    fragment_cache_key = fresh_master_skeleton_cache_key(@user)
     Rails.cache.delete(fragment_cache_key)
 
     described_class.render_for(@user, @app_type)
@@ -104,10 +100,7 @@ RSpec.describe Prewarm::MasterTemplates do
   it 'returns nil when rendering does not populate the fragment cache' do
     previous_caching = Rails.configuration.action_controller.perform_caching
     Rails.configuration.action_controller.perform_caching = true
-    fragment_cache_key = ApplicationController.helpers.partial_cache_key(
-      :master__search_results_template,
-      force_user_or_admin: @user
-    )
+    fragment_cache_key = fresh_master_skeleton_cache_key(@user)
     Rails.cache.delete(fragment_cache_key)
     allow(PrewarmController.renderer).to receive(:render).and_return('<script src="/missing.js"></script>')
 

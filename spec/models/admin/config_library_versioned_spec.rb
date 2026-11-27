@@ -35,6 +35,29 @@ RSpec.describe 'Config library versioning with dynamic definitions', type: :mode
     change_setting('AllowDynamicMigrations', false)
   end
 
+  # The rolled-back definitions (and their deleted libraries) must not stay registered in the
+  # process, or later specs that build template tokens for every active definition raise.
+  # This is registered before before_all so that it runs after before_all's rollback.
+  after :all do
+    [DynamicModel, ActivityLog, ExternalIdentifier].each do |definition_class|
+      definition_class.reset_active_model_configurations!
+      # Keep definitions that still exist, since classes look up their own definition by id.
+      # For rolled-back definitions remove the generated class too, otherwise a later import of the
+      # same definition would reuse a class whose definition can no longer be found
+      # Definitions that remain may hold in-memory option changes that were rolled back in the database
+      definition_class.definition_cache.delete_if do |id, definition|
+        if definition_class.exists?(id)
+          definition.reload
+          definition.send(:reset_all_versions)
+          next false
+        end
+
+        definition.remove_implementation_class
+        true
+      end
+    end
+  end
+
   before_all do
     @user0, = create_user
     create_admin
@@ -151,6 +174,23 @@ RSpec.describe 'Config library versioning with dynamic definitions', type: :mode
   end
 
   describe 'versioned dynamic definition uses versioned config library' do
+    it 'uses the latest library content when the live definition predates the library update' do
+      lib = create_test_config_library(label_value: 'v1_label')
+      dmdef = generate_dm_with_library_ref
+      definition_updated_at = dmdef.updated_at
+
+      lib.current_admin = @admin
+      lib.update!(options: <<~YAML)
+        _definitions_lib:
+          label_from_lib: &label_from_lib v2_label
+      YAML
+
+      dmdef.update_column(:updated_at, definition_updated_at)
+      dmdef.reload.force_option_config_parse
+
+      expect(dmdef.option_type_config_for(:default).label).to eq('v2_label')
+    end
+
     it 'uses the v1 library content for instances created under v1 definition' do
       # Create library v1 and dynamic model referencing it
       lib = create_test_config_library(label_value: 'v1_label')

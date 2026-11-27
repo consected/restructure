@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# Purpose: verify definition responses are cached against definition and user data versions.
+
 require 'rails_helper'
 
 describe DefinitionsController, type: :controller do
@@ -20,13 +22,74 @@ describe DefinitionsController, type: :controller do
       @definitions_controller = DefinitionsController.new
     end
 
+    after(:each) do
+      User.reset_latest_update
+    end
+
     it 'should get latest protocol_events' do
       get :show, params:  { id: 'protocol_events' }, xhr: true
 
       expect(response).to have_http_status(:success)
-      j = JSON.parse(response.body)
+      j = response.parsed_body
       expect(j).to be_a Array
       expect(j.length).to eq Classification::ProtocolEvent.enabled.length
+    end
+
+    it 'refreshes a definition response when the shared definition token changes' do
+      id = "protocol_events-cache-token-#{SecureRandom.hex(4)}"
+      allow(controller).to receive(:get_def).and_return([{ version: 'before' }], [{ version: 'after' }])
+
+      get :show, params: { id: }, xhr: true
+      expect(response.parsed_body).to eq([{ 'version' => 'before' }])
+
+      Dynamic::DefinitionCacheVersion.rotate!
+      get :show, params: { id: }, xhr: true
+
+      expect(response.parsed_body).to eq([{ 'version' => 'after' }])
+    end
+
+    it 'refreshes the users definition response when a user is added' do
+      id = "users-cache-token-#{SecureRandom.hex(4)}"
+      get :show, params: { id: }, xhr: true
+      expect(response.parsed_body).to include(hash_including('id' => @user.id, 'name' => @user.email))
+
+      new_email = "cache-token-#{SecureRandom.hex(4)}@example.com"
+      new_user = User.create!(
+        current_admin: Admin.active.first!,
+        email: new_email,
+        first_name: 'Cache',
+        last_name: 'Version',
+        password: Devise.friendly_token(30)
+      )
+
+      get :show, params: { id: }, xhr: true
+
+      expect(response.parsed_body).to include(hash_including('id' => new_user.id, 'name' => new_email))
+    end
+
+    it 'refreshes the users definition response when a user is changed by another worker' do
+      id = "users-cache-token-#{SecureRandom.hex(4)}"
+      # The test database has definitions that never generate, so force the cache to publish
+      allow(Dynamic::DefinitionCache).to receive(:definitions_current?).and_return(true)
+      get :show, params: { id: }, xhr: true
+      expect(response.parsed_body).to include(hash_including('id' => @user.id, 'name' => @user.email))
+      memoized_latest_update = User.latest_update
+
+      # Another worker's save leaves this worker's latest_update memo untouched
+      new_email = "other-worker-#{SecureRandom.hex(4)}@example.com"
+      new_user = User.create!(
+        current_admin: Admin.active.first!,
+        email: new_email,
+        first_name: 'Other',
+        last_name: 'Worker',
+        password: Devise.friendly_token(30)
+      )
+      User.where(id: new_user.id).update_all(updated_at: 1.minute.from_now)
+      User.instance_variable_set(:@latest_update, memoized_latest_update)
+
+      get :show, params: { id: }, xhr: true
+
+      expect(response.parsed_body).to include(hash_including('id' => new_user.id))
     end
 
     it 'should not get an unexpected item' do

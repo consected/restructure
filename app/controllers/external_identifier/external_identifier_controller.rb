@@ -6,7 +6,10 @@ class ExternalIdentifier::ExternalIdentifierController < UserBaseController
   def template_config
     Application.refresh_dynamic_defs
 
-    render plain: ''
+    set_browser_cache(max_age: 30)
+    return unless stale?(etag: template_config_cache_key)
+
+    render partial: 'external_identifiers/common_search_results_template_set'
   end
 
   protected
