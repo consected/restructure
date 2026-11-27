@@ -12,6 +12,7 @@ _fpa.show_if.methods = {
   show_items: function (block, data, embedded_item) {
     if (!block || !data) return;
 
+    // Set on data so that show_if conditions can refer to the current user's roles.
     data.current_user_roles = _fpa.state.current_user_roles;
 
     _fpa.show_if.methods.handle_embedded_item(block, data);
@@ -67,6 +68,7 @@ _fpa.show_if.methods = {
       _fpa.form_utils.resize_labels(block, null, true);
     })
 
+    // Delayed so that any dialog shown by show_item has rendered before it is scrolled into view.
     window.setTimeout(function () {
       _fpa.form_utils.setup_e_signature(block, true);
 
@@ -107,8 +109,7 @@ _fpa.show_if.methods = {
           show_if_field_defs[match_field] = show_if_field_defs[field_name]
         }
       }
-      // Delete the regex style field name, since it is meaningless now 
-      // we've 
+      // Delete the regex style field name, since its matching fields now have their own definitions.
       delete show_if_field_defs[field_name];
     }
 
@@ -201,6 +202,9 @@ _fpa.show_if.methods = {
       for (var cond_field in cond_def) {
         if (cond_def.hasOwnProperty(cond_field)) {
 
+          // Reset for each field, so that a result from a previous field is never reused.
+          let matches;
+
           var exp_value = cond_def[cond_field];
           var orig_exp_value = exp_value;
 
@@ -219,7 +223,7 @@ _fpa.show_if.methods = {
             // then this is an embedded condition. Handle it.
             var subdef = {};
             subdef[cond_field] = exp_value;
-            var matches = _fpa.show_if.methods.calc_conditions(subdef, data);
+            matches = _fpa.show_if.methods.calc_conditions(subdef, data);
           }
           else if (cond_field == 'always') {
             matches = exp_value
@@ -243,15 +247,16 @@ _fpa.show_if.methods = {
               else if (exp_value === '0') exp_value = [false, 'no', 0, '0'];
             }
 
-            // to have value
-
+            // An explicit condition holds its expected value under 'value'
             if (explicit_cond) {
               exp_value = exp_value.value;
             }
 
+            // Normalise the expected value into an array of values to compare against
             if (exp_value == null)
               exp_value = [exp_value];
             else if (typeof exp_value == 'string') {
+              // Expected values may refer to other fields, e.g. '{{other_field}}'
               if (exp_value.indexOf('{{') >= 0)
                 exp_value = _fpa.substitution.substitute(exp_value, data)
               exp_value = [exp_value];
@@ -273,17 +278,15 @@ _fpa.show_if.methods = {
                 if (exp_value[i] === false && exp_value.indexOf('0') == -1) exp_value.push('0');
                 if (typeof exp_value[i] == 'number') exp_value[i] = exp_value[i].toString();
                 if (typeof exp_value[i] == 'string' && exp_value[i].indexOf('{{') >= 0) {
-                  exp_value[i] = _fpa.substitution.substitute(exp_value, data)
+                  exp_value[i] = _fpa.substitution.substitute(exp_value[i], data)
                 }
               }
             }
 
-            var matches;
-
-
+            // An explicit condition (e.g. { condition: '>=', value: 5 }) compares the field using the given operator.
             if (explicit_cond) {
-              // Take the expected value back out of the array
-              exp_value = exp_value[0];
+              // Ordering, equality and text operators use a single expected value; membership operators keep the whole list
+              if (explicit_cond != 'in' && explicit_cond != '!in') exp_value = exp_value[0];
               switch (explicit_cond) {
                 case '<':
                   matches = (parseInt(exp_field_value) < parseInt(exp_value));
@@ -304,19 +307,31 @@ _fpa.show_if.methods = {
                   matches = (exp_field_value != exp_value);
                   break;
                 case 'in':
-                  matches = exp_value.indexOf(exp_field_value) >= 0;
-                case '!in':
-                  matches = exp_value.indexOf(exp_field_value) < 0;
+                case '!in': {
+                  // An array field is in the list if any of its values is in the list
+                  const found = Array.isArray(exp_field_value)
+                    ? exp_field_value.some((v) => exp_value.indexOf(v) >= 0)
+                    : exp_value.indexOf(exp_field_value) >= 0;
+                  matches = explicit_cond == 'in' ? found : !found;
+                  break;
+                }
                 case 'includes':
-                  matches = exp_field_value.indexOf(exp_value) >= 0;
-                case '!includes':
-                  matches = exp_field_value.indexOf(exp_value) < 0;
+                case '!includes': {
+                  // Text containment. A missing field contains nothing, and an array field contains the value as an item.
+                  const found = Array.isArray(exp_field_value)
+                    ? exp_field_value.indexOf(exp_value) >= 0
+                    : exp_field_value != null && String(exp_field_value).indexOf(exp_value) >= 0;
+                  matches = explicit_cond == 'includes' ? found : !found;
+                  break;
+                }
                 default:
                   console.log(`The specified 'condition' '${explicit_cond}' is not valid.`)
                   break;
               }
 
-              if (isNaN(parseInt(orig_exp_value))) {
+              // Ordering operators also compare non-numeric values as text
+              const ordering_operators = ['>=', '&gt;=', '<=', '&lt;=', '>', '&gt;', '<', '&lt;'];
+              if (ordering_operators.indexOf(explicit_cond) >= 0 && isNaN(parseInt(orig_exp_value))) {
                 var exp = orig_exp_value;
                 switch (explicit_cond) {
 
@@ -369,6 +384,7 @@ _fpa.show_if.methods = {
             if (!matches) break;
           }
           else if (cond_type.indexOf('not_all') === 0) {
+            // Succeeds as soon as one condition does not match
             if (!matches) {
               cond_success = true;
               break;

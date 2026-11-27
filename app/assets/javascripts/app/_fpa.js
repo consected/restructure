@@ -36,7 +36,6 @@ _fpa = {
     'user_preferences'
   ],
 
-  HandlebarsCompileOptions: { preventIndent: true },
   page_transition_callback: null,
 
   result_target: function (block) {
@@ -63,6 +62,14 @@ _fpa = {
       var alt_target = $block.attr('data-working-target');
       if (alt_target) do_action($(alt_target));
     } catch (err) { }
+  },
+  update_state_now: function () {
+    _fpa.state.now = _fpa.utils.DateTime.now().toUTC().toISO();
+  },
+  setup_ajax_state_updates: function () {
+    $(document).off('ajaxComplete.fpaNow').on('ajaxComplete.fpaNow', function () {
+      _fpa.update_state_now();
+    });
   },
   ajax_done: function (block) {
     try {
@@ -99,37 +106,6 @@ _fpa = {
     } catch (err) { }
     _fpa.remote_request = null;
     _fpa.state.search_running = false;
-  },
-  // Preprocess handlebars source to make special ReStructure curly substitutions
-  // work correctly. For each of them we make them into Handlebars helpers.
-  setup_template_source: function (source) {
-    const do_list = ['embedded_report', 'glyphicon']
-    do_list.forEach(function (pre) {
-      const re = new RegExp(`{{${pre}_[a-zA-Z0-9_]+}}`, 'g');
-      var re_res = source.match(re)
-      if (re_res) {
-        re_res.forEach(function (got) {
-          const name = got.replace(`{{${pre}_`, '').replace('}}', '')
-          source = source.replace(got, `{{${pre} '${name}' true}}`)
-        })
-      }
-    })
-
-    const re = new RegExp(`{{[a-zA-Z0-9_]+::[0-9a-z:_.]+}}`, 'g');
-    var re_res = source.match(re)
-    if (re_res) {
-      re_res.forEach(function (got) {
-        console.log('tag_format')
-        const tagform = got.replace(`{{`, '').replace('}}', '')
-        var parts = tagform.split('::')
-        var tag = parts.shift()
-
-        parts = parts.map((p) => { return `'${p}'` })
-
-        source = source.replace(got, `{{tag_format ${tag} ${parts.join(' ')}}}`)
-      })
-    }
-    return source;
   },
   compile_templates: function () {
     $('body').addClass('status-compiling');
@@ -1534,6 +1510,7 @@ _fpa = {
     if (_fpa.state.current_user) {
       window.localStorage.setItem('session_app_type_id', _fpa.state.current_user.app_type_id);
     }
+    _fpa.setup_ajax_state_updates();
     _fpa.loaded.preload();
     _fpa.handle_remotes();
     if (current_user || current_admin) {

@@ -46,7 +46,7 @@ Page Load → Include precompiled JS for inline templates (<script src="...">)
 | Partial registration | CLI `--partial` flag | Auto-registers to `Handlebars.partials` |
 | Minification | Production only (`-m` flag) | Reduce file sizes in production |
 | Source maps | Development only | Enable debugging in development |
-| Handlebars library | Keep full version | Required for `{{template}}`, `{{compile_template}}` helpers |
+| Handlebars library | Use runtime-only build in the application; Jasmine loads the full build in its spec helper | View templates are precompiled, and config strings use `_fpa.substitution` |
 
 ## Implementation Components
 
@@ -472,12 +472,9 @@ handlebars --version
 
 ## Future Optimizations
 
-### 1. Switch to Handlebars Runtime
+### Runtime-only Handlebars in the application
 
-If `{{template}}`, `{{compile_template}}`, and `{{run_template}}` helpers can be eliminated or refactored:
-
-- Switch from `handlebars/dist/handlebars` (88KB) to `handlebars.runtime.min.js` (28KB)
-- ~60KB reduction in JavaScript payload
+The application manifest uses `handlebars/dist/handlebars.runtime`. Admin-configured strings are rendered by `_fpa.substitution`, while precompiled view templates use the runtime. The Jasmine `srcFiles` list in `spec/support/jasmine-browser.json` loads `spec/handlebars_compiler-*.js`, a test-only manifest at `app/assets/javascripts/spec/handlebars_compiler.js` that includes the full build and re-registers the application helpers. It is not required by `application.js`.
 
 ### 2. Bundle Templates
 

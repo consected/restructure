@@ -1,4 +1,4 @@
-// Covers show_if evaluation for selection-like field names and suffixed selection types.
+// Purpose: verify show_if evaluation, including substitutions in expected-value arrays and selection-like field names with suffixed selection types.
 //= require app/_fpa_show_if.js
 describe('show_if', function () {
   it('evaluates a selection-like field and recognizes suffixed selections', function () {
@@ -722,4 +722,52 @@ describe('show_if', function () {
   });
 
 
+
+
+  it('substitutes each expected array value independently', function () {
+    const conditions = { selected_value: ['{{expected_value}}', 'another value'] };
+    const data = { selected_value: 'resolved value', expected_value: 'resolved value' };
+
+    expect(_fpa.show_if.methods.calc_conditions(conditions, data)).toBe(true);
+  });
+
+  // Explicit 'in' and '!in' conditions test membership of the field value in the whole value list.
+  it('evaluates explicit in and !in conditions against the full list', function () {
+    const in_def = { all: { field_a: { condition: 'in', value: ['a', 'b'] } } };
+    const not_in_def = { all: { field_a: { condition: '!in', value: ['a', 'b'] } } };
+
+    expect(_fpa.show_if.methods.calc_conditions(in_def, { field_a: 'a' })).toBe(true);
+    expect(_fpa.show_if.methods.calc_conditions(in_def, { field_a: 'c' })).toBe(false);
+    expect(_fpa.show_if.methods.calc_conditions(not_in_def, { field_a: 'a' })).toBe(false);
+    expect(_fpa.show_if.methods.calc_conditions(not_in_def, { field_a: 'c' })).toBe(true);
+  });
+
+  it('evaluates explicit in conditions for a multi-value field', function () {
+    const in_def = { all: { field_a: { condition: 'in', value: ['a', 'b'] } } };
+
+    expect(_fpa.show_if.methods.calc_conditions(in_def, { field_a: ['c', 'b'] })).toBe(true);
+    expect(_fpa.show_if.methods.calc_conditions(in_def, { field_a: ['c', 'd'] })).toBe(false);
+  });
+
+  // Explicit 'includes' and '!includes' conditions test text containment of the expected value.
+  it('evaluates explicit includes and !includes conditions as text containment', function () {
+    const includes_def = { all: { field_a: { condition: 'includes', value: 'b' } } };
+    const not_includes_def = { all: { field_a: { condition: '!includes', value: 'b' } } };
+
+    expect(_fpa.show_if.methods.calc_conditions(includes_def, { field_a: 'abc' })).toBe(true);
+    expect(_fpa.show_if.methods.calc_conditions(includes_def, { field_a: 'xyz' })).toBe(false);
+    expect(_fpa.show_if.methods.calc_conditions(not_includes_def, { field_a: 'abc' })).toBe(false);
+    expect(_fpa.show_if.methods.calc_conditions(not_includes_def, { field_a: 'xyz' })).toBe(true);
+  });
+
+  it('treats a missing or boolean field value safely for explicit includes conditions', function () {
+    const includes_def = { all: { field_a: { condition: 'includes', value: 'tru' } } };
+    const not_includes_def = { all: { field_a: { condition: '!includes', value: 'tru' } } };
+
+    expect(_fpa.show_if.methods.calc_conditions(includes_def, { field_a: null })).toBe(false);
+    expect(_fpa.show_if.methods.calc_conditions(not_includes_def, { field_a: null })).toBe(true);
+    expect(_fpa.show_if.methods.calc_conditions(includes_def, { field_a: true })).toBe(true);
+  });
+
 });
+

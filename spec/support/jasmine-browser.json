@@ -3,7 +3,8 @@
   "cssDir": "app/assets/stylesheets",
   "srcFiles": [
     "application-*.js",
-    "admin_index-*.js"
+    "admin_index-*.js",
+    "spec/handlebars_compiler-*.js"
   ],
   "specDir": "spec/javascripts",
   "helpers": [

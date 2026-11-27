@@ -6,7 +6,7 @@
 %>
 
 <% # Produce HTML attributes to help identify the block of fields, applying tag substitutions to each value %>
-<%= handlebars_template_tag('custom_block_attrs_html', css_class: 'hidden handlebars-partial') do %>{{#each custom_block_attrs}}{{hyphenate @key}}={{{template this}}} {{/each}}<% end %>
+<%= handlebars_template_tag('custom_block_attrs_html', css_class: 'hidden handlebars-partial') do %>{{#each custom_block_attrs}}{{hyphenate @key}}={{{template this ../result_data}}} {{/each}}<% end %>
 <% # Get the result heading caption, applying tag substitutions %>
 <%= handlebars_template_tag('show_result_caption', css_class: 'hidden handlebars-partial') do %>{{#with result_data}}{{{run_template ../caption}}}{{/with}}<% end %>
 <%= handlebars_template_tag('show_result_caption_id_hyphenated', css_class: 'hidden handlebars-partial') do %>{{#with result_data}}{{{id_hyphenate (run_template ../caption)}}}{{/with}}<% end %>

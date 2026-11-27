@@ -18,7 +18,7 @@
 
 // YARN installed packages
 // Distribution files referenced directly to allow asset pipeline to handle compilation and loading
-//= require handlebars/dist/handlebars
+//= require handlebars/dist/handlebars.runtime
 //= require bootstrap-datepicker/dist/js/bootstrap-datepicker
 //= require chart.js/dist/chart
 //= require chartjs-chart-sankey/dist/chartjs-chart-sankey.min.js
