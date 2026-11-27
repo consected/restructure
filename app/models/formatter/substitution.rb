@@ -335,6 +335,7 @@ module Formatter
         data[:alt_item] = alt_item
         data['data'] ||= item.data if item.respond_to? :data
         data['save_trigger_results'] = item.save_trigger_results if item.respond_to? :save_trigger_results
+        data['background_context'] = item.background_context if item.respond_to? :background_context
 
         if item.respond_to?(:master)
           master = item.master

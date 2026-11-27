@@ -137,10 +137,35 @@ module CalcActions
         return config.each_with_index { |item, index| collect_task_config(descriptor, item, path + [index]) }
       end
       return unless config.is_a?(Hash)
+
+      return collect_background_hash(config, path) if descriptor == OptionConfigs::TriggerTypes::Base.for(:background)
       return collect_tasks([config], path) if descriptor.task_list_config?
 
       collect_direct(descriptor, config, path)
       collect_named_entries(descriptor, config, path) if named_entry_form?(descriptor, config)
+    end
+
+    # Collects a background Hash. The context form has with values and a do list; a plain trigger hash
+    # may have on_complete and on_failure hooks, which are collected separately from its trigger names.
+    # @param config [Hash] the background configuration
+    # @param path [Array] the path keys of the background configuration
+    # @return [void]
+    def collect_background_hash(config, path)
+      hooks = %i[on_complete on_failure]
+      if background_context_form?(config)
+        collect_value_map(config[:with], join(path, :with))
+        collect_tasks(config[:do], join(path, :do)) if config.key?(:do)
+      else
+        collect_tasks([config.except(*hooks)], path)
+      end
+      hooks.each { |key| collect_tasks(config[key], join(path, key)) if config.key?(key) }
+    end
+
+    # Whether a background config uses the context form, matching the validator's rule (a +with+ or +do+ key).
+    # @param config [Object] the background configuration
+    # @return [Boolean]
+    def background_context_form?(config)
+      config.key?(:do) || config.key?('do') || config.key?(:with) || config.key?('with')
     end
 
     # named_entry triggers wrap each configuration in a label, such as create_reference: { my_ref: { if: ... } }

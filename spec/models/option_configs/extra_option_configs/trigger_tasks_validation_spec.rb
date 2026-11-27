@@ -154,6 +154,71 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
     end
   end
 
+  describe 'background context form' do
+    it 'accepts a valid with and do form without notices' do
+      instance = klass.new(
+        background: {
+          with: { selected: '{{save_trigger_results.value}}' },
+          do: { log: { message: 'uses {{background_context.selected}}' } }
+        }
+      )
+
+      expect(instance.config_errors).to be_empty
+      expect(instance.config_warnings).to be_empty
+    end
+
+    it 'accepts lifecycle hooks on a plain background hash without notices' do
+      instance = klass.new(
+        background: {
+          log: { message: 'x', severity: 'info' },
+          on_complete: { log: { message: 'done', severity: 'info' } }
+        }
+      )
+
+      expect(instance.config_errors).to be_empty
+      expect(instance.config_warnings).to be_empty
+    end
+
+    it 'validates triggers nested in a plain background hook' do
+      instance = klass.new(background: { log: { message: 'x' }, on_failure: { fake_trigger: {} } })
+
+      expect(instance.config_warnings.pluck(:message)).to include('tasks unrecognized trigger action name: fake_trigger')
+    end
+
+    it 'warns about unrecognized background keys and nested unknown triggers' do
+      instance = klass.new(background: { do: { fake_trigger: {} }, invalid: true })
+
+      expect(instance.config_warnings.pluck(:message)).to include(
+        'tasks background has unrecognized key: invalid',
+        'tasks unrecognized trigger action name: fake_trigger'
+      )
+    end
+
+    it 'reports a with mapping that is not a Hash' do
+      instance = klass.new(background: { with: ['invalid'], do: [{ log: { message: 'x' } }] })
+
+      expect(instance.config_errors.pluck(:message)).to include('tasks background with must be a Hash')
+    end
+
+    it 'reports a context mapping without do as invalid' do
+      instance = klass.new(background: { with: { selected: '{{value}}' } })
+
+      expect(instance.config_errors.pluck(:message).join(' ')).to match(/requires a do/)
+    end
+
+    it 'reports a do value that is not a trigger list' do
+      instance = klass.new(background: { with: { selected: '{{value}}' }, do: 'not a list' })
+
+      expect(instance.config_errors.pluck(:message).join(' ')).to match(/do must be a trigger list/)
+    end
+
+    it 'reports a with/do context hash wrapped in a list as invalid' do
+      instance = klass.new(background: [{ with: { selected: '{{value}}' }, do: [{ log: { message: 'x' } }] }])
+
+      expect(instance.config_errors.pluck(:message).join(' ')).to match(/only valid inside a background trigger hash/)
+    end
+  end
+
   # ── Array-valued trigger configs ────────────────────────────────────
 
   describe 'array-valued trigger configs' do

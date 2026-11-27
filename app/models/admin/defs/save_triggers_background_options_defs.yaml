@@ -1,17 +1,27 @@
 # Save Trigger: Background options
 #
 # Canonical schema
-# background: <TriggerTaskList>
+# background: <TriggerTaskList | Hash(with: ContextMap, do: TriggerTaskList) | Hash(trigger_type: TriggerConfig)>
+#   on_complete and on_failure (TriggerTaskList) may be added to either Hash form; they run in the foreground
 #
 # TriggerTaskList type - see save_trigger.md
-# TriggerTaskList: <Array(Hash(trigger_type: TriggerConfig))>
+# TriggerTaskList: <Hash(trigger_type: TriggerConfig) | Array(Hash(trigger_type: TriggerConfig))>
 #
 # Pattern 1: Queue several triggers to run together (save_triggers_background_pattern_1_basic_defs.yaml)
-# See save_trigger_background.md for the worked example and usage notes.
+# Pattern 2: Pass selected foreground context (save_triggers_background_pattern_2_with_context_defs.yaml)
+# See save_trigger_background.md for examples and usage notes.
 
 # Notes:
 # - The queued job's result summary (status, item_class, item_id, trigger_count, queued_at)
 #   is stored in save_trigger_results['background'], not the inner triggers' own results.
 # - Individual triggers within the background job support on_complete and on_failure
-#   lifecycle hooks - see the lifecycle hooks documentation for details.
+#   lifecycle hooks - see the lifecycle hooks documentation for details. Hooks on the outer
+#   background trigger still run in the foreground after queuing.
 
+# Context form:
+# background:
+#   with: <Hash(context_key: ValueExpr)>
+#   do: <TriggerTaskList>
+# `with` is optional and its values are resolved in the foreground. The selected values are
+# available in the job under `background_context`; use triple-curly substitutions to pass
+# original types such as Hashes, arrays, dates, and records.

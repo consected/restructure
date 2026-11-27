@@ -148,6 +148,8 @@ class Settings
 
   NfsStoreBackgroundDownloadMaxFiles = (ENV['NFS_STORE_BACKGROUND_DOWNLOAD_MAX_FILES'].presence || 100).to_i
   NfsStoreBackgroundDownloadMaxBytes = (ENV['NFS_STORE_BACKGROUND_DOWNLOAD_MAX_BYTES'].presence || 20.megabytes).to_i
+  SaveTriggerBackgroundContextMaxBytes =
+    (ENV['FPHS_SAVE_TRIGGER_BG_CONTEXT_MAX_BYTES'].presence || 64.kilobytes).to_i
   NfsStorePreparedDownloadsTtlHours = (ENV['NFS_STORE_PREPARED_DOWNLOADS_TTL_HOURS'].presence || 24).to_i
 
   # Registration Settings
@@ -433,6 +435,7 @@ class Settings
     PullExternalDataAllowedHosts PullExternalDataAllowPrivateHosts
     CountryCodesForTimezones DefaultUserTimezone
     DefaultDateFormat DefaultTimeFormat DefaultDateTimeFormat
+    SaveTriggerBackgroundContextMaxBytes
     nfs_store_default_app_type_id
     admin_nfs_role
     DefaultCountrySelect DefaultPhoneCountryCode DefaultPhoneTrunkNumber GdprCountryCodes

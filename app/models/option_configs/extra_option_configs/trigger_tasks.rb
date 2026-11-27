@@ -83,7 +83,16 @@ module OptionConfigs
             next
           end
 
+          if trigger_name.to_sym == :background && config.is_a?(Hash)
+            validate_background_hash(config)
+            next
+          end
+
           trigger_type = OptionConfigs::TriggerTypes::Base.for(trigger_name)
+          if !trigger_type && %i[with do].include?(trigger_name.to_sym)
+            add_validation_notice(:tasks, "#{trigger_name} is only valid inside a background trigger hash")
+            next
+          end
           unless trigger_type
             add_validation_notice(:tasks, "unrecognized trigger action name: #{trigger_name}", level: :warn)
             next
@@ -113,6 +122,49 @@ module OptionConfigs
         %i[do on_complete on_failure].each do |key|
           validate_nested_trigger_task_list(config[key]) if config.key?(key)
         end
+      end
+
+      # Validates a background Hash, which is either the context form or a plain trigger hash.
+      # Plain hashes may carry on_complete and on_failure hooks, which run in the foreground.
+      # @param config [Hash] the background configuration
+      # @return [void]
+      def validate_background_hash(config)
+        return validate_background_context(config) if background_context_form?(config)
+
+        %i[on_complete on_failure].each do |key|
+          validate_nested_trigger_task_list(config[key]) if config.key?(key)
+        end
+        validate_nested_trigger_task_list(config.except(:on_complete, :on_failure))
+      end
+
+      # Validates the selected context form of a background trigger.
+      # @param config [Hash] the background configuration
+      # @return [void]
+      def validate_background_context(config)
+        allowed_keys = %i[with do on_complete on_failure]
+        (config.keys.map(&:to_sym) - allowed_keys).each do |key|
+          add_validation_notice(:tasks, "background has unrecognized key: #{key}", level: :warn)
+        end
+
+        if config.key?(:with) && !config[:with].is_a?(Hash)
+          add_validation_notice(:tasks, 'background with must be a Hash')
+        end
+        if config.key?(:with) && !config.key?(:do)
+          add_validation_notice(:tasks, 'background with requires a do trigger list')
+        end
+        if config.key?(:do) && !(config[:do].is_a?(Array) || config[:do].is_a?(Hash))
+          add_validation_notice(:tasks, 'background do must be a trigger list')
+        end
+        %i[do on_complete on_failure].each do |key|
+          validate_nested_trigger_task_list(config[key]) if config.key?(key)
+        end
+      end
+
+      # Whether a background config uses the context form, which has a +with+ or +do+ key.
+      # @param config [Object] the background configuration
+      # @return [Boolean]
+      def background_context_form?(config)
+        config.is_a?(Hash) && (config.key?(:do) || config.key?('do') || config.key?(:with) || config.key?('with'))
       end
 
       # Recursively validates nested trigger definitions for delegate-pattern triggers

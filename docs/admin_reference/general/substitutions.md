@@ -63,6 +63,14 @@ using 3 curly braces is used to avoid the result being cast to a String.
 This returns a Hash or Object, which may be stored as raw data in a database JSON field for example.
 Parts of the full data tree may be extracted and stored in this way.
 
+## Background trigger context
+
+A background trigger can explicitly pass selected foreground values using its `with:` mapping.
+Within that background job, read them from `background_context`, for example
+`{{background_context.loop_value}}` or `{{background_context.payload.status}}`. Use triple
+braces in `with:` when a Hash, array, date, time, or record must retain its original type.
+See [background triggers](save_trigger_background.md) for serialization limits and caveats.
+
 ## Specifying item in an array
 
 When working with object or array fields, or the result of `json_parse` or `yaml_parse`, the following

@@ -1,0 +1,11 @@
+# Pattern 2: Pass selected foreground values to a background trigger list.
+# Double-curly substitutions produce strings; triple-curly substitutions preserve the original type.
+save_trigger:
+  on_create:
+    background:
+      with:
+        loop_index: "{{save_trigger_results.loop_result_index}}"
+        loop_value: "{{{save_trigger_results.loop_result_value}}}"
+      do:
+        - log:
+            message: "Processing {{background_context.loop_index}} => {{background_context.loop_value}}"

@@ -148,7 +148,177 @@ RSpec.describe SaveTriggers::Background, type: :model do
       end
     end
 
+    context 'with selected background context' do
+      it 'resolves selected values in the foreground and exposes them in the job' do
+        @activity_log.save_trigger_results['selected_value'] = 'from foreground'
+        @activity_log.trigger_variables = { selected_variable: 'from trigger variables' }
+        config = {
+          with: {
+            selected_value: '{{save_trigger_results.selected_value}}',
+            selected_variable: '{{variables.selected_variable}}'
+          },
+          do: [{ log: {
+            message: 'Context {{background_context.selected_value}} / {{background_context.selected_variable}}',
+            severity: 'info'
+          } }]
+        }
+
+        trigger = SaveTriggers::Background.new(config, @activity_log)
+        expect { trigger.perform }.to have_enqueued_job(SaveTriggersBackgroundJob).with(
+          hash_including(context: { selected_value: 'from foreground', selected_variable: 'from trigger variables' })
+        )
+        expect(@activity_log.save_trigger_results['background'][:context_keys]).to eq(%i[selected_value selected_variable])
+        expect(Rails.logger).to receive(:info).with(%r{Context from foreground / from trigger variables})
+        allow(Rails.logger).to receive(:info)
+
+        perform_enqueued_jobs
+      end
+
+      it 'serializes nested values, dates, times, and records, applying the job user to nested records' do
+        @activity_log.save_trigger_results['selected_payload'] = {
+          label: 'selected',
+          date: Date.current,
+          time: Time.utc(2025, 1, 2, 3, 4, 5),
+          records: [@player_contact]
+        }
+        @activity_log.save_trigger_results['top_level_record'] = @player_contact
+        config = {
+          with: {
+            payload: { object: '{{{save_trigger_results.selected_payload}}}' },
+            record: '{{{save_trigger_results.top_level_record}}}'
+          },
+          do: [{ log: { message: 'Inspect context', severity: 'info' } }]
+        }
+        allow_any_instance_of(SaveTriggers::Log).to receive(:perform) do |log_trigger|
+          payload = log_trigger.item.background_context[:payload]
+          expect(payload[:label]).to eq('selected')
+          expect(payload[:date]).to eq(Date.current)
+          expect(payload[:time]).to eq(Time.utc(2025, 1, 2, 3, 4, 5))
+          expect(payload[:records].first.id).to eq(@player_contact.id)
+          expect(payload[:records].first.current_user).to eq(@user)
+          expect(log_trigger.item.background_context[:record].current_user).to eq(@user)
+          raw_payload = Formatter::Substitution.substitute_plain(
+            '{{{background_context.payload}}}', data: log_trigger.item
+          )
+          expect(raw_payload).to eq(payload)
+          label = Formatter::Substitution.substitute(
+            '{{background_context.payload.label}}', data: log_trigger.item
+          )
+          expect(label).to eq('selected')
+        end
+
+        SaveTriggers::Background.new(config, @activity_log).perform
+        perform_enqueued_jobs
+      end
+
+      it 'rejects missing strict substitutions and preserves ignored and raw missing values' do
+        strict_config = {
+          with: { missing: '{{not_present}}' },
+          do: [{ log: { message: 'Missing value' } }]
+        }
+        expect { SaveTriggers::Background.new(strict_config, @activity_log).perform }
+          .to raise_error(FphsException)
+
+        config = {
+          with: { ignored: '{{not_present::ignore_missing}}', raw: '{{{not_present}}}' },
+          do: [{ log: { message: 'Missing values' } }]
+        }
+        allow_any_instance_of(SaveTriggers::Log).to receive(:perform) do |log_trigger|
+          expect(log_trigger.item.background_context).to eq(ignored: '', raw: nil)
+        end
+
+        SaveTriggers::Background.new(config, @activity_log).perform
+        perform_enqueued_jobs
+      end
+
+      it 'queues a distinct resolved context for each each iteration' do
+        config = [{
+          each: {
+            iterator_name: 'loop_result',
+            value: %w[first second],
+            do: [{
+              background: {
+                with: { value: '{{save_trigger_results.loop_result_value}}' },
+                do: [{ log: { message: 'Iteration {{background_context.value}}', severity: 'info' } }]
+              }
+            }]
+          }
+        }]
+        trigger = SaveTriggers::Each.new(config.first[:each], @activity_log)
+
+        expect { trigger.perform }.to have_enqueued_job(SaveTriggersBackgroundJob).twice
+        expect(Rails.logger).to receive(:info).with(/Iteration first/)
+        expect(Rails.logger).to receive(:info).with(/Iteration second/)
+        allow(Rails.logger).to receive(:info)
+
+        perform_enqueued_jobs
+      end
+
+      it 'rejects a context form without do and non-serializable selected values' do
+        expect do
+          SaveTriggers::Background.new({ with: { selected: 'value' } }, @activity_log).perform
+        end.to raise_error(FphsException, /do/)
+
+        expect do
+          SaveTriggers::Background.new(
+            { with: ['invalid'], do: [{ log: { message: 'Never queued' } }] }, @activity_log
+          ).perform
+        end.to raise_error(FphsException, /with.*Hash/)
+
+        @activity_log.save_trigger_results['unserializable'] = Object.new
+        config = {
+          with: { selected: '{{{save_trigger_results.unserializable}}}' },
+          do: [{ log: { message: 'Never queued' } }]
+        }
+        expect do
+          SaveTriggers::Background.new(config, @activity_log).perform
+        end.to raise_error(FphsException, /selected/)
+
+        @activity_log.save_trigger_results['unserializable'] = { 1 => 'unsupported key' }
+        expect do
+          SaveTriggers::Background.new(config, @activity_log).perform
+        end.to raise_error(FphsException, /selected/)
+
+        @activity_log.save_trigger_results['unserializable'] = @activity_log.class.where(id: @activity_log.id)
+        expect do
+          SaveTriggers::Background.new(config, @activity_log).perform
+        end.to raise_error(FphsException, /selected/)
+      end
+
+      it 'refuses to queue a context form whose do is not a trigger list' do
+        expect do
+          SaveTriggers::Background.new({ with: { selected: 'value' }, do: 'not a list' }, @activity_log).perform
+        end.to raise_error(FphsException, /do must be a trigger list/)
+        expect(SaveTriggersBackgroundJob).not_to have_been_enqueued
+      end
+
+      it 'refuses to queue a with/do context hash wrapped in a list' do
+        config = [{ with: { selected: 'value' }, do: [{ log: { message: 'Never queued' } }] }]
+
+        expect do
+          SaveTriggers::Background.new(config, @activity_log).perform
+        end.to raise_error(FphsException, /only valid inside a background trigger hash/)
+        expect(SaveTriggersBackgroundJob).not_to have_been_enqueued
+      end
+
+      it 'enforces the configured serialized context size limit' do
+        stub_const('Settings::SaveTriggerBackgroundContextMaxBytes', 1)
+        config = { with: { selected: 'too large' }, do: [{ log: { message: 'Never queued' } }] }
+
+        expect do
+          SaveTriggers::Background.new(config, @activity_log).perform
+        end.to raise_error(FphsException, /size|bytes/i)
+      end
+    end
+
     context 'job execution' do
+      it 'does not queue on_complete from a plain hash form as a trigger' do
+        config = { log: { message: 'Plain', severity: 'info' }, on_complete: { log: { message: 'Done', severity: 'info' } } }
+
+        SaveTriggers::Background.new(config, @activity_log).perform
+        expect { perform_enqueued_jobs }.not_to raise_error
+      end
+
       it 'executes triggers when job runs' do
         config = [
           { log: { message: 'Background execution test', severity: 'info' } }
