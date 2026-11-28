@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'tmpdir'
 require "#{Rails.root}/spec/support/user_support"
 require "#{Rails.root}/spec/support/seeds"
 require './db/table_generators/external_identifiers_table'
@@ -9,7 +10,7 @@ $STARTED_AT = DateTime.now.to_i
 module SetupHelper
   SpecTallyTable = 'rails_spec_db_tally'
   DefaultMigrationsDir = 'db/migrations'
-  LAZY_APP_SCHEMAS = %w[play_ipa sample_tracking study_info study_rec].freeze
+  LAZY_APP_SCHEMAS = %w[biodata play_ipa sample_tracking study_info study_rec].freeze
 
   class AppDefinitionTally < ActiveRecord::Base
     self.table_name = 'ml_app.rails_spec_db_tally'
@@ -352,6 +353,37 @@ module SetupHelper
     q = ActiveRecord::Base.connection.execute "select * from pg_catalog.pg_roles where rolname='fphsetl'"
     res = q.ntuples
     raise "Database #{db_name} does not have role fphsetl set up" unless res == 1
+  end
+
+  # Run a single checked-in app migration without loading duplicate migration names from other app folders.
+  # @param [String] schema_name app migration directory under db/app_migrations
+  # @param [Integer] version migration version to run
+  # @return [void]
+  def self.run_app_migration(schema_name, version)
+    migration_file = Rails.root.glob("db/app_migrations/#{schema_name}/#{version}_*.rb").first
+    raise "App migration #{version} was not found for #{schema_name}" unless migration_file
+
+    connection = ActiveRecord::Base.connection
+    original_search_path = connection.schema_search_path
+    begin
+      # The migration DSL validates its target schema against the connection search path.
+      connection.schema_search_path = (Admin::MigrationGenerator.current_search_paths + [schema_name, 'public']).uniq.join(',')
+      temporary_root = Rails.root.join('tmp/agent-tmp')
+      FileUtils.mkdir_p temporary_root
+      Dir.mktmpdir('app_migration_', temporary_root) do |migration_dir|
+        FileUtils.cp(migration_file, migration_dir)
+        migration_context = Admin::MigrationGenerator.migration_context(migration_dir)
+        # Test database templates can retain the version after omitting the app table itself.
+        migration_table = connection.quote_table_name(migration_context.schema_migration.table_name)
+        connection.delete(
+          "DELETE FROM #{migration_table} WHERE version = #{connection.quote(version.to_s)}"
+        )
+        migration_context.migrate
+      end
+    ensure
+      connection.schema_search_path = original_search_path
+      Admin::MigrationGenerator.tables_and_views_reset!
+    end
   end
 
   def self.migrate_if_needed

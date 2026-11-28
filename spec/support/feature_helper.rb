@@ -75,14 +75,4 @@ module FeatureHelper
 
     expect(find(el_selector).visible?).to be true if options[:check_it]
   end
-
-  def force_modal_hide
-    run_script = "var el = $('.modal'); el.on('shown.bs.modal', function(){ el.modal('hide');});"
-    begin
-      page.execute_script run_script
-    rescue StandardError => e
-      puts "Failed to run the force_modal_hide javascript: #{run_script}."
-      puts e.backtrace.join("\n")
-    end
-  end
 end

@@ -8,7 +8,7 @@ RSpec.describe SetupHelper do
   describe 'lazy app definitions' do
     it 'registers only imported app schemas, not shared suite schemas' do
       expect(described_class::LAZY_APP_SCHEMAS).to contain_exactly(
-        'play_ipa', 'sample_tracking', 'study_info', 'study_rec'
+        'biodata', 'play_ipa', 'sample_tracking', 'study_info', 'study_rec'
       )
     end
 

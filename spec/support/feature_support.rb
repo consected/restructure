@@ -249,18 +249,15 @@ module FeatureSupport
   def dismiss_modal
     finish_page_loading
     finish_form_formatting
-    if all('.modal.fade.in', wait: false).empty?
-      # Places a javascript event handler on the modal to hide it automatically when it shows
-      force_modal_hide
-    else
-      finish_form_formatting
-      expect(page).to have_css('button[data-dismiss="modal"]', wait: 10)
-      b = all('button[data-dismiss="modal"]', wait: false)
-      b.first.click if b && !b.empty?
-      # wait for the modal to fade out before continuing
-      has_no_css?('.modal.fade.in')
-      has_css?('.modal[style~="display: none"]')
-    end
+    return if all('.modal.fade.in', wait: false).empty?
+
+    finish_form_formatting
+    expect(page).to have_css('button[data-dismiss="modal"]', wait: 10)
+    b = all('button[data-dismiss="modal"]', wait: false)
+    b.first.click if b && !b.empty?
+    # wait for the modal to fade out before continuing
+    has_no_css?('.modal.fade.in')
+    has_css?('.modal[style~="display: none"]')
   end
 
   def dismiss_all_modals
