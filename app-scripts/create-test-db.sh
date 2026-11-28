@@ -34,21 +34,25 @@ function setup() {
     fi
     psql -c "create extension if not exists pgcrypto;" $PSQL_ARGS > /dev/null
     psql -c "create database $DBNAME;" $PSQL_ARGS > /dev/null
+    psql -d "$DBNAME" -c "create extension if not exists pgcrypto;" $PSQL_ARGS > /dev/null
     for user in fphsetl fphs fphsrailsapp fphsadm fphsusr; do
       psql -c "create user ${user} password 'fphs';" $PSQL_ARGS > /dev/null
     done
     psql -d "$DBNAME" $PSQL_ARGS < "../db/structure.sql" > /dev/null
     psql -d "$DBNAME" -c "create schema if not exists bulk_msg;" $PSQL_ARGS > /dev/null
     psql -d "$DBNAME" -c "create schema if not exists ref_data;" $PSQL_ARGS > /dev/null
+    psql -d "$DBNAME" -c "create schema if not exists data_requests;" $PSQL_ARGS > /dev/null
   else
     sudo -u postgres psql -c "create extension if not exists pgcrypto;" > /dev/null
     sudo -u postgres psql -c "create database $DBNAME with owner $DBOWNER;" > /dev/null
+    sudo -u postgres psql -d "$DBNAME" -c "create extension if not exists pgcrypto;" > /dev/null
     for user in fphsetl fphs fphsrailsapp fphsadm fphsusr; do
       sudo -u postgres psql -c "create user ${user} password 'fphs';" > /dev/null
     done
     psql -d "$DBNAME" < "../db/structure.sql" > /dev/null
     psql -d "$DBNAME" -c "create schema if not exists bulk_msg;" > /dev/null
     psql -d "$DBNAME" -c "create schema if not exists ref_data;" > /dev/null
+    psql -d "$DBNAME" -c "create schema if not exists data_requests;" > /dev/null
   fi
 
   RAILS_ENV=test TEST_ENV_NUMBER=${DBNUM} bundle exec rails db:seed > /dev/null
